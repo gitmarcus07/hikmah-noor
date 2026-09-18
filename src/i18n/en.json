@@ -14,11 +14,11 @@
     "search": "Search articles..."
   },
   "home": {
-    "heroBadge": "Authentic • Simple • Reliable",
-    "heroTitle": "Understand the Quran, Duas & Islam — clearly",
-    "heroSub": "Arabic text with transliteration and easy English meaning. Surahs, daily duas, 6 kalimas, Islamic terms and stories.",
-    "heroCta1": "Browse Duas",
-    "heroCta2": "What is the Quran?",
+    "heroBadge": "🌱 Daily Quran Habit Tracker",
+    "heroTitle": "Build a Daily Quran Habit — Track Every Verse",
+    "heroSub": "Set a daily verse goal, grow your streak, and earn hasanat for every letter — with timers, reminders, challenges and Juz progress saved to your free account. Plus 114 surahs, duas, kalimas and meanings.",
+    "heroCta1": "Start My Habit",
+    "heroCta2": "Read Quran",
     "latest": "Latest guides",
     "seeAll": "See all",
     "toolsTitle": "Islamic tools",
@@ -50,6 +50,8 @@
     ],
     "faqTitle": "Frequently asked questions",
     "faq": [
+      { "q": "How does the Quran habit tracker work?", "a": "Set a daily verse goal, read verse by verse with the timer, and tap I'm Done — your verses, time, hasanat and streak save to your free account automatically." },
+      { "q": "Do I need an account to track my reading?", "a": "Yes — a free login with Google or email saves your goal, streak, Juz progress and bookmarks so you can continue where you left off on any device. Everything is free forever." },
       { "q": "How can I read the Quran with translation?", "a": "Open any of the 114 surahs or 30 paras — every verse shows Arabic text with Urdu, English and Hindi meaning, transliteration and audio." },
       { "q": "Do duas include transliteration?", "a": "Yes. Every dua shows the Arabic text, easy transliteration and translation with its hadith source." },
       { "q": "Is Hikmah Noor free?", "a": "Yes, all guides and tools are free to read and share for learning." }
