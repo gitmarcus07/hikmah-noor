@@ -1,5 +1,5 @@
 // POST /api/auth/logout — delete session + clear cookie.
-import { clearSessionCookie, getCookie, json, sha256Hex } from '../../_lib/auth.js';
+import { clearSessionCookie, getCookie, json, sha256Hex } from '../../lib/auth.js';
 
 export async function onRequest(context) {
   const { env, request } = context;

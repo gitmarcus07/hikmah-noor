@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# local wrangler state (dev D1 copies, build cache)
+.wrangler/
+
+# unrelated starter copy, has its own repo
+pink-phase/

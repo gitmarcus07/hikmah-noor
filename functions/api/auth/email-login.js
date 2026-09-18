@@ -2,7 +2,7 @@
 import {
   clientIp, createSession, json, rateLimit, readJson,
   sessionCookie, verifyPassword,
-} from '../../_lib/auth.js';
+} from '../../lib/auth.js';
 
 export async function onRequest(context) {
   const { env, request } = context;

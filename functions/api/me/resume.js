@@ -1,5 +1,5 @@
 // GET /api/me/resume — {surah,verse,juz} | PUT /api/me/resume {surah,verse,juz?}
-import { json, nowSec, readJson, requireUser } from '../../_lib/auth.js';
+import { json, nowSec, readJson, requireUser } from '../../lib/auth.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;

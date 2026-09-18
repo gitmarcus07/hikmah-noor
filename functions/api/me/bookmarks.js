@@ -1,5 +1,5 @@
 // /api/me/bookmarks — GET list; POST {kind,ref}; DELETE ?kind=&ref=
-import { json, nowSec, readJson, requireUser } from '../../_lib/auth.js';
+import { json, nowSec, readJson, requireUser } from '../../lib/auth.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;

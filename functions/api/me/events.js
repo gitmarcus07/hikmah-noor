@@ -1,7 +1,7 @@
 // POST /api/me/events {surah,verse,verses,seconds,hasanat,pages}
 // Logs one "I'm Done" reading event, upserts resume point,
 // refreshes streak row, returns updated streak + today totals.
-import { json, nowSec, readJson, requireUser } from '../../_lib/auth.js';
+import { json, nowSec, readJson, requireUser } from '../../lib/auth.js';
 
 function dayUTC() {
   return new Date().toISOString().slice(0, 10);

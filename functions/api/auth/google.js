@@ -1,5 +1,5 @@
 // GET /api/auth/google — start Google OAuth. Redirects to Google.
-import { googleAuthUrl, json, randHex } from '../_lib/auth.js';
+import { googleAuthUrl, json, randHex } from '../lib/auth.js';
 
 export async function onRequest(context) {
   const { env } = context;

@@ -1,5 +1,5 @@
 // GET /api/me/stats?range=today|week|all — aggregates + week daily rows.
-import { json, requireUser } from '../../_lib/auth.js';
+import { json, requireUser } from '../../lib/auth.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;

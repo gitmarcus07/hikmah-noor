@@ -2,7 +2,7 @@
 import {
   createSession, exchangeGoogleCode, fetchGoogleProfile, getCookie,
   json, newUserId, nowSec, sessionCookie,
-} from '../../_lib/auth.js';
+} from '../../lib/auth.js';
 
 export async function onRequest(context) {
   const { env, request } = context;
