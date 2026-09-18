@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { nonDefaultLocales } from '../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map(locale => ({ params: { locale } })); }
+const { locale } = Astro.params;
+---
+<BaseLayout title="Disclaimer — Hikmah Noor" description="Educational content, not fatwa. Verify with scholars." locale={locale} crumbs={[{ name: 'Home', path: '/' }, { name: 'Disclaimer', path: '/disclaimer/' }]} canonicalPath="/disclaimer/">
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-extrabold mb-3 text-white">Disclaimer</h1>
+  <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
+    <p>Content is for learning, written in our own words with Quran/hadith references. It is not a fatwa. Practices differ by madhab and situation — consult qualified scholars for rulings.</p>
+    <p>Zakat and Hijri dates are estimates.</p>
+  </div>
+</div>
+</BaseLayout>

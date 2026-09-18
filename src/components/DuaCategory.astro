@@ -1,0 +1,83 @@
+---
+/* Dua category listing: every dua name + what it is for + link. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { DUA_CATS } from '../data/duas';
+
+interface Props { cat: any; duas: any[]; locale: string; }
+const { cat, duas, locale } = Astro.props;
+const dict = getDict(locale);
+const isFallback = locale !== 'en';
+const catPath = `/duas/${cat.slug}/`;
+
+const title = `${cat.title} Duas in Arabic with Meaning (${duas.length} duas)`;
+let description = `${duas.length} authentic ${cat.title.toLowerCase()} duas: ${duas.slice(0, 3).map((d: any) => d.title).join(', ')} and more — Arabic, transliteration, meaning, virtue.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${cat.title.toLowerCase()} duas, dua in arabic, transliteration, meaning, ${duas.map((d: any) => d.title.toLowerCase()).slice(0, 5).join(', ')}`;
+
+const faq = [
+  { q: `Which ${cat.title.toLowerCase()} duas are included?`, a: `${duas.map((d: any) => d.title).join('; ')}. Open any dua for Arabic text, transliteration, meaning, narrator, grade and source.` },
+  { q: `Are these ${cat.title.toLowerCase()} duas authentic?`, a: `Every dua names its source (Quran passage or hadith collection) without invented numbers, plus narrator where known and a Sahih/Hasan/Daif or Quranic grade. Learn wording from a teacher; consult scholars for rulings.` },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Duas', path: '/duas/' },
+  { name: cat.title, path: catPath },
+];
+const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={catPath}>
+  <section class="relative overflow-hidden bg-night-900 text-white">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-7 pb-8 md:pt-10 md:pb-10">
+      <nav class="text-xs text-ink-500 mb-3"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <a href={localizedPath(locale, '/duas/')} class="hover:text-brand-300">{dict.nav.duas}</a> / <span>{cat.title}</span></nav>
+      <div class="flex items-center gap-3">
+        <span class="w-13 h-13 shrink-0 grid place-items-center rounded-2xl bg-white/10 border border-white/15 text-gold-300 p-3"><Icon name={cat.icon || 'duas'} size={28} /></span>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{cat.title} Duas {isFallback && <span class="align-middle text-[11px] font-extrabold uppercase text-night-900 bg-gold-300 px-2 py-1 rounded-full">EN</span>}</h1>
+          <p class="mt-1.5 text-ink-300 leading-7 max-w-2xl">{cat.desc} ({duas.length} duas)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid gap-3 md:grid-cols-2">
+      {duas.map((d: any, i: number) => (
+        <a href={localizedPath(locale, `/duas/${d.cat}/${d.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-5 flex gap-4 items-start shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 hover:-translate-y-0.5 transition">
+          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 font-extrabold">{i + 1}</span>
+          <span class="min-w-0">
+            <span class="font-extrabold block leading-6 text-ink-50 group-hover:text-brand-300">{d.title}</span>
+            <span class="text-sm text-ink-500 leading-6 block mt-0.5">For: {d.use}</span>
+            <span class="mt-1.5 flex flex-wrap gap-1.5">
+              {d.grade && <span class="text-[11px] font-bold text-brand-300 bg-brand-500/15 px-2 py-0.5 rounded-full">{d.grade}</span>}
+              <span class="text-[11px] font-bold text-ink-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">{d.source}</span>
+            </span>
+            <span class="text-xs font-bold text-brand-300 mt-1 block">Arabic + transliteration + meaning →</span>
+          </span>
+        </a>
+      ))}
+    </div>
+
+    <section class="mt-8 max-w-3xl">
+      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
+            <summary class="font-bold cursor-pointer leading-6 text-ink-50">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">🤲 All dua categories</h2>
+      <div class="flex flex-wrap gap-2">
+        {siblings.map((s) => (
+          <a href={localizedPath(locale, `/duas/${s.slug}/`)} class="text-sm font-bold bg-night-800 border border-white/10 text-ink-200 hover:border-brand-500/50 hover:text-brand-300 rounded-full px-4 py-2.5 min-h-[44px] inline-flex items-center">{s.title}</a>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

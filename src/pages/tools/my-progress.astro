@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProgressDashboard from '../../components/ProgressDashboard.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'How is my streak calculated?', a: 'One point per day you read. Miss one day and grace saves your streak — miss two days in a row and it resets to zero.' },
+  { q: 'What is hasanat?', a: 'An estimate: roughly 10 hasanat per Arabic letter you read, based on the hadith that every letter earns ten rewards. Letter counts are estimated, not exact.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'My Progress', path: '/tools/my-progress/' },
+];
+---
+<BaseLayout title="My Quran Progress — Streak, Stats & Challenges" description="Your verses, hasanat, reading time, streak and challenge progress — saved to your free account." keywords="quran progress, quran streak, hasanat tracker, quran challenges" locale={locale} canonicalPath="/tools/my-progress/" faq={faq} crumbs={crumbs} noindex={true}>
+  <ProgressDashboard locale={locale} />
+</BaseLayout>

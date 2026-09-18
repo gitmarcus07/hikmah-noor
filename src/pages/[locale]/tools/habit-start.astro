@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import OnboardingWizard from '../../../components/OnboardingWizard.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'Is this free?', a: 'Yes — 100% free forever. No card, no premium tier, no locked features.' },
+  { q: 'Why do I need to login?', a: 'Login saves your daily goal, streak, reading time and hasanat to your account, so you can continue where you left off on any device.' },
+  { q: 'What happens after setup?', a: 'Your personalised plan is saved and you go straight to the reading session — read your daily verses, tap “I’m Done”, and watch your streak grow.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Habit Plan', path: '/tools/habit-start/' },
+];
+---
+<BaseLayout title="Build Your Quran Habit — Daily Goal & Reminders" description="Set your daily verse goal, streak target, reciter, translation and reminders. Free forever — login saves your plan." keywords="quran habit, daily quran goal, quran streak, quran reminders, quran habit tracker" locale={locale} canonicalPath="/tools/habit-start/" faq={faq} crumbs={crumbs}>
+  <OnboardingWizard locale={locale} />
+  <p class="mx-auto max-w-2xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

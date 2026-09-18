@@ -1,0 +1,116 @@
+---
+interface Props {
+  locale: string;
+  /** e.g. `/search-index.json` or `/hi/search-index.json` */
+  indexUrl: string;
+  /** e.g. `/search/` or `/hi/search/` */
+  searchUrl: string;
+  placeholder: string;
+  id?: string;
+}
+const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
+---
+<div class="relative min-w-0 flex-1" data-searchbox>
+  <form action={searchUrl} method="get" class="flex items-center bg-night-800 border border-white/10 rounded-2xl p-1.5 shadow-lg shadow-black/30" role="search">
+    <span class="ps-3 text-ink-500 shrink-0" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+    <input id={id} name="q" placeholder={placeholder} autocomplete="off" role="combobox" aria-expanded="false" aria-controls={`${id}-suggest`} aria-autocomplete="list" class="flex-1 min-w-0 bg-transparent px-3 py-2.5 text-[15px] text-ink-50 placeholder:text-ink-500 outline-none" />
+    <button class="shrink-0 bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-xl px-4 sm:px-5 py-2.5 min-h-[44px] grid place-items-center" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+  </form>
+  <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 bg-night-850 rounded-2xl shadow-xl border border-white/10 overflow-hidden" role="listbox"></div>
+</div>
+<script define:vars={{ indexUrl, searchUrl, inputId: id }}>
+  (() => {
+    const box = document.querySelector(`[data-searchbox] #${CSS.escape(inputId)}`);
+    if (!box) return;
+    const panel = document.getElementById(`${inputId}-suggest`);
+    const form = box.closest('form');
+    let items = null;
+    let active = -1;
+    let rows = [];
+    const load = async () => {
+      if (items) return items;
+      try { items = await (await fetch(indexUrl)).json(); }
+      catch { items = []; }
+      return items;
+    };
+    const score = (it, q) => {
+      const t = (it.title || '').toLowerCase();
+      const d = (it.description || '').toLowerCase();
+      const tags = (it.tags || []).join(' ').toLowerCase();
+      const c = (it.category || '').toLowerCase();
+      let s = 0;
+      if (t.startsWith(q)) s += 100;
+      else if (t.includes(q)) s += 60;
+      if (c === q || c.startsWith(q)) s += 25;
+      if ((it.tags || []).some(t => String(t).toLowerCase() === q)) s += 40;
+      for (const tag of (it.tags || [])) {
+        const tl = String(tag).toLowerCase();
+        if (tl.startsWith(q)) { s += 30; break; }
+        if (tl.includes(q)) s += 12; break;
+      }
+      if (d.includes(q)) s += 8;
+      void tags;
+      return s;
+    };
+    const hi = (text, q) => {
+      const i = text.toLowerCase().indexOf(q);
+      if (i < 0) return text.length > 60 ? text.slice(0, 60) + '…' : text;
+      return text.slice(0, i) + '<mark>' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+    };
+    const close = () => {
+      panel.classList.add('hidden');
+      box.setAttribute('aria-expanded', 'false');
+      active = -1;
+    };
+    const render = (list, q, total) => {
+      rows = list;
+      if (!list.length) {
+        panel.innerHTML = '<p class="px-4 py-3.5 text-sm text-ink-300">No matches — press Enter to search anyway.</p>';
+      } else {
+        panel.innerHTML = list.map((it, i) =>
+          `<a href="${it.url}" role="option" data-i="${i}" class="sugrow flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/10 ${i > 0 ? 'border-t border-white/5' : ''}">` +
+          `<span class="text-[10px] font-extrabold uppercase tracking-wide text-brand-300 bg-brand-500/15 rounded-full px-2 py-1 shrink-0">${it.category}</span>` +
+          `<span class="min-w-0"><span class="font-semibold text-ink-50 text-[14px] leading-5 block truncate">${hi(it.title, q)}</span></span>` +
+          `</a>`
+        ).join('') + (total > list.length
+          ? `<a href="${searchUrl}?q=${encodeURIComponent(q)}" class="block px-3.5 py-3 text-sm font-bold text-brand-300 bg-white/5 hover:bg-white/10 border-t border-white/10">See all ${total} results →</a>`
+          : '');
+      }
+      panel.classList.remove('hidden');
+      box.setAttribute('aria-expanded', 'true');
+    };
+    let t = null;
+    box.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(async () => {
+        const q = box.value.toLowerCase().trim();
+        if (q.length < 1) { close(); return; }
+        const all = await load();
+        const ranked = all.map(it => ({ it, s: score(it, q) })).filter(r => r.s > 0)
+          .sort((a, b) => b.s - a.s || a.it.title.localeCompare(b.it.title));
+        render(ranked.slice(0, 6).map(r => r.it), q, ranked.length);
+      }, 120);
+    });
+    box.addEventListener('focus', async () => {
+      if (box.value.trim().length >= 1) box.dispatchEvent(new Event('input'));
+      else load();
+    });
+    box.addEventListener('keydown', (e) => {
+      const links = [...panel.querySelectorAll('.sugrow')];
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (panel.classList.contains('hidden') || !links.length) return;
+        e.preventDefault();
+        active = e.key === 'ArrowDown' ? (active + 1) % links.length : (active - 1 + links.length) % links.length;
+        links.forEach((a, i) => a.classList.toggle('bg-white/10', i === active));
+        links[active]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && active >= 0 && links[active]) {
+        e.preventDefault();
+        window.location.href = links[active].href;
+      } else if (e.key === 'Escape') close();
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-searchbox]')) close();
+    });
+    form?.addEventListener('submit', () => close());
+  })();
+</script>

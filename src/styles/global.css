@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, "Noto Sans Devanagari", "Noto Sans Arabic", system-ui, sans-serif;
+  --font-arabic: "Amiri Quran", "Noto Naskh Arabic", serif;
+  --font-urdu: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
+
+  /* Quranly-style night surfaces */
+  --color-night-950: #100e1c;
+  --color-night-900: #14121f;
+  --color-night-850: #1a1729;
+  --color-night-800: #221e38;
+
+  /* Brand violet */
+  --color-brand-200: #c9bfff;
+  --color-brand-300: #b7a6ff;
+  --color-brand-400: #9a8cff;
+  --color-brand-500: #8b7cf6;
+  --color-brand-600: #6d5ef0;
+
+  /* Readable ink on dark */
+  --color-ink-50: #f2eeff;
+  --color-ink-200: #e2dcf7;
+  --color-ink-300: #c3bce0;
+  --color-ink-500: #9a94c2;
+
+  /* Gold accents (kept from previous art) */
+  --color-gold-300: #f5c94c;
+  --color-gold-400: #d4af37;
+}
+
+:root { color-scheme: dark; }
+
+html { scroll-behavior: smooth; }
+body {
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--color-night-950);
+  color: var(--color-ink-50);
+}
+
+::selection { background: var(--color-brand-500); color: #14121f; }
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-300);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+mark {
+  background: var(--color-gold-300);
+  color: #1a1729;
+  border-radius: 4px;
+  padding-inline: 2px;
+}
+
+.font-arabic { font-family: var(--font-arabic); }
+.font-urdu { font-family: var(--font-urdu); }
+
+.arabic-block {
+  font-family: var(--font-arabic);
+  font-size: 1.75rem;
+  line-height: 2.4;
+  direction: rtl;
+  text-align: right;
+}
+
+.prose-islamic h2 { @apply text-2xl font-bold mt-8 mb-3 text-ink-50; }
+.prose-islamic h3 { @apply text-xl font-semibold mt-6 mb-2 text-ink-200; }
+.prose-islamic p { @apply leading-7 text-ink-300 mb-4; }
+.prose-islamic ul { @apply list-disc ps-6 mb-4 text-ink-300; }
+.prose-islamic blockquote { @apply border-s-4 border-brand-400 bg-white/5 p-4 rounded-xl my-4 text-ink-200; }
+.prose-islamic a { @apply text-gold-300 underline underline-offset-2; }
+
+/* dark scrollbars */
+* { scrollbar-color: #3b3560 #100e1c; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #3b3560; border-radius: 8px; }
+*::-webkit-scrollbar-track { background: #100e1c; }
+
+/* mobile: prevent horizontal overflow from long Arabic */
+img, table { max-width: 100%; }
+table { display: block; overflow-x: auto; }

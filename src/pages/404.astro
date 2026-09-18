@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const links = [
+  { label: 'All Duas', href: localizedPath(locale, '/duas/') },
+  { label: 'All 114 Surahs', href: localizedPath(locale, '/surahs/') },
+  { label: 'All 6 Kalimas', href: localizedPath(locale, '/kalimas/') },
+  { label: 'Islamic Meanings', href: localizedPath(locale, '/meanings/') },
+  { label: 'Prophet Stories', href: localizedPath(locale, '/waqiat/') },
+  { label: 'All Tools', href: localizedPath(locale, '/tools/') },
+];
+---
+<BaseLayout title="Page Not Found" description="The page you asked for does not exist. Browse duas, surahs, kalimas, meanings, stories and tools on Hikmah Noor." locale={locale} canonicalPath="/" noindex={true}>
+  <div class="max-w-2xl mx-auto px-4 py-14 text-center">
+    <p class="text-7xl font-extrabold text-brand-300">404</p>
+    <h1 class="text-2xl md:text-3xl font-extrabold mt-3 text-white">Page not found</h1>
+    <p class="mt-2 text-ink-300 leading-7">The link may be old or mistyped. Try search, or jump to a section below.</p>
+    <form action={localizedPath(locale, '/search/')} method="get" class="mt-6 flex gap-2" role="search">
+      <input name="q" placeholder="Search duas, surahs, kalimas…" class="flex-1 min-w-0 bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-5 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
+      <button class="bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-2xl px-6 min-h-[52px]">Go</button>
+    </form>
+    <div class="mt-6 flex flex-wrap justify-center gap-2">
+      {links.map((l) => (
+        <a href={l.href} class="text-sm font-bold bg-night-800 border border-white/10 text-ink-200 hover:border-brand-400 hover:text-brand-300 rounded-full px-4 py-2.5 min-h-[44px] inline-flex items-center">{l.label}</a>
+      ))}
+    </div>
+    <a href={localizedPath(locale, '/')} class="mt-6 inline-block text-sm font-extrabold text-brand-300 hover:text-brand-200">← Back to home</a>
+  </div>
+</BaseLayout>

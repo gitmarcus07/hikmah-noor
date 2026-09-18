@@ -1,0 +1,134 @@
+---
+/* Meaning detail page (EN + locale). Definition + proof + misconception +
+ * practice, with premium SVG artwork hero. Auto FAQ + crumbs + schemas. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MeaningArt from './MeaningArt.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { MEANINGS } from '../data/meanings';
+
+interface Props { meaning: any; locale: string; }
+const { meaning, locale } = Astro.props;
+const dict = getDict(locale);
+const isFallback = locale !== 'en';
+const meaningPath = `/meanings/${meaning.slug}/`;
+
+const title = `${meaning.term} Meaning in Islam — ${meaning.translit}`;
+let description = `What does ${meaning.term.toLowerCase()} mean? ${meaning.definition} Proof: ${meaning.proofRef}.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${meaning.term.toLowerCase()} meaning, ${meaning.translit.toLowerCase()}, ${meaning.term.toLowerCase()} in islam, ${meaning.term.toLowerCase()} in quran${meaning.aliases?.length ? `, ${meaning.aliases.join(', ')}` : ''}`;
+
+const faq = [
+  { q: `What is the meaning of ${meaning.term}?`, a: meaning.definition },
+  { q: `What is the proof for ${meaning.term}?`, a: `${meaning.proofRef}${meaning.hadithRef ? ` and ${meaning.hadithRef}` : ''}. ${meaning.misconception}` },
+  { q: `How do I practice ${meaning.term} daily?`, a: meaning.practice.map((p: string, i: number) => `${i + 1}. ${p}`).join(' ') },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Meanings', path: '/meanings/' },
+  { name: meaning.term, path: meaningPath },
+];
+const others = MEANINGS.filter((m) => m.slug !== meaning.slug).slice(0, 4);
+const sIdx = MEANINGS.findIndex((m) => m.slug === meaning.slug);
+const prevM = sIdx > 0 ? MEANINGS[sIdx - 1] : null;
+const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : null;
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={meaningPath}>
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8">
+    <nav class="text-xs text-ink-500 mb-3">
+      <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
+      <a href={localizedPath(locale, '/meanings/')} class="hover:text-brand-300"> {dict.nav.meanings}</a> /
+      <span> {meaning.term}</span>
+    </nav>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-[11px] font-extrabold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">📖 Meaning</span>
+      {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">EN</span>}
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 text-white">{meaning.term} <span class="text-ink-500 font-bold">— {meaning.translit}</span></h1>
+    <p class="mt-2 text-ink-300 leading-7">{meaning.definition}</p>
+    {meaning.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] text-ink-500 leading-6">Also searched as: {meaning.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold text-ink-300">{a}</em></span>
+      ))}</p>
+    )}
+    {isFallback && <p class="mt-4 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>}
+
+    <div class="rounded-3xl overflow-hidden my-6 shadow-xl shadow-black/30 border border-white/10">
+      <MeaningArt motif={meaning.motif} arabic={meaning.arabic} term={meaning.term} translit={meaning.translit} accent={meaning.accent} />
+    </div>
+
+    <div class="bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/30 relative overflow-hidden">
+      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
+      <div class="relative">
+        <div class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300 mb-3">Proof • {meaning.proofRef}</div>
+        <p class="arabic-block leading-[2.2]" lang="ar" dir="rtl">{meaning.proofArabic}</p>
+        {meaning.hadithArabic && (
+          <>
+            <div class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300 mt-6 mb-3">Hadith • {meaning.hadithRef}</div>
+            <p class="arabic-block leading-[2.2]" lang="ar" dir="rtl">{meaning.hadithArabic}</p>
+          </>
+        )}
+      </div>
+    </div>
+
+    <div class="grid gap-3 mt-3">
+      <div class="bg-gold-300/10 border border-gold-300/30 rounded-2xl p-5">
+        <div class="text-[11px] font-extrabold uppercase tracking-widest text-gold-300 mb-2">⚠️ Common misconception</div>
+        <p class="leading-7 text-[15px] text-ink-200">{meaning.misconception}</p>
+      </div>
+      <div class="bg-brand-500/10 border border-brand-500/30 rounded-2xl p-5">
+        <div class="text-[11px] font-extrabold uppercase tracking-widest text-brand-300 mb-2">✅ Practice in 3 steps</div>
+        <ol class="list-decimal ms-5 space-y-1.5 leading-7 text-[15px] text-ink-200">
+          {meaning.practice.map((p: string) => <li>{p}</li>)}
+        </ol>
+      </div>
+    </div>
+    <p class="mt-3 text-xs text-ink-500">📚 Proof: <b>{meaning.proofRef}</b>{meaning.hadithRef && <span> • <b>{meaning.hadithRef}</b></span>}</p>
+    <p class="mt-2 text-xs text-ink-500">Learn details from a teacher; consult scholars for rulings.</p>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
+            <summary class="font-bold cursor-pointer leading-6 text-ink-50">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">📖 More meanings</h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((r) => (
+          <a href={localizedPath(locale, `/meanings/${r.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
+            <MeaningArt motif={r.motif} arabic={r.arabic} term={r.term} translit={r.translit} accent={r.accent} />
+            <span class="block p-4">
+              <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{r.term}</span>
+              <span class="text-[13px] text-ink-300 line-clamp-2">{r.definition}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+      <a href={localizedPath(locale, '/meanings/')} class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand-300 hover:text-brand-200">All meanings →</a>
+    </section>
+
+    {(prevM || nextM) && (
+      <nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="More meanings">
+        {prevM ? (
+          <a href={localizedPath(locale, `/meanings/${prevM.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
+            <span class="text-xs font-bold text-ink-500">← Previous</span>
+            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{prevM.term}</span>
+          </a>
+        ) : <span />}
+        {nextM && (
+          <a href={localizedPath(locale, `/meanings/${nextM.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 text-right shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
+            <span class="text-xs font-bold text-ink-500">Next →</span>
+            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{nextM.term}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

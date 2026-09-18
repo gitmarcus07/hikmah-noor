@@ -1,0 +1,17 @@
+---
+import DuaDetail from '../../../../components/DuaDetail.astro';
+import { nonDefaultLocales } from '../../../../i18n/utils';
+import { DUA_CATS, DUAS } from '../../../../data/duas';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales)
+    for (const c of DUA_CATS)
+      for (const d of DUAS.filter((x) => x.cat === c.slug))
+        paths.push({ params: { locale, category: 'duas', slug: c.slug, dua: d.slug }, props: { dua: d, cat: c } });
+  return paths;
+}
+const { dua, cat } = Astro.props;
+const { locale } = Astro.params;
+---
+<DuaDetail dua={dua} cat={cat} locale={locale} />

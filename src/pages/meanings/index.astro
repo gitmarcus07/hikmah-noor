@@ -1,0 +1,12 @@
+---
+import MeaningHub from '../../components/MeaningHub.astro';
+import { getCollection } from 'astro:content';
+import { localizedPath } from '../../i18n/utils';
+
+const locale = 'en';
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const guides = (await getCollection('articles', ({ data }) => !data.draft && data.locale === 'en' && data.category === 'meanings'))
+  .sort((a, b) => +b.data.pubDate - +a.data.pubDate)
+  .map((a) => ({ title: a.data.title, desc: a.data.description, href: localizedPath('en', `/meanings/${slugOf(a.id)}/`) }));
+---
+<MeaningHub locale={locale} guides={guides} />

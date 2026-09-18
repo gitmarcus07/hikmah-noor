@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "hikmah-noor",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hikmah-noor-habit",
+      "database_id": "2a30b7b2-33ab-4c1a-bf49-a6e9d616b96f"
+    }
+  ]
+}

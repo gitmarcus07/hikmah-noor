@@ -1,0 +1,14 @@
+---
+import ToolCalculator from '../../../../components/ToolCalculator.astro';
+import { nonDefaultLocales } from '../../../../i18n/utils';
+import { TOOLS } from '../../../../lib/finance/tools.js';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const t of TOOLS) paths.push({ params: { locale, category: t.cat, tool: t.slug }, props: { tool: t } });
+  return paths;
+}
+const { tool } = Astro.props;
+const { locale } = Astro.params;
+---
+<ToolCalculator tool={tool} locale={locale} />

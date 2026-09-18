@@ -1,0 +1,63 @@
+---
+/* Kalimas hub: all 6 kalimas -> detail pages. Plus article guides. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { KALIMAS } from '../data/kalimas';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const isFallback = locale !== 'en';
+
+const title = `All 6 Kalimas in Arabic with Transliteration, Meaning & Explanation`;
+const description = `All 6 kalimas — Tayyibah, Shahadah, Tamjeed, Tawheed, Astaghfar and Radd-e-Kufr — with Arabic, transliteration, English meaning and source basis.`;
+const keywords = '6 kalimas, 6 kalma, all kalimas, kalma in arabic, pehla kalma, dusra kalma, first kalima, second kalima, la ilaha illallah, shahadah';
+const faq = [
+  { q: 'How many kalimas are there?', a: 'Traditionally six are taught: Tayyibah, Shahadah, Tamjeed, Tawheed, Astaghfar and Radd-e-Kufr. Open each for Arabic, transliteration, meaning and source basis.' },
+  { q: 'Does every kalima include transliteration and meaning?', a: 'Yes — Arabic text, easy transliteration, English meaning, virtue and source basis on each kalima’s own page.' },
+  { q: 'Are these kalimas from hadith?', a: 'The first two match hadith wordings directly. Kalimas 3–6 are traditional curriculum wordings whose phrases come from the Quran and hadith — each page states its exact basis without invented references.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Kalimas', path: '/kalimas/' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/kalimas/">
+  <section class="relative overflow-hidden bg-night-900 text-white">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">
+      <nav class="text-xs text-ink-500 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span>{dict.nav.kalimas}</span></nav>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-gold-300 text-night-900 rounded-full px-3 py-1.5">6 kalimas</span>
+        {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">EN</span>}
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">All 6 Kalimas 🕌</h1>
+      <p class="mt-3 text-ink-300 leading-7 max-w-2xl md:text-lg">Learn each kalima with Arabic, transliteration, English meaning, virtue and source basis — from Tayyibah to Radd-e-Kufr.</p>
+      <form action={localizedPath(locale, '/search/')} method="get" class="mt-5 flex gap-2 max-w-xl" role="search">
+        <input name="q" placeholder="Search kalimas — e.g. pehla kalma, shahadah…" class="flex-1 min-w-0 bg-night-800 text-ink-50 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
+        <button class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-2xl px-6 min-h-[52px]">Go</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h2 class="text-xl md:text-2xl font-extrabold mb-4 text-white">🕌 The six kalimas</h2>
+    <div class="grid gap-3 md:grid-cols-2">
+      {KALIMAS.map((k) => (
+        <a href={localizedPath(locale, `/kalimas/${k.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-5 flex gap-4 items-start shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 hover:-translate-y-0.5 transition">
+          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 font-extrabold">{k.num}</span>
+          <span class="min-w-0">
+            <span class="font-extrabold block leading-6 text-ink-50 group-hover:text-brand-300">{k.title}</span>
+            <span class="text-sm text-ink-500 leading-6 block mt-0.5">{k.use}</span>
+            <span class="mt-1.5 flex flex-wrap gap-1.5">
+              <span class="text-[11px] font-bold text-brand-300 bg-brand-500/15 px-2 py-0.5 rounded-full">{k.grade}</span>
+            </span>
+            <span class="text-xs font-bold text-brand-300 mt-1 block">Arabic + transliteration + meaning →</span>
+          </span>
+        </a>
+      ))}
+    </div>
+
+  </div>
+</BaseLayout>

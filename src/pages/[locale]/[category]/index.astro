@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ArticleCard from '../../../components/ArticleCard.astro';
+import DuaHub from '../../../components/DuaHub.astro';
+import KalimaHub from '../../../components/KalimaHub.astro';
+import MeaningHub from '../../../components/MeaningHub.astro';
+import WaqiahHub from '../../../components/WaqiahHub.astro';
+import { getMixedLocale } from '../../../lib/articles';
+import { nonDefaultLocales, categories, getDict, localizedPath } from '../../../i18n/utils';
+
+import surahsMeta from '../../../data/surahs-meta.json';
+import parasMeta from '../../../data/paras-meta.json';
+const paras = parasMeta as any[];
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const category of categories) paths.push({ params: { locale, category } });
+  return paths;
+}
+
+const { locale, category } = Astro.params;
+const dict = getDict(locale);
+const isDuas = category === 'duas';
+const isKalimas = category === 'kalimas';
+let list = await getMixedLocale(locale, category);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const duaGuides = isDuas ? list.map(a => ({ title: a.data.title, desc: a.data.description, href: localizedPath(a.data.locale, `/${a.data.category}/${slugOf(a.id)}/`) })) : [];
+const isMeanings = category === 'meanings';
+const meaningGuides = isMeanings ? list.map(a => ({ title: a.data.title, desc: a.data.description, href: localizedPath(a.data.locale, `/${a.data.category}/${slugOf(a.id)}/`) })) : [];
+const isWaqiat = category === 'waqiat';
+const fallbackCount = list.filter(a => a.data.locale !== locale).length;
+const isQuran = category === 'quran';
+const isSurahs = category === 'surahs';
+const title = category === 'quran'
+  ? 'Holy Quran — Read Full Quran Online with 30 Paras, Translation & Audio'
+  : category === 'surahs'
+    ? 'All 114 Surahs — Read Every Surah with Translation & Audio'
+    : `${category[0].toUpperCase()}${category.slice(1)} — ${dict.siteName}`;
+const pageDescription = category === 'quran'
+  ? 'Read the full Holy Quran online in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Browse all 30 paras (juz) and 114 surahs, plus Quran guides.'
+  : category === 'surahs'
+    ? 'Read all 114 surahs of the Holy Quran in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Surah Yaseen, Al-Kahf, Ar-Rahman, Al-Mulk and more.'
+    : `${dict.home.categoriesTitle}: ${category}. Authentic Islamic guides in ${locale}.`;
+const pageKeywords = category === 'quran'
+  ? 'quran, full quran, read quran online, 30 para quran, quran 30 parah, juz, para, quran with urdu translation, quran english translation, quran hindi meaning, quran transliteration, quran with audio, quran recitation, holy quran'
+  : category === 'surahs'
+    ? 'surahs, 114 surahs, all surahs, surah list, read surah online, surah urdu translation, surah english translation, surah hindi meaning, surah transliteration, surah audio, surah yaseen, surah kahf, surah rahman, surah mulk'
+    : undefined;
+---
+{isDuas ? (
+<DuaHub locale={locale} guides={duaGuides} popularSlugs={['musa-clarity-speech', 'ask-jannah-refuge-hell', 'starting-journey', 'sayyidul-istighfar', 'ayatul-kursi-salah', 'seeking-knowledge', 'laylatul-qadr', 'for-parents', 'breaking-fast', 'for-the-deceased', 'hasbunallah', 'new-moon-sighting']} />
+) : isKalimas ? (
+<KalimaHub locale={locale} />
+) : isMeanings ? (
+<MeaningHub locale={locale} guides={meaningGuides} />
+) : isWaqiat ? (
+<WaqiahHub locale={locale} />
+) : (
+<BaseLayout title={title} description={pageDescription} keywords={pageKeywords} locale={locale} canonicalPath={`/${category}/`}>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <nav class="text-xs text-ink-500 mb-3"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
+    <h1 class="text-3xl md:text-4xl font-extrabold capitalize mb-2 text-white">{category === 'surahs' ? 'All 114 Surahs — Read with Translation & Audio' : category === 'quran' ? 'Holy Quran — Full Quran with 30 Paras' : category}</h1>
+    {category === 'surahs' ? (
+      <>
+        <p class="text-ink-300 mb-4">Read every surah in Arabic with Urdu, English & Hindi meaning, transliteration and audio recitation. Search by name or number, then open any surah for full text.</p>
+        <input id="surahfilter" placeholder="Search surah — name or number…" class="w-full max-w-xl bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-5 py-3.5 min-h-[52px] mb-5 outline-none focus:ring-2 ring-brand-400" />
+        <div id="surahgrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {surahsMeta.map(s => (
+            <a href={`/${locale}/surahs/${s.slug}/`} data-search={`${s.num} ${s.name} ${s.englishName}`} class="surahrow bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:shadow-md hover:border-brand-500/50">
+              <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{s.num}</span>
+              <span class="min-w-0">
+                <span class="font-bold block leading-6 text-ink-50">Surah {s.name} <span class="text-ink-500 font-normal">• {s.englishName}</span></span>
+                <span class="text-xs text-ink-500">{s.verseCount} verses • {s.revelation === 'Mecca' ? 'Makki' : 'Madani'}</span>
+              </span>
+              <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{s.arabicName}</span>
+            </a>
+          ))}
+        </div>
+        <script>
+          (() => {
+            const input = document.getElementById('surahfilter');
+            const rows = [...document.querySelectorAll('.surahrow')];
+            input?.addEventListener('input', () => {
+              const q = input.value.toLowerCase().trim();
+              rows.forEach(r => r.classList.toggle('hidden', q !== '' && !r.dataset.search.toLowerCase().includes(q)));
+            });
+          })();
+        </script>
+        {list.length > 0 && (
+          <>
+            <h2 class="text-xl font-extrabold mt-10 mb-4 text-white">Surah guides</h2>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{list.map(a => <ArticleCard locale={locale} category={a.data.category} slug={slugOf(a.id)} title={a.data.title} description={a.data.description} date={a.data.pubDate} image={a.data.image} entryLocale={a.data.locale} />)}</div>
+          </>
+        )}
+      </>
+    ) : category === 'quran' ? (
+    <>
+      <p class="text-ink-300 mb-4">Read the complete Quran in Arabic with Urdu, English & Hindi meaning, transliteration and audio. Choose a para below, or browse <a class="font-bold text-brand-300 hover:underline" href={localizedPath(locale, '/surahs/')}>all 114 surahs</a>.</p>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {paras.map(p => (
+          <a href={localizedPath(locale, `/quran/${p.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:shadow-md hover:border-brand-500/50">
+            <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{p.num}</span>
+            <span class="min-w-0">
+              <span class="font-bold block leading-6 text-ink-50">Para {p.num} — {p.name}</span>
+              <span class="text-xs text-ink-500">{p.range}</span>
+            </span>
+            <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{p.arabicName}</span>
+          </a>
+        ))}
+      </div>
+      {list.length > 0 && (
+        <>
+          <h2 class="text-xl font-extrabold mt-10 mb-4 text-white">Quran guides</h2>
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{list.map(a => <ArticleCard locale={locale} category={a.data.category} slug={slugOf(a.id)} title={a.data.title} description={a.data.description} date={a.data.pubDate} image={a.data.image} entryLocale={a.data.locale} />)}</div>
+        </>
+      )}
+    </>
+    ) : (
+    <>
+    {fallbackCount > 0 && <p class="mb-4 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">Showing English guides with <span class="font-extrabold uppercase text-[11px] text-night-900 bg-gold-300 rounded-full px-2 py-0.5">EN</span> badge — translation coming soon.</p>}
+    <p class="text-ink-300 mb-6">{list.length} guides • {dict.home.categoriesTitle}</p>
+    {list.length === 0
+      ? <p class="bg-night-850 border border-white/10 rounded-2xl p-6 text-ink-300">No articles yet in this language. Showing English soon.</p>
+      : <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{list.map(a => <ArticleCard locale={locale} category={a.data.category} slug={slugOf(a.id)} title={a.data.title} description={a.data.description} date={a.data.pubDate} image={a.data.image} entryLocale={a.data.locale} />)}</div>}
+    </>
+    )}
+  </div>
+</BaseLayout>
+)}

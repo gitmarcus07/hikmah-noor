@@ -1,0 +1,60 @@
+---
+/* Waqiat hub: prophet stories -> detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WaqiahArt from './WaqiahArt.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { WAQIAT } from '../data/waqiat';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const isFallback = locale !== 'en';
+
+const title = `Stories of the Prophets in Islam — Qisse with Lessons (${WAQIAT.length} stories)`;
+const description = `All ${WAQIAT.length} prophet stories — Yusuf, Ibrahim, Musa, Nuh, Yunus, Ayyub, Sulayman, Dawud, Isa and the Hijrah — with events, lessons and Quran references.`;
+const keywords = 'prophet stories islam, qisse ambiya, yusuf story, ibrahim fire, musa sea, noah ark, yunus whale, seerah stories';
+const faq = [
+  { q: 'Where do these stories come from?', a: 'Each story cites its Quran surahs — no invented details. Lessons are drawn plainly from the verses; consult scholars for deeper rulings.' },
+  { q: 'What will I learn on each story page?', a: 'A summary, the key events in order, three lessons, the Quran references, and the emblematic verse in Arabic.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Waqiat', path: '/waqiat/' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/waqiat/">
+  <section class="relative overflow-hidden bg-night-900 text-white">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">
+      <nav class="text-xs text-ink-500 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span>{dict.nav.waqiat}</span></nav>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-gold-300 text-night-900 rounded-full px-3 py-1.5">{WAQIAT.length} stories</span>
+        {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">EN</span>}
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">Prophet Stories 📜</h1>
+      <p class="mt-3 text-ink-300 leading-7 max-w-2xl md:text-lg">Quranic narratives with events in order, lessons, and references — from the well of Yusuf to the cave of Thawr.</p>
+      <form action={localizedPath(locale, '/search/')} method="get" class="mt-5 flex gap-2 max-w-xl" role="search">
+        <input name="q" placeholder="Search stories — e.g. yusuf, ibrahim, hijrah…" class="flex-1 min-w-0 bg-night-800 text-ink-50 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-amber-300 placeholder:text-ink-500" />
+        <button class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-2xl px-6 min-h-[52px]">Go</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h2 class="text-xl md:text-2xl font-extrabold mb-4 text-white">📜 Browse all stories</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {WAQIAT.map((w) => (
+        <a href={localizedPath(locale, `/waqiat/${w.slug}/`)} class="group bg-night-850 border border-white/10 rounded-3xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 hover:-translate-y-1 transition">
+          <span class="block overflow-hidden"><WaqiahArt motif={w.motif} arabic={w.arabic} prophet={w.prophet} accent={w.accent} /></span>
+          <span class="block p-5">
+            <span class="text-[11px] font-extrabold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2 py-0.5 rounded-full">{w.prophet}</span>
+            <span class="font-extrabold block text-lg leading-7 mt-2 text-ink-50 group-hover:text-brand-300">{w.title}</span>
+            <span class="text-sm text-ink-300 leading-6 block mt-1 line-clamp-2">{w.summary}</span>
+            <span class="text-xs font-bold text-brand-300 mt-2 block">Story + lessons →</span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const locale = 'en';
+const faq = [
+  { q: 'How do I report a mistake?', a: 'Email hello@hikmah-noor.pages.dev with the page URL and, for sourcing issues, the authentic reference. Corrections are reviewed weekly.' },
+  { q: 'Can I request a dua or topic?', a: 'Yes — dua requests and topic suggestions are welcome at the same address. Include transliteration needs (Urdu/Hindi) if relevant.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Contact', path: '/contact/' },
+];
+---
+<BaseLayout title="Contact — Hikmah Noor" description="Contact Hikmah Noor for corrections and feedback." locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/contact/">
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-extrabold mb-3 text-white">Contact</h1>
+  <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
+    <p>For corrections, translation help or dua requests, email: <b>hello@hikmah-noor.pages.dev</b></p>
+    <p>Please include article URL and authentic source for corrections. We review weekly.</p>
+  </div>
+  <section class="mt-8">
+    <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+    <div class="space-y-3">
+      {faq.map(f => (
+        <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
+          <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
+          <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+</BaseLayout>

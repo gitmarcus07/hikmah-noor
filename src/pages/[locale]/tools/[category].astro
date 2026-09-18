@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '../../../components/Icon.astro';
+import { nonDefaultLocales, getDict, localizedPath } from '../../../i18n/utils';
+import { CATS, toolsByCat } from '../../../lib/finance/tools.js';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const c of CATS) paths.push({ params: { locale, category: c.slug } });
+  return paths;
+}
+const { locale, category } = Astro.params;
+const dict = getDict(locale);
+const cat = CATS.find((c) => c.slug === category);
+if (!cat) throw new Error(`Unknown tools category: ${category}`);
+const list = toolsByCat(category);
+---
+<BaseLayout title={`${cat.title} Tools — Islamic Finance Calculators`} description={`${cat.desc} Free calculators with evidence and school differences.`} keywords={`${cat.title.toLowerCase()} tools, islamic finance calculator`} locale={locale} canonicalPath={`/tools/${category}/`} faq={[]} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: cat.title, path: `/tools/${category}/` }]}>
+  <section class={`relative overflow-hidden bg-gradient-to-br ${cat.grad} text-white`}>
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(255,255,255,.18), transparent 45%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">
+      <nav class="text-xs text-white/70 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <a href={localizedPath(locale, '/tools/')} class="hover:text-brand-300">Tools</a> / <span>{cat.title}</span></nav>
+      <div class="flex items-center gap-4">
+        <span class="w-14 h-14 shrink-0 grid place-items-center rounded-2xl bg-white/15 border border-white/20"><Icon name={cat.icon || 'tools'} size={30} /></span>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{cat.title} Tools <span class="align-middle text-[11px] font-extrabold uppercase text-night-900 bg-gold-300 px-2 py-1 rounded-full">EN</span></h1>
+          <p class="mt-1.5 text-white/85 leading-7 max-w-2xl">{cat.desc} Pick the tool that matches your situation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {list.map((t) => (
+        <a href={localizedPath(locale, `/tools/${t.cat}/${t.slug}/`)} class="group bg-night-850 border border-white/10 rounded-3xl p-5 md:p-6 flex gap-4 items-start shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 hover:-translate-y-1 transition">
+          <span class={`w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-gradient-to-br ${cat.grad} text-white shadow-sm`}><Icon name={t.icon || 'tools'} size={24} /></span>
+          <span class="min-w-0">
+            <span class="font-extrabold block leading-6 text-[16px] text-ink-50 group-hover:text-brand-300">{t.title.split('—')[0].trim()}</span>
+            <span class="text-[11px] font-extrabold uppercase tracking-wide text-brand-300">{t.level}</span>
+            <span class="text-sm text-ink-300 leading-6 block mt-1.5">{t.desc}</span>
+          </span>
+          <span class="ms-auto shrink-0 self-center w-9 h-9 grid place-items-center rounded-full bg-white/10 text-ink-500 group-hover:bg-brand-500 group-hover:text-night-900 transition"><Icon name="chevron" size={18} /></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

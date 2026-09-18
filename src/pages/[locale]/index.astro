@@ -1,0 +1,21 @@
+---
+import HomePage from '../../components/HomePage.astro';
+import { nonDefaultLocales, getDict } from '../../i18n/utils';
+import { getMixedLocale } from '../../lib/articles';
+
+export async function getStaticPaths() {
+  return nonDefaultLocales.map(locale => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params;
+const dict = getDict(locale);
+
+const all = await getMixedLocale(locale);
+const latest = all.slice(0, 4);
+const catGroups: Record<string, typeof all> = {};
+for (const a of all) {
+  (catGroups[a.data.category] ||= []).push(a);
+}
+const fallbackCount = all.filter(a => a.data.locale !== locale).length;
+---
+<HomePage locale={locale} dict={dict} latest={latest} catGroups={catGroups} fallbackCount={fallbackCount} />

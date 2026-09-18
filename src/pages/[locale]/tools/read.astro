@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AuthModal from '../../../components/AuthModal.astro';
+import { nonDefaultLocales, localizedPath } from '../../../i18n/utils';
+import surahsMeta from '../../../data/surahs-meta.json';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'Do I need to login to read?', a: 'You can browse, but verses, streaks and hasanat only save to your free account — login first so nothing is lost.' },
+  { q: 'Where do I continue from?', a: 'Your last position saves automatically. The Continue button above takes you back to the exact verse.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Read', path: '/tools/read/' },
+];
+---
+<BaseLayout title="Read Quran — Gamified Reading Session" description="Read verse by verse with timer, audio, hasanat counter, streaks and Juz progress. Free — login saves everything." keywords="read quran, quran reading tracker, quran streak, hasanat counter" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs}>
+  <div class="max-w-4xl mx-auto px-4 py-8" data-picker>
+    <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-night-900 bg-gold-300 rounded-full px-3.5 py-1.5 inline-block">📖 Reading session</p>
+    <h1 class="text-3xl md:text-4xl font-extrabold text-white mt-3">Read Quran, earn your streak</h1>
+    <p class="mt-2 text-ink-300 leading-7 max-w-2xl">Pick a surah — read verse by verse, tap <b>I'm Done</b>, and your verses, time and hasanat save automatically.</p>
+
+    <div data-pk-resume class="hidden mt-5 bg-night-850 border border-brand-500/40 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center gap-3">
+      <p class="font-extrabold text-white">Continue: <span data-pk-resumelabel class="text-brand-300"></span></p>
+      <a data-pk-resumelink href="#" class="sm:ms-auto shrink-0 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px] inline-flex items-center justify-center">Continue →</a>
+    </div>
+    <div data-pk-login class="mt-5 bg-night-850 border border-white/10 rounded-3xl p-5 text-center">
+      <p class="font-bold text-ink-200">Login to save your reading progress</p>
+      <button data-pk-open class="mt-3 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+    </div>
+
+    <input data-pk-filter placeholder="Search surah — name or number…" class="mt-5 w-full max-w-xl bg-night-800 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+    <div class="grid gap-3 sm:grid-cols-2 mt-4">
+      {(surahsMeta as any[]).map((s) => (
+        <a href={localizedPath(locale, `/tools/read/${s.num}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="pkrow group bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:border-brand-500/50 transition">
+          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{s.num}</span>
+          <span class="min-w-0">
+            <span class="font-bold block leading-6 text-ink-50 group-hover:text-brand-300">Surah {s.name} <span class="text-ink-500 font-normal">• {s.englishName}</span></span>
+            <span class="text-xs text-ink-500">{s.verseCount} verses</span>
+          </span>
+          <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{s.arabicName}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+  <AuthModal />
+  <script define:vars={{ readBase: localizedPath(locale, '/tools/read/') }}>
+    (() => {
+      const root = document.querySelector('[data-picker]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      root.querySelector('[data-pk-filter]')?.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        root.querySelectorAll('.pkrow').forEach((r) => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
+      });
+      root.querySelector('[data-pk-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
+      (async () => {
+        try {
+          const { Auth, Me } = await import('/habits/habit.js');
+          const { user } = await Auth.session();
+          if (!user) return;
+          root.querySelector('[data-pk-login]')?.classList.add('hidden');
+          const { resume } = await Me.resume().catch(() => ({ resume: null }));
+          if (resume) {
+            const box = root.querySelector('[data-pk-resume]');
+            box?.classList.remove('hidden');
+            const lbl = box?.querySelector('[data-pk-resumelabel]');
+            if (lbl) lbl.textContent = `Surah ${resume.surah}, verse ${resume.verse}`;
+            const link = box?.querySelector('[data-pk-resumelink]');
+            if (link) link.href = `${readBase}${resume.surah}/?verse=${resume.verse}`;
+          }
+        } catch {}
+      })();
+    })();
+  </script>
+</BaseLayout>

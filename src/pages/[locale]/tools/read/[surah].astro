@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ReadSession from '../../../../components/ReadSession.astro';
+import { nonDefaultLocales } from '../../../../i18n/utils';
+import parasMeta from '../../../../data/paras-meta.json';
+import surahsMeta from '../../../../data/surahs-meta.json';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) {
+    for (const s of surahsMeta as any[]) paths.push({ params: { locale, surah: String(s.num) } });
+  }
+  return paths;
+}
+
+const { locale } = Astro.params;
+const surahFiles = import.meta.glob('../../../../data/surahs/*.json');
+const num = Math.min(114, Math.max(1, Number(Astro.params.surah) || 1));
+const loader = (surahFiles as any)[`../../../../data/surahs/${num}.json`];
+const mod = await loader();
+const surah = (mod as any).default ?? mod;
+
+const counts = new Map((surahsMeta as any[]).map((s: any) => [s.num, s.verseCount]));
+const juzTotals = (parasMeta as any[]).map((p: any) => {
+  let verses = 0;
+  for (let s = p.start.surah; s <= p.end.surah; s += 1) {
+    const total = counts.get(s) || 0;
+    const from = s === p.start.surah ? p.start.verse : 1;
+    const to = s === p.end.surah ? p.end.verse : total;
+    verses += Math.max(0, to - from + 1);
+  }
+  return { num: p.num, verses };
+});
+const juzOfSurah = ((parasMeta as any[]).find((p: any) => num >= p.start.surah && num <= p.end.surah)?.num) ?? null;
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Read', path: '/tools/read/' },
+  { name: `Surah ${surah.name}`, path: `/tools/read/${num}/` },
+];
+---
+<BaseLayout
+  title={`Read Surah ${surah.name} — Track Verses, Time & Hasanat`}
+  description={`Read Surah ${surah.name} (${surah.englishName}) verse by verse with audio, timer, hasanat counter and streak tracking. Free — login saves your progress.`}
+  locale={locale}
+  keywords={`read surah ${surah.name.toLowerCase()}, quran reading tracker, hasanat counter, quran streak`}
+  canonicalPath={`/tools/read/${num}/`}
+  noindex={true}
+  crumbs={crumbs}
+>
+  <ReadSession locale={locale} surah={surah} juzTotals={juzTotals} juzOfSurah={juzOfSurah} />
+  <p class="mx-auto max-w-2xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

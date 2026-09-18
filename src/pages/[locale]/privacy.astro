@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { nonDefaultLocales } from '../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map(locale => ({ params: { locale } })); }
+const { locale } = Astro.params;
+---
+<BaseLayout title="Privacy Policy — Hikmah Noor" description="Privacy policy: no accounts, no tracking beyond basic analytics." locale={locale} crumbs={[{ name: 'Home', path: '/' }, { name: 'Privacy', path: '/privacy/' }]} canonicalPath="/privacy/">
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-extrabold mb-3 text-white">Privacy Policy</h1>
+  <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
+    <p>We do not require accounts. Zakat inputs stay in your browser and are never sent to servers. Basic privacy-friendly analytics may count visits without identifying you.</p>
+    <p>Contact email is only used to reply. No data is sold.</p>
+  </div>
+</div>
+</BaseLayout>

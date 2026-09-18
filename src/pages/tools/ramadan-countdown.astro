@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { getDict, localizedPath } from '../../i18n/utils';
+const locale = 'en';
+const dict = getDict(locale);
+const h = dict.home ?? {};
+const faq = [
+  { q: 'Is this countdown exact?', a: 'No. Dates are astronomical estimates for 1 Ramadan. Moon sighting varies by country — always follow your local scholars and moon committee.' },
+  { q: 'What happens during Ramadan?', a: 'Fasting from dawn to sunset, taraweeh prayers, Quran recitation (many complete 1 juz per day for khatm), zakat and charity.' },
+  { q: 'How should I prepare?', a: 'Revise recitation, practice fasting Mondays/Thursdays, calculate zakat early, and plan taraweeh and daily Quran portions.' },
+];
+---
+<BaseLayout title={`${dict.home.ramadanTitle}`} description="Ramadan countdown with Hijri date — always counts to the next Ramadan. Estimated starts, moon sighting may vary by country." locale={locale} canonicalPath="/tools/ramadan-countdown/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: dict.home.ramadanTitle, path: '/tools/ramadan-countdown/' }]}>
+  <section class="relative overflow-hidden bg-night-900 text-white">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12 text-center">
+      <nav class="text-xs text-ink-500 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <a href={localizedPath(locale, '/tools/')} class="hover:text-brand-300">{dict.nav.tools}</a> / <span>{dict.home.ramadanTitle}</span></nav>
+      <div class="flex flex-wrap justify-center gap-2 mb-4">
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest bg-gold-300 text-night-900 rounded-full px-3.5 py-1.5"><span class="w-2 h-2 rounded-full bg-brand-600 animate-pulse" aria-hidden="true"></span>{h.countdownBadge ?? 'Live'}</span>
+        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3.5 py-1.5">🌙 {h.countdownTitle ?? dict.home.ramadanTitle}</span>
+      </div>
+      <div class="text-5xl mb-3" aria-hidden="true">🌙</div>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight break-words text-white">{dict.home.ramadanTitle}</h1>
+      <p class="mt-3 font-extrabold text-lg text-gold-300"><b id="ramadanStatus">Loading…</b></p>
+      <p class="mt-2 text-ink-300 text-sm md:text-base leading-6 max-w-2xl mx-auto">{h.countdownSub ?? 'Moon sighting may differ by country.'}</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 max-w-3xl mx-auto text-start">
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4"><p class="text-[11px] font-extrabold uppercase tracking-widest text-gold-300">📅 Today (Gregorian)</p><p class="font-extrabold mt-1.5 leading-6" id="gregToday">…</p></div>
+        <div class="bg-white/10 border border-white/15 rounded-2xl p-4"><p class="text-[11px] font-extrabold uppercase tracking-widest text-gold-300">☪️ Hijri today</p><p class="font-extrabold mt-1.5 leading-6" id="hijri">…</p></div>
+        <div class="bg-gold-300 text-night-900 rounded-2xl p-4"><p class="text-[11px] font-extrabold uppercase tracking-widest">🌙 Estimated Ramadan</p><p class="font-extrabold mt-1.5 leading-6" id="ramadanTarget">…</p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="bg-night-850 border border-white/10 text-white rounded-3xl p-5 sm:p-8 shadow-xl shadow-black/40 relative overflow-hidden">
+      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
+      <div class="relative">
+        <div class="grid grid-cols-4 gap-2 sm:gap-4" role="timer" aria-live="off" aria-label={dict.home.ramadanTitle}>
+          <div class="bg-white/10 border border-white/15 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center min-w-0"><div id="d" class="text-3xl sm:text-5xl font-extrabold text-gold-300 tabular-nums">0</div><div class="text-[11px] sm:text-sm text-ink-300 mt-1.5 font-semibold">{h.days ?? 'Days'}</div></div>
+          <div class="bg-white/10 border border-white/15 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center min-w-0"><div id="h" class="text-3xl sm:text-5xl font-extrabold text-gold-300 tabular-nums">0</div><div class="text-[11px] sm:text-sm text-ink-300 mt-1.5 font-semibold">{h.hours ?? 'Hours'}</div></div>
+          <div class="bg-white/10 border border-white/15 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center min-w-0"><div id="m" class="text-3xl sm:text-5xl font-extrabold text-gold-300 tabular-nums">0</div><div class="text-[11px] sm:text-sm text-ink-300 mt-1.5 font-semibold">{h.mins ?? 'Mins'}</div></div>
+          <div class="bg-white/10 border border-white/15 rounded-2xl sm:rounded-3xl p-3 sm:p-6 text-center min-w-0"><div id="s" class="text-3xl sm:text-5xl font-extrabold text-gold-300 tabular-nums">0</div><div class="text-[11px] sm:text-sm text-ink-300 mt-1.5 font-semibold">{h.secs ?? 'Secs'}</div></div>
+        </div>
+        <div class="mt-5 flex flex-col sm:flex-row gap-3">
+          <a href={localizedPath(locale, '/tools/zakat/zakat-calculator/')} class="flex-1 bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-full px-6 py-3.5 min-h-[52px] inline-flex items-center justify-center gap-2">🧮 {dict.home.zakatTitle} →</a>
+          <a href={localizedPath(locale, '/surahs/')} class="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-full px-6 py-3.5 min-h-[52px] inline-flex items-center justify-center gap-2">📖 114 {dict.nav.surahs} →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2 mt-6">
+      <div class="bg-night-850 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-lg shadow-black/30">
+        <h2 class="text-xl font-extrabold flex items-center gap-2 text-white">📋 How to prepare</h2>
+        <ul class="mt-4 space-y-2.5 text-[15px] leading-7 text-ink-300">
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Revise Quran recitation and Surah Al-Fatiha meanings.</li>
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Practice fasting Mondays &amp; Thursdays.</li>
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Calculate zakat early — <a class="font-bold text-brand-300 underline" href={localizedPath(locale, '/tools/zakat/zakat-calculator/')}>open the zakat calculator</a>.</li>
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Plan taraweeh and 1 juz per day for khatm.</li>
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Memorize key duas — <a class="font-bold text-brand-300 underline" href={localizedPath(locale, '/duas/')}>browse duas</a>.</li>
+          <li class="flex gap-2.5"><span class="text-brand-300 font-extrabold">✓</span>Set charity and iftar plans before Ramadan starts.</li>
+        </ul>
+      </div>
+      <div class="bg-gradient-to-br from-night-800 to-night-850 border border-white/10 text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-black/40">
+        <h2 class="text-xl font-extrabold flex items-center gap-2 text-white">🌙 How these dates work</h2>
+        <ul class="mt-4 space-y-2.5 text-[15px] leading-7 text-ink-300">
+          <li class="flex gap-2.5"><span class="text-gold-300 font-extrabold">•</span>Astronomical estimates for 1 Ramadan; the counter rolls forward automatically and never goes stale.</li>
+          <li class="flex gap-2.5"><span class="text-gold-300 font-extrabold">•</span>Moon sighting differs by country — follow local scholars for fasting and Eid.</li>
+          <li class="flex gap-2.5"><span class="text-gold-300 font-extrabold">•</span>During Ramadan the counter switches to Eid al-Fitr automatically.</li>
+          <li class="flex gap-2.5"><span class="text-gold-300 font-extrabold">•</span>Hijri date shown uses the Islamic calendar for your locale.</li>
+        </ul>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a href={localizedPath(locale, '/quran/')} class="text-sm font-extrabold bg-gold-300 hover:bg-amber-200 text-night-900 rounded-full px-5 py-2.5 min-h-[44px] inline-flex items-center">30 {dict.nav.quran} →</a>
+          <a href={localizedPath(locale, '/duas/ramadan-fasting/')} class="text-sm font-bold bg-white/10 border border-white/20 rounded-full px-5 py-2.5 min-h-[44px] inline-flex items-center">{dict.nav.duas} →</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="mt-6 max-w-3xl">
+      <h2 class="text-xl md:text-2xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 sm:p-5 shadow-lg shadow-black/30">
+            <summary class="font-bold cursor-pointer leading-6">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+<script>
+  const starts = ['2026-02-18','2027-02-08','2028-01-28','2029-01-16','2030-01-05','2030-12-26','2031-12-15','2032-12-04','2033-11-23'].map((s) => new Date(s + 'T00:00:00Z').getTime());
+  const DAY = 864e5, LUNAR_YEAR = 354.37 * DAY, RAMADAN_LEN = 30 * DAY;
+  const fmt = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  function resolve() {
+    const now = Date.now();
+    const past = [...starts].reverse().find((t) => t <= now);
+    if (past && now - past < RAMADAN_LEN) {
+      return { target: past + RAMADAN_LEN, label: '🌙 Ramadan Mubarak! Estimated Eid al-Fitr: ' + fmt(past + RAMADAN_LEN) };
+    }
+    let target = starts.find((t) => t > now);
+    if (target === undefined) { target = starts[starts.length - 1]; while (target <= now) target += LUNAR_YEAR; }
+    return { target, label: 'Estimated start: ' + fmt(target) };
+  }
+  let state = resolve();
+  function tick() {
+    if (Date.now() >= state.target) state = resolve();
+    const diff = Math.max(0, state.target - Date.now());
+    const d = Math.floor(diff / DAY), h = Math.floor(diff / 36e5) % 24, m = Math.floor(diff / 6e4) % 60, s = Math.floor(diff / 1e3) % 60;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('d', d); set('h', h); set('m', m); set('s', s);
+    set('ramadanStatus', state.label); set('ramadanTarget', fmt(state.target));
+  }
+  tick(); setInterval(tick, 1000);
+  try {
+    document.getElementById('hijri').textContent = new Intl.DateTimeFormat('en-SA-u-ca-islamic', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+    document.getElementById('gregToday').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {}
+</script>
+</BaseLayout>

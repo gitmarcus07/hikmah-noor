@@ -1,0 +1,366 @@
+---
+/* Premium Islamic-finance tool page: gradient hero, step wizard pills,
+ * live auto-calculation, rich result card with copy + evidence + FAQ.
+ * Schema (fields/steps) comes from src/lib/finance/tools.js;
+ * math runs in the browser via /finance/calc.js (public, static). */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { CATS, toolsByCat, getToolBySlug } from '../lib/finance/tools.js';
+
+interface Props { tool: any; locale: string; }
+const { tool, locale } = Astro.props;
+const dict = getDict(locale);
+const cat = CATS.find((c: any) => c.slug === tool.cat);
+const siblings = toolsByCat(tool.cat).filter((t: any) => t.slug !== tool.slug);
+const agri = tool.slug === 'ushr-guide' ? getToolBySlug('agriculture-zakat') : null;
+const isFallback = locale !== 'en';
+const catPath = `/tools/${tool.cat}/`;
+const toolPath = `/tools/${tool.cat}/${tool.slug}/`;
+const shortName = tool.title.split('—')[0].trim();
+
+const HEADLINES: Record<string, string> = {
+  'zakat-calculator': 'Your estimated zakat', 'gold-zakat': 'Your estimated gold zakat',
+  'silver-zakat': 'Your estimated silver zakat', 'cash-savings-zakat': 'Your estimated cash zakat',
+  'business-zakat': 'Your estimated business zakat', 'investment-zakat': 'Indicative investment zakat',
+  'agriculture-zakat': 'Your estimated harvest due', 'livestock-zakat': 'Animals due (classical schedule)',
+  'zakat-al-fitr': 'Your estimated Zakat al-Fitr', 'fidyah': 'Your estimated fidyah',
+  'kaffarah-oath': 'Your oath expiation', 'kaffarah-fasting': 'Your kaffarah outcome',
+  'hajj-fidyah': 'Your Hajj fidyah outcome', 'mahr-planner': 'Your mahr plan',
+  'nafaqah-planner': 'Your maintenance budget', 'khums': 'Your estimated khums',
+};
+const ALWAYS_SHOW = ['mahr-planner', 'nafaqah-planner'];
+const headline = HEADLINES[tool.slug] || 'Your result';
+
+const LEVEL_STYLE: Record<string, string> = {
+  'Obligatory (pillar)': 'bg-brand-300 text-night-900',
+  'Obligatory (pillar) — method varies': 'bg-brand-300 text-night-900',
+  'Obligatory (per fasting person)': 'bg-brand-300 text-night-900',
+  'Obligatory (pillar) — reference': 'bg-brand-300 text-night-900',
+  'Conditional obligation': 'bg-gold-300 text-night-900',
+  'Family right (no fixed amount)': 'bg-sky-300 text-night-900',
+  'Planning tool (no fixed %)': 'bg-sky-300 text-night-900',
+  'School-specific': 'bg-violet-300 text-night-900',
+  'Historical state levy': 'bg-white/10 text-ink-200 border border-white/10',
+  'Educational guide': 'bg-white/10 text-ink-200 border border-white/10',
+};
+
+const CURS = [['INR','INR ₹'],['USD','USD $'],['GBP','GBP £'],['EUR','EUR €'],['AED','AED'],['SAR','SAR ﷼'],['PKR','PKR ₨'],['BDT','BDT ৳'],['CAD','CAD'],['AUD','AUD']];
+function fieldId(stepIdx: number, key: string) { return `f-${stepIdx}-${key}`; }
+const allSteps = tool.kind === 'steps' ? tool.steps : [{ title: '', fields: tool.fields }];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: cat?.title || 'Tools', path: catPath },
+  { name: shortName, path: toolPath },
+];
+---
+<BaseLayout title={tool.title} description={tool.desc} keywords={tool.keywords} locale={locale} canonicalPath={toolPath} type="article" faq={tool.faq || []} crumbs={crumbs}>
+  <div data-toolroot>
+    <!-- HERO -->
+    <section class="relative overflow-hidden bg-night-900 text-white">
+      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+      <div class="relative max-w-3xl mx-auto px-4 pt-6 pb-7 md:pt-8 md:pb-9">
+        <nav class="text-xs text-ink-500 mb-4">
+          <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
+          <a href={localizedPath(locale, '/tools/')} class="hover:text-brand-300"> Tools</a> /
+          <a href={localizedPath(locale, catPath)} class="hover:text-brand-300"> {cat?.title}</a>
+        </nav>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class={`text-[11px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full ${LEVEL_STYLE[tool.level] || 'bg-white/10 text-ink-200 border border-white/10'}`}>{tool.level}</span>
+          {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">EN</span>}
+          <span class="text-[11px] font-bold uppercase tracking-wide text-ink-500">Free • No signup • With evidence</span>
+        </div>
+        <h1 class="text-3xl md:text-[2.6rem] md:leading-[1.15] font-extrabold leading-tight mt-3 text-white">{shortName}</h1>
+        <p class="mt-3 text-ink-300 leading-7 text-[15px] md:text-base max-w-2xl">{tool.intro}</p>
+        {isFallback && <p class="mt-4 text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>}
+      </div>
+    </section>
+
+    <div class="max-w-3xl mx-auto px-4 py-6 md:py-8">
+    {tool.kind === 'info' ? (
+      <div class="bg-night-850 border border-white/10 rounded-3xl p-5 md:p-7 shadow-xl shadow-black/30 -mt-12 md:-mt-14 relative">
+        <ul class="space-y-3">
+          {(tool.points || []).map((pt: string) => (
+            <li class="flex items-start gap-3 text-[15px] leading-7"><span class="w-7 h-7 shrink-0 grid place-items-center rounded-full bg-brand-500 text-night-900 text-sm font-extrabold">✓</span><span>{pt}</span></li>
+          ))}
+        </ul>
+        {agri && <a href={localizedPath(locale, `/tools/${agri.cat}/${agri.slug}/`)} class="mt-6 inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-full px-6 py-3 min-h-[52px] shadow">Open the Agriculture Zakat calculator →</a>}
+      </div>
+    ) : (
+      <>
+        {tool.kind === 'steps' && (
+          <div class="mb-5 -mt-12 md:-mt-14 relative">
+            <div class="bg-night-850 border border-white/10 rounded-3xl shadow-xl shadow-black/30 p-4 md:p-5">
+              <div id="stepPills" class="flex flex-wrap gap-2">
+                {allSteps.map((s: any, si: number) => (
+                  <span data-pill={si} class="text-xs font-bold rounded-full px-3.5 py-2 border min-h-[36px] inline-flex items-center gap-1.5">{si + 1}. {s.title}</span>
+                ))}
+              </div>
+              <div class="h-2 bg-white/10 rounded-full overflow-hidden mt-3"><div id="stepBar" class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full transition-all" style="width:10%"></div></div>
+            </div>
+          </div>
+        )}
+        <div class={`bg-night-850 border border-white/10 rounded-3xl p-5 md:p-7 shadow-xl shadow-black/30 space-y-6 ${tool.kind === 'steps' ? '' : '-mt-12 md:-mt-14 relative'}`} id="toolForm">
+          {allSteps.map((step: any, si: number) => (
+            <section data-step={si} data-showstep={step.showIf ? `${step.showIf.k}=${step.showIf.v}` : ''} class={tool.kind === 'steps' ? (si === 0 ? '' : 'hidden') : ''}>
+              {step.title && tool.kind === 'steps' && <h2 class="font-extrabold text-lg mb-4 flex items-center gap-2.5 text-white"><span class="w-8 h-8 shrink-0 grid place-items-center rounded-full bg-brand-500 text-night-900 text-sm font-extrabold">{si + 1}</span>{step.title}</h2>}
+              <div class="space-y-5">
+                {step.fields.map((f: any) => (
+                  <div data-field={f.key} data-showif={f.showIf ? `${f.showIf.k}=${f.showIf.v}` : ''}>
+                    {f.type === 'note' ? (
+                      <p class="text-[13px] leading-6 text-ink-200 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">💡 {f.label}</p>
+                    ) : f.type === 'currency' ? (
+                      <label class="block font-bold text-[15px]">{f.label}
+                        <select data-k={f.key} id={fieldId(si, f.key)} class="mt-2 w-full bg-night-800 border border-white/10 text-ink-50 rounded-2xl px-4 py-3.5 min-h-[56px] font-semibold focus:ring-2 ring-brand-400 outline-none">
+                          {CURS.map(([v, t]) => <option value={v} selected={v === f.def}>{t}</option>)}
+                        </select>
+                      </label>
+                    ) : f.type === 'select' ? (
+                      <label class="block font-bold text-[15px]">{f.label}
+                        {f.hint && <span class="block text-[13px] font-normal text-ink-500 mt-1">{f.hint}</span>}
+                        <select data-k={f.key} id={fieldId(si, f.key)} class="mt-2 w-full bg-night-800 border border-white/10 text-ink-50 rounded-2xl px-4 py-3.5 min-h-[56px] font-semibold focus:ring-2 ring-brand-400 outline-none">
+                          {f.options.map((o: any) => <option value={o.v} selected={o.v === f.def}>{o.t}</option>)}
+                        </select>
+                      </label>
+                    ) : f.type === 'radio' ? (
+                      <fieldset>
+                        <legend class="font-bold text-[15px]">{f.label}</legend>
+                        {f.hint && <p class="text-[13px] text-ink-500 mt-1">{f.hint}</p>}
+                        <div class="mt-2.5 flex flex-wrap gap-2">
+                          {f.options.map((o: any) => (
+                            <label class="cursor-pointer text-sm font-bold border-2 rounded-2xl px-4 py-2.5 min-h-[48px] inline-flex items-center gap-2 has-checked:bg-brand-500 has-checked:text-night-900 has-checked:border-brand-500 bg-night-800 border-white/10 text-ink-200 hover:border-brand-400 transition">
+                              <input type="radio" name={fieldId(si, f.key)} data-k={f.key} value={o.v} checked={o.v === f.def} class="accent-brand-500 w-4 h-4" />{o.t}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    ) : (
+                      <label class="block font-bold text-[15px]">{f.label}
+                        {f.hint && <span class="block text-[13px] font-normal text-ink-500 mt-1">{f.hint}</span>}
+                        <input data-k={f.key} id={fieldId(si, f.key)} type="number" min="0" step="any" inputmode="decimal" value={f.def ?? 0} placeholder={f.placeholder || '0'} class="mt-2 w-full bg-night-800 border border-white/10 text-ink-50 rounded-2xl px-4 py-3.5 min-h-[56px] font-semibold focus:ring-2 ring-brand-400 outline-none" />
+                      </label>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+          <p id="autoNote" class="hidden text-xs font-semibold text-brand-300">✓ Updates automatically as you type</p>
+          <div class="flex gap-3 pt-1">
+            {tool.kind === 'steps' && <button id="backBtn" class="px-5 rounded-2xl border-2 border-white/15 text-ink-200 font-bold min-h-[56px] hidden hover:border-brand-400">← Back</button>}
+            {tool.kind === 'steps' && <button id="nextBtn" class="flex-1 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl py-3.5 min-h-[56px] shadow">Next →</button>}
+            <button id="calcBtn" class={`flex-1 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl py-3.5 min-h-[56px] shadow-lg ${tool.kind === 'steps' ? 'hidden' : ''}`}>Calculate ✨</button>
+            <button id="resetBtn" class="px-5 rounded-2xl border-2 border-white/15 text-ink-200 font-bold min-h-[56px] hover:border-brand-400" title="Reset">↺</button>
+          </div>
+        </div>
+
+        <div id="result" class="mt-6 hidden" aria-live="polite"></div>
+      </>
+    )}
+
+    {tool.kind !== 'info' && (
+      <section class="mt-8 bg-night-850 border border-white/10 rounded-3xl p-5 md:p-6 shadow-lg shadow-black/30">
+        <h2 class="font-extrabold text-lg mb-2 text-white">📜 Evidence &amp; Methodology</h2>
+        <p class="text-sm text-ink-300 leading-7">Your result box shows the exact evidence, assumptions and warnings for your inputs. References name the Qur'an passage or collection without inventing numbers — verify with scholars for your case.</p>
+      </section>
+    )}
+
+    {(tool.faq?.length > 0) && (
+      <section class="mt-8">
+        <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+        <div class="space-y-3">
+          {tool.faq.map((f: any) => (
+            <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
+              <summary class="font-bold cursor-pointer leading-6">{f.q}</summary>
+              <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {siblings.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-xl font-extrabold mb-3 text-white">🧰 More {cat?.title} tools</h2>
+        <div class="grid gap-3 sm:grid-cols-2">
+          {siblings.map((s: any) => (
+            <a href={localizedPath(locale, `/tools/${s.cat}/${s.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 flex gap-3 items-center shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 hover:-translate-y-0.5 transition">
+              <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 border border-white/10 group-hover:bg-brand-500 group-hover:text-night-900 transition"><Icon name={s.icon || 'tools'} size={20} /></span>
+              <span class="min-w-0"><span class="font-bold block text-[15px] leading-6 truncate">{s.title.split('—')[0].trim()}</span><span class="text-xs font-bold text-brand-300">{s.level}</span></span>
+              <span class="ms-auto text-ink-500 group-hover:text-brand-300 group-hover:translate-x-0.5 transition"><Icon name="chevron" size={18} /></span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+    </div>
+  </div>
+
+  {tool.kind !== 'info' && (
+  <script define:vars={{ calcName: tool.calc, headline, alwaysShow: ALWAYS_SHOW.includes(tool.slug), isSteps: tool.kind === 'steps' }}>
+    // Plain (non-module) script — math loads from static /finance/calc.js.
+    (async () => {
+      const { CALCS, fmt } = await import('/finance/calc.js');
+      const root = document.querySelector('[data-toolroot]');
+      if (!root) return;
+      const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const val = (k) => {
+        const els = [...root.querySelectorAll(`[data-k="${k}"]`)];
+        if (!els.length) return undefined;
+        if (els[0].type === 'radio') return (els.find((e) => e.checked) || {}).value;
+        return els[0].value;
+      };
+      const getValues = () => {
+        const o = {};
+        root.querySelectorAll('[data-k]').forEach((el) => {
+          if (el.type === 'radio') { if (el.checked) o[el.dataset.k] = el.value; }
+          else o[el.dataset.k] = el.value;
+        });
+        return o;
+      };
+      const condMet = (spec) => {
+        if (!spec) return true;
+        const [k, v] = spec.split('=');
+        return String(val(k)) === v;
+      };
+      const refreshVisibility = () => {
+        root.querySelectorAll('[data-showif]').forEach((d) => d.classList.toggle('hidden', !condMet(d.dataset.showif)));
+        root.querySelectorAll('[data-showstep]').forEach((d) => {
+          if (d.dataset.showstep && !condMet(d.dataset.showstep)) d.dataset.skip = '1';
+          else delete d.dataset.skip;
+        });
+      };
+      const visibleSteps = () => [...root.querySelectorAll('[data-step]')].filter((s) => !s.dataset.skip);
+      let stepIdx = 0;
+      let interacted = false;
+      const stepBar = root.querySelector('#stepBar');
+      const pills = [...root.querySelectorAll('[data-pill]')];
+      const backBtn = root.querySelector('#backBtn');
+      const nextBtn = root.querySelector('#nextBtn');
+      const calcBtn = root.querySelector('#calcBtn');
+      const autoNote = root.querySelector('#autoNote');
+      const paintPills = () => {
+        const steps = visibleSteps();
+        pills.forEach((p) => {
+          const i = Number(p.dataset.pill);
+          const stepEl = root.querySelector(`[data-step="${i}"]`);
+          const isSkipped = stepEl?.dataset.skip === '1';
+          const pos = steps.indexOf(stepEl);
+          p.classList.toggle('hidden', isSkipped);
+          const done = pos >= 0 && pos < stepIdx;
+          const cur = pos === stepIdx;
+          p.className = `text-xs font-bold rounded-full px-3.5 py-2 border-2 min-h-[36px] inline-flex items-center gap-1.5 transition ${cur ? 'bg-brand-500 text-night-900 border-brand-500 shadow' : done ? 'bg-brand-500/15 text-brand-300 border-brand-500/40' : 'bg-night-800 text-ink-500 border-white/10'}`;
+        });
+      };
+      const onLastStep = () => {
+        if (!isSteps) return true;
+        const steps = visibleSteps();
+        return stepIdx >= steps.length - 1;
+      };
+      const showStep = (i, scroll = true) => {
+        const steps = visibleSteps();
+        stepIdx = Math.max(0, Math.min(i, steps.length - 1));
+        root.querySelectorAll('[data-step]').forEach((s) => s.classList.add('hidden'));
+        steps[stepIdx]?.classList.remove('hidden');
+        if (stepBar) stepBar.style.width = `${((stepIdx + 1) / Math.max(1, steps.length)) * 100}%`;
+        if (backBtn) backBtn.classList.toggle('hidden', stepIdx === 0);
+        const last = stepIdx === steps.length - 1;
+        if (nextBtn) nextBtn.classList.toggle('hidden', last);
+        if (calcBtn) calcBtn.classList.toggle('hidden', !last);
+        paintPills();
+        if (scroll) {
+          const form = root.querySelector('#toolForm');
+          if (form) window.scrollTo({ top: form.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
+        }
+      };
+      const runCalc = (scroll = true) => {
+        const v = getValues();
+        let r;
+        try { r = CALCS[calcName](v); }
+        catch (e) { r = { amount: 0, breakdown: [], warnings: ['Could not compute — please check your inputs.'], evidence: [], assumptions: [], eligible: false, disclaimer: '' }; }
+        const out = root.querySelector('#result');
+        const showAmount = alwaysShow || r.eligible;
+        const amtStr = r.dueText ? r.dueText
+          : (r.unit === 'kg of produce') ? `${Number(r.amount).toFixed(2)} kg of produce`
+          : (r.unit && r.unit !== r.currency) ? `${Number(r.amount).toFixed(2)} ${r.unit}`
+          : fmt(r.amount, r.currency || v.currency || 'INR');
+        const ok = showAmount && (Number(r.amount) > 0 || r.dueText);
+        // Plain-language verdict first; everything else tucks into <details>.
+        const verdict = ok
+          ? (r.dueText ? 'Give this from your animals, per the classical schedule.'
+            : (r.unit && r.unit !== r.currency) ? 'Total due from your entry.'
+            : 'This is the estimated amount to give.')
+          : ((r.warnings || [])[0] || 'No payment due on this input.');
+        const pill = ok ? (alwaysShow ? '📋 Your plan' : '✅ Amount due') : 'ℹ️ No payment due';
+        const rowHtml = (b, dark) => `<div class="flex justify-between gap-3 py-2 border-b ${dark ? 'border-white/10' : 'border-white/10'} last:border-0 text-[15px]"><span class="${dark ? 'text-ink-300' : 'text-ink-500'}">${esc(b.label)}</span><b class="text-end shrink-0 ${dark ? 'text-ink-50' : 'text-ink-50'}">${esc(b.value)}</b></div>`;
+        const rowsFull = (r.breakdown || []).map((b) => rowHtml(b, ok)).join('');
+        const warnItem = (w, dark) => `<p class="text-[13px] leading-6 rounded-2xl px-4 py-3 ${dark ? 'bg-amber-400/15 border border-amber-300/30' : 'bg-gold-300/10 border border-gold-300/30 text-ink-200'}">⚠️ ${esc(w)}</p>`;
+        const warnsVisible = (r.warnings || []).map((w) => warnItem(w, ok)).join('');
+        const li = (x, dark) => `<li class="text-[13px] leading-6 ${dark ? 'text-ink-300' : 'text-ink-500'}">• ${esc(x)}</li>`;
+        const moreBody = (r.assumptions || []).map((a) => li(a, ok)).join('');
+        const evidBody = (r.evidence || []).map((e) => li(e, ok)).join('');
+        const det = (t, body) => body ? `<details class="mt-3 rounded-2xl px-4 py-3 ${ok ? 'bg-white/5 border border-white/10' : 'bg-white/5 border border-white/10'}"><summary class="font-bold text-sm cursor-pointer ${ok ? 'text-ink-200' : 'text-ink-300'}">${t}</summary><div class="mt-2 space-y-2">${body}</div></details>` : '';
+        out.className = `mt-6 rounded-3xl p-6 md:p-7 shadow-xl ${ok ? 'bg-night-850 border border-white/10 text-white' : 'bg-night-850 border border-white/10 text-ink-200'}`;
+        out.dataset.summary = `${headline}: ${r.dueText || ((r.unit && r.unit !== r.currency) ? Number(r.amount).toFixed(2) + ' ' + r.unit : fmt(r.amount, r.currency || v.currency || 'INR'))} | ` + (r.breakdown || []).map((b) => `${b.label}: ${b.value}`).join(' | ');
+        out.innerHTML =
+          `<div class="flex items-center justify-between gap-2">` +
+          `<span class="text-[12px] font-extrabold uppercase tracking-wide rounded-full px-3 py-1.5 ${ok ? 'bg-gold-300 text-night-900' : 'bg-white/10 text-ink-300'}">${pill}</span>` +
+          `<button type="button" id="copyBtn" class="shrink-0 text-xs font-bold rounded-full px-3.5 py-2 min-h-[36px] ${ok ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-white/10 hover:bg-white/20 text-ink-200'}">⧉ Copy</button></div>` +
+          (ok ? `<p class="text-4xl md:text-5xl font-extrabold ${ok ? 'text-gold-300' : ''} mt-3 break-words tracking-tight">${esc(amtStr)}</p>` : '') +
+          `<p class="mt-2 text-[16px] leading-7 font-semibold ${ok ? 'text-ink-200' : 'text-ink-300'}">${esc(verdict)}</p>` +
+          (r.methodology ? `<p class="mt-1 text-xs ${ok ? 'text-ink-500' : 'text-ink-500'}">Method: <b>${esc(r.methodology)}</b> • Currency: <b>${esc(r.currency || v.currency || '')}</b></p>` : '') +
+          // planners show their plan rows openly; calculators keep numbers one tap away
+          (alwaysShow && rowsFull ? `<div class="mt-4">${rowsFull}</div>` : '') +
+          (ok && (r.warnings || []).length ? `<div class="mt-4 space-y-2">${warnsVisible}</div>` : '') +
+          (!ok && (r.warnings || []).length > 1 ? `<div class="mt-4 space-y-2">${(r.warnings || []).slice(1).map((w) => warnItem(w, ok)).join('')}</div>` : '') +
+          (!alwaysShow && rowsFull ? det('🧾 See full calculation', rowsFull) : '') +
+          det('📜 Evidence & assumptions', (moreBody ? `<ul class="space-y-1">${moreBody}</ul>` : '') + (evidBody ? `<ul class="space-y-1 mt-2">${evidBody}</ul>` : '')) +
+          (r.disclaimer ? `<p class="mt-4 text-[12px] leading-6 ${ok ? 'text-ink-500 border-t border-white/10 pt-4' : 'text-ink-500 border-t border-white/10 pt-4'}">${esc(r.disclaimer)}</p>` : '');
+        out.classList.remove('hidden');
+        out.querySelector('#copyBtn')?.addEventListener('click', async (e) => {
+          const btn = e.currentTarget;
+          try { await navigator.clipboard.writeText(out.dataset.summary || ''); btn.textContent = 'Copied ✓'; }
+          catch { btn.textContent = 'Copy failed'; }
+          setTimeout(() => { btn.textContent = '⧉ Copy'; }, 2000);
+        });
+        if (scroll) out.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      let deb = null;
+      const autoRun = () => {
+        if (!interacted) return;
+        if (isSteps && !onLastStep()) return;
+        clearTimeout(deb);
+        deb = setTimeout(() => runCalc(false), 450);
+      };
+      root.addEventListener('input', () => { interacted = true; autoNote?.classList.remove('hidden'); autoRun(); });
+      root.addEventListener('change', () => {
+        interacted = true;
+        autoNote?.classList.remove('hidden');
+        refreshVisibility();
+        if (isSteps) showStep(stepIdx, false);
+        autoRun();
+      });
+      nextBtn?.addEventListener('click', () => { interacted = true; showStep(stepIdx + 1); });
+      backBtn?.addEventListener('click', () => showStep(stepIdx - 1));
+      calcBtn?.addEventListener('click', () => { interacted = true; runCalc(true); });
+      root.querySelector('#resetBtn')?.addEventListener('click', () => {
+        root.querySelectorAll('[data-k]').forEach((el) => {
+          if (el.tagName === 'SELECT') el.selectedIndex = 0;
+          else if (el.type === 'radio') el.checked = el.dataset.wasChecked === '1';
+          else if (el.type === 'number') el.value = el.defaultValue;
+        });
+        interacted = false;
+        autoNote?.classList.add('hidden');
+        root.querySelector('#result')?.classList.add('hidden');
+        if (isSteps) { refreshVisibility(); showStep(0, false); }
+      });
+      root.querySelectorAll('input[type="radio"][data-k]').forEach((el) => {
+        if (el.checked) el.dataset.wasChecked = '1';
+      });
+      refreshVisibility();
+      if (isSteps) showStep(0, false);
+    })();
+  </script>
+  )}
+</BaseLayout>

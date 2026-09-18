@@ -1,0 +1,224 @@
+---
+interface Verse { v: number; ar: string; ur: string; en: string; hi: string; tr: string }
+interface SurahMeta { num: number; slug: string; name: string; englishName: string; arabicName: string; revelation: string; verseCount: number }
+interface Props {
+  surah: { num: number; slug: string; name: string; englishName: string; arabicName: string; revelation: string; verseCount: number; verses: Verse[] };
+  prev: SurahMeta | null;
+  next: SurahMeta | null;
+  locale: string;
+}
+import { localizedPath } from '../i18n/utils';
+const { surah, prev, next, locale } = Astro.props;
+const pad = (n: number) => String(n).padStart(3, '0');
+const audioBase = 'https://everyayah.com/data/Alafasy_128kbps/';
+const audioOf = (v: number) => `${audioBase}${pad(surah.num)}${pad(v)}.mp3`;
+const makki = surah.revelation.toLowerCase().startsWith('mecca');
+const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+---
+<nav class="text-xs text-ink-500 mb-3">
+  <a href={localizedPath(locale, '/')} class="hover:text-brand-300">Home</a> /
+  <a href={localizedPath(locale, '/surahs/')} class="hover:text-brand-300">Surahs</a> /
+  <span class="text-ink-300">Surah {surah.name}</span>
+</nav>
+
+<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 text-center mb-5 shadow-xl shadow-black/30">
+  <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
+  <div class="relative">
+  <span class="inline-block text-xs font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1 text-ink-200">Surah {surah.num} of 114 • {surah.verseCount} verses • {makki ? 'Makki' : 'Madani'}</span>
+  <p class="font-arabic text-4xl md:text-5xl mt-3 text-white" lang="ar" dir="rtl">{surah.arabicName}</p>
+  <h1 class="text-2xl md:text-3xl font-extrabold mt-2 text-white">Surah {surah.name} ({surah.englishName})</h1>
+  <p class="text-ink-300 text-sm mt-1">Read with Urdu, English & Hindi meaning, transliteration and audio</p>
+  </div>
+</div>
+
+{surah.num !== 1 && surah.num !== 9 && (
+  <p class="font-arabic text-2xl md:text-3xl text-center bg-night-850 border border-white/10 text-ink-50 rounded-2xl py-5 px-4 mb-5" lang="ar" dir="rtl">{BISMILLAH}</p>
+)}
+
+<div class="sticky top-16 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-2xl p-2.5 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
+  <div class="flex rounded-xl overflow-hidden border border-white/10 text-sm font-bold" role="group" aria-label="Translation language">
+    <button data-langbtn="ur" class="px-3.5 py-2.5 min-h-[44px] bg-brand-500 text-night-900">اردو</button>
+    <button data-langbtn="en" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">English</button>
+    <button data-langbtn="hi" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">हिन्दी</button>
+  </div>
+  <button id="trbtn" class="px-3.5 py-2.5 min-h-[44px] text-sm font-bold rounded-xl border border-white/10 bg-night-800 text-ink-200 hover:bg-white/10" aria-pressed="false">Aa Transliteration</button>
+  <label class="flex items-center gap-1.5 text-sm font-bold border border-white/10 rounded-xl px-2.5 min-h-[44px] bg-night-800 text-ink-200" title="Play translation audio after each verse">
+    <span aria-hidden="true">🌐</span>
+    <select id="trmode" class="bg-transparent outline-none font-bold text-sm max-w-[160px] text-ink-200" aria-label="Translation audio language">
+      <option value="off" class="bg-night-850">No translation audio</option>
+      <option value="ur" class="bg-night-850">+ اردو audio</option>
+      <option value="en" class="bg-night-850">+ English audio</option>
+      <option value="hi" class="bg-night-850">+ हिन्दी voice</option>
+    </select>
+  </label>
+  <div class="ms-auto flex gap-2">
+    <button id="playall" class="px-4 py-2.5 min-h-[44px] text-sm font-bold rounded-xl bg-brand-500 text-night-900 hover:bg-brand-400">▶ Play surah</button>
+    <button id="stopall" class="px-4 py-2.5 min-h-[44px] text-sm font-bold rounded-xl border border-white/10 bg-night-800 text-ink-200 hover:bg-white/10 hidden">⏹ Stop</button>
+  </div>
+</div>
+
+<div id="verses" data-tr="ur" data-showtr="0" data-surah={surah.num} class="space-y-3">
+  {surah.verses.map((verse) => (
+    <article id={`v${verse.v}`} data-verse={verse.v} class="verse bg-night-850 border border-white/10 rounded-2xl p-4 md:p-5 scroll-mt-36 shadow-lg shadow-black/20">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-8 h-8 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 text-sm font-extrabold">{verse.v}</span>
+        <button class="vplay w-9 h-9 grid place-items-center rounded-full bg-brand-500 text-night-900 hover:bg-brand-400" data-v={verse.v} data-src={audioOf(verse.v)} aria-label={`Play verse ${verse.v}`}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <p class="font-arabic text-[26px] md:text-[32px] leading-[2.1] text-right text-ink-50" lang="ar" dir="rtl">{verse.ar} <span class="text-gold-300 text-[0.8em]">﴿{verse.v}﴾</span></p>
+      <p class="m-tr italic text-ink-500 leading-7 mt-2 hidden" data-trtext>{verse.tr}</p>
+      <p class="m-ur leading-8 mt-2 text-ink-200" dir={locale === 'en' ? 'rtl' : undefined} lang="ur">{verse.ur}</p>
+      <p class="m-en leading-7 mt-2 text-ink-300 hidden">{verse.en}</p>
+      <p class="m-hi leading-8 mt-2 text-ink-300 hidden" lang="hi">{verse.hi}</p>
+    </article>
+  ))}
+</div>
+
+<p class="text-xs text-ink-500 mt-6 leading-6">
+  Arabic: Uthmani script. Urdu meaning: Fateh Muhammad Jalandhry • English: The Clear Quran, Dr. Mustafa Khattab •
+  Hindi: Suhel Farooq Khan • Text via quran-api (fawazahmed0) • Recitation: Mishary Alafasy via EveryAyah.
+  Translation audio: English (Sahih International, Ibrahim Walk) & Urdu (Shamshad Ali Khan) via EveryAyah;
+  Hindi uses your device's voice reader and needs internet voices on some phones.
+  Spoken translation wording may differ slightly from the displayed text.
+</p>
+
+<style>
+  .tr-on { background: rgba(245,201,76,.15); border-radius: 0.5rem; padding-inline: 0.25rem; }
+  .verse.ring-2 { --tw-ring-color: var(--color-brand-500); }
+</style>
+
+<div class="grid sm:grid-cols-2 gap-4 mt-6">
+  {prev ? (
+    <a href={localizedPath(locale, `/surahs/${prev.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition">← <span class="text-xs text-ink-500">Previous</span><span class="font-bold block text-ink-50">{prev.num}. Surah {prev.name}</span></a>
+  ) : <span />}
+  {next ? (
+    <a href={localizedPath(locale, `/surahs/${next.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition text-right"><span class="text-xs text-ink-500">Next</span> →<span class="font-bold block text-ink-50">{next.num}. Surah {next.name}</span></a>
+  ) : <span />}
+</div>
+
+<script>
+  (() => {
+    const box = document.getElementById('verses');
+    const langBtns = [...document.querySelectorAll('[data-langbtn]')];
+    const trBtn = document.getElementById('trbtn');
+    const playAll = document.getElementById('playall');
+    const stopAll = document.getElementById('stopall');
+    if (!box) return;
+
+    function setLang(l) {
+      box.dataset.tr = l;
+      for (const v of box.children) {
+        v.querySelector('.m-ur').classList.toggle('hidden', l !== 'ur');
+        v.querySelector('.m-en').classList.toggle('hidden', l !== 'en');
+        v.querySelector('.m-hi').classList.toggle('hidden', l !== 'hi');
+      }
+      for (const b of langBtns) {
+        const on = b.dataset.langbtn === l;
+        b.classList.toggle('bg-brand-500', on);
+        b.classList.toggle('text-night-900', on);
+        b.classList.toggle('bg-night-800', !on);
+        b.classList.toggle('text-ink-200', !on);
+      }
+    }
+    langBtns.forEach(b => b.addEventListener('click', () => setLang(b.dataset.langbtn)));
+    trBtn.addEventListener('click', () => {
+      const on = box.dataset.showtr !== '1';
+      box.dataset.showtr = on ? '1' : '0';
+      trBtn.setAttribute('aria-pressed', String(on));
+      trBtn.classList.toggle('bg-brand-500', on);
+      trBtn.classList.toggle('text-night-900', on);
+      trBtn.classList.toggle('border-brand-500', on);
+      box.querySelectorAll('[data-trtext]').forEach(el => el.classList.toggle('hidden', !on));
+    });
+
+    const audio = new Audio();
+    audio.preload = 'none';
+    const audioTr = new Audio();
+    audioTr.preload = 'none';
+    const trMode = document.getElementById('trmode');
+    const SURAH = +box.dataset.surah;
+    const pad3 = (n) => String(n).padStart(3, '0');
+    const TR_BASE = {
+      ur: 'https://everyayah.com/data/translations/urdu_shamshad_ali_khan_46kbps/',
+      en: 'https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/',
+    };
+    let playingAll = false;
+    let current = 0;
+    const cards = [...box.querySelectorAll('.verse')];
+    function highlight(v) {
+      cards.forEach(c => c.classList.toggle('ring-2', +c.dataset.verse === v));
+      if (v) document.getElementById('v' + v)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function markTr(el) {
+      box.querySelectorAll('.tr-on').forEach(x => x.classList.remove('tr-on'));
+      if (el) el.classList.add('tr-on');
+    }
+    function trText(v, lang) {
+      const card = box.querySelector(`.verse[data-verse="${v}"]`);
+      const cls = lang === 'ur' ? '.m-ur' : lang === 'en' ? '.m-en' : '.m-hi';
+      return { card, el: card?.querySelector(cls), text: card?.querySelector(cls)?.textContent?.trim() || '' };
+    }
+    function playAr(v, all) {
+      const btn = box.querySelector(`.vplay[data-v="${v}"]`);
+      if (!btn) { stop(); return; }
+      try { speechSynthesis.cancel(); } catch (e) {}
+      audioTr.pause();
+      markTr(null);
+      current = v;
+      playingAll = all;
+      audio.src = btn.dataset.src;
+      audio.play().catch(() => stop());
+      highlight(v);
+      stopAll.classList.toggle('hidden', !all);
+      playAll.innerHTML = all ? '⏸ Playing…' : '▶ Play surah';
+    }
+    function playTr(v) {
+      const mode = trMode.value;
+      const { el, text } = trText(v, mode);
+      markTr(el);
+      if (mode === 'hi') {
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'hi-IN';
+          u.rate = 0.95;
+          u.onend = () => afterTr();
+          u.onerror = () => afterTr();
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u);
+        } catch (e) { afterTr(); }
+        return;
+      }
+      audioTr.src = TR_BASE[mode] + pad3(SURAH) + pad3(v) + '.mp3';
+      audioTr.play().catch(() => afterTr());
+    }
+    function afterTr() {
+      markTr(null);
+      if (playingAll) playAr(current + 1, true);
+      else highlight(0);
+    }
+    function stop() {
+      audio.pause();
+      audioTr.pause();
+      try { speechSynthesis.cancel(); } catch (e) {}
+      playingAll = false;
+      markTr(null);
+      highlight(0);
+      stopAll.classList.add('hidden');
+      playAll.innerHTML = '▶ Play surah';
+    }
+    audio.addEventListener('ended', () => {
+      if (trMode.value !== 'off') playTr(current);
+      else if (playingAll) playAr(current + 1, true);
+      else highlight(0);
+    });
+    audioTr.addEventListener('ended', afterTr);
+    audioTr.addEventListener('error', () => { if (audioTr.src) afterTr(); });
+    box.querySelectorAll('.vplay').forEach(b => b.addEventListener('click', () => {
+      const v = +b.dataset.v;
+      if (!audio.paused && current === v) { stop(); } else playAr(v, false);
+    }));
+    playAll.addEventListener('click', () => { if (playingAll) stop(); else playAr(1, true); });
+    stopAll.addEventListener('click', stop);
+  })();
+</script>

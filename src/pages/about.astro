@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const faq = [
+  { q: 'Is Hikmah Noor free?', a: 'Yes — every guide, dua, kalima and tool is free to read and share for learning.' },
+  { q: 'Where does the content come from?', a: 'The Quran, Sahih hadith collections (Bukhari, Muslim) and well-known tafsir. Every dua names its source and authenticity grade; weak reports are labelled weak.' },
+  { q: 'Is this a fatwa site?', a: 'No. Hikmah Noor is educational. For personal rulings, always consult a qualified scholar. See the Disclaimer page.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'About Us', path: '/about/' },
+];
+const stats = [
+  { n: '114', label: 'Surahs with translation', href: '/surahs/', icon: 'surahs' },
+  { n: '179', label: 'Duas with sources', href: '/duas/', icon: 'duas' },
+  { n: '6', label: 'Kalimas explained', href: '/kalimas/', icon: 'kalimas' },
+  { n: '14', label: 'Islamic terms', href: '/meanings/', icon: 'meanings' },
+  { n: '10', label: 'Prophet stories', href: '/waqiat/', icon: 'waqiat' },
+  { n: '20', label: 'Finance tools', href: '/tools/', icon: 'tools' },
+];
+---
+<BaseLayout title="About Us — Hikmah Noor" description="Hikmah Noor shares authentic, easy Islamic knowledge: 114 surahs, 179 duas with sources, 6 kalimas, meanings, prophet stories and finance tools." keywords="about hikmah noor, authentic islamic website, quran duas kalimas meanings" locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/about/">
+  <section class="relative overflow-hidden bg-night-900 text-white">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">
+      <nav class="text-xs text-ink-500 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">Home</a> / <span>About Us</span></nav>
+      <span class="text-[11px] font-extrabold uppercase tracking-widest bg-gold-300 text-night-900 rounded-full px-3 py-1.5">☪ Our mission</span>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mt-3 text-white">About Hikmah Noor</h1>
+      <p class="mt-3 text-ink-300 leading-7 max-w-2xl md:text-lg">Assalamu Alaikum. <b>Hikmah Noor</b> (Wisdom Light) is an independent educational site helping you understand the Quran, daily duas, kalimas and seerah in simple language — with Arabic, transliteration and honest sourcing on every page.</p>
+    </div>
+  </section>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h2 class="text-xl md:text-2xl font-extrabold mb-4 text-white">📚 What you’ll find here</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {stats.map((s) => (
+        <a href={localizedPath(locale, s.href)} class="group bg-night-850 border border-white/10 rounded-2xl p-5 flex gap-4 items-center shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 hover:-translate-y-0.5 transition">
+          <span class="w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-brand-500/15 text-brand-300 font-extrabold text-lg">{s.n}</span>
+          <span class="min-w-0">
+            <span class="font-extrabold block leading-6 text-ink-50 group-hover:text-brand-300">{s.label}</span>
+            <span class="text-[13px] text-ink-500">Open section →</span>
+          </span>
+          <span class="ms-auto shrink-0 text-ink-500 group-hover:text-brand-300 transition"><Icon name={s.icon as any} size={20} /></span>
+        </a>
+      ))}
+    </div>
+
+    <div class="grid gap-3 md:grid-cols-2 mt-8">
+      <div class="bg-night-850 border border-white/10 rounded-2xl p-6 shadow-lg shadow-black/30">
+        <h2 class="text-xl font-extrabold mb-3 text-white">✅ Our authenticity promise</h2>
+        <ul class="space-y-2.5 text-[15px] text-ink-300 leading-7">
+          <li><b>Quran first</b> — verses quoted with surah and number.</li>
+          <li><b>Named collections</b> — every hadith dua names its source (Bukhari, Muslim, Tirmidhi…) with a Sahih / Hasan / Daif grade.</li>
+          <li><b>Weak labelled weak</b> — no inflated promises; disputed reports say so on the page.</li>
+          <li><b>No invented references</b> — hadith numbers are never fabricated.</li>
+        </ul>
+      </div>
+      <div class="bg-night-850 border border-white/10 rounded-2xl p-6 shadow-lg shadow-black/30">
+        <h2 class="text-xl font-extrabold mb-3 text-white">🤲 How to use this site</h2>
+        <ul class="space-y-2.5 text-[15px] text-ink-300 leading-7">
+          <li><b>Learn daily</b> — one dua, one term or one story a day.</li>
+          <li><b>Search in your words</b> — try “safar ki dua”, “wuzu ki dua”, “sabr meaning”.</li>
+          <li><b>Verify with a teacher</b> — wording and rulings differ; scholars decide.</li>
+          <li><b>Share freely</b> — all content is free for learning and dawah.</li>
+        </ul>
+      </div>
+    </div>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3 max-w-3xl">
+        {faq.map((f) => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
+            <summary class="font-bold cursor-pointer leading-6 text-ink-50">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <div class="mt-8 max-w-3xl bg-night-850 border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row sm:items-center gap-4 shadow-lg shadow-black/30">
+      <div class="min-w-0">
+        <p class="font-extrabold text-lg text-white">Questions, corrections or feedback?</p>
+        <p class="text-sm text-ink-300 mt-1">Found a mistake in Arabic or sourcing? Tell us — accuracy is the whole point.</p>
+      </div>
+      <a href={localizedPath(locale, '/contact/')} class="shrink-0 sm:ms-auto bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[48px] inline-flex items-center justify-center">Contact Us →</a>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,194 @@
+---
+/* Progress dashboard — Quranly screens 5, 24–26 adapted.
+ * Stats Today/Week/All, streak + week dots, challenges with
+ * progress bars, bookmarks. Login compulsory (auth gate).
+ */
+import AuthModal from './AuthModal.astro';
+import { localizedPath } from '../i18n/utils';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const readUrl = localizedPath(locale, '/tools/read/');
+---
+<div class="max-w-3xl mx-auto px-4 py-8" data-dash>
+  <div data-dash-gate class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8">
+    <div class="text-5xl">🔒</div>
+    <h1 class="text-2xl font-extrabold text-white mt-3">Login to see your progress</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">Stats, streaks, challenges and bookmarks live in your free account.</p>
+    <button data-dash-login class="mt-5 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+  </div>
+
+  <div data-dash-live class="hidden">
+    <div class="flex flex-wrap items-center gap-3">
+      <div>
+        <p class="text-sm text-ink-300">Asalam Alaykum,</p>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-white" data-dash-name>Reader</h1>
+      </div>
+      <span class="ms-auto inline-flex items-center gap-1.5 bg-night-850 border border-gold-300/40 text-gold-300 font-extrabold rounded-full px-4 py-2">🔥 <span data-dash-streak>0</span></span>
+    </div>
+    <div data-dash-week class="mt-3 flex gap-1.5" aria-label="This week"></div>
+
+    {/* stats tabs */}
+    <div class="mt-5 flex gap-2" role="tablist" aria-label="Range">
+      {['today', 'week', 'all'].map((r, i) => (
+        <button data-dash-range={r} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-sm font-extrabold transition min-h-[44px] ${i === 0 ? 'bg-brand-500 text-night-900' : 'bg-night-850 border border-white/10 text-ink-300'}`}>{r[0].toUpperCase() + r.slice(1)}</button>
+      ))}
+    </div>
+    <div data-dash-tiles class="mt-3 grid grid-cols-2 gap-3"></div>
+
+    {/* challenges */}
+    <h2 class="text-xl font-extrabold text-white mt-8 mb-3">🏆 Challenges</h2>
+    <div data-dash-challenges class="space-y-3"></div>
+
+    {/* bookmarks */}
+    <h2 class="text-xl font-extrabold text-white mt-8 mb-3">🔖 Saved verses</h2>
+    <div data-dash-marks class="space-y-2.5"></div>
+
+    <div class="mt-8 bg-night-850 border border-white/10 rounded-3xl p-5 text-sm text-ink-300 leading-7">
+      <b class="text-ink-50">Streak rules:</b> +1 for every day you read. Miss one day and grace saves your streak — miss two in a row and it resets. Stay consistent!
+    </div>
+    <a data-dash-read href={readUrl} class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3.5 min-h-[56px] inline-flex items-center justify-center gap-2">📖 Read Quran</a>
+    <button data-dash-logout class="mt-3 w-full text-xs font-bold text-ink-500 hover:text-brand-300 min-h-[44px]">Logout</button>
+  </div>
+</div>
+
+<AuthModal />
+
+<script define:vars={{ readUrl }}>
+  (() => {
+    const root = document.querySelector('[data-dash]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const $ = (s) => root.querySelector(s);
+    let H = null, range = 'today';
+
+    const CHALLENGE_DEFS = [
+      { slug: 'friday-kahf', title: 'Friday Challenge', sub: 'Recite Surah Al-Kahf', unit: 'verses', href: null },
+      { slug: 'meaning-30day', title: 'The Meaning Challenge', sub: 'Finish the Quran in a language you understand in 30 days', unit: 'verses', href: null },
+      { slug: 'nightly', title: 'Nightly Recitation', sub: 'Read before sleep', unit: 'verses', href: null },
+      { slug: 'ramadan-khatm', title: 'Ramadan Challenge', sub: 'Complete a full khatm — 30 Juz', unit: 'juz', href: null },
+    ];
+    const TARGETS = { 'friday-kahf': 110, 'meaning-30day': 6236, nightly: 110, 'ramadan-khatm': 30 };
+
+    const paintTiles = (s) => {
+      const box = $('[data-dash-tiles]');
+      if (!box) return;
+      box.innerHTML = [
+        ['💗', 'Hasanat', H.fmtCompact(s.hasanat || 0)],
+        ['📄', 'Verses', String(s.verses || 0)],
+        ['⏱️', 'Time', H.fmtTime(s.seconds || 0)],
+        ['📑', 'Pages', String(s.pages || 0)],
+      ].map(([i, t, v]) => `<div class="bg-night-850 border border-white/10 rounded-2xl p-4 text-center"><div class="text-3xl">${i}</div><div class="text-sm text-ink-300 mt-1">${t}</div><div class="font-extrabold text-2xl text-white">${v}</div></div>`).join('');
+    };
+
+    const paintWeek = (days) => {
+      const box = $('[data-dash-week]');
+      if (!box) return;
+      const set = new Set((days || []).map((d) => d.date));
+      const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      const now = new Date();
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      box.innerHTML = labels.map((d, i) => {
+        const dt = new Date(monday);
+        dt.setDate(monday.getDate() + i);
+        const on = set.has(dt.toISOString().slice(0, 10));
+        return `<span class="w-9 h-9 grid place-items-center rounded-full text-xs font-extrabold border ${on ? 'bg-brand-500 text-night-900 border-brand-500' : 'bg-night-850 text-ink-300 border-white/10'}">${d}</span>`;
+      }).join('');
+    };
+
+    const paintChallenges = async () => {
+      const box = $('[data-dash-challenges]');
+      if (!box) return;
+      const saved = await H.Me.challenges().catch(() => ({ challenges: [] }));
+      const map = new Map((saved.challenges || []).map((c) => [c.slug, c]));
+      const week = await H.Me.stats('week').catch(() => ({ stats: { verses: 0 } }));
+      const all = await H.Me.stats('all').catch(() => ({ stats: { verses: 0 } }));
+      const auto = { 'meaning-30day': all.stats?.verses || 0, nightly: week.stats?.verses || 0 };
+      box.innerHTML = CHALLENGE_DEFS.map((c) => {
+        const target = TARGETS[c.slug];
+        const progress = Math.min(target, Math.max(map.get(c.slug)?.progress || 0, auto[c.slug] || 0));
+        const pct = Math.round((progress / target) * 100);
+        const href = c.slug === 'friday-kahf' ? `${readUrl}18/` : readUrl;
+        return `<a href="${href}" class="block bg-night-850 border border-white/10 rounded-3xl p-5 hover:border-brand-500/50 transition">
+          <p class="font-extrabold text-lg text-white">${c.title}</p>
+          <p class="text-sm text-ink-300">${c.sub}</p>
+          <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mt-3"><div class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full" style="width:${pct}%"></div></div>
+          <div class="mt-1.5 flex justify-between text-xs font-bold text-ink-300"><span>${progress}/${target} ${c.unit}</span><span>${pct}%</span></div>
+        </a>`;
+      }).join('');
+    };
+
+    const paintMarks = async () => {
+      const box = $('[data-dash-marks]');
+      if (!box) return;
+      const { bookmarks } = await H.Me.bookmarks().catch(() => ({ bookmarks: [] }));
+      if (!bookmarks?.length) {
+        box.innerHTML = `<p class="text-sm text-ink-500 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">No saved verses yet — tap ♡ or 🔖 on any verse while reading.</p>`;
+        return;
+      }
+      box.innerHTML = bookmarks.map((b) => {
+        const href = b.kind === 'verse' && b.ref.includes(':')
+          ? `${readUrl}${b.ref.split(':')[0]}/?verse=${b.ref.split(':')[1]}`
+          : readUrl;
+        return `<div class="flex items-center gap-3 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">
+          <span class="font-bold text-ink-50">${b.kind === 'verse' ? `Surah ${b.ref.replace(':', ':')}` : b.ref}</span>
+          <a href="${href}" class="ms-auto text-sm font-extrabold text-brand-300">Open →</a>
+          <button data-unmark="${b.kind}|${b.ref}" class="text-xs font-bold text-ink-500 hover:text-red-300 min-h-[44px] px-2">Remove</button>
+        </div>`;
+      }).join('');
+      box.querySelectorAll('[data-unmark]').forEach((btn) => btn.addEventListener('click', async () => {
+        const [kind, ref] = btn.dataset.unmark.split('|');
+        await H.Me.removeBookmark(kind, ref).catch(() => {});
+        paintMarks();
+      }));
+    };
+
+    const loadRange = async () => {
+      const { stats, days } = await H.Me.stats(range).catch(() => ({ stats: {}, days: [] }));
+      paintTiles(stats || {});
+      if (range === 'week') paintWeek(days);
+    };
+
+    root.querySelectorAll('[data-dash-range]').forEach((btn) => btn.addEventListener('click', async () => {
+      range = btn.dataset.dashRange;
+      root.querySelectorAll('[data-dash-range]').forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('bg-brand-500', on);
+        b.classList.toggle('text-night-900', on);
+        b.classList.toggle('bg-night-850', !on);
+        b.classList.toggle('text-ink-300', !on);
+        b.setAttribute('aria-selected', String(on));
+      });
+      await loadRange();
+    }));
+
+    $('[data-dash-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
+    $('[data-dash-logout]')?.addEventListener('click', async () => {
+      try { await H.Auth.logout(); } finally { window.location.reload(); }
+    });
+    document.addEventListener('hn:auth', () => window.location.reload());
+
+    (async () => {
+      H = await import('/habits/habit.js');
+      const { user } = await H.Auth.session().catch(() => ({ user: null }));
+      if (!user) { $('[data-dash-gate]')?.classList.remove('hidden'); return; }
+      $('[data-dash-live]')?.classList.remove('hidden');
+      $('[data-dash-name]').textContent = (user.name || 'Reader').split(' ')[0];
+      const [{ streak }, week] = await Promise.all([
+        H.Me.streak().catch(() => ({ streak: { current: 0 } })),
+        H.Me.stats('week').catch(() => ({ days: [] })),
+      ]);
+      $('[data-dash-streak]').textContent = streak?.current || 0;
+      paintWeek(week.days);
+      await loadRange();
+      await paintChallenges();
+      await paintMarks();
+      const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
+      if (resume) {
+        const a = $('[data-dash-read]');
+        if (a) a.href = `${readUrl}${resume.surah}/?verse=${resume.verse}`;
+      }
+    })();
+  })();
+</script>

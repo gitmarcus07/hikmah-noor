@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+import { getDict, localizedPath } from '../../i18n/utils';
+import surahsMeta from '../../data/surahs-meta.json';
+
+const locale = 'en';
+const category = 'surahs';
+const dict = getDict(locale);
+let list = await getCollection('articles', ({ data }) => !data.draft && data.locale === locale && data.category === category);
+list = list.sort((a, b) => +b.data.pubDate - +a.data.pubDate);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const title = 'All 114 Surahs — Read Every Surah with Translation & Audio';
+const description = 'Read all 114 surahs of the Holy Quran in Arabic (Uthmani) with Urdu, English and Hindi translation, transliteration and audio recitation. Surah Al-Fatiha, Al-Baqarah, Yaseen, Al-Kahf, Ar-Rahman, Al-Mulk and more.';
+const keywords = 'surahs, 114 surahs, all surahs, surah list, read surah online, surah with urdu translation, surah english translation, surah hindi meaning, surah transliteration, surah audio, surah yaseen, surah kahf, surah rahman, surah mulk, surah fatiha, surah baqarah';
+const faq = [
+  { q: 'How many surahs are in the Quran?', a: 'There are 114 surahs in the Holy Quran, from Al-Fatiha (1) to An-Nas (114). All are listed above with verse counts and Makki/Madani classification.' },
+  { q: 'Can I read surahs with translation and audio?', a: 'Yes. Every surah page shows Arabic verses with Urdu, English and Hindi meaning, transliteration and recitation audio. Use the language buttons and Play surah button.' },
+  { q: 'Which are the most searched surahs?', a: 'Surah Yaseen (36), Al-Kahf (18), Ar-Rahman (55), Al-Mulk (67), Al-Fatiha (1) and Al-Baqarah (2) are among the most read. Use the search box above to find any surah by name or number.' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} canonicalPath={`/${category}/`} faq={faq}>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <nav class="text-xs text-ink-500 mb-3"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
+    <h1 class="text-3xl md:text-4xl font-extrabold capitalize mb-2 text-white">All 114 Surahs — Read with Translation & Audio</h1>
+    <p class="text-ink-300 mb-4">Read every surah in Arabic with Urdu, English & Hindi meaning, transliteration and audio recitation. Search by name or number, then open any surah for full text.</p>
+    <input id="surahfilter" placeholder="Search surah — name or number…" class="w-full max-w-xl bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-5 py-3.5 min-h-[52px] mb-5 outline-none focus:ring-2 ring-brand-400" />
+    <div id="surahgrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {surahsMeta.map(s => (
+        <a href={localizedPath(locale, `/surahs/${s.slug}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="surahrow bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:shadow-md hover:border-brand-500/50">
+          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{s.num}</span>
+          <span class="min-w-0">
+            <span class="font-bold block leading-6 text-ink-50">Surah {s.name} <span class="text-ink-500 font-normal">• {s.englishName}</span></span>
+            <span class="text-xs text-ink-500">{s.verseCount} verses • {s.revelation === 'Mecca' ? 'Makki' : 'Madani'}</span>
+          </span>
+          <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{s.arabicName}</span>
+        </a>
+      ))}
+    </div>
+    <script>
+      (() => {
+        const input = document.getElementById('surahfilter');
+        const rows = [...document.querySelectorAll('.surahrow')];
+        input?.addEventListener('input', () => {
+          const q = input.value.toLowerCase().trim();
+          rows.forEach(r => r.classList.toggle('hidden', q !== '' && !r.dataset.search.toLowerCase().includes(q)));
+        });
+      })();
+    </script>
+    {list.length > 0 && (
+      <>
+        <h2 class="text-xl font-extrabold mt-10 mb-4 text-white">Surah guides</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{list.map(a => <ArticleCard locale={locale} category={a.data.category} slug={slugOf(a.id)} title={a.data.title} description={a.data.description} date={a.data.pubDate} />)}</div>
+      </>
+    )}
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map(f => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
+            <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

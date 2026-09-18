@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+import { getDict, localizedPath } from '../../i18n/utils';
+import { paras } from '../../lib/paras';
+
+const locale = 'en';
+const category = 'quran';
+const dict = getDict(locale);
+let list = await getCollection('articles', ({ data }) => !data.draft && data.locale === locale && data.category === category);
+list = list.sort((a, b) => +b.data.pubDate - +a.data.pubDate);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const title = 'Holy Quran — Read Full Quran Online with 30 Paras, Translation & Audio';
+const description = 'Read the full Holy Quran online in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Browse all 30 paras (juz) and 114 surahs, plus Quran guides.';
+const keywords = 'quran, full quran, read quran online, 30 para quran, quran 30 parah, juz, para, quran with urdu translation, quran english translation, quran hindi meaning, quran transliteration, quran with audio, quran recitation, holy quran';
+const faq = [
+  { q: 'How many paras are in the Quran?', a: 'The Holy Quran is divided into 30 paras (juz). Reading one para a day completes the full Quran in a month. All 30 paras are listed above.' },
+  { q: 'Can I read the Quran with Urdu, English and Hindi translation here?', a: 'Yes. Every para and surah page shows Arabic verses with Urdu, English and Hindi meaning, transliteration and audio recitation. Use the language buttons to switch translation.' },
+  { q: 'Is Quran audio available?', a: 'Yes. Every verse has Arabic recitation audio (Mishary Alafasy), plus Urdu and English translation audio options.' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} canonicalPath={`/${category}/`} faq={faq}>
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <nav class="text-xs text-ink-500 mb-3"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
+    <h1 class="text-3xl md:text-4xl font-extrabold mb-2 text-white">Holy Quran — Full Quran with 30 Paras</h1>
+    <p class="text-ink-300 mb-4">Read the complete Quran in Arabic (Uthmani) with Urdu, English & Hindi meaning, transliteration and audio. Choose a para below, or browse <a class="font-bold text-brand-300 hover:underline" href={localizedPath(locale, '/surahs/')}>all 114 surahs</a>.</p>
+    <input id="parafilter" placeholder="Search para — number or name…" class="w-full max-w-xl bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-5 py-3.5 min-h-[52px] mb-5 outline-none focus:ring-2 ring-brand-400" />
+    <div id="paragrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {paras.map(p => (
+        <a href={localizedPath(locale, `/quran/${p.slug}/`)} data-search={`${p.num} ${p.name} ${p.transliteration} para juz`} class="pararow bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:shadow-md hover:border-brand-500/50">
+          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{p.num}</span>
+          <span class="min-w-0">
+            <span class="font-bold block leading-6 text-ink-50">Para {p.num} — {p.name}</span>
+            <span class="text-xs text-ink-500">{p.range}</span>
+          </span>
+          <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{p.arabicName}</span>
+        </a>
+      ))}
+    </div>
+    <script>
+      (() => {
+        const input = document.getElementById('parafilter');
+        const rows = [...document.querySelectorAll('.pararow')];
+        input?.addEventListener('input', () => {
+          const q = input.value.toLowerCase().trim();
+          rows.forEach(r => r.classList.toggle('hidden', q !== '' && !r.dataset.search.toLowerCase().includes(q)));
+        });
+      })();
+    </script>
+
+    <section class="mt-10 bg-night-850 border border-white/10 rounded-2xl p-5 md:p-6 prose-islamic">
+      <h2>How to read the Quran here</h2>
+      <ul><li><b>30 paras (juz):</b> one para a day finishes the Quran in a month.</li><li><b>114 surahs:</b> each surah page has full Arabic text, translation and audio.</li><li><b>Translations:</b> switch Urdu / English / Hindi above any verse list.</li><li><b>Audio:</b> play single verses or a whole para/surah continuously.</li></ul>
+    </section>
+
+    {faq.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+        <div class="space-y-3">
+          {faq.map(f => (
+            <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
+              <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
+              <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {list.length > 0 && (
+      <>
+        <h2 class="text-xl font-extrabold mt-10 mb-4 text-white">Quran guides</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{list.map(a => <ArticleCard locale={locale} category={a.data.category} slug={slugOf(a.id)} title={a.data.title} description={a.data.description} date={a.data.pubDate} />)}</div>
+      </>
+    )}
+  </div>
+</BaseLayout>

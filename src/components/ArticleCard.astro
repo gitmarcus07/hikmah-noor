@@ -1,0 +1,38 @@
+---
+import SiteArt from './SiteArt.astro';
+import { artFor } from '../lib/art';
+import { localizedPath } from '../i18n/utils';
+
+interface Props {
+  locale: string;
+  category: string;
+  slug: string;
+  title: string;
+  description: string;
+  date?: string | Date;
+  image?: string;
+  /** Actual article locale — links + badge follow it when it differs from the page locale. */
+  entryLocale?: string;
+}
+const { locale, category, slug, title, description, date, image, entryLocale } = Astro.props;
+const realLocale = entryLocale ?? locale;
+const isFallback = realLocale !== locale;
+const href = localizedPath(realLocale, `/${category}/${slug}/`);
+const img = artFor(image, category);
+const d = date ? new Date(date).toLocaleDateString(locale === 'hi' ? 'hi-IN' : locale === 'ur' ? 'ur-PK' : locale === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+---
+<a href={href} class="group bg-night-850 rounded-2xl border border-white/10 overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition flex flex-col">
+  <span class="block h-40 overflow-hidden"><SiteArt name={img} title={title} /></span>
+  <div class="p-4 flex flex-col gap-2 flex-1">
+    <span class="flex items-center gap-1.5 self-start">
+      <span class="text-[11px] font-bold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2 py-1 rounded-full">{category}</span>
+      {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2 py-1 rounded-full" title="English — translation coming soon">EN</span>}
+    </span>
+    <h3 class="font-bold text-ink-50 text-[17px] leading-6 group-hover:text-brand-300">{title}</h3>
+    <p class="text-sm text-ink-300 leading-6 line-clamp-2">{description}</p>
+    {d && <span class="text-xs text-ink-500 mt-auto pt-2">{d}</span>}
+  </div>
+</a>
+<style>
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>

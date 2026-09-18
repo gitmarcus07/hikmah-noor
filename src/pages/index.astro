@@ -1,0 +1,21 @@
+---
+import HomePage from '../components/HomePage.astro';
+import { getCollection } from 'astro:content';
+import { getDict } from '../i18n/utils';
+
+const locale = 'en';
+const dict = getDict(locale);
+
+async function byLocale(loc: string) {
+  let list = await getCollection('articles', ({ data }) => !data.draft && data.locale === loc);
+  return list.sort((a, b) => +b.data.pubDate - +a.data.pubDate);
+}
+
+const all = await byLocale(locale);
+const latest = all.slice(0, 4);
+const catGroups: Record<string, typeof all> = {};
+for (const a of all) {
+  (catGroups[a.data.category] ||= []).push(a);
+}
+---
+<HomePage locale={locale} dict={dict} latest={latest} catGroups={catGroups} fallbackCount={0} />

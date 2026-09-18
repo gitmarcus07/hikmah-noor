@@ -1,0 +1,10 @@
+---
+import ToolCalculator from '../../../components/ToolCalculator.astro';
+import { TOOLS } from '../../../lib/finance/tools.js';
+
+export async function getStaticPaths() {
+  return TOOLS.map((t) => ({ params: { category: t.cat, tool: t.slug }, props: { tool: t } }));
+}
+const { tool } = Astro.props;
+---
+<ToolCalculator tool={tool} locale="en" />
