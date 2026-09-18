@@ -1,5 +1,5 @@
 // GET /api/me/streak — {current,longest,last_active_date}
-import { json, requireUser } from '../../lib/auth.js';
+import { json, requireUser } from '../lib/auth.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;

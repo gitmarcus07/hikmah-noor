@@ -1,6 +1,6 @@
 // GET /api/me/prefs — full prefs row (with defaults).
 // PUT /api/me/prefs — upsert whitelisted fields.
-import { json, nowSec, readJson, requireUser } from '../../lib/auth.js';
+import { json, nowSec, readJson, requireUser } from '../lib/auth.js';
 
 const DEFAULTS = {
   daily_goal: 1, streak_goal: 7, font_size_script: 2.0, font_size_translation: 1.0,

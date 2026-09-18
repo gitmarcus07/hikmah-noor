@@ -1,5 +1,5 @@
 // GET /api/me/challenges — progress rows. PUT {slug,progress,target}
-import { json, nowSec, readJson, requireUser } from '../../lib/auth.js';
+import { json, nowSec, readJson, requireUser } from '../lib/auth.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;
