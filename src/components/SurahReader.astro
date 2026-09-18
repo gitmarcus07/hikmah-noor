@@ -21,21 +21,21 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   <span class="text-ink-300">Surah {surah.name}</span>
 </nav>
 
-<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 text-center mb-5 shadow-xl shadow-black/30">
+<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-5 md:p-6 text-center mb-5 shadow-xl shadow-black/30">
   <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
   <div class="relative">
   <span class="inline-block text-xs font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1 text-ink-200">Surah {surah.num} of 114 • {surah.verseCount} verses • {makki ? 'Makki' : 'Madani'}</span>
-  <p class="font-arabic text-4xl md:text-5xl mt-3 text-white" lang="ar" dir="rtl">{surah.arabicName}</p>
-  <h1 class="text-2xl md:text-3xl font-extrabold mt-2 text-white">Surah {surah.name} ({surah.englishName})</h1>
+  <p class="font-arabic text-3xl md:text-4xl mt-3 text-white" lang="ar" dir="rtl">{surah.arabicName}</p>
+  <h1 class="text-xl md:text-2xl font-extrabold mt-2 text-white">Surah {surah.name} ({surah.englishName})</h1>
   <p class="text-ink-300 text-sm mt-1">Read with Urdu, English & Hindi meaning, transliteration and audio</p>
   </div>
 </div>
 
 {surah.num !== 1 && surah.num !== 9 && (
-  <p class="font-arabic text-2xl md:text-3xl text-center bg-night-850 border border-white/10 text-ink-50 rounded-2xl py-5 px-4 mb-5" lang="ar" dir="rtl">{BISMILLAH}</p>
+  <p class="font-arabic text-xl md:text-2xl text-center bg-night-850 border border-white/10 text-ink-50 rounded-2xl py-4 px-4 mb-5" lang="ar" dir="rtl">{BISMILLAH}</p>
 )}
 
-<div class="sticky top-16 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-2xl p-2.5 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
+<div class="sticky top-14 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-full px-3 py-2 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
   <div class="flex rounded-xl overflow-hidden border border-white/10 text-sm font-bold" role="group" aria-label="Translation language">
     <button data-langbtn="ur" class="px-3.5 py-2.5 min-h-[44px] bg-brand-500 text-night-900">اردو</button>
     <button data-langbtn="en" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">English</button>
@@ -57,9 +57,9 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   </div>
 </div>
 
-<div id="verses" data-tr="ur" data-showtr="0" data-surah={surah.num} class="space-y-3">
+<div id="verses" data-tr="ur" data-showtr="0" data-surah={surah.num} class="divide-y divide-white/10">
   {surah.verses.map((verse) => (
-    <article id={`v${verse.v}`} data-verse={verse.v} class="verse bg-night-850 border border-white/10 rounded-2xl p-4 md:p-5 scroll-mt-36 shadow-lg shadow-black/20">
+    <article id={`v${verse.v}`} data-verse={verse.v} class="verse py-5 px-1 md:px-2 scroll-mt-32">
       <div class="flex items-center gap-2 mb-2">
         <span class="w-8 h-8 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 text-sm font-extrabold">{verse.v}</span>
         <button class="vplay w-9 h-9 grid place-items-center rounded-full bg-brand-500 text-night-900 hover:bg-brand-400" data-v={verse.v} data-src={audioOf(verse.v)} aria-label={`Play verse ${verse.v}`}>
@@ -88,7 +88,7 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   .verse.ring-2 { --tw-ring-color: var(--color-brand-500); }
 </style>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-6">
+<div class="grid gap-3 mt-6">
   {prev ? (
     <a href={localizedPath(locale, `/surahs/${prev.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition">← <span class="text-xs text-ink-500">Previous</span><span class="font-bold block text-ink-50">{prev.num}. Surah {prev.name}</span></a>
   ) : <span />}

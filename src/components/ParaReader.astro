@@ -24,17 +24,17 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   <span class="text-ink-300">Para {para.num} ({para.name})</span>
 </nav>
 
-<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 text-center mb-5 shadow-xl shadow-black/30">
+<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-5 md:p-6 text-center mb-5 shadow-xl shadow-black/30">
   <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
   <div class="relative">
   <span class="inline-block text-xs font-bold bg-white/10 border border-white/15 text-ink-200 rounded-full px-3 py-1">Para {para.num} of 30 • {totalVerses} verses • {para.range}</span>
-  <p class="font-arabic text-4xl md:text-5xl mt-3 text-white" lang="ar" dir="rtl">{para.arabicName}</p>
-  <h1 class="text-2xl md:text-3xl font-extrabold mt-2 text-white">Quran Para {para.num} ({para.name})</h1>
+  <p class="font-arabic text-3xl md:text-4xl mt-3 text-white" lang="ar" dir="rtl">{para.arabicName}</p>
+  <h1 class="text-xl md:text-2xl font-extrabold mt-2 text-white">Quran Para {para.num} ({para.name})</h1>
   <p class="text-ink-300 text-sm mt-1">Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio</p>
   </div>
 </div>
 
-<div class="sticky top-16 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-2xl p-2.5 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
+<div class="sticky top-14 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-full px-3 py-2 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
   <div class="flex rounded-xl overflow-hidden border border-white/10 text-sm font-bold" role="group" aria-label="Translation language">
     <button data-langbtn="ur" class="px-3.5 py-2.5 min-h-[44px] bg-brand-500 text-night-900">اردو</button>
     <button data-langbtn="en" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">English</button>
@@ -56,11 +56,11 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   </div>
 </div>
 
-<div id="verses" data-tr="ur" data-showtr="0" class="space-y-6">
+<div id="verses" data-tr="ur" data-showtr="0" class="space-y-8">
   {sections.map(({ surah, verses }) => (
     <section>
-      <div class="flex items-center gap-3 mb-3 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">
-        <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold text-sm">{surah.num}</span>
+      <div class="flex items-center gap-3 py-3 border-b border-white/10 px-1">
+        <span class="w-9 h-9 shrink-0 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 font-extrabold text-sm">{surah.num}</span>
         <div class="min-w-0">
           <a href={localizedPath(locale, `/surahs/${surah.slug}/`)} class="font-bold leading-6 text-ink-50 hover:text-brand-300">Surah {surah.name} <span class="text-ink-500 font-normal">• {surah.englishName}</span></a>
           <div class="text-xs text-ink-500">Verses {verses[0]?.v}–{verses[verses.length - 1]?.v} of {surah.verseCount} in this para</div>
@@ -68,11 +68,11 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
         <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{surah.arabicName}</span>
       </div>
       {surah.num !== 1 && surah.num !== 9 && verses[0]?.v === 1 && (
-        <p class="font-arabic text-2xl md:text-3xl text-center bg-night-850 border border-white/10 text-ink-50 rounded-2xl py-5 px-4 mb-3" lang="ar" dir="rtl">{BISMILLAH}</p>
+        <p class="font-arabic text-xl md:text-2xl text-center text-ink-50 py-4 px-4" lang="ar" dir="rtl">{BISMILLAH}</p>
       )}
-      <div class="space-y-3">
+      <div class="divide-y divide-white/10">
         {verses.map((verse) => (
-          <article id={`s${surah.num}v${verse.v}`} data-surah={surah.num} data-verse={verse.v} class="verse bg-night-850 border border-white/10 rounded-2xl p-4 md:p-5 scroll-mt-36 shadow-lg shadow-black/20">
+          <article id={`s${surah.num}v${verse.v}`} data-surah={surah.num} data-verse={verse.v} class="verse py-5 px-1 md:px-2 scroll-mt-32">
             <div class="flex items-center gap-2 mb-2">
               <span class="text-xs font-bold text-ink-500">{surah.num}:{verse.v}</span>
               <span class="w-8 h-8 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 text-sm font-extrabold">{verse.v}</span>
@@ -105,7 +105,7 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   .verse.ring-2 { --tw-ring-color: var(--color-brand-500); }
 </style>
 
-<div class="grid sm:grid-cols-2 gap-4 mt-6">
+<div class="grid gap-3 mt-6">
   {prev ? (
     <a href={localizedPath(locale, `/quran/${prev.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition">← <span class="text-xs text-ink-500">Previous</span><span class="font-bold block text-ink-50">Para {prev.num} ({prev.name})</span></a>
   ) : <span />}
