@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProfileSection from '../../components/ProfileSection.astro';
+import { nonDefaultLocales } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Profile', path: '/profile/' },
+];
+---
+<BaseLayout title="My Profile — Login, Account & Details" description="Login, create your free account and manage your profile — name, username, country, bio and avatar. Your Quran progress syncs everywhere." locale={locale} canonicalPath="/profile/" crumbs={crumbs} noindex={true}>
+  <ProfileSection locale={locale} />
+  <p class="mx-auto max-w-3xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

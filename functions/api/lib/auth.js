@@ -85,7 +85,22 @@ export function validEmail(email) {
 
 export function publicUser(row) {
   if (!row) return null;
-  return { id: row.id, name: row.name || '', email: row.email || '', avatar: row.avatar_url || '', provider: row.provider || 'email' };
+  return {
+    id: row.id,
+    name: row.name || '',
+    email: row.email || '',
+    avatar: row.avatar_url || '',
+    provider: row.provider || 'email',
+    username: row.username || '',
+    country: row.country || '',
+    city: row.city || '',
+    bio: row.bio || '',
+    gender: row.gender || '',
+    language: row.language || 'en',
+    avatar_emoji: row.avatar_emoji || '',
+    created_at: row.created_at || 0,
+    updated_at: row.updated_at || 0,
+  };
 }
 
 export async function createSession(env, userId, maxAge = 2592000) {
@@ -102,11 +117,24 @@ export async function getSessionUser(env, request) {
   const token = getCookie(request, 'hn_session');
   if (!token) return null;
   const tokenHash = await sha256Hex(token);
-  const row = await env.DB.prepare(
-    `SELECT u.id, u.name, u.email, u.avatar_url, u.provider, s.expires_at
-     FROM sessions s JOIN users u ON u.id = s.user_id
-     WHERE s.token_hash = ?`
-  ).bind(tokenHash).first();
+  // Full profile select (post-0002 migration). Fall back to the
+  // pre-migration column set so older dev DBs keep working.
+  let row = null;
+  try {
+    row = await env.DB.prepare(
+      `SELECT u.id, u.name, u.email, u.avatar_url, u.provider, u.username,
+              u.country, u.city, u.bio, u.gender, u.language, u.avatar_emoji,
+              u.created_at, u.updated_at, s.expires_at
+       FROM sessions s JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ?`
+    ).bind(tokenHash).first();
+  } catch {
+    row = await env.DB.prepare(
+      `SELECT u.id, u.name, u.email, u.avatar_url, u.provider, u.created_at, s.expires_at
+       FROM sessions s JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ?`
+    ).bind(tokenHash).first();
+  }
   if (!row) return null;
   if (row.expires_at < nowSec()) {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();

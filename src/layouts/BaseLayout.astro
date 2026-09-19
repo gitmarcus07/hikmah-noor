@@ -99,6 +99,12 @@ const crumbLd = crumbs.length ? {
       </nav>
       <div class="ms-auto flex items-center gap-1 sm:gap-2">
         <a href={localizedPath(locale, '/search/')} class="w-9 h-9 grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
+        {/* auth: login button (guest) / avatar chip (member) — toggled by nav script below */}
+        <a data-nav-login href={localizedPath(locale, '/profile/')} class="hidden sm:inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0">👤 Login</a>
+        <a data-nav-profile href={localizedPath(locale, '/profile/')} class="hidden items-center gap-2 bg-white/5 hover:bg-white/10 border border-brand-500/40 rounded-full ps-1 pe-3 py-1 text-sm font-bold text-ink-50 shrink-0" aria-label="My profile">
+          <span data-nav-avatar class="w-7 h-7 grid place-items-center rounded-full bg-brand-500/20 text-base overflow-hidden">👤</span>
+          <span data-nav-name class="max-w-[80px] truncate">Profile</span>
+        </a>
         <div class="relative" id="langWrap">
           <button id="langBtn" class="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-full ps-2.5 pe-2 py-1.5 text-sm shadow shrink-0" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
             <Icon name="globe" size={17} />
@@ -129,6 +135,11 @@ const crumbLd = crumbs.length ? {
         <nav class="bg-night-850 rounded-3xl shadow-xl border border-white/10 overflow-hidden" aria-label="Mobile">
           <p class="px-4 pt-3.5 pb-1 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">Browse</p>
           <div class="p-2">
+            <a href={localizedPath(locale, '/profile/')} data-nav-mobile class="flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] bg-brand-500/10 border border-brand-500/30 hover:bg-brand-500/20 active:bg-brand-500/25">
+              <span data-nav-mobile-avatar class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 border border-white/10 text-xl overflow-hidden">👤</span>
+              <span class="min-w-0"><span data-nav-mobile-name class="block text-[16px] font-semibold text-ink-50">Login / Profile</span><span class="block text-xs text-ink-500">Account & details →</span></span>
+              <span class="ms-auto text-ink-500"><Icon name="chevron" size={18} /></span>
+            </a>
             {([
               ['home', dict.nav.home, localizedPath(locale, '/')],
               ['surahs', dict.nav.surahs, localizedPath(locale, '/surahs/')],
@@ -206,6 +217,52 @@ const crumbLd = crumbs.length ? {
       window.addEventListener('resize', () => {
         if (window.innerWidth >= 1024) setMenu(false);
       });
+
+      // ---- site-wide auth chip: guest → Login, member → avatar + name ----
+      const paintNav = (user) => {
+        const login = document.querySelector('[data-nav-login]');
+        const chip = document.querySelector('[data-nav-profile]');
+        const mName = document.querySelector('[data-nav-mobile-name]');
+        const mAv = document.querySelector('[data-nav-mobile-avatar]');
+        if (!user) {
+          login?.classList.remove('hidden');
+          login?.classList.add('sm:inline-flex');
+          chip?.classList.add('hidden');
+          chip?.classList.remove('inline-flex');
+          if (mName) mName.textContent = 'Login / Profile';
+          if (mAv) mAv.textContent = '👤';
+          return;
+        }
+        login?.classList.add('hidden');
+        login?.classList.remove('sm:inline-flex');
+        chip?.classList.remove('hidden');
+        chip?.classList.add('inline-flex');
+        const first = (user.name || 'Profile').split(' ')[0];
+        const av = document.querySelector('[data-nav-avatar]');
+        if (av) {
+          if (user.avatar_emoji) av.textContent = user.avatar_emoji;
+          else if (user.avatar) { av.innerHTML = ''; const img = document.createElement('img'); img.src = user.avatar; img.alt = ''; img.className = 'w-full h-full object-cover'; av.appendChild(img); }
+          else av.textContent = first.charAt(0).toUpperCase();
+        }
+        const nm = document.querySelector('[data-nav-name]');
+        if (nm) nm.textContent = first;
+        if (mName) mName.textContent = user.name || user.email || 'My profile';
+        if (mAv) {
+          if (user.avatar_emoji) mAv.textContent = user.avatar_emoji;
+          else if (user.avatar) { mAv.innerHTML = ''; const img = document.createElement('img'); img.src = user.avatar; img.alt = ''; img.className = 'w-full h-full object-cover rounded-xl'; mAv.appendChild(img); }
+          else mAv.textContent = first.charAt(0).toUpperCase();
+        }
+      };
+      window.hnUpdateNav = paintNav;
+      // Open the page-level login modal when present; else go to /profile/.
+      document.querySelector('[data-nav-login]')?.addEventListener('click', (e) => {
+        if (window.hnAuthModal) { e.preventDefault(); window.hnAuthModal.open('login'); }
+      });
+      document.addEventListener('hn:auth', (e) => { if (e.detail?.user) paintNav(e.detail.user); });
+      fetch('/api/auth/session', { credentials: 'same-origin' })
+        .then((r) => r.ok ? r.json() : { user: null })
+        .then((d) => paintNav(d.user || null))
+        .catch(() => paintNav(null));
     })();
   </script>
 
@@ -224,6 +281,7 @@ const crumbLd = crumbs.length ? {
         <div class="font-bold mb-3 text-gold-300">{dict.footer.pages}</div>
         <ul class="space-y-2 text-sm">
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/about/')}>About Us</a></li>
+          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/profile/')}>My Profile</a></li>
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/contact/')}>Contact</a></li>
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/privacy/')}>Privacy</a></li>
         </ul>

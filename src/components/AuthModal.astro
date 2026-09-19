@@ -72,20 +72,6 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
       oauth_not_configured: 'Google login isn’t set up yet — use email for now.',
     }[code] || 'Something went wrong. Please retry.');
 
-    window.hnAuthModal = {
-      open() { modal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; },
-      close() { modal.classList.add('hidden'); document.body.style.overflow = ''; },
-    };
-    modal.querySelectorAll('[data-auth-close]').forEach((b) => b.addEventListener('click', window.hnAuthModal.close));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.hnAuthModal.close(); });
-
-    modal.querySelector('[data-auth-google]')?.addEventListener('click', async () => {
-      try {
-        const { Auth } = await import('/habits/habit.js');
-        Auth.google();
-      } catch { window.location.href = '/api/auth/google'; }
-    });
-
     const tabs = [...modal.querySelectorAll('[data-auth-tab]')];
     const forms = {
       login: modal.querySelector('[data-auth-form="login"]'),
@@ -102,6 +88,24 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
       forms.login.classList.toggle('hidden', mode !== 'login');
       forms.register.classList.toggle('hidden', mode !== 'register');
     };
+
+    window.hnAuthModal = {
+      open(mode) {
+        if (mode === 'login' || mode === 'register') paintTabs(mode);
+        modal.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+      },
+      close() { modal.classList.add('hidden'); document.body.style.overflow = ''; },
+    };
+    modal.querySelectorAll('[data-auth-close]').forEach((b) => b.addEventListener('click', window.hnAuthModal.close));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.hnAuthModal.close(); });
+
+    modal.querySelector('[data-auth-google]')?.addEventListener('click', async () => {
+      try {
+        const { Auth } = await import('/habits/habit.js');
+        Auth.google();
+      } catch { window.location.href = '/api/auth/google'; }
+    });
+
     tabs.forEach((t) => t.addEventListener('click', () => paintTabs(t.dataset.authTab)));
 
     const submit = (mode, fn) => forms[mode]?.addEventListener('submit', async (e) => {

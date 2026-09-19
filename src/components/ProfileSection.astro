@@ -1,0 +1,363 @@
+---
+/* Profile section — login / signup / logout + editable details
+ * (name, username, avatar, country, city, bio, gender, language).
+ * Works standalone on /profile/ pages. Uses AuthModal + /habits/habit.js.
+ */
+import AuthModal from './AuthModal.astro';
+import { localizedPath } from '../i18n/utils';
+
+interface Props { locale?: string; }
+const { locale = 'en' } = Astro.props;
+const progressUrl = localizedPath(locale, '/tools/my-progress/');
+const readUrl = localizedPath(locale, '/tools/read/');
+const homeUrl = localizedPath(locale, '/');
+
+const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','🌸','🍀','💎','🔥','🌊','🦅','🐝','🍉','🌹','🪴','🐪'];
+---
+
+<div class="max-w-3xl mx-auto px-4 py-8" data-profile>
+  {/* loading */}
+  <div data-p-loading class="animate-pulse space-y-3">
+    <div class="h-40 bg-night-850 border border-white/10 rounded-3xl"></div>
+    <div class="h-64 bg-night-850 border border-white/10 rounded-3xl"></div>
+  </div>
+
+  {/* logged-out gate */}
+  <div data-p-gate class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8 shadow-xl shadow-black/30">
+    <div class="mx-auto w-20 h-20 grid place-items-center rounded-full bg-brand-500/15 border border-brand-500/30 text-5xl" aria-hidden="true">👤</div>
+    <p class="mt-4 text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-300">Your profile</p>
+    <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">Login or create a free account</h1>
+    <p class="mt-2 text-ink-300 text-[15px] leading-7 max-w-md mx-auto">Save your name, country and reading progress. Pick up your Quran habit on any device — 100% free, forever.</p>
+    <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+      <button data-p-open-login class="bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login →</button>
+      <button data-p-open-register class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Create free account</button>
+    </div>
+    <div class="mt-5 flex flex-wrap justify-center gap-2 text-xs font-bold text-ink-300">
+      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">🔥 Streaks</span>
+      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">📖 Resume reading</span>
+      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">🔖 Saved verses</span>
+    </div>
+  </div>
+
+  {/* logged-in view */}
+  <div data-p-live class="hidden space-y-4">
+    {/* header card */}
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30">
+      <div class="flex items-start gap-4">
+        <div data-p-avatar class="w-20 h-20 shrink-0 grid place-items-center rounded-full bg-brand-500/15 border-2 border-brand-500/40 text-4xl overflow-hidden" aria-hidden="true">👤</div>
+        <div class="min-w-0 flex-1">
+          <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-300">Asalam Alaykum</p>
+          <h1 data-p-name class="text-2xl font-extrabold text-white truncate">Reader</h1>
+          <p class="text-sm text-ink-300 truncate"><span data-p-username class="font-bold text-brand-300"></span> <span data-p-email class="text-ink-500"></span></p>
+          <p data-p-meta class="mt-1 text-xs text-ink-500 leading-5"></p>
+          <p data-p-bio class="mt-2 text-sm text-ink-200 leading-6"></p>
+        </div>
+        <span data-p-provider class="shrink-0 text-[11px] font-extrabold uppercase tracking-wide bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-ink-300"></span>
+      </div>
+      {/* mini stats */}
+      <div data-p-stats class="mt-4 grid grid-cols-3 gap-2 text-center"></div>
+      <div class="mt-4 flex flex-col sm:flex-row gap-2">
+        <a data-p-read href={readUrl} class="flex-1 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📖 Continue reading</a>
+        <a href={progressUrl} class="flex-1 inline-flex items-center justify-center gap-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📊 My progress</a>
+      </div>
+    </section>
+
+    {/* edit form */}
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Edit profile">
+      <h2 class="text-lg font-extrabold text-white">✏️ Profile details</h2>
+      <p class="text-sm text-ink-500 mt-0.5">Shown on your progress page and greetings. Email stays private.</p>
+
+      <p class="mt-4 text-xs font-extrabold uppercase tracking-widest text-ink-500">Choose an avatar</p>
+      <div data-p-emojis class="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Avatar emoji">
+        {AVATARS.map((e) => (
+          <button type="button" data-emoji={e} class="w-11 h-11 grid place-items-center rounded-full border-2 border-white/10 bg-white/5 text-2xl hover:border-brand-400 transition min-w-[44px] min-h-[44px]" role="radio" aria-checked="false">{e}</button>
+        ))}
+      </div>
+
+      <form data-p-form class="mt-4 grid gap-3 sm:grid-cols-2">
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Display name *</span>
+          <input name="name" required minlength="2" maxlength="60" autocomplete="name" placeholder="Your name"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username</span>
+          <input name="username" maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country</span>
+          <select name="country" data-p-country
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="">Select country…</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">City</span>
+          <input name="city" maxlength="60" autocomplete="address-level2" placeholder="City"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+        </label>
+        <label class="block sm:col-span-2">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Bio <span data-p-biocount class="text-ink-500 normal-case font-bold"></span></span>
+          <textarea name="bio" rows="2" maxlength="280" placeholder="A line about you — e.g. learning Quran daily, from Delhi 🤲"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[64px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 resize-y"></textarea>
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Gender</span>
+          <select name="gender" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Language</span>
+          <select name="language" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="ur">اردو (Urdu)</option>
+            <option value="ar">العربية (Arabic)</option>
+          </select>
+        </label>
+        <p data-p-msg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
+        <button class="sm:col-span-2 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[56px]">Save profile ✓</button>
+      </form>
+    </section>
+
+    {/* security (email accounts) */}
+    <section data-p-security class="hidden bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Password">
+      <h2 class="text-lg font-extrabold text-white">🔑 Change password</h2>
+      <form data-p-pw class="mt-3 grid gap-3 sm:grid-cols-2">
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Current password</span>
+          <input name="current_password" type="password" autocomplete="current-password" placeholder="••••••••"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400" />
+        </label>
+        <label class="block">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">New password (min 8)</span>
+          <input name="new_password" type="password" minlength="8" autocomplete="new-password" placeholder="New password"
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400" />
+        </label>
+        <p data-p-pwmsg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
+        <button class="sm:col-span-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Update password</button>
+      </form>
+    </section>
+
+    {/* session */}
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30">
+      <h2 class="text-lg font-extrabold text-white">⚙️ Session</h2>
+      <div class="mt-3 flex flex-col sm:flex-row gap-2">
+        <button data-p-logout class="flex-1 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Logout</button>
+        <a href={homeUrl} class="flex-1 inline-flex items-center justify-center text-sm font-bold text-ink-500 hover:text-brand-300 min-h-[52px]">← Back home</a>
+      </div>
+      <details class="mt-4 text-sm">
+        <summary class="cursor-pointer font-bold text-red-300 min-h-[44px] inline-flex items-center">Delete my account…</summary>
+        <p class="mt-2 text-ink-300 leading-6">This permanently removes your profile, streaks, stats and bookmarks. This cannot be undone.</p>
+        <button data-p-delete class="mt-3 bg-red-500/15 hover:bg-red-500/25 border border-red-400/40 text-red-200 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Delete account permanently</button>
+      </details>
+    </section>
+  </div>
+</div>
+
+<AuthModal />
+
+<script define:vars={{ readUrl }}>
+  (() => {
+    const root = document.querySelector('[data-profile]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const $ = (s) => root.querySelector(s);
+
+    const COUNTRIES = ['Afghanistan','Algeria','Australia','Austria','Azerbaijan','Bahrain','Bangladesh','Belgium','Bosnia & Herzegovina','Brazil','Brunei','Bulgaria','Cambodia','Canada','Chad','China','Denmark','Djibouti','Egypt','Ethiopia','Fiji','Finland','France','Gambia','Germany','Ghana','Greece','Guinea','Guyana','India','Indonesia','Iran','Iraq','Ireland','Italy','Japan','Jordan','Kazakhstan','Kenya','Kosovo','Kuwait','Kyrgyzstan','Lebanon','Libya','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Morocco','Mozambique','Myanmar','Nepal','Netherlands','New Zealand','Niger','Nigeria','Norway','Oman','Pakistan','Palestine','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Senegal','Singapore','Somalia','South Africa','South Korea','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Trinidad & Tobago','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uzbekistan','Yemen','Zimbabwe','Other'];
+
+    // Populate country select
+    const countrySel = $('[data-p-country]');
+    COUNTRIES.forEach((c) => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      countrySel?.appendChild(o);
+    });
+
+    let H = null, profile = null, pickedEmoji = '';
+
+    const showMsg = (sel, ok, text) => {
+      const el = $(sel);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove('hidden', 'bg-emerald-400/15', 'text-emerald-200', 'border', 'border-emerald-300/30', 'bg-red-400/10', 'text-red-200');
+      el.classList.add(ok ? 'bg-emerald-400/15' : 'bg-red-400/10', ok ? 'text-emerald-200' : 'text-red-200');
+    };
+
+    const paintEmoji = () => {
+      root.querySelectorAll('[data-emoji]').forEach((b) => {
+        const on = b.dataset.emoji === pickedEmoji;
+        b.classList.toggle('border-brand-500', on);
+        b.classList.toggle('bg-brand-500/20', on);
+        b.classList.toggle('border-white/10', !on);
+        b.setAttribute('aria-checked', String(on));
+      });
+    };
+    root.querySelectorAll('[data-emoji]').forEach((b) => b.addEventListener('click', () => {
+      pickedEmoji = pickedEmoji === b.dataset.emoji ? '' : b.dataset.emoji;
+      paintEmoji();
+    }));
+
+    const avatarFor = (u) => {
+      if (u?.avatar_emoji) return u.avatar_emoji;
+      if (u?.avatar) return `<img src="${u.avatar.replace(/"/g, '')}" alt="" class="w-full h-full object-cover" />`;
+      return (u?.name || 'R').trim().charAt(0).toUpperCase() || 'R';
+    };
+
+    const paintHeader = (u) => {
+      const av = $('[data-p-avatar]');
+      if (av) { av.innerHTML = ''; const inner = avatarFor(u); if (inner.startsWith('<img')) av.innerHTML = inner; else av.textContent = inner; }
+      if ($('[data-p-name]')) $('[data-p-name]').textContent = u.name || 'Reader';
+      if ($('[data-p-username]')) $('[data-p-username]').textContent = u.username ? `@${u.username}` : '';
+      if ($('[data-p-email]')) $('[data-p-email]').textContent = u.email || '';
+      const loc = [u.city, u.country].filter(Boolean).join(', ');
+      const since = u.created_at ? new Date(u.created_at * 1000).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '';
+      if ($('[data-p-meta]')) $('[data-p-meta]').textContent = [loc, since ? `Member since ${since}` : ''].filter(Boolean).join(' • ');
+      if ($('[data-p-bio]')) { $('[data-p-bio]').textContent = u.bio || ''; $('[data-p-bio]').classList.toggle('hidden', !u.bio); }
+      if ($('[data-p-provider]')) $('[data-p-provider]').textContent = u.provider === 'google' ? '◉ Google' : '✉ Email';
+      if (window.hnUpdateNav) window.hnUpdateNav(u);
+    };
+
+    const fillForm = (u) => {
+      const f = $('[data-p-form]');
+      if (!f) return;
+      f.name.value = u.name || '';
+      f.username.value = u.username || '';
+      if (countrySel) countrySel.value = COUNTRIES.includes(u.country) ? u.country : (u.country ? '' : '');
+      if (u.country && !COUNTRIES.includes(u.country)) {
+        const o = document.createElement('option');
+        o.value = u.country; o.textContent = u.country; o.selected = true;
+        countrySel?.appendChild(o);
+      }
+      f.city.value = u.city || '';
+      f.bio.value = u.bio || '';
+      f.gender.value = ['male', 'female', 'other'].includes(u.gender) ? u.gender : '';
+      f.language.value = ['en', 'hi', 'ur', 'ar'].includes(u.language) ? u.language : 'en';
+      pickedEmoji = u.avatar_emoji || '';
+      paintEmoji();
+      const bc = $('[data-p-biocount]');
+      if (bc) bc.textContent = `(${(u.bio || '').length}/280)`;
+    };
+
+    const paintStats = async () => {
+      const box = $('[data-p-stats]');
+      if (!box) return;
+      try {
+        const [{ streak }, all] = await Promise.all([
+          H.Me.streak().catch(() => ({ streak: { current: 0, longest: 0 } })),
+          H.Me.stats('all').catch(() => ({ stats: { verses: 0, hasanat: 0 } })),
+        ]);
+        const tiles = [
+          ['🔥', `${streak?.current || 0}`, 'day streak'],
+          ['📖', `${all?.stats?.verses || 0}`, 'verses'],
+          ['💗', H.fmtCompact(all?.stats?.hasanat || 0), 'hasanat'],
+        ];
+        box.innerHTML = tiles.map(([i, v, t]) => `<div class="bg-night-800 border border-white/10 rounded-2xl px-2 py-3"><div class="text-xl">${i}</div><div class="font-extrabold text-lg text-white">${v}</div><div class="text-[11px] font-bold text-ink-500">${t}</div></div>`).join('');
+      } catch { /* stats optional */ }
+    };
+
+    $('[data-p-open-login]')?.addEventListener('click', () => window.hnAuthModal?.open('login'));
+    $('[data-p-open-register]')?.addEventListener('click', () => window.hnAuthModal?.open('register'));
+
+    const bioInput = $('[data-p-form]')?.querySelector('[name="bio"]');
+    bioInput?.addEventListener('input', () => {
+      const bc = $('[data-p-biocount]');
+      if (bc) bc.textContent = `(${bioInput.value.length}/280)`;
+    });
+
+    $('[data-p-form]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+      try {
+        const fd = new FormData(form);
+        const data = await H.Me.saveProfile({
+          name: fd.get('name'), username: fd.get('username'), country: fd.get('country'),
+          city: fd.get('city'), bio: fd.get('bio'), gender: fd.get('gender'),
+          language: fd.get('language'), avatar_emoji: pickedEmoji,
+        });
+        profile = data.user;
+        paintHeader(profile);
+        fillForm(profile);
+        showMsg('[data-p-msg]', true, '✓ Profile saved.');
+        document.dispatchEvent(new CustomEvent('hn:auth', { detail: { user: profile } }));
+      } catch (err) {
+        showMsg('[data-p-msg]', false, err.hint || err.message || 'Could not save — try again.');
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 4000);
+      }
+    });
+
+    $('[data-p-pw]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const fd = new FormData(form);
+      try {
+        await H.Me.saveProfile({ current_password: fd.get('current_password'), new_password: fd.get('new_password') });
+        showMsg('[data-p-pwmsg]', true, '✓ Password updated.');
+        form.reset();
+      } catch (err) {
+        showMsg('[data-p-pwmsg]', false, err.hint || 'Could not update password.');
+      } finally {
+        setTimeout(() => $('[data-p-pwmsg]')?.classList.add('hidden'), 4000);
+      }
+    });
+
+    $('[data-p-logout]')?.addEventListener('click', async () => {
+      try { await H.Auth.logout(); } finally { window.location.reload(); }
+    });
+
+    $('[data-p-delete]')?.addEventListener('click', async () => {
+      if (!confirm('Delete your account and all progress permanently?')) return;
+      if (!confirm('Last chance — this cannot be undone. Delete?')) return;
+      try {
+        await H.Me.deleteAccount();
+        window.location.href = '/';
+      } catch {
+        alert('Could not delete — try again.');
+      }
+    });
+
+    document.addEventListener('hn:auth', async () => {
+      try {
+        const { user } = await H.Auth.session();
+        if (user) window.location.reload();
+      } catch { /* modal flow */ }
+    });
+
+    (async () => {
+      H = await import('/habits/habit.js');
+      let user = null;
+      try {
+        const s = await H.Auth.session();
+        user = s.user;
+      } catch { user = null; }
+      $('[data-p-loading]')?.classList.add('hidden');
+      if (!user) { $('[data-p-gate]')?.classList.remove('hidden'); return; }
+      try {
+        const full = await H.Me.profile().catch(() => ({ user }));
+        profile = full.user || user;
+      } catch { profile = user; }
+      $('[data-p-live]')?.classList.remove('hidden');
+      paintHeader(profile);
+      fillForm(profile);
+      if (profile.provider === 'email') $('[data-p-security]')?.classList.remove('hidden');
+      paintStats();
+      // Continue-reading deep link
+      try {
+        const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
+        if (resume) {
+          const a = $('[data-p-read]');
+          if (a) { const base = String(readUrl).replace(/\/$/, ''); a.href = `${base}/${resume.surah}/?verse=${resume.verse}`; }
+        }
+      } catch {}
+    })();
+  })();
+</script>
