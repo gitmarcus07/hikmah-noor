@@ -135,7 +135,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
           </select>
         </label>
         <p data-p-msg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
-        <button class="sm:col-span-2 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[56px]">Save profile ✓</button>
+        <button type="submit" data-p-save class="sm:col-span-2 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[56px]">Save profile ✓</button>
       </form>
     </section>
 
@@ -202,6 +202,14 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       el.classList.remove('hidden', 'bg-emerald-400/15', 'text-emerald-200', 'border', 'border-emerald-300/30', 'bg-red-400/10', 'text-red-200');
       el.classList.add(ok ? 'bg-emerald-400/15' : 'bg-red-400/10', ok ? 'text-emerald-200' : 'text-red-200');
     };
+
+    // Guarantees the user always sees a result — a hanging request
+    // becomes a timeout message instead of a dead button.
+    const withTimeout = (p, ms = 25000) =>
+      Promise.race([
+        p,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out — check your connection and retry.')), ms)),
+      ]);
 
     // Visible face via habit.js (photo → SVG → emoji → initial).
     const faceHTML = (u) => {
@@ -384,32 +392,37 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       syncPhotoUI();
     });
 
-    $('[data-p-form]')?.addEventListener('submit', async (e) => {
+    const saveForm = $('[data-p-form]');
+    saveForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!H?.Me?.saveProfile) {
-        showMsg('[data-p-msg]', false, 'App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
-        return;
-      }
       const form = e.currentTarget;
-      const btn = form.querySelector('button');
-      btn.disabled = true;
+      const btn = form.querySelector('[data-p-save]') || form.querySelector('button');
+      const origLabel = btn ? btn.textContent : '';
       try {
+        if (!H?.Me?.saveProfile) throw new Error('App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
         const fd = new FormData(form);
-        const data = await H.Me.saveProfile({
-          name: fd.get('name'), username: fd.get('username'), country: fd.get('country'),
-          city: fd.get('city'), bio: fd.get('bio'), gender: fd.get('gender'),
-          language: fd.get('language'), avatar_emoji: picked, avatar_url: photo,
-        });
+        const str = (k) => String(fd.get(k) ?? '');
+        console.log('[profile] saving…');
+        const data = await withTimeout(H.Me.saveProfile({
+          name: str('name'), username: str('username'), country: str('country'),
+          city: str('city'), bio: str('bio'), gender: str('gender'),
+          language: str('language'), avatar_emoji: picked, avatar_url: photo,
+        }));
+        if (!data?.user) throw new Error('Server returned an empty response — please retry.');
         profile = data.user;
         paintHeader(profile);
         fillForm(profile);
+        paintPreview();
+        console.log('[profile] saved ok');
         showMsg('[data-p-msg]', true, '✓ Profile saved.');
         document.dispatchEvent(new CustomEvent('hn:auth', { detail: { user: profile } }));
       } catch (err) {
-        showMsg('[data-p-msg]', false, err.hint || err.message || 'Could not save — try again.');
+        console.error('[profile] save failed:', err);
+        showMsg('[data-p-msg]', false, err?.hint || err?.message || 'Could not save — try again.');
       } finally {
-        btn.disabled = false;
-        setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 4000);
+        if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+        setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 5000);
       }
     });
 
@@ -422,7 +435,10 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       const form = e.currentTarget;
       const fd = new FormData(form);
       try {
-        await H.Me.saveProfile({ current_password: fd.get('current_password'), new_password: fd.get('new_password') });
+        await withTimeout(H.Me.saveProfile({
+          current_password: String(fd.get('current_password') ?? ''),
+          new_password: String(fd.get('new_password') ?? ''),
+        }));
         showMsg('[data-p-pwmsg]', true, '✓ Password updated.');
         form.reset();
       } catch (err) {
