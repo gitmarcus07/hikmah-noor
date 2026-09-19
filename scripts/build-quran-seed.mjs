@@ -1,8 +1,14 @@
 // One-time seed generator for verse search + mushaf pager.
 // Run: node scripts/build-quran-seed.mjs  (needs internet for page boundaries)
-// Then apply each part:
-//   wrangler d1 execute hikmah-noor-habit --remote --file=./migrations/0005_quran_verses_1.sql
-//   ... _2, _3, _4
+// Then apply in order:
+//   wrangler d1 execute hikmah-noor-habit --remote --file=./migrations/0005_quran_schema.sql
+//   foreach ($f in (Get-ChildItem migrations/0006_quran_verses_*.sql | Sort-Object Name)) {
+//     wrangler d1 execute hikmah-noor-habit --remote --file=$($f.FullName)
+//   }
+// NOTE: verses must stay one single-row INSERT per statement, chunked into
+// ~150KB files. D1 rejects oversized multi-row statements (SQLITE_TOOBIG)
+// and rolls back the whole file — do NOT re-batch rows into shared VALUES
+// lists or grow the per-file byte cap.
 // Sources: local src/data/surahs/*.json (text) + api.quran.com v4 (Madani page
 // boundaries, keyless). Output is static SQL — runtime stays fully offline.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -64,30 +70,42 @@ if (pages[0]?.ss !== 1 || pages[pages.length - 1]?.es !== 114) {
   throw new Error('unexpected first/last page range — refusing to emit');
 }
 
-// ---- 3) emit chunked SQL (~1.8MB per file) ----
+// ---- 3) emit D1-safe chunked SQL ----
+// Schema (CREATEs + 604 page boundaries) goes to 0005_quran_schema.sql alone.
+// Verses go to 0006_quran_verses_01.sql ... as ONE row per INSERT statement,
+// chunked at ~150KB per file. Multi-row VALUES batches exceed D1's
+// per-statement limit (SQLITE_TOOBIG, whole file rolls back), so keep this
+// single-row layout even though it produces more files.
 const head =
   `CREATE VIRTUAL TABLE IF NOT EXISTS verses_fts USING fts5(surah UNINDEXED, verse UNINDEXED, sname, ar, ur, en, hi);\n` +
   `CREATE TABLE IF NOT EXISTS mushaf_pages(page INTEGER PRIMARY KEY, ss INTEGER, sv INTEGER, es INTEGER, ev INTEGER);\n` +
   pages
     .map((p) => `INSERT OR IGNORE INTO mushaf_pages(page,ss,sv,es,ev) VALUES (${p.p},${p.ss},${p.sv},${p.es},${p.ev});`)
     .join('\n');
-const parts = [head];
-const BATCH = 100;
-for (let i = 0; i < rows.length; i += BATCH) {
-  const chunk = rows
-    .slice(i, i + BATCH)
-    .map(
-      (r) =>
-        `(${r[0]},${r[1]},'${esc(r[2])}','${esc(r[3])}','${esc(r[4])}','${esc(r[5])}','${esc(r[6])}')`
-    )
-    .join(',');
-  const stmt = `INSERT INTO verses_fts(surah,verse,sname,ar,ur,en,hi) VALUES ${chunk};`;
-  const last = parts[parts.length - 1];
-  if ((last + '\n' + stmt).length > 1800000) parts.push(stmt);
-  else parts[parts.length - 1] = `${last}\n${stmt}`;
+const parts = [];
+const MAX_BYTES = 150 * 1024;
+let cur = [];
+let curBytes = 0;
+for (const r of rows) {
+  const stmt =
+    `INSERT INTO verses_fts(surah,verse,sname,ar,ur,en,hi) VALUES ` +
+    `(${r[0]},${r[1]},'${esc(r[2])}','${esc(r[3])}','${esc(r[4])}','${esc(r[5])}','${esc(r[6])}');`;
+  const b = Buffer.byteLength(stmt + '\n', 'utf8');
+  if (cur.length && curBytes + b > MAX_BYTES) {
+    parts.push(cur);
+    cur = [];
+    curBytes = 0;
+  }
+  cur.push(stmt);
+  curBytes += b;
 }
-parts.forEach((p, i) => {
-  writeFileSync(`${root}/migrations/0005_quran_verses_${i + 1}.sql`, `${p}\n`);
-  console.log(`wrote 0005_quran_verses_${i + 1}.sql (${(p.length / 1048576).toFixed(2)} MB)`);
+if (cur.length) parts.push(cur);
+writeFileSync(`${root}/migrations/0005_quran_schema.sql`, `${head}\n`);
+console.log(`wrote 0005_quran_schema.sql (${(head.length / 1024).toFixed(0)} KB)`);
+parts.forEach((chunk, i) => {
+  const name = `0006_quran_verses_${String(i + 1).padStart(2, '0')}.sql`;
+  const body = chunk.join('\n');
+  writeFileSync(`${root}/migrations/${name}`, `${body}\n`);
+  console.log(`wrote ${name} (${chunk.length} verses, ${(body.length / 1024).toFixed(0)} KB)`);
 });
-console.log(`done: ${rows.length} verses, ${pages.length} pages, ${parts.length} files`);
+console.log(`done: ${rows.length} verses, ${pages.length} pages, ${parts.length + 1} files`);
