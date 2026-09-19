@@ -1,14 +1,18 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AuthModal from '../../components/AuthModal.astro';
+import AppHeader from '../../components/AppHeader.astro';
 import AppTabBar from '../../components/AppTabBar.astro';
 import { localizedPath } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 
 const locale = 'en';
+const readBase = localizedPath(locale, '/tools/read/');
+const progressSavedUrl = `${localizedPath(locale, '/tools/my-progress/')}#saved`;
+const surahData = (surahsMeta as any[]).map((s) => [s.num, s.name, s.englishName, s.verseCount]);
 const faq = [
   { q: 'Do I need to login to read?', a: 'You can browse, but verses, streaks and hasanat only save to your free account — login first so nothing is lost.' },
-  { q: 'Where do I continue from?', a: 'Your last position saves automatically. The Continue button above takes you back to the exact verse.' },
+  { q: 'Where do I continue from?', a: 'Your last position saves automatically. Pick your surah and verse below — it starts filled with where you left off.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -17,61 +21,205 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="Read Quran — Gamified Reading Session" description="Read verse by verse with timer, audio, hasanat counter, streaks and Juz progress. Free — login saves everything." keywords="read quran, quran reading tracker, quran streak, hasanat counter" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs}>
-  <div class="max-w-4xl mx-auto px-4 py-8" data-picker>
-    <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-night-900 bg-gold-300 rounded-full px-3.5 py-1.5 inline-block">📖 Reading session</p>
-    <h1 class="text-3xl md:text-4xl font-extrabold text-white mt-3">Read Quran, earn your streak</h1>
-    <p class="mt-2 text-ink-300 leading-7 max-w-2xl">Pick a surah — read verse by verse, tap <b>I'm Done</b>, and your verses, time and hasanat save automatically.</p>
+  <AppHeader locale={locale} title="Reading" />
+  <div class="max-w-md mx-auto px-4 py-5" data-reading>
+    <p class="text-center text-[17px] font-bold text-white leading-7">Your daily Quran — every verse saves to your streak, timer and hasanat.</p>
 
-    <div data-pk-resume class="hidden mt-5 bg-night-850 border border-brand-500/40 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center gap-3">
-      <p class="font-extrabold text-white">Continue: <span data-pk-resumelabel class="text-brand-300"></span></p>
-      <a data-pk-resumelink href="#" class="sm:ms-auto shrink-0 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px] inline-flex items-center justify-center">Continue →</a>
+    {/* surah selector */}
+    <button data-r-surahbtn class="mt-4 w-full flex items-center gap-3 text-start bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-3xl p-5 min-h-[76px] transition">
+      <span class="min-w-0 flex-1">
+        <span data-r-surahtitle class="block text-[22px] font-extrabold text-white truncate">Al-Faatiha</span>
+        <span data-r-surahsub class="block text-[15px] text-ink-500">The Opening | 7 Verses</span>
+      </span>
+      <span class="text-ink-300 text-3xl leading-none" aria-hidden="true">›</span>
+    </button>
+
+    {/* verse selector */}
+    <button data-r-versebtn class="mt-3 w-full flex items-center gap-3 text-start bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-3xl p-5 min-h-[76px] transition">
+      <span class="min-w-0 flex-1">
+        <span class="block text-[22px] font-extrabold text-white">Start from Verse</span>
+        <span data-r-versesub class="block text-[15px] text-ink-500">1 Verse</span>
+      </span>
+      <span class="text-ink-300 text-3xl leading-none" aria-hidden="true">›</span>
+    </button>
+
+    {/* start */}
+    <a data-r-start href={`${readBase}1/?verse=1`} class="mt-3 flex items-center justify-center rounded-full border-2 border-white/70 hover:border-white hover:bg-white/5 active:scale-[0.99] text-white text-lg font-bold px-6 py-3.5 min-h-[56px] transition">Start Reading Quran</a>
+
+    {/* favourites + bookmarks */}
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <a href={progressSavedUrl} class="rounded-3xl border-2 border-rose-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
+        <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-rose-600 text-4xl shadow-lg shadow-rose-950/50" aria-hidden="true">🤍</span>
+        <span class="mt-2 block text-[17px] text-ink-200">Favourites</span>
+        <span data-r-favcount class="block text-2xl font-extrabold text-white">0</span>
+      </a>
+      <a href={progressSavedUrl} class="rounded-3xl border-2 border-violet-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
+        <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-4xl shadow-lg shadow-violet-950/50" aria-hidden="true">🔖</span>
+        <span class="mt-2 block text-[17px] text-ink-200">Bookmarks</span>
+        <span data-r-markcount class="block text-2xl font-extrabold text-white">0</span>
+      </a>
     </div>
-    <div data-pk-login class="mt-5 bg-night-850 border border-white/10 rounded-3xl p-5 text-center">
+
+    {/* guest nudge */}
+    <div data-r-login class="mt-4 bg-night-850 border border-white/10 rounded-3xl p-5 text-center">
       <p class="font-bold text-ink-200">Login to save your reading progress</p>
-      <button data-pk-open class="mt-3 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+      <button data-r-open class="mt-3 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
     </div>
 
-    <input data-pk-filter placeholder="Search surah — name or number…" class="mt-5 w-full max-w-xl bg-night-800 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-    <div class="grid gap-3 sm:grid-cols-2 mt-4">
+    {/* all surahs */}
+    <h2 class="mt-8 text-xl font-extrabold text-white">All Surahs</h2>
+    <input data-r-filter placeholder="Search surah — name or number…" class="mt-3 w-full bg-night-800 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+    <div class="mt-3 space-y-2">
       {(surahsMeta as any[]).map((s) => (
-        <a href={localizedPath(locale, `/tools/read/${s.num}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="pkrow group bg-night-850 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:border-brand-500/50 transition">
-          <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold">{s.num}</span>
-          <span class="min-w-0">
-            <span class="font-bold block leading-6 text-ink-50 group-hover:text-brand-300">Surah {s.name} <span class="text-ink-500 font-normal">• {s.englishName}</span></span>
-            <span class="text-xs text-ink-500">{s.verseCount} verses</span>
+        <a href={localizedPath(locale, `/tools/read/${s.num}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="rrow group bg-night-850 border border-white/10 rounded-2xl px-4 py-3 min-h-[60px] flex items-center gap-3 hover:border-brand-500/50 transition">
+          <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold text-sm">{s.num}</span>
+          <span class="min-w-0 flex-1">
+            <span class="font-bold block leading-6 text-ink-50 group-hover:text-brand-300 truncate">Surah {s.name}</span>
+            <span class="text-xs text-ink-500">{s.englishName} • {s.verseCount} verses</span>
           </span>
-          <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{s.arabicName}</span>
+          <span class="text-ink-500 text-2xl leading-none" aria-hidden="true">›</span>
         </a>
       ))}
     </div>
   </div>
+
+  {/* surah bottom sheet */}
+  <div data-r-surahsheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Surah">
+    <div class="absolute inset-0 bg-black/70" data-r-close></div>
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-850 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+      <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
+      <div class="flex items-center gap-2">
+        <input data-r-surahfilter placeholder="Search surah…" class="flex-1 min-w-0 bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+        <button data-r-close class="w-[52px] h-[52px] shrink-0 grid place-items-center rounded-2xl bg-white/5 border border-white/10 text-ink-200 text-xl" aria-label="Close">✕</button>
+      </div>
+      <div data-r-surahlist class="mt-3 overflow-y-auto space-y-2 pe-1"></div>
+    </div>
+  </div>
+
+  {/* verse bottom sheet */}
+  <div data-r-versesheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Verse">
+    <div class="absolute inset-0 bg-black/70" data-r-close></div>
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-850 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+      <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
+      <div class="flex items-center gap-2">
+        <p class="flex-1 font-extrabold text-lg text-white">Start from verse <span data-r-sheetcount class="text-ink-500 text-sm"></span></p>
+        <button data-r-close class="w-[52px] h-[52px] shrink-0 grid place-items-center rounded-2xl bg-white/5 border border-white/10 text-ink-200 text-xl" aria-label="Close">✕</button>
+      </div>
+      <div data-r-verselist class="mt-3 overflow-y-auto grid grid-cols-5 gap-2 pe-1"></div>
+    </div>
+  </div>
+
   <AuthModal />
   <AppTabBar locale={locale} active="reading" />
-  <script define:vars={{ readBase: localizedPath(locale, '/tools/read/') }}>
+  <script define:vars={{ readBase, surahData }}>
     (() => {
-      const root = document.querySelector('[data-picker]');
+      const root = document.querySelector('[data-reading]');
       if (!root || root.dataset.wired) return;
       root.dataset.wired = '1';
-      root.querySelector('[data-pk-filter]')?.addEventListener('input', (e) => {
-        const q = e.target.value.toLowerCase().trim();
-        root.querySelectorAll('.pkrow').forEach((r) => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
+      const $ = (s) => root.querySelector(s);
+      let H = null, surah = 1, verse = 1;
+
+      const meta = (n) => {
+        const m = surahData[n - 1];
+        return m ? { num: m[0], name: m[1], english: m[2], count: m[3] } : { num: n, name: `Surah ${n}`, english: '', count: 0 };
+      };
+      const paintSelection = () => {
+        const m = meta(surah);
+        if ($('[data-r-surahtitle]')) $('[data-r-surahtitle]').textContent = m.name;
+        if ($('[data-r-surahsub]')) $('[data-r-surahsub]').textContent = `${m.english} | ${m.count} Verses`;
+        if ($('[data-r-versesub]')) $('[data-r-versesub]').textContent = `${verse} Verse${verse > 1 ? 's' : ''}`;
+        const st = $('[data-r-start]');
+        if (st) st.href = `${String(readBase).replace(/\/$/, '')}/${surah}/?verse=${verse}`;
+      };
+
+      const openSheet = (sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return;
+        el.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      };
+      const closeSheets = () => {
+        document.querySelectorAll('[data-r-surahsheet],[data-r-versesheet]').forEach((el) => el.classList.add('hidden'));
+        document.body.style.overflow = '';
+      };
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheets(); });
+      root.querySelectorAll('[data-r-close]').forEach((b) => b.addEventListener('click', closeSheets));
+
+      const renderSurahList = (q = '') => {
+        const box = $('[data-r-surahlist]');
+        if (!box) return;
+        const query = String(q || '').toLowerCase().trim();
+        const list = surahData.filter((m) => !query || `${m[0]} ${m[1]} ${m[2]}`.toLowerCase().includes(query));
+        box.innerHTML = list.length ? list.map((m) => `
+          <button data-pick-surah="${m[0]}" class="w-full flex items-center gap-3 text-start rounded-2xl px-4 py-3 min-h-[60px] transition ${m[0] === surah ? 'bg-brand-500/20 border-2 border-brand-500' : 'bg-white/5 border-2 border-transparent hover:border-white/15'}">
+            <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold text-sm">${m[0]}</span>
+            <span class="min-w-0"><span class="block font-bold text-ink-50 truncate">${m[1]}</span><span class="block text-xs text-ink-500">${m[2]} • ${m[3]} verses</span></span>
+            ${m[0] === surah ? '<span class="ms-auto text-brand-300 font-extrabold">✓</span>' : ''}
+          </button>`).join('') : `<p class="text-center text-sm text-ink-500 py-6">No surah matches “${q}”.</p>`;
+        box.querySelectorAll('[data-pick-surah]').forEach((b) => b.addEventListener('click', () => {
+          surah = Number(b.dataset.pickSurah);
+          verse = verse <= meta(surah).count ? verse : 1;
+          paintSelection();
+          closeSheets();
+        }));
+      };
+
+      const renderVerseGrid = () => {
+        const box = $('[data-r-verselist]');
+        if (!box) return;
+        const m = meta(surah);
+        const cnt = $('[data-r-sheetcount]');
+        if (cnt) cnt.textContent = `of ${m.name} (${m.count})`;
+        let html = '';
+        for (let v = 1; v <= m.count; v++) {
+          html += `<button data-pick-verse="${v}" class="min-h-[48px] rounded-xl font-extrabold text-[15px] transition ${v === verse ? 'bg-brand-500 text-night-900' : 'bg-white/5 text-ink-200 border border-white/10 hover:border-brand-400'}">${v}</button>`;
+        }
+        box.innerHTML = html;
+        box.querySelectorAll('[data-pick-verse]').forEach((b) => b.addEventListener('click', () => {
+          verse = Number(b.dataset.pickVerse);
+          paintSelection();
+          closeSheets();
+        }));
+      };
+
+      $('[data-r-surahbtn]')?.addEventListener('click', () => {
+        const f = $('[data-r-surahfilter]');
+        if (f) f.value = '';
+        renderSurahList('');
+        openSheet('[data-r-surahsheet]');
       });
-      root.querySelector('[data-pk-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
+      $('[data-r-versebtn]')?.addEventListener('click', () => {
+        renderVerseGrid();
+        openSheet('[data-r-versesheet]');
+      });
+      $('[data-r-surahfilter]')?.addEventListener('input', (e) => renderSurahList(e.target.value));
+      root.querySelector('[data-r-filter]')?.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase().trim();
+        root.querySelectorAll('.rrow').forEach((r) => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
+      });
+      root.querySelector('[data-r-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
+      document.addEventListener('hn:auth', () => window.location.reload());
+
+      paintSelection();
       (async () => {
+        try { H = await import('/habits/habit.js?v=4'); } catch { return; }
+        let user = null;
+        try { user = (await H.Auth.session()).user; } catch {}
+        if (!user) return;
+        root.querySelector('[data-r-login]')?.classList.add('hidden');
         try {
-          const { Auth, Me } = await import('/habits/habit.js?v=4');
-          const { user } = await Auth.session();
-          if (!user) return;
-          root.querySelector('[data-pk-login]')?.classList.add('hidden');
-          const { resume } = await Me.resume().catch(() => ({ resume: null }));
-          if (resume) {
-            const box = root.querySelector('[data-pk-resume]');
-            box?.classList.remove('hidden');
-            const lbl = box?.querySelector('[data-pk-resumelabel]');
-            if (lbl) lbl.textContent = `Surah ${resume.surah}, verse ${resume.verse}`;
-            const link = box?.querySelector('[data-pk-resumelink]');
-            if (link) link.href = `${readBase}${resume.surah}/?verse=${resume.verse}`;
+          const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
+          if (resume?.surah) {
+            surah = Math.min(114, Math.max(1, resume.surah));
+            verse = Math.max(1, resume.verse || 1);
+            paintSelection();
           }
+        } catch {}
+        try {
+          const { bookmarks } = await H.Me.bookmarks().catch(() => ({ bookmarks: [] }));
+          const list = bookmarks || [];
+          if ($('[data-r-favcount]')) $('[data-r-favcount]').textContent = list.filter((b) => b.kind === 'verse').length;
+          if ($('[data-r-markcount]')) $('[data-r-markcount]').textContent = list.length;
         } catch {}
       })();
     })();

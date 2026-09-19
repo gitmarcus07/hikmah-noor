@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LeaderboardBoard from '../components/LeaderboardBoard.astro';
+import AppHeader from '../components/AppHeader.astro';
 import AppTabBar from '../components/AppTabBar.astro';
 
 const locale = 'en';
@@ -10,6 +11,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="Global Leaderboard — Top Quran Readers" description="The global Hikmah Noor leaderboard: top readers ranked by hasanat, verses and streaks. Read daily and climb the ranks." keywords="quran leaderboard, top readers, hasanat ranking, quran streak leaderboard" locale={locale} canonicalPath="/leaderboard/" crumbs={crumbs} noindex={true}>
+  <AppHeader locale={locale} title="Leaderboard" />
   <LeaderboardBoard locale={locale} />
   <AppTabBar locale={locale} active="leaderboard" />
 </BaseLayout>

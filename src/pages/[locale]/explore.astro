@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import AppTabBar from '../../components/AppTabBar.astro';
+import { nonDefaultLocales, localizedPath } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Explore', path: '/explore/' },
+];
+
+const CARDS = [
+  {
+    title: 'Search Quran', sub: 'Search Translation & Ayaat!',
+    href: localizedPath(locale, '/search/'),
+    bg: 'bg-gradient-to-br from-[#c4a5f5] via-[#a985ee] to-[#8b6ff0]',
+    titleCls: 'text-white', subCls: 'text-white/85', icon: '🔍',
+  },
+  {
+    title: 'Quranic Gems', sub: "Gems of understanding — let's start now!",
+    href: localizedPath(locale, '/meanings/'),
+    bg: 'bg-gradient-to-br from-[#b79df7] via-[#9d7ff2] to-[#7c5cf0]',
+    titleCls: 'text-white', subCls: 'text-white/85', icon: '💎',
+  },
+  {
+    title: 'Mushaf', sub: 'Classic Mushaf format!',
+    href: localizedPath(locale, '/quran/'),
+    bg: 'bg-gradient-to-br from-[#a7f3d0] via-[#6ee7b7] to-[#34d399]',
+    titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '📖',
+  },
+  {
+    title: 'Quran Challenges', sub: 'How far can you go?',
+    href: `${localizedPath(locale, '/tools/my-progress/')}#challenges`,
+    bg: 'bg-gradient-to-br from-[#fed7aa] via-[#fdba74] to-[#fb923c]',
+    titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '⛰️',
+  },
+];
+---
+<BaseLayout title="Explore — Search Quran, Gems, Mushaf & Challenges" description="Explore the Quran: search translations and ayaat, discover Quranic gems, read the classic Mushaf, and take Quran challenges." locale={locale} canonicalPath="/explore/" crumbs={crumbs}>
+  <AppHeader locale={locale} title="Explore" />
+  <div class="max-w-md mx-auto px-4 py-5 space-y-3.5">
+    {CARDS.map((c) => (
+      <a href={c.href} class={`group relative overflow-hidden flex items-center gap-3 rounded-[28px] p-5 min-h-[112px] shadow-xl shadow-black/30 hover:scale-[1.01] active:scale-[0.99] transition ${c.bg}`}>
+        <span class="min-w-0 flex-1">
+          <span class={`block text-[26px] leading-8 font-extrabold ${c.titleCls}`}>{c.title}</span>
+          <span class={`block mt-0.5 text-[15px] font-medium ${c.subCls}`}>{c.sub}</span>
+        </span>
+        <span class="shrink-0 text-[64px] leading-none opacity-90 drop-shadow-lg group-hover:scale-110 transition" aria-hidden="true">{c.icon}</span>
+      </a>
+    ))}
+    <p class="mx-auto max-w-3xl text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+  </div>
+  <AppTabBar locale={locale} active="explore" />
+</BaseLayout>

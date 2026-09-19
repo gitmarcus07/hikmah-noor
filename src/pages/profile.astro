@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProfileSection from '../components/ProfileSection.astro';
+import AppHeader from '../components/AppHeader.astro';
 import AppTabBar from '../components/AppTabBar.astro';
 
 const locale = 'en';
@@ -10,6 +11,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="My Profile — Login, Account & Details" description="Login, create your free account and manage your profile — name, username, country, bio and avatar. Your Quran progress syncs everywhere." keywords="profile, login, signup, account, user profile" locale={locale} canonicalPath="/profile/" crumbs={crumbs} noindex={true}>
+  <AppHeader locale={locale} title="Profile" />
   <ProfileSection locale={locale} />
   <AppTabBar locale={locale} active="settings" />
 </BaseLayout>
