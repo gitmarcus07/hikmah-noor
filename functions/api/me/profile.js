@@ -7,6 +7,8 @@ import {
 
 const GENDERS = new Set(['', 'male', 'female', 'other', 'prefer-not-to-say']);
 const LANGS = new Set(['en', 'hi', 'ur', 'ar']);
+// Premium SVG avatar ids (must mirror AVATAR_IDS in public/habits/habit.js).
+const KNOWN_AVATARS = new Set(['hilal', 'kaaba', 'dome', 'star8', 'fanoos', 'tasbih', 'mushaf', 'mihrab', 'badr', 'lulu', 'nakhil', 'zamzam']);
 const USERNAME_RE = /^[a-zA-Z0-9_.]{3,30}$/;
 
 async function tableCols(db) {
@@ -119,20 +121,25 @@ export async function onRequestPut(context) {
       sets.push('language = ?');
       vals.push(language);
     }
-    // --- avatar emoji ---
+    // --- avatar choice: premium SVG id (hilal, kaaba, …) or classic emoji ---
     if (body.avatar_emoji !== undefined) {
-      const avatar_emoji = String(body.avatar_emoji || '').trim().slice(0, 8);
+      const raw = String(body.avatar_emoji || '').trim();
+      const avatar_emoji = KNOWN_AVATARS.has(raw) ? raw : raw.slice(0, 8);
       sets.push('avatar_emoji = ?');
       vals.push(avatar_emoji);
     }
-    // --- avatar url (https only) ---
+    // --- custom photo: https link or small uploaded data:image ---
     if (body.avatar_url !== undefined) {
-      const avatar_url = String(body.avatar_url || '').trim().slice(0, 500);
-      if (avatar_url && !/^https:\/\//.test(avatar_url)) {
-        return fail('Avatar link must start with https://');
+      const avatar_url = String(body.avatar_url || '').trim();
+      if (avatar_url) {
+        const isHttps = /^https:\/\//.test(avatar_url) && avatar_url.length <= 500;
+        const isUpload = /^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_url) && avatar_url.length <= 25000;
+        if (!isHttps && !isUpload) {
+          return fail('Photo must be an https:// link or an uploaded image.');
+        }
       }
       sets.push('avatar_url = ?');
-      vals.push(avatar_url);
+      vals.push(avatar_url.slice(0, 25000));
     }
     if (cols.has('updated_at')) {
       sets.push('updated_at = ?');

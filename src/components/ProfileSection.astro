@@ -11,8 +11,7 @@ const { locale = 'en' } = Astro.props;
 const progressUrl = localizedPath(locale, '/tools/my-progress/');
 const readUrl = localizedPath(locale, '/tools/read/');
 const homeUrl = localizedPath(locale, '/');
-
-const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','🌸','🍀','💎','🔥','🌊','🦅','🐝','🍉','🌹','🪴','🐪'];
+const leaderboardUrl = localizedPath(locale, '/leaderboard/');
 ---
 
 <div class="max-w-3xl mx-auto px-4 py-8" data-profile>
@@ -60,6 +59,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
         <a data-p-read href={readUrl} class="flex-1 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📖 Continue reading</a>
         <a href={progressUrl} class="flex-1 inline-flex items-center justify-center gap-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📊 My progress</a>
       </div>
+      <a href={leaderboardUrl} class="mt-2 flex items-center justify-center gap-2 text-sm font-extrabold text-gold-300 hover:text-amber-200 min-h-[44px]">🏆 Global leaderboard →</a>
     </section>
 
     {/* edit form */}
@@ -68,10 +68,23 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
       <p class="text-sm text-ink-500 mt-0.5">Shown on your progress page and greetings. Email stays private.</p>
 
       <p class="mt-4 text-xs font-extrabold uppercase tracking-widest text-ink-500">Choose an avatar</p>
-      <div data-p-emojis class="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Avatar emoji">
-        {AVATARS.map((e) => (
-          <button type="button" data-emoji={e} class="w-11 h-11 grid place-items-center rounded-full border-2 border-white/10 bg-white/5 text-2xl hover:border-brand-400 transition min-w-[44px] min-h-[44px]" role="radio" aria-checked="false">{e}</button>
-        ))}
+      <p class="mt-1 text-xs text-ink-500">Pick a design below — or use your own photo. Your choice shows here instantly.</p>
+      <div data-p-gallery class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2" role="radiogroup" aria-label="Avatar gallery">
+        {/* filled by script from habit.js (single source of truth) */}
+      </div>
+
+      <div class="mt-4 rounded-2xl border border-white/10 bg-night-800 p-4">
+        <p class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Custom photo <span class="normal-case font-bold">(optional)</span></p>
+        <div class="mt-2 flex flex-col sm:flex-row gap-2">
+          <label data-p-upload class="flex-1 inline-flex items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-white/15 hover:border-brand-400 rounded-2xl px-4 py-3 min-h-[52px] text-sm font-extrabold text-ink-200 transition">
+            📷 Upload photo
+            <input data-p-file type="file" accept="image/*" class="sr-only" />
+          </label>
+          <button type="button" data-p-photorm class="hidden items-center justify-center gap-2 text-sm font-bold text-red-300 hover:text-red-200 border border-red-400/30 rounded-2xl px-4 py-3 min-h-[52px]">Remove</button>
+        </div>
+        <input data-p-photourl type="url" inputmode="url" maxlength="500" placeholder="…or paste an https:// image link"
+          class="mt-2 w-full bg-night-850 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 text-sm" />
+        <p class="mt-1.5 text-[11px] text-ink-500 leading-4">Uploads are resized on your device before saving. A photo replaces the gallery avatar.</p>
       </div>
 
       <form data-p-form class="mt-4 grid gap-3 sm:grid-cols-2">
@@ -84,6 +97,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
           <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username</span>
           <input name="username" maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads"
             class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+          <span class="mt-1 block text-[11px] text-ink-500 leading-4">Set a @username to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
         </label>
         <label class="block">
           <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country</span>
@@ -179,7 +193,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
       countrySel?.appendChild(o);
     });
 
-    let H = null, profile = null, pickedEmoji = '';
+    let H = null, profile = null, picked = '', photo = '';
 
     const showMsg = (sel, ok, text) => {
       const el = $(sel);
@@ -189,29 +203,71 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
       el.classList.add(ok ? 'bg-emerald-400/15' : 'bg-red-400/10', ok ? 'text-emerald-200' : 'text-red-200');
     };
 
-    const paintEmoji = () => {
-      root.querySelectorAll('[data-emoji]').forEach((b) => {
-        const on = b.dataset.emoji === pickedEmoji;
-        b.classList.toggle('border-brand-500', on);
-        b.classList.toggle('bg-brand-500/20', on);
+    // Visible face via habit.js (photo → SVG → emoji → initial).
+    const faceHTML = (u) => {
+      try {
+        if (H?.faceFor) return H.faceFor(u);
+      } catch { /* fall through to local fallback */ }
+      if (u?.avatar) return `<img src="${String(u.avatar).replace(/"/g, '')}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />`;
+      return (u?.avatar_emoji || (u?.name || 'R').trim().charAt(0).toUpperCase() || 'R');
+    };
+    const setFace = (el, html) => {
+      if (!el) return;
+      if (String(html).trim().startsWith('<')) { el.innerHTML = html; }
+      else { el.innerHTML = ''; el.textContent = html; }
+    };
+    // Live preview (unsaved) combining the current picks.
+    const previewUser = () => ({ ...(profile || {}), avatar_emoji: picked, avatar: photo || '' });
+    const paintPreview = () => setFace($('[data-p-avatar]'), faceHTML(previewUser()));
+
+    const renderGallery = () => {
+      const box = $('[data-p-gallery]');
+      if (!box || !H?.AVATAR_IDS || box.dataset.done) return;
+      box.dataset.done = '1';
+      H.AVATAR_IDS.forEach((id) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.avatar = id;
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', 'false');
+        b.title = (H.AVATAR_NAMES && H.AVATAR_NAMES[id]) || id;
+        b.setAttribute('aria-label', b.title);
+        b.className = 'relative aspect-square overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 hover:border-brand-400 hover:scale-[1.03] active:scale-95 transition min-h-[52px]';
+        b.innerHTML = H.AVATAR_SVGS[id];
+        b.addEventListener('click', () => selectAvatar(id));
+        box.appendChild(b);
+      });
+      paintGallery();
+    };
+    const paintGallery = () => {
+      root.querySelectorAll('[data-avatar]').forEach((b) => {
+        const on = b.dataset.avatar === picked;
+        b.classList.toggle('border-gold-300', on);
+        b.classList.toggle('ring-2', on);
+        b.classList.toggle('ring-gold-300/60', on);
         b.classList.toggle('border-white/10', !on);
         b.setAttribute('aria-checked', String(on));
       });
     };
-    root.querySelectorAll('[data-emoji]').forEach((b) => b.addEventListener('click', () => {
-      pickedEmoji = pickedEmoji === b.dataset.emoji ? '' : b.dataset.emoji;
-      paintEmoji();
-    }));
-
-    const avatarFor = (u) => {
-      if (u?.avatar_emoji) return u.avatar_emoji;
-      if (u?.avatar) return `<img src="${u.avatar.replace(/"/g, '')}" alt="" class="w-full h-full object-cover" />`;
-      return (u?.name || 'R').trim().charAt(0).toUpperCase() || 'R';
+    const selectAvatar = (id) => {
+      picked = picked === id ? '' : id;
+      if (picked) {
+        // Gallery choice replaces any custom photo.
+        photo = '';
+        const urlInput = $('[data-p-photourl]');
+        if (urlInput) urlInput.value = '';
+        syncPhotoUI();
+      }
+      paintGallery();
+      paintPreview();
+    };
+    const syncPhotoUI = () => {
+      const rm = $('[data-p-photorm]');
+      if (rm) { rm.classList.toggle('hidden', !photo); rm.classList.toggle('inline-flex', !!photo); }
     };
 
     const paintHeader = (u) => {
-      const av = $('[data-p-avatar]');
-      if (av) { av.innerHTML = ''; const inner = avatarFor(u); if (inner.startsWith('<img')) av.innerHTML = inner; else av.textContent = inner; }
+      setFace($('[data-p-avatar]'), faceHTML(u));
       if ($('[data-p-name]')) $('[data-p-name]').textContent = u.name || 'Reader';
       if ($('[data-p-username]')) $('[data-p-username]').textContent = u.username ? `@${u.username}` : '';
       if ($('[data-p-email]')) $('[data-p-email]').textContent = u.email || '';
@@ -238,8 +294,13 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
       f.bio.value = u.bio || '';
       f.gender.value = ['male', 'female', 'other'].includes(u.gender) ? u.gender : '';
       f.language.value = ['en', 'hi', 'ur', 'ar'].includes(u.language) ? u.language : 'en';
-      pickedEmoji = u.avatar_emoji || '';
-      paintEmoji();
+      picked = u.avatar_emoji || '';
+      photo = u.avatar || '';
+      const urlInput = $('[data-p-photourl]');
+      if (urlInput) urlInput.value = /^https:\/\//.test(photo) ? photo : '';
+      renderGallery();
+      paintGallery();
+      syncPhotoUI();
       const bc = $('[data-p-biocount]');
       if (bc) bc.textContent = `(${(u.bio || '').length}/280)`;
     };
@@ -270,6 +331,59 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
       if (bc) bc.textContent = `(${bioInput.value.length}/280)`;
     });
 
+    // Custom photo: upload (resized on-device) or https link.
+    $('[data-p-file]')?.addEventListener('change', (e) => {
+      const file = e.currentTarget.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showMsg('[data-p-msg]', false, 'Please choose an image file.'); return; }
+      const img = new Image();
+      const objUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          const S = 160;
+          const scale = Math.max(S / img.width, S / img.height);
+          const cw = document.createElement('canvas');
+          cw.width = S; cw.height = S;
+          const ctx = cw.getContext('2d');
+          const w = img.width * scale, h = img.height * scale;
+          ctx.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+          photo = cw.toDataURL('image/jpeg', 0.82);
+          picked = '';
+          const urlInput = $('[data-p-photourl]');
+          if (urlInput) urlInput.value = '';
+          URL.revokeObjectURL(objUrl);
+          paintGallery();
+          paintPreview();
+          syncPhotoUI();
+          showMsg('[data-p-msg]', true, '✓ Photo ready — hit Save profile to keep it.');
+          setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 3000);
+        } catch { showMsg('[data-p-msg]', false, 'Could not read that image.'); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(objUrl); showMsg('[data-p-msg]', false, 'Could not read that image.'); };
+      img.src = objUrl;
+    });
+
+    $('[data-p-photourl]')?.addEventListener('change', (e) => {
+      const v = String(e.currentTarget.value || '').trim();
+      if (!v) return;
+      if (!/^https:\/\//.test(v)) { showMsg('[data-p-msg]', false, 'Photo link must start with https://'); return; }
+      photo = v;
+      picked = '';
+      paintGallery();
+      paintPreview();
+      syncPhotoUI();
+    });
+
+    $('[data-p-photorm]')?.addEventListener('click', () => {
+      photo = '';
+      const urlInput = $('[data-p-photourl]');
+      if (urlInput) urlInput.value = '';
+      const fileInput = $('[data-p-file]');
+      if (fileInput) fileInput.value = '';
+      paintPreview();
+      syncPhotoUI();
+    });
+
     $('[data-p-form]')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!H?.Me?.saveProfile) {
@@ -284,7 +398,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
         const data = await H.Me.saveProfile({
           name: fd.get('name'), username: fd.get('username'), country: fd.get('country'),
           city: fd.get('city'), bio: fd.get('bio'), gender: fd.get('gender'),
-          language: fd.get('language'), avatar_emoji: pickedEmoji,
+          language: fd.get('language'), avatar_emoji: picked, avatar_url: photo,
         });
         profile = data.user;
         paintHeader(profile);
@@ -345,7 +459,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
     });
 
     (async () => {
-      H = await import('/habits/habit.js?v=2');
+      H = await import('/habits/habit.js?v=3');
       let user = null;
       try {
         const s = await H.Auth.session();

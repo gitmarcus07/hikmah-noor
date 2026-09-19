@@ -22,10 +22,12 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      // Keep noindex redirect stubs and login-gated habit pages out.
+      // Keep noindex redirect stubs, login-gated habit pages,
+      // and account pages (profile, leaderboard) out.
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
-        !/\/tools\/(read|my-progress)\//.test(page),
+        !/\/tools\/(read|my-progress)\//.test(page) &&
+        !/\/(profile|leaderboard)\//.test(page),
     }),
   ],
 });

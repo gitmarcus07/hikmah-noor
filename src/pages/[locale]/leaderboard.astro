@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LeaderboardBoard from '../../components/LeaderboardBoard.astro';
+import { nonDefaultLocales } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Leaderboard', path: '/leaderboard/' },
+];
+---
+<BaseLayout title="Global Leaderboard — Top Quran Readers" description="The global Hikmah Noor leaderboard: top readers ranked by hasanat, verses and streaks. Read daily and climb the ranks." locale={locale} canonicalPath="/leaderboard/" crumbs={crumbs} noindex={true}>
+  <LeaderboardBoard locale={locale} />
+  <p class="mx-auto max-w-3xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

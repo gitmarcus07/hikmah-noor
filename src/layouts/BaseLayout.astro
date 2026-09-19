@@ -23,6 +23,7 @@ const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
 const canonical = `${site}${localizedPath(locale, canonicalPath || '/')}`;
 const fontCss = 'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap';
+const profileUrl = localizedPath(locale, '/profile/');
 
 const articleLd = type === 'article' ? {
   '@context': 'https://schema.org',
@@ -170,7 +171,7 @@ const crumbLd = crumbs.length ? {
       </div>
     </div>
   </header>
-  <script>
+  <script define:vars={{ profileUrl }}>
     (() => {
       const langBtn = document.getElementById('langBtn');
       const langMenu = document.getElementById('langMenu');
@@ -219,7 +220,32 @@ const crumbLd = crumbs.length ? {
       });
 
       // ---- site-wide auth chip: guest → Login, member → avatar + name ----
+      // Faces resolve via habit.js (custom photo → SVG avatar → initial).
+      let HN = null, lastUser = undefined;
+      import('/habits/habit.js?v=3').then((m) => {
+        HN = m;
+        if (lastUser !== undefined) paintNav(lastUser);
+      }).catch(() => {});
+      const faceFallback = (user) => {
+        const first = (user.name || 'Profile').split(' ')[0];
+        return first.charAt(0).toUpperCase() || 'R';
+      };
+      const setFace = (el, user) => {
+        if (!el) return;
+        try {
+          if (HN?.faceFor) {
+            const html = HN.faceFor(user);
+            if (String(html).trim().startsWith('<')) { el.innerHTML = html; return; }
+            el.innerHTML = '';
+            el.textContent = html;
+            return;
+          }
+        } catch { /* fallback below */ }
+        el.innerHTML = '';
+        el.textContent = faceFallback(user);
+      };
       const paintNav = (user) => {
+        lastUser = user || null;
         const login = document.querySelector('[data-nav-login]');
         const chip = document.querySelector('[data-nav-profile]');
         const mName = document.querySelector('[data-nav-mobile-name]');
@@ -238,20 +264,11 @@ const crumbLd = crumbs.length ? {
         chip?.classList.remove('hidden');
         chip?.classList.add('inline-flex');
         const first = (user.name || 'Profile').split(' ')[0];
-        const av = document.querySelector('[data-nav-avatar]');
-        if (av) {
-          if (user.avatar_emoji) av.textContent = user.avatar_emoji;
-          else if (user.avatar) { av.innerHTML = ''; const img = document.createElement('img'); img.src = user.avatar; img.alt = ''; img.className = 'w-full h-full object-cover'; av.appendChild(img); }
-          else av.textContent = first.charAt(0).toUpperCase();
-        }
+        setFace(document.querySelector('[data-nav-avatar]'), user);
         const nm = document.querySelector('[data-nav-name]');
         if (nm) nm.textContent = first;
         if (mName) mName.textContent = user.name || user.email || 'My profile';
-        if (mAv) {
-          if (user.avatar_emoji) mAv.textContent = user.avatar_emoji;
-          else if (user.avatar) { mAv.innerHTML = ''; const img = document.createElement('img'); img.src = user.avatar; img.alt = ''; img.className = 'w-full h-full object-cover rounded-xl'; mAv.appendChild(img); }
-          else mAv.textContent = first.charAt(0).toUpperCase();
-        }
+        setFace(document.querySelector('[data-nav-mobile-avatar]'), user);
       };
       window.hnUpdateNav = paintNav;
       // Open the page-level login modal when present; else go to /profile/.
@@ -282,6 +299,7 @@ const crumbLd = crumbs.length ? {
         <ul class="space-y-2 text-sm">
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/about/')}>About Us</a></li>
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/profile/')}>My Profile</a></li>
+          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/leaderboard/')}>🏆 Leaderboard</a></li>
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/contact/')}>Contact</a></li>
           <li><a class="hover:text-gold-300" href={localizedPath(locale, '/privacy/')}>Privacy</a></li>
         </ul>
