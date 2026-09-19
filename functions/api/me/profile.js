@@ -106,9 +106,10 @@ export async function onRequestPut(context) {
     sets.push('username = ?');
     vals.push(username);
   }
-  // --- country / city ---
+  // --- country / city (country is compulsory — drives challenge timezones) ---
   if (body.country !== undefined) {
     const country = String(body.country || '').trim().slice(0, 60);
+    if (!country) return fail('Please select your country — challenges unlock on your country time.', 'country_required');
     sets.push('country = ?');
     vals.push(country);
   }
@@ -180,6 +181,18 @@ export async function onRequestPut(context) {
   }
 
   if (!sets.length) return json({ error: 'nothing_to_update' }, 400);
+  // Compulsory country: any profile-details save requires a country on file
+  // (already sent, or previously saved) — challenge windows follow it.
+  const profileTouched = ['name', 'username', 'country', 'city', 'bio', 'gender', 'language', 'avatar_emoji', 'avatar_url']
+    .some((k) => body[k] !== undefined);
+  if (profileTouched) {
+    let eff = body.country !== undefined ? String(body.country || '').trim() : null;
+    if (eff === null) {
+      const cur = await env.DB.prepare('SELECT country FROM users WHERE id = ?').bind(user.id).first().catch(() => null);
+      eff = (cur && cur.country) || '';
+    }
+    if (!eff) return fail('Please select your country — challenges unlock on your country time.', 'country_required', 400);
+  }
   vals.push(user.id);
   baseVals.push(user.id);
   try {

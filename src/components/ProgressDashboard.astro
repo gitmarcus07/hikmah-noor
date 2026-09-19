@@ -14,9 +14,47 @@ interface Props { locale: string; }
 const { locale } = Astro.props;
 const readUrl = localizedPath(locale, '/tools/read/');
 const habitUrl = localizedPath(locale, '/tools/habit-start/');
-// Minimal client lookups (kept tiny for the inline script).
+const profileUrl = localizedPath(locale, '/profile/');
+// Minimal client lookups (kept tiny for inline script).
 const surahShort = (surahsMeta as any[]).map((s) => [s.name, s.verseCount]);
 const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]);
+// Primary IANA timezone per profile country (keys must match the profile
+// country list). Multi-zone countries use the most populous zone.
+const COUNTRY_TZ: Record<string, string> = {
+  'Afghanistan': 'Asia/Kabul', 'Algeria': 'Africa/Algiers', 'Australia': 'Australia/Sydney',
+  'Austria': 'Europe/Vienna', 'Azerbaijan': 'Asia/Baku', 'Bahrain': 'Asia/Bahrain',
+  'Bangladesh': 'Asia/Dhaka', 'Belgium': 'Europe/Brussels', 'Bosnia & Herzegovina': 'Europe/Sarajevo',
+  'Brazil': 'America/Sao_Paulo', 'Brunei': 'Asia/Brunei', 'Bulgaria': 'Europe/Sofia',
+  'Cambodia': 'Asia/Phnom_Penh', 'Canada': 'America/Toronto', 'Chad': 'Africa/Ndjamena',
+  'China': 'Asia/Shanghai', 'Denmark': 'Europe/Copenhagen', 'Djibouti': 'Africa/Djibouti',
+  'Egypt': 'Africa/Cairo', 'Ethiopia': 'Africa/Addis_Ababa', 'Fiji': 'Pacific/Fiji',
+  'Finland': 'Europe/Helsinki', 'France': 'Europe/Paris', 'Gambia': 'Africa/Banjul',
+  'Germany': 'Europe/Berlin', 'Ghana': 'Africa/Accra', 'Greece': 'Europe/Athens',
+  'Guinea': 'Africa/Conakry', 'Guyana': 'America/Guyana', 'India': 'Asia/Kolkata',
+  'Indonesia': 'Asia/Jakarta', 'Iran': 'Asia/Tehran', 'Iraq': 'Asia/Baghdad',
+  'Ireland': 'Europe/Dublin', 'Italy': 'Europe/Rome', 'Japan': 'Asia/Tokyo',
+  'Jordan': 'Asia/Amman', 'Kazakhstan': 'Asia/Almaty', 'Kenya': 'Africa/Nairobi',
+  'Kosovo': 'Europe/Belgrade', 'Kuwait': 'Asia/Kuwait', 'Kyrgyzstan': 'Asia/Bishkek',
+  'Lebanon': 'Asia/Beirut', 'Libya': 'Africa/Tripoli', 'Malaysia': 'Asia/Kuala_Lumpur',
+  'Maldives': 'Indian/Maldives', 'Mali': 'Africa/Bamako', 'Malta': 'Europe/Malta',
+  'Mauritania': 'Africa/Nouakchott', 'Mauritius': 'Indian/Mauritius', 'Morocco': 'Africa/Casablanca',
+  'Mozambique': 'Africa/Maputo', 'Myanmar': 'Asia/Yangon', 'Nepal': 'Asia/Kathmandu',
+  'Netherlands': 'Europe/Amsterdam', 'New Zealand': 'Pacific/Auckland', 'Niger': 'Africa/Niamey',
+  'Nigeria': 'Africa/Lagos', 'Norway': 'Europe/Oslo', 'Oman': 'Asia/Muscat',
+  'Pakistan': 'Asia/Karachi', 'Palestine': 'Asia/Gaza', 'Philippines': 'Asia/Manila',
+  'Poland': 'Europe/Warsaw', 'Portugal': 'Europe/Lisbon', 'Qatar': 'Asia/Qatar',
+  'Romania': 'Europe/Bucharest', 'Russia': 'Europe/Moscow', 'Saudi Arabia': 'Asia/Riyadh',
+  'Senegal': 'Africa/Dakar', 'Singapore': 'Asia/Singapore', 'Somalia': 'Africa/Mogadishu',
+  'South Africa': 'Africa/Johannesburg', 'South Korea': 'Asia/Seoul', 'Spain': 'Europe/Madrid',
+  'Sri Lanka': 'Asia/Colombo', 'Sudan': 'Africa/Khartoum', 'Suriname': 'America/Paramaribo',
+  'Sweden': 'Europe/Stockholm', 'Switzerland': 'Europe/Zurich', 'Syria': 'Asia/Damascus',
+  'Taiwan': 'Asia/Taipei', 'Tajikistan': 'Asia/Dushanbe', 'Tanzania': 'Africa/Dar_es_Salaam',
+  'Thailand': 'Asia/Bangkok', 'Trinidad & Tobago': 'America/Port_of_Spain', 'Tunisia': 'Africa/Tunis',
+  'Turkey': 'Europe/Istanbul', 'Turkmenistan': 'Asia/Ashgabat', 'Uganda': 'Africa/Kampala',
+  'Ukraine': 'Europe/Kyiv', 'United Arab Emirates': 'Asia/Dubai', 'United Kingdom': 'Europe/London',
+  'United States': 'America/New_York', 'Uzbekistan': 'Asia/Tashkent', 'Yemen': 'Asia/Aden',
+  'Zimbabwe': 'Africa/Harare',
+};
 ---
 <div class="max-w-md mx-auto px-4 py-5" data-dash>
   <div data-dash-loading class="animate-pulse space-y-3">
@@ -33,6 +71,8 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
   </div>
 
   <div data-dash-live class="hidden space-y-4">
+    {/* country nudge — challenges follow country time */}
+    <a data-dash-countrynudge href={profileUrl} class="hidden items-center gap-2 rounded-2xl border border-gold-300/40 bg-gold-300/10 px-4 py-3 text-sm font-bold text-gold-300 min-h-[52px]">🌍 Set your country so challenges unlock on your time →</a>
     {/* header: greeting + streak pill (sticky) */}
     <div class="sticky top-14 z-30 py-2 bg-night-950/90 backdrop-blur-md flex items-center gap-3">
       <div data-dash-avatar class="w-12 h-12 shrink-0 grid place-items-center rounded-full overflow-hidden ring-2 ring-white/25 bg-gradient-to-br from-emerald-300 to-teal-500 text-xl font-extrabold text-night-900" aria-hidden="true">?</div>
@@ -115,7 +155,7 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
 
 <AuthModal />
 
-<script define:vars={{ readUrl, habitUrl, surahShort, juzStarts }}>
+<script define:vars={{ readUrl, habitUrl, surahShort, juzStarts, COUNTRY_TZ }}>
   (() => {
     const root = document.querySelector('[data-dash]');
     if (!root || root.dataset.wired) return;
@@ -276,28 +316,43 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
     ];
     const TARGETS = { 'friday-kahf': 110, nightly: 110, 'ramadan-khatm': 30 };
 
-    // ---- real-time challenge windows (device local time) ----
+    // ---- challenge windows follow the user's COUNTRY time ----
+    // Device time is the fallback (unset/unknown country).
     const NIGHT_START = 20; // Nightly Recitation opens 8 PM…
     const NIGHT_END = 5;    // …until 5 AM.
     // Expected Ramadan (1st) starts — approximate, moon sighting varies by ±1 day.
     const RAMADAN_STARTS = [[2026,2,18],[2027,2,7],[2028,1,27],[2029,1,16],[2030,1,5],[2030,12,26],[2031,12,15],[2032,12,4]];
-    const isFriday = () => new Date().getDay() === 5;
-    const isNight = () => { const h = new Date().getHours(); return h >= NIGHT_START || h < NIGHT_END; };
+    let userTz = null; // IANA zone from profile country; null = device time.
+    // Offset (ms) of a zone vs the device clock, right now.
+    const tzOffsetMs = (tz) => {
+      try {
+        const now = new Date();
+        const shifted = new Date(now.toLocaleString('en-US', { timeZone: tz }));
+        const plain = new Date(now.toLocaleString('en-US'));
+        return Math.round((shifted - plain) / 60000) * 60000;
+      } catch { return 0; }
+    };
+    // "Now" on the user's wall clock (a Date whose fields read as zone wall time).
+    const znow = () => (userTz ? new Date(Date.now() + tzOffsetMs(userTz)) : new Date());
+    // Wall-clock ms (built from znow) back to absolute ms.
+    const toAbs = (wallMs) => (userTz ? wallMs - tzOffsetMs(userTz) : wallMs);
+    const isFriday = () => znow().getDay() === 5;
+    const isNight = () => { const h = znow().getHours(); return h >= NIGHT_START || h < NIGHT_END; };
     const hijriMonth = () => {
       try {
-        const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric' }).formatToParts(new Date());
+        const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { ...(userTz ? { timeZone: userTz } : {}), month: 'numeric' }).formatToParts(new Date());
         const m = parts.find((p) => p.type === 'month');
         return m ? Number(m.value) : null;
       } catch { return null; }
     };
-    const inRamadanTable = (d = new Date()) => RAMADAN_STARTS.some(([y, m, day]) => {
+    const inRamadanTable = (d) => RAMADAN_STARTS.some(([y, m, day]) => {
       const s = new Date(y, m - 1, day);
       return d >= s && d < new Date(s.getTime() + 30 * 864e5);
     });
     const isRamadan = () => {
       const hm = hijriMonth();
       if (hm !== null && Number.isFinite(hm)) return hm === 9;
-      return inRamadanTable();
+      return inRamadanTable(znow());
     };
     const fmtLeft = (ms) => {
       if (ms === null || ms === undefined) return '';
@@ -306,17 +361,17 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
       return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
     };
     const nextFridayIn = () => {
-      const n = new Date(); const d = new Date(n);
+      const n = znow(); const d = new Date(n);
       d.setDate(n.getDate() + ((5 - n.getDay() + 7) % 7));
       d.setHours(0, 0, 0, 0);
-      if (d <= n) d.setDate(d.getDate() + 7);
-      return d - n;
+      if (d.getTime() <= n.getTime()) d.setDate(d.getDate() + 7);
+      return Math.max(0, toAbs(d.getTime()) - Date.now());
     };
     const nextNightIn = () => {
-      const n = new Date(); const d = new Date(n);
+      const n = znow(); const d = new Date(n);
       d.setHours(NIGHT_START, 0, 0, 0);
-      if (d <= n) d.setDate(d.getDate() + 1);
-      return d - n;
+      if (d.getTime() <= n.getTime()) d.setDate(d.getDate() + 1);
+      return Math.max(0, toAbs(d.getTime()) - Date.now());
     };
     const nextRamadanIn = () => {
       const n = new Date();
@@ -429,6 +484,14 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
       $('[data-dash-loading]')?.classList.add('hidden');
       if (!user) { $('[data-dash-gate]')?.classList.remove('hidden'); return; }
       $('[data-dash-live]')?.classList.remove('hidden');
+      // Country drives challenge windows; nudge when missing.
+      userTz = (user.country && COUNTRY_TZ[user.country]) || null;
+      const nudge = $('[data-dash-countrynudge]');
+      if (nudge) {
+        const missing = !user.country;
+        nudge.classList.toggle('hidden', !missing);
+        nudge.classList.toggle('flex', missing);
+      }
       setFace($('[data-dash-avatar]'), user);
       if (window.hnUpdateNav) window.hnUpdateNav(user);
       $('[data-dash-name]').textContent = (user.name || 'Reader').split(' ')[0];

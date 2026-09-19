@@ -101,7 +101,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
           <span class="mt-1 block text-[11px] text-ink-500 leading-4">3–30 chars: a–z, 0–9, . and _ — must start &amp; end with a letter or number. No two people can share one. Set it to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
         </label>
         <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country *</span>
           <select name="country" data-p-country
             class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
             <option value="">Select country…</option>
@@ -461,6 +461,13 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         if (unameErr) {
           paintUnameStatus('bad', `✗ ${unameErr}`);
           throw new Error(unameErr);
+        }
+        // Country is compulsory — challenge windows follow country time.
+        const ctryVal = str('country').trim();
+        if (!ctryVal) {
+          const sel = form.querySelector('[data-p-country]');
+          sel?.focus();
+          throw new Error('Please select your country — challenges unlock on your country time.');
         }
         console.log('[profile] saving…');
         const data = await withTimeout(H.Me.saveProfile({
