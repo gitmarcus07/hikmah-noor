@@ -95,9 +95,10 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         </label>
         <label class="block">
           <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username</span>
-          <input name="username" maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads"
+          <input name="username" data-p-uname maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads" autocapitalize="none" spellcheck="false"
             class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-          <span class="mt-1 block text-[11px] text-ink-500 leading-4">Set a @username to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
+          <span data-p-unamestatus class="mt-1 hidden text-[11px] font-bold leading-4" role="status"></span>
+          <span class="mt-1 block text-[11px] text-ink-500 leading-4">3–30 chars: a–z, 0–9, . and _ — must start &amp; end with a letter or number. No two people can share one. Set it to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
         </label>
         <label class="block">
           <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country</span>
@@ -210,6 +211,49 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         p,
         new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out — check your connection and retry.')), ms)),
       ]);
+
+    // Instagram-like username rules (mirrors functions/api username logic).
+    const UNAME_RE = /^[a-z0-9][a-z0-9._]{1,28}[a-z0-9]$/;
+    const UNAME_BLOCKED = new Set(['admin', 'administrator', 'support', 'official', 'hikmahnoor', 'hikmah_noor', 'root', 'system']);
+    const unameLocalError = (v) => {
+      if (!v) return null;
+      if (v.length < 3) return 'Username needs at least 3 characters.';
+      if (v.length > 30) return 'Username can be at most 30 characters.';
+      if (!UNAME_RE.test(v)) return 'Use a–z, 0–9, . and _ — start & end with a letter or number.';
+      if (v.includes('..')) return 'Username cannot contain consecutive dots.';
+      if (UNAME_BLOCKED.has(v)) return 'That username is reserved — pick another.';
+      return null;
+    };
+    const paintUnameStatus = (kind, text) => {
+      const st = $('[data-p-unamestatus]');
+      if (!st) return;
+      st.textContent = text || '';
+      st.classList.toggle('hidden', !text);
+      st.classList.remove('text-emerald-300', 'text-red-300', 'text-ink-500');
+      st.classList.add(kind === 'ok' ? 'text-emerald-300' : kind === 'bad' ? 'text-red-300' : 'text-ink-500');
+    };
+    let unameTimer = null;
+    const checkUsernameLive = async () => {
+      const input = $('[data-p-uname]');
+      const v = String(input?.value || '').trim();
+      if (!v) { paintUnameStatus('', ''); return 'empty'; }
+      const local = unameLocalError(v);
+      if (local) { paintUnameStatus('bad', `✗ ${local}`); return 'invalid'; }
+      paintUnameStatus('', 'Checking…');
+      try {
+        const r = await fetch(`/api/username-check?u=${encodeURIComponent(v)}`, { credentials: 'same-origin' });
+        const d = await r.json();
+        if (d.available) {
+          paintUnameStatus('ok', d.mine ? '✓ This is your username.' : '✓ Username available!');
+          return 'ok';
+        }
+        paintUnameStatus('bad', d.reason === 'taken' ? '✗ Username already taken — try another.' : '✗ That username is not allowed.');
+        return 'taken';
+      } catch {
+        paintUnameStatus('', '');
+        return 'unknown';
+      }
+    };
 
     // Visible face via habit.js (photo → SVG → emoji → initial).
     const faceHTML = (u) => {
@@ -339,6 +383,15 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       if (bc) bc.textContent = `(${bioInput.value.length}/280)`;
     });
 
+    // Username: force lowercase + Instagram charset, live availability.
+    const unameInput = $('[data-p-uname]');
+    unameInput?.addEventListener('input', () => {
+      const clean = unameInput.value.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
+      if (clean !== unameInput.value) unameInput.value = clean;
+      clearTimeout(unameTimer);
+      unameTimer = setTimeout(checkUsernameLive, 450);
+    });
+
     // Custom photo: upload (resized on-device) or https link.
     $('[data-p-file]')?.addEventListener('change', (e) => {
       const file = e.currentTarget.files?.[0];
@@ -403,20 +456,32 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
         const fd = new FormData(form);
         const str = (k) => String(fd.get(k) ?? '');
+        const unameVal = str('username').trim().toLowerCase();
+        const unameErr = unameLocalError(unameVal);
+        if (unameErr) {
+          paintUnameStatus('bad', `✗ ${unameErr}`);
+          throw new Error(unameErr);
+        }
         console.log('[profile] saving…');
         const data = await withTimeout(H.Me.saveProfile({
-          name: str('name'), username: str('username'), country: str('country'),
+          name: str('name'), username: unameVal, country: str('country'),
           city: str('city'), bio: str('bio'), gender: str('gender'),
           language: str('language'), avatar_emoji: picked, avatar_url: photo,
         }));
         if (!data?.user) throw new Error('Server returned an empty response — please retry.');
         profile = data.user;
+        // Re-read server truth so the screen always matches the database.
+        try {
+          const fresh = await withTimeout(H.Me.profile());
+          if (fresh?.user) profile = fresh.user;
+        } catch { /* keep PUT response */ }
         paintHeader(profile);
         fillForm(profile);
         paintPreview();
+        paintUnameStatus('', '');
+        if (window.hnUpdateNav) window.hnUpdateNav(profile);
         console.log('[profile] saved ok');
         showMsg('[data-p-msg]', true, '✓ Profile saved.');
-        document.dispatchEvent(new CustomEvent('hn:auth', { detail: { user: profile } }));
       } catch (err) {
         console.error('[profile] save failed:', err);
         showMsg('[data-p-msg]', false, err?.hint || err?.message || 'Could not save — try again.');
@@ -467,8 +532,14 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       }
     });
 
-    document.addEventListener('hn:auth', async () => {
+    // Fresh login via modal: reload only when the member view isn't already
+    // on screen (otherwise a save would wipe its own success message).
+    document.addEventListener('hn:auth', async (e) => {
       try {
+        if (document.querySelector('[data-p-live]:not(.hidden)')) {
+          if (window.hnUpdateNav && e.detail?.user) window.hnUpdateNav(e.detail.user);
+          return;
+        }
         const { user } = await H.Auth.session();
         if (user) window.location.reload();
       } catch { /* modal flow */ }

@@ -7,26 +7,29 @@ import {
 
 const GENDERS = new Set(['', 'male', 'female', 'other', 'prefer-not-to-say']);
 const LANGS = new Set(['en', 'hi', 'ur', 'ar']);
+// Instagram-like username rules: 3–30 chars, a–z 0–9 . _, must start
+// and end with a letter/number, no consecutive dots. Stored lowercase.
+const USERNAME_RE = /^[a-z0-9][a-z0-9._]{1,28}[a-z0-9]$/;
+const USERNAME_BLOCKED = new Set(['admin', 'administrator', 'support', 'official', 'hikmahnoor', 'hikmah_noor', 'root', 'system']);
+function usernameRuleError(u) {
+  if (u.length < 3) return 'Username needs at least 3 characters.';
+  if (u.length > 30) return 'Username can be at most 30 characters.';
+  if (!USERNAME_RE.test(u)) return 'Usernames use letters, numbers, dots and _ — and must start and end with a letter or number.';
+  if (u.includes('..')) return 'Username cannot contain consecutive dots.';
+  if (USERNAME_BLOCKED.has(u)) return 'That username is reserved — pick another.';
+  return null;
+}
 // Premium SVG avatar ids (must mirror AVATAR_IDS in public/habits/habit.js).
 const KNOWN_AVATARS = new Set(['hilal', 'kaaba', 'dome', 'star8', 'fanoos', 'tasbih', 'mushaf', 'mihrab', 'badr', 'lulu', 'nakhil', 'zamzam']);
-const USERNAME_RE = /^[a-zA-Z0-9_.]{3,30}$/;
 
-async function tableCols(db) {
-  try {
-    const r = await db.prepare('PRAGMA table_info(users)').all();
-    return new Set((r.results || []).map((c) => c.name));
-  } catch {
-    return new Set(['id', 'email', 'name', 'avatar_url', 'provider', 'password_hash', 'created_at']);
-  }
-}
+// NOTE: never probe the schema with PRAGMA here — D1's Workers runtime
+// does not support PRAGMA, so a probe would always "fail" and silently
+// disable every profile field. Assume the 0002 migration is applied;
+// fall back to base columns only if a query errors with no such column.
+const BASE_COLS = ['id', 'email', 'name', 'avatar_url', 'provider', 'created_at'];
+const FULL_COLS = [...BASE_COLS, 'username', 'country', 'city', 'bio', 'gender', 'language', 'avatar_emoji', 'updated_at'];
 
-async function fullProfile(env, userId) {
-  const cols = await tableCols(env);
-  const want = ['id', 'email', 'name', 'avatar_url', 'provider', 'username', 'country',
-    'city', 'bio', 'gender', 'language', 'avatar_emoji', 'created_at', 'updated_at'];
-  const sel = want.filter((c) => cols.has(c));
-  const row = await env.DB.prepare(`SELECT ${sel.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
-  if (!row) return null;
+function toPublicProfile(row) {
   return {
     id: row.id,
     name: row.name || '',
@@ -45,6 +48,19 @@ async function fullProfile(env, userId) {
   };
 }
 
+async function fullProfile(env, userId) {
+  try {
+    const row = await env.DB.prepare(`SELECT ${FULL_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
+    if (!row) return null;
+    return toPublicProfile(row);
+  } catch {
+    // Pre-migration DB: base columns only.
+    const row = await env.DB.prepare(`SELECT ${BASE_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
+    if (!row) return null;
+    return toPublicProfile(row);
+  }
+}
+
 export async function onRequestGet(context) {
   const { env, request } = context;
   const { user, error } = await requireUser(env, request);
@@ -59,11 +75,11 @@ export async function onRequestPut(context) {
   const { user, error } = await requireUser(env, request);
   if (error) return error;
   const body = (await readJson(request)) || {};
-  const cols = await tableCols(env);
-  const hasProfileCols = cols.has('country');
-
   const sets = [];
   const vals = [];
+  // Base-column sets, used as a fallback if the DB predates migration 0002.
+  const baseSets = [];
+  const baseVals = [];
   const fail = (msg, code = 'invalid_profile', status = 400) => json({ error: code, hint: msg }, status);
 
   // --- name (always available) ---
@@ -72,80 +88,77 @@ export async function onRequestPut(context) {
     if (name.length < 2) return fail('Please enter your name (min 2 characters).');
     sets.push('name = ?');
     vals.push(name);
+    baseSets.push('name = ?');
+    baseVals.push(name);
   }
 
-  if (hasProfileCols) {
-    // --- username (unique, optional) ---
-    if (body.username !== undefined) {
-      const username = String(body.username || '').trim().slice(0, 30);
-      if (username && !USERNAME_RE.test(username)) {
-        return fail('Username: 3–30 characters, letters, numbers, _ and . only.');
-      }
-      if (username) {
-        const taken = await env.DB.prepare(
-          'SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?'
-        ).bind(username, user.id).first();
-        if (taken) return fail('That username is taken — try another.', 'username_taken', 409);
-      }
-      sets.push('username = ?');
-      vals.push(username);
+  // --- username (unique, optional, Instagram-like rules, stored lowercase) ---
+  if (body.username !== undefined) {
+    const username = String(body.username || '').trim().toLowerCase().slice(0, 30);
+    if (username) {
+      const ruleErr = usernameRuleError(username);
+      if (ruleErr) return fail(ruleErr);
+      const taken = await env.DB.prepare(
+        'SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?'
+      ).bind(username, user.id).first();
+      if (taken) return fail('That username is taken — try another.', 'username_taken', 409);
     }
-    // --- country / city ---
-    if (body.country !== undefined) {
-      const country = String(body.country || '').trim().slice(0, 60);
-      sets.push('country = ?');
-      vals.push(country);
-    }
-    if (body.city !== undefined) {
-      const city = String(body.city || '').trim().slice(0, 60);
-      sets.push('city = ?');
-      vals.push(city);
-    }
-    // --- bio ---
-    if (body.bio !== undefined) {
-      const bio = String(body.bio || '').trim().slice(0, 280);
-      sets.push('bio = ?');
-      vals.push(bio);
-    }
-    // --- gender ---
-    if (body.gender !== undefined) {
-      const gender = String(body.gender || '').trim().slice(0, 24);
-      if (!GENDERS.has(gender)) return fail('Please pick a valid option for gender.');
-      sets.push('gender = ?');
-      vals.push(gender);
-    }
-    // --- language ---
-    if (body.language !== undefined) {
-      const language = String(body.language || '').trim().slice(0, 8);
-      if (!LANGS.has(language)) return fail('Please pick a valid language.');
-      sets.push('language = ?');
-      vals.push(language);
-    }
-    // --- avatar choice: premium SVG id (hilal, kaaba, …) or classic emoji ---
-    if (body.avatar_emoji !== undefined) {
-      const raw = String(body.avatar_emoji || '').trim();
-      const avatar_emoji = KNOWN_AVATARS.has(raw) ? raw : raw.slice(0, 8);
-      sets.push('avatar_emoji = ?');
-      vals.push(avatar_emoji);
-    }
-    // --- custom photo: https link or small uploaded data:image ---
-    if (body.avatar_url !== undefined) {
-      const avatar_url = String(body.avatar_url || '').trim();
-      if (avatar_url) {
-        const isHttps = /^https:\/\//.test(avatar_url) && avatar_url.length <= 500;
-        const isUpload = /^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_url) && avatar_url.length <= 25000;
-        if (!isHttps && !isUpload) {
-          return fail('Photo must be an https:// link or an uploaded image.');
-        }
-      }
-      sets.push('avatar_url = ?');
-      vals.push(avatar_url.slice(0, 25000));
-    }
-    if (cols.has('updated_at')) {
-      sets.push('updated_at = ?');
-      vals.push(nowSec());
-    }
+    sets.push('username = ?');
+    vals.push(username);
   }
+  // --- country / city ---
+  if (body.country !== undefined) {
+    const country = String(body.country || '').trim().slice(0, 60);
+    sets.push('country = ?');
+    vals.push(country);
+  }
+  if (body.city !== undefined) {
+    const city = String(body.city || '').trim().slice(0, 60);
+    sets.push('city = ?');
+    vals.push(city);
+  }
+  // --- bio ---
+  if (body.bio !== undefined) {
+    const bio = String(body.bio || '').trim().slice(0, 280);
+    sets.push('bio = ?');
+    vals.push(bio);
+  }
+  // --- gender ---
+  if (body.gender !== undefined) {
+    const gender = String(body.gender || '').trim().slice(0, 24);
+    if (!GENDERS.has(gender)) return fail('Please pick a valid option for gender.');
+    sets.push('gender = ?');
+    vals.push(gender);
+  }
+  // --- language ---
+  if (body.language !== undefined) {
+    const language = String(body.language || '').trim().slice(0, 8);
+    if (!LANGS.has(language)) return fail('Please pick a valid language.');
+    sets.push('language = ?');
+    vals.push(language);
+  }
+  // --- avatar choice: premium SVG id (hilal, kaaba, …) or classic emoji ---
+  if (body.avatar_emoji !== undefined) {
+    const raw = String(body.avatar_emoji || '').trim();
+    const avatar_emoji = KNOWN_AVATARS.has(raw) ? raw : raw.slice(0, 8);
+    sets.push('avatar_emoji = ?');
+    vals.push(avatar_emoji);
+  }
+  // --- custom photo: https link or small uploaded data:image ---
+  if (body.avatar_url !== undefined) {
+    const avatar_url = String(body.avatar_url || '').trim();
+    if (avatar_url) {
+      const isHttps = /^https:\/\//.test(avatar_url) && avatar_url.length <= 500;
+      const isUpload = /^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_url) && avatar_url.length <= 25000;
+      if (!isHttps && !isUpload) {
+        return fail('Photo must be an https:// link or an uploaded image.');
+      }
+    }
+    sets.push('avatar_url = ?');
+    vals.push(avatar_url.slice(0, 25000));
+  }
+  sets.push('updated_at = ?');
+  vals.push(nowSec());
 
   // --- optional password change (email accounts) ---
   let pwChanged = false;
@@ -168,7 +181,14 @@ export async function onRequestPut(context) {
 
   if (!sets.length) return json({ error: 'nothing_to_update' }, 400);
   vals.push(user.id);
-  await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
+  baseVals.push(user.id);
+  try {
+    await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
+  } catch (e) {
+    // Pre-migration DB (no profile columns): persist base fields only.
+    if (!/no such column/i.test(String((e && e.message) || '')) || !baseSets.length) throw e;
+    await env.DB.prepare(`UPDATE users SET ${baseSets.join(', ')} WHERE id = ?`).bind(...baseVals).run();
+  }
   const profile = await fullProfile(env, user.id);
   return json({ ok: true, user: profile, passwordChanged: pwChanged });
 }
