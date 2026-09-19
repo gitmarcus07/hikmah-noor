@@ -142,14 +142,9 @@ const COUNTRY_TZ: Record<string, string> = {
     <h2 id="challenges" class="text-xl font-extrabold text-white pt-1 scroll-mt-32">🏆 Challenges</h2>
     <div data-dash-challenges class="space-y-3"></div>
 
-    {/* bookmarks */}
-    <h2 id="saved" class="text-xl font-extrabold text-white pt-1 scroll-mt-32">🔖 Saved verses</h2>
-    <div data-dash-marks class="space-y-2.5"></div>
-
     <div class="bg-night-850 border border-white/10 rounded-3xl p-5 text-sm text-ink-300 leading-7">
       <b class="text-ink-50">Streak rules:</b> +1 for every day you read. Miss one day and grace saves your streak — miss two in a row and it resets. Stay consistent!
     </div>
-    <button data-dash-logout class="w-full text-xs font-bold text-ink-500 hover:text-brand-300 min-h-[44px]">Logout</button>
   </div>
 </div>
 
@@ -427,31 +422,6 @@ const COUNTRY_TZ: Record<string, string> = {
       }).join('');
     };
 
-    const paintMarks = async () => {
-      const box = $('[data-dash-marks]');
-      if (!box) return;
-      const { bookmarks } = await H.Me.bookmarks().catch(() => ({ bookmarks: [] }));
-      if (!bookmarks?.length) {
-        box.innerHTML = `<p class="text-sm text-ink-500 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">No saved verses yet — tap ♡ or 🔖 on any verse while reading.</p>`;
-        return;
-      }
-      box.innerHTML = bookmarks.map((b) => {
-        const href = b.kind === 'verse' && b.ref.includes(':')
-          ? `${String(readUrl).replace(/\/$/, '')}/${b.ref.split(':')[0]}/?verse=${b.ref.split(':')[1]}`
-          : readUrl;
-        return `<div class="flex items-center gap-3 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">
-          <span class="font-bold text-ink-50">${b.kind === 'verse' ? `Surah ${b.ref.replace(':', ':')}` : b.ref}</span>
-          <a href="${href}" class="ms-auto text-sm font-extrabold text-brand-300">Open →</a>
-          <button data-unmark="${b.kind}|${b.ref}" class="text-xs font-bold text-ink-500 hover:text-red-300 min-h-[44px] px-2">Remove</button>
-        </div>`;
-      }).join('');
-      box.querySelectorAll('[data-unmark]').forEach((btn) => btn.addEventListener('click', async () => {
-        const [kind, ref] = btn.dataset.unmark.split('|');
-        await H.Me.removeBookmark(kind, ref).catch(() => {});
-        paintMarks();
-      }));
-    };
-
     const loadRange = async () => {
       const { stats, days } = await H.Me.stats(range).catch(() => ({ stats: {}, days: [] }));
       paintTiles(stats || {});
@@ -473,9 +443,6 @@ const COUNTRY_TZ: Record<string, string> = {
     }));
 
     $('[data-dash-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
-    $('[data-dash-logout]')?.addEventListener('click', async () => {
-      try { await H.Auth.logout(); } finally { window.location.reload(); }
-    });
     document.addEventListener('hn:auth', () => window.location.reload());
 
     (async () => {
@@ -505,7 +472,6 @@ const COUNTRY_TZ: Record<string, string> = {
       await paintHero(user, allV);
       await loadRange();
       await paintChallenges();
-      await paintMarks();
     })();
   })();
 </script>

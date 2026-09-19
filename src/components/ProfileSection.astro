@@ -40,6 +40,15 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
 
   {/* logged-in view */}
   <div data-p-live class="hidden space-y-4">
+    {/* settings categories — jump without scrolling to the bottom */}
+    <nav aria-label="Settings sections" class="sticky top-14 z-30 -mx-1 px-1 py-2 bg-night-950/90 backdrop-blur-md">
+      <div class="flex gap-2 overflow-x-auto pb-1" role="list">
+        <a href="#p-profile" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-brand-500/15 border border-brand-500/40 text-brand-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:bg-brand-500/25 transition">👤 Profile</a>
+        <a href="#p-privacy" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">👁️ Privacy</a>
+        <a href="#p-password" data-p-navpw role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">🔑 Password</a>
+        <a href="#p-session" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">⚙️ Session</a>
+      </div>
+    </nav>
     {/* header card */}
     <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30">
       <div class="flex items-start gap-4">
@@ -63,7 +72,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     </section>
 
     {/* edit form */}
-    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Edit profile">
+    <section id="p-profile" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Edit profile">
       <h2 class="text-lg font-extrabold text-white">✏️ Profile details</h2>
       <p class="text-sm text-ink-500 mt-0.5">Shown on your progress page and greetings. Email stays private.</p>
 
@@ -141,7 +150,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     </section>
 
     {/* visibility — name, username & photo are always public */}
-    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Profile visibility">
+    <section id="p-privacy" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Profile visibility">
       <h2 class="text-lg font-extrabold text-white">👁️ Who sees what</h2>
       <p class="text-sm text-ink-500 mt-0.5">Your name, username and photo are always public. Toggle the rest — applies instantly, no save needed.</p>
       <p data-p-vismsg class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
@@ -170,7 +179,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     </section>
 
     {/* security (email accounts) */}
-    <section data-p-security class="hidden bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Password">
+    <section data-p-security id="p-password" class="hidden bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Password">
       <h2 class="text-lg font-extrabold text-white">🔑 Change password</h2>
       <form data-p-pw class="mt-3 grid gap-3 sm:grid-cols-2">
         <label class="block">
@@ -189,7 +198,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     </section>
 
     {/* session */}
-    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30">
+    <section id="p-session" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32">
       <h2 class="text-lg font-extrabold text-white">⚙️ Session</h2>
       <div class="mt-3 flex flex-col sm:flex-row gap-2">
         <button data-p-logout class="flex-1 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Logout</button>
@@ -665,6 +674,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       paintHeader(profile);
       fillForm(profile);
       if (profile.provider === 'email') $('[data-p-security]')?.classList.remove('hidden');
+      else $('[data-p-navpw]')?.classList.add('hidden');
       paintStats();
       // Continue-reading deep link
       try {

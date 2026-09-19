@@ -5,12 +5,14 @@ import AppHeader from '../../components/AppHeader.astro';
 import AppTabBar from '../../components/AppTabBar.astro';
 import { localizedPath } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
+import parasMeta from '../../data/paras-meta.json';
 
 const locale = 'en';
 const readBase = localizedPath(locale, '/tools/read/');
 const favsUrl = localizedPath(locale, '/tools/favourites/');
 const marksUrl = localizedPath(locale, '/tools/bookmarks/');
 const surahData = (surahsMeta as any[]).map((s) => [s.num, s.name, s.englishName, s.verseCount]);
+const juzData = (parasMeta as any[]).map((p: any) => [p.num, p.start.surah, p.start.verse]);
 const faq = [
   { q: 'Do I need to login to read?', a: 'No — every surah is free to read with translation and audio. A free login only syncs your place and bookmarks across devices.' },
   { q: 'Where do I continue from?', a: 'Pick your surah and verse below — the buttons start filled with where you left off. Login syncs it to all your devices.' },
@@ -84,27 +86,29 @@ const crumbs = [
     </div>
   </div>
 
-  {/* surah bottom sheet */}
+  {/* surah bottom sheet — Juz / Chapter picker */}
   <div data-r-surahsheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Surah">
     <div class="absolute inset-0 bg-black/70" data-r-close></div>
-    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-850 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-900 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
       <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
-      <div class="flex items-center gap-2">
-        <input data-r-surahfilter placeholder="Search surah…" class="flex-1 min-w-0 bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-        <button data-r-close class="w-[52px] h-[52px] shrink-0 grid place-items-center rounded-2xl bg-white/5 border border-white/10 text-ink-200 text-xl" aria-label="Close">✕</button>
+      <div class="grid grid-cols-2 gap-0 rounded-full p-0" role="tablist" aria-label="Juz or Chapter">
+        <button data-r-tab-juz role="tab" aria-selected="false" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-white">Juz</button>
+        <button data-r-tab-chapter role="tab" aria-selected="true" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-brand-500/40 text-brand-200">Chapter</button>
       </div>
-      <div data-r-surahlist class="mt-3 overflow-y-auto space-y-2 pe-1"></div>
+      <div data-r-chapterlist class="mt-3 overflow-y-auto space-y-2.5 pe-1"></div>
+      <div data-r-juzlist class="hidden mt-3 overflow-y-auto space-y-2.5 pe-1"></div>
     </div>
   </div>
 
-  {/* verse bottom sheet */}
+  {/* verse bottom sheet — Select Verse with search */}
   <div data-r-versesheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Verse">
     <div class="absolute inset-0 bg-black/70" data-r-close></div>
-    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-850 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-900 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
       <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
-      <div class="flex items-center gap-2">
-        <p class="flex-1 font-extrabold text-lg text-white">Start from verse <span data-r-sheetcount class="text-ink-500 text-sm"></span></p>
-        <button data-r-close class="w-[52px] h-[52px] shrink-0 grid place-items-center rounded-2xl bg-white/5 border border-white/10 text-ink-200 text-xl" aria-label="Close">✕</button>
+      <p class="text-center font-extrabold text-[19px] text-white">Select Verse</p>
+      <div class="mt-3 relative">
+        <span class="absolute start-4 top-1/2 -translate-y-1/2 text-ink-500 text-xl" aria-hidden="true">⌕</span>
+        <input data-r-versefilter placeholder="Search" inputmode="numeric" class="w-full bg-transparent border border-white/25 rounded-full ps-11 pe-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
       </div>
       <div data-r-verselist class="mt-3 overflow-y-auto grid grid-cols-5 gap-2 pe-1"></div>
     </div>
@@ -112,13 +116,14 @@ const crumbs = [
 
   <AuthModal />
   <AppTabBar locale={locale} active="reading" />
-  <script define:vars={{ readBase, surahData }}>
+  <script define:vars={{ readBase, surahData, juzData }}>
     (() => {
       const root = document.querySelector('[data-reading]');
       if (!root || root.dataset.wired) return;
       root.dataset.wired = '1';
       const $ = (s) => root.querySelector(s);
-      let H = null, surah = 1, verse = 1;
+      const sheet$ = (s) => document.querySelector(s);
+      let H = null, surah = 1, verse = 1, surahTab = 'chapter', verseQuery = '';
 
       const meta = (n) => {
         const m = surahData[n - 1];
@@ -144,38 +149,74 @@ const crumbs = [
         document.body.style.overflow = '';
       };
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheets(); });
-      root.querySelectorAll('[data-r-close]').forEach((b) => b.addEventListener('click', closeSheets));
+      document.querySelectorAll('[data-r-close]').forEach((b) => b.addEventListener('click', closeSheets));
 
-      const renderSurahList = (q = '') => {
-        const box = $('[data-r-surahlist]');
+      const DL_ICON = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>';
+
+      const paintSurahTabs = () => {
+        const tj = sheet$('[data-r-tab-juz]');
+        const tc = sheet$('[data-r-tab-chapter]');
+        const on = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-brand-500/40 text-brand-200';
+        const off = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-white';
+        if (tj) { tj.className = surahTab === 'juz' ? on : off; tj.setAttribute('aria-selected', String(surahTab === 'juz')); }
+        if (tc) { tc.className = surahTab === 'chapter' ? on : off; tc.setAttribute('aria-selected', String(surahTab === 'chapter')); }
+        const cl = sheet$('[data-r-chapterlist]');
+        const jl = sheet$('[data-r-juzlist]');
+        if (cl) cl.classList.toggle('hidden', surahTab !== 'chapter');
+        if (jl) jl.classList.toggle('hidden', surahTab !== 'juz');
+      };
+
+      const renderChapterList = () => {
+        const box = sheet$('[data-r-chapterlist]');
         if (!box) return;
-        const query = String(q || '').toLowerCase().trim();
-        const list = surahData.filter((m) => !query || `${m[0]} ${m[1]} ${m[2]}`.toLowerCase().includes(query));
-        box.innerHTML = list.length ? list.map((m) => `
-          <button data-pick-surah="${m[0]}" class="w-full flex items-center gap-3 text-start rounded-2xl px-4 py-3 min-h-[60px] transition ${m[0] === surah ? 'bg-brand-500/20 border-2 border-brand-500' : 'bg-white/5 border-2 border-transparent hover:border-white/15'}">
-            <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold text-sm">${m[0]}</span>
-            <span class="min-w-0"><span class="block font-bold text-ink-50 truncate">${m[1]}</span><span class="block text-xs text-ink-500">${m[2]} • ${m[3]} verses</span></span>
-            ${m[0] === surah ? '<span class="ms-auto text-brand-300 font-extrabold">✓</span>' : ''}
-          </button>`).join('') : `<p class="text-center text-sm text-ink-500 py-6">No surah matches “${q}”.</p>`;
+        box.innerHTML = surahData.map((m) => {
+          const active = m[0] === surah;
+          return `
+          <button data-pick-surah="${m[0]}" class="w-full flex items-center gap-3 text-start rounded-2xl px-5 py-3.5 min-h-[72px] transition ${active ? 'bg-brand-500/40 border-2 border-brand-400' : 'bg-white/[0.04] border-2 border-transparent hover:border-white/15'}">
+            <span class="min-w-0 flex-1">
+              <span class="block font-extrabold text-[19px] leading-6 ${active ? 'text-brand-200' : 'text-white'}">${m[0]}. ${m[1]}</span>
+              <span class="block text-[15px] ${active ? 'text-brand-200/80' : 'text-ink-500'}">${m[2]}</span>
+            </span>
+            <span class="shrink-0 text-[15px] font-medium ${active ? 'text-brand-200/90' : 'text-ink-500'}">${m[3]} Verses</span>
+            <span class="shrink-0 ${active ? 'text-brand-200' : 'text-brand-400'}" aria-hidden="true">${DL_ICON}</span>
+          </button>`;
+        }).join('');
         box.querySelectorAll('[data-pick-surah]').forEach((b) => b.addEventListener('click', () => {
           surah = Number(b.dataset.pickSurah);
           verse = verse <= meta(surah).count ? verse : 1;
           paintSelection();
+          renderChapterList();
           closeSheets();
         }));
       };
 
-      const renderVerseGrid = () => {
-        const box = $('[data-r-verselist]');
+      const renderJuzList = () => {
+        const box = sheet$('[data-r-juzlist]');
+        if (!box) return;
+        box.innerHTML = juzData.map((j) => `
+          <button data-pick-juz="${j[0]}" class="w-full text-start rounded-2xl px-5 py-4 min-h-[60px] transition bg-white/[0.04] border-2 border-transparent hover:border-white/15">
+            <span class="block font-extrabold text-[19px] text-white">Juz ${j[0]}</span>
+          </button>`).join('');
+        box.querySelectorAll('[data-pick-juz]').forEach((b) => b.addEventListener('click', () => {
+          const j = juzData.find((x) => x[0] === Number(b.dataset.pickJuz));
+          if (j) { surah = Math.min(114, Math.max(1, j[1])); verse = Math.max(1, j[2] || 1); }
+          paintSelection();
+          renderChapterList();
+          closeSheets();
+        }));
+      };
+
+      const renderVerseGrid = (q = '') => {
+        const box = sheet$('[data-r-verselist]');
         if (!box) return;
         const m = meta(surah);
-        const cnt = $('[data-r-sheetcount]');
-        if (cnt) cnt.textContent = `of ${m.name} (${m.count})`;
-        let html = '';
-        for (let v = 1; v <= m.count; v++) {
-          html += `<button data-pick-verse="${v}" class="min-h-[48px] rounded-xl font-extrabold text-[15px] transition ${v === verse ? 'bg-brand-500 text-night-900' : 'bg-white/5 text-ink-200 border border-white/10 hover:border-brand-400'}">${v}</button>`;
-        }
-        box.innerHTML = html;
+        const query = String(q || '').trim();
+        let nums = [];
+        for (let v = 1; v <= m.count; v++) nums.push(v);
+        if (query) nums = nums.filter((v) => String(v).includes(query));
+        box.innerHTML = nums.length ? nums.map((v) => `
+          <button data-pick-verse="${v}" class="min-h-[52px] rounded-2xl font-extrabold text-[19px] transition ${v === verse ? 'bg-brand-500/60 text-brand-100 border-2 border-brand-300' : 'bg-white/[0.04] text-white border-2 border-transparent hover:border-white/15'}">${v}</button>`
+        ).join('') : `<p class="col-span-5 text-center text-sm text-ink-500 py-6">No verse matches “${query}”.</p>`;
         box.querySelectorAll('[data-pick-verse]').forEach((b) => b.addEventListener('click', () => {
           verse = Number(b.dataset.pickVerse);
           paintSelection();
@@ -183,17 +224,23 @@ const crumbs = [
         }));
       };
 
+      sheet$('[data-r-tab-juz]')?.addEventListener('click', () => { surahTab = 'juz'; paintSurahTabs(); });
+      sheet$('[data-r-tab-chapter]')?.addEventListener('click', () => { surahTab = 'chapter'; paintSurahTabs(); });
       $('[data-r-surahbtn]')?.addEventListener('click', () => {
-        const f = $('[data-r-surahfilter]');
-        if (f) f.value = '';
-        renderSurahList('');
+        surahTab = 'chapter';
+        paintSurahTabs();
+        renderChapterList();
+        renderJuzList();
         openSheet('[data-r-surahsheet]');
       });
       $('[data-r-versebtn]')?.addEventListener('click', () => {
-        renderVerseGrid();
+        verseQuery = '';
+        const f = sheet$('[data-r-versefilter]');
+        if (f) f.value = '';
+        renderVerseGrid('');
         openSheet('[data-r-versesheet]');
       });
-      $('[data-r-surahfilter]')?.addEventListener('input', (e) => renderSurahList(e.target.value));
+      sheet$('[data-r-versefilter]')?.addEventListener('input', (e) => renderVerseGrid(e.target.value));
       root.querySelector('[data-r-filter]')?.addEventListener('input', (e) => {
         const q = e.target.value.toLowerCase().trim();
         root.querySelectorAll('.rrow').forEach((r) => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
