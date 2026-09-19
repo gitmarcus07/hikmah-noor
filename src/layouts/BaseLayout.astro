@@ -222,7 +222,7 @@ const crumbLd = crumbs.length ? {
       // ---- site-wide auth chip: guest → Login, member → avatar + name ----
       // Faces resolve via habit.js (custom photo → SVG avatar → initial).
       let HN = null, lastUser = undefined;
-      import('/habits/habit.js?v=3').then((m) => {
+      import('/habits/habit.js?v=4').then((m) => {
         HN = m;
         if (lastUser !== undefined) paintNav(lastUser);
       }).catch(() => {});

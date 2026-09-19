@@ -1,5 +1,5 @@
 // Hikmah Noor habit client — DOM-free API + math helpers.
-// Loaded as static module: await import('/habits/habit.js?v=3')
+// Loaded as static module: await import('/habits/habit.js?v=4')
 // IMPORTANT: when this file changes, bump the ?v= number in every
 // dynamic import (grep for "habits/habit.js") so browsers/CDN fetch
 // the new copy instead of serving a stale cached one.
@@ -42,6 +42,7 @@ export const Me = {
   deleteAccount: () => req('/api/me/profile', { method: 'DELETE', body: JSON.stringify({ confirm: true }) }),
   leaderboard: (by = 'hasanat', limit = 20) =>
     req(`/api/leaderboard?by=${encodeURIComponent(by)}&limit=${encodeURIComponent(limit)}`),
+  community: () => req('/api/community'),
   logEvent: (ev) => req('/api/me/events', { method: 'POST', body: JSON.stringify(ev) }),
   streak: () => req('/api/me/streak'),
   resume: () => req('/api/me/resume'),

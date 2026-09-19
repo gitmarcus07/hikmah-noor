@@ -5,7 +5,7 @@ export async function onRequestGet(context) {
   const { env, request } = context;
   const { user, error } = await requireUser(env, request);
   if (error) return error;
-  const rows = await env.DB.prepare('SELECT slug, progress, target, completed_at FROM challenge_progress WHERE user_id = ?')
+  const rows = await env.DB.prepare('SELECT slug, progress, target, completed_at, started_at FROM challenge_progress WHERE user_id = ?')
     .bind(user.id).all();
   return json({ challenges: rows.results || [] });
 }
@@ -21,7 +21,7 @@ export async function onRequestPut(context) {
   if (!/^[a-z0-9-]+$/.test(slug)) return json({ error: 'invalid_slug' }, 400);
   const done = progress >= target ? nowSec() : null;
   await env.DB.prepare(
-    'INSERT INTO challenge_progress (user_id, slug, progress, target, completed_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id, slug) DO UPDATE SET progress=excluded.progress, target=excluded.target, completed_at=COALESCE(completed_at, excluded.completed_at)'
-  ).bind(user.id, slug, Math.min(progress, target), target, done).run();
+    'INSERT INTO challenge_progress (user_id, slug, progress, target, completed_at, started_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(user_id, slug) DO UPDATE SET progress=excluded.progress, target=excluded.target, completed_at=COALESCE(challenge_progress.completed_at, excluded.completed_at), started_at=COALESCE(challenge_progress.started_at, excluded.started_at)'
+  ).bind(user.id, slug, Math.min(progress, target), target, done, nowSec()).run();
   return json({ ok: true });
 }

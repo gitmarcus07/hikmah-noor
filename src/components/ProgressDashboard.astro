@@ -1,84 +1,176 @@
 ---
-/* Progress dashboard — Quranly screens 5, 24–26 adapted.
- * Stats Today/Week/All, streak + week dots, challenges with
- * progress bars, bookmarks. Login compulsory (auth gate).
+/* Home dashboard (Quranly-style) — greeting + streak pill, week dots,
+ * purple Goal card (daily verses, live readers, resume, Juz bar),
+ * Meaning Challenge hero (countdown, participants, progress),
+ * Today/Week/All tabs, stat tiles, more challenges, bookmarks.
+ * Login compulsory (auth gate). Mobile-first, max-w-md app column.
  */
 import AuthModal from './AuthModal.astro';
 import { localizedPath } from '../i18n/utils';
+import surahsMeta from '../data/surahs-meta.json';
+import parasMeta from '../data/paras-meta.json';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
 const readUrl = localizedPath(locale, '/tools/read/');
+const habitUrl = localizedPath(locale, '/tools/habit-start/');
+// Minimal client lookups (kept tiny for the inline script).
+const surahShort = (surahsMeta as any[]).map((s) => [s.name, s.verseCount]);
+const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]);
 ---
-<div class="max-w-3xl mx-auto px-4 py-8" data-dash>
-  <div data-dash-gate class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8">
-    <div class="text-5xl">🔒</div>
-    <h1 class="text-2xl font-extrabold text-white mt-3">Login to see your progress</h1>
-    <p class="mt-1 text-ink-300 text-[15px]">Stats, streaks, challenges and bookmarks live in your free account.</p>
-    <button data-dash-login class="mt-5 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+<div class="max-w-md mx-auto px-4 py-5" data-dash>
+  <div data-dash-loading class="animate-pulse space-y-3">
+    <div class="h-16 bg-night-850 border border-white/10 rounded-3xl"></div>
+    <div class="h-64 bg-night-850 border border-white/10 rounded-[28px]"></div>
+    <div class="h-40 bg-night-850 border border-white/10 rounded-[28px]"></div>
   </div>
 
-  <div data-dash-live class="hidden">
-    <div class="flex flex-wrap items-center gap-3">
-      <div>
-        <p class="text-sm text-ink-300">Asalam Alaykum,</p>
-        <h1 class="text-2xl md:text-3xl font-extrabold text-white" data-dash-name>Reader</h1>
-      </div>
-      <span class="ms-auto inline-flex items-center gap-1.5 bg-night-850 border border-gold-300/40 text-gold-300 font-extrabold rounded-full px-4 py-2">🔥 <span data-dash-streak>0</span></span>
-    </div>
-    <div data-dash-week class="mt-3 flex gap-1.5" aria-label="This week"></div>
+  <div data-dash-gate class="hidden text-center bg-night-850 border border-white/10 rounded-[28px] p-8">
+    <div class="text-5xl">🔒</div>
+    <h1 class="text-2xl font-extrabold text-white mt-3">Login to open your home</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">Goals, streaks, challenges and bookmarks live in your free account.</p>
+    <button data-dash-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+  </div>
 
-    {/* stats tabs */}
-    <div class="mt-5 flex gap-2" role="tablist" aria-label="Range">
+  <div data-dash-live class="hidden space-y-4">
+    {/* header: greeting + streak pill */}
+    <div class="flex items-center gap-3">
+      <div data-dash-avatar class="w-12 h-12 shrink-0 grid place-items-center rounded-full overflow-hidden ring-2 ring-white/25 bg-gradient-to-br from-emerald-300 to-teal-500 text-xl font-extrabold text-night-900" aria-hidden="true">?</div>
+      <div class="min-w-0">
+        <p class="text-[13px] leading-5 text-ink-300">Asalam Alaykum,</p>
+        <h1 class="text-[22px] leading-7 font-extrabold text-white truncate" data-dash-name>Reader</h1>
+      </div>
+      <div class="ms-auto flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-2.5 py-2 shrink-0">
+        <a href={habitUrl} aria-label="My plan" title="My plan" class="text-xl leading-none min-w-[28px] min-h-[28px] grid place-items-center">🗓️</a>
+        <span class="w-px h-6 bg-white/15" aria-hidden="true"></span>
+        <span class="text-xl leading-none" aria-hidden="true">🔥</span>
+        <span class="font-extrabold text-[17px] text-orange-400"><span data-dash-streak>0</span><span class="text-ink-500 font-bold">/</span><span data-dash-goal class="text-ink-300">7</span></span>
+      </div>
+    </div>
+
+    {/* week dots */}
+    <div data-dash-week class="flex items-center justify-between rounded-full border border-white/10 bg-white/5 px-3 py-2" aria-label="This week"></div>
+
+    {/* goal card */}
+    <section class="rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/40 bg-gradient-to-br from-[#b79df7] via-[#a58bf5] to-[#8b6ff0]" aria-label="Daily goal">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h2 class="text-[26px] leading-7 font-extrabold">Goal</h2>
+          <p class="mt-0.5 text-[15px] font-medium text-white/90">Per Day Verses</p>
+          <p class="text-[15px] font-bold"><span data-dash-todayv>0</span>/<span data-dash-dailygoal>1</span></p>
+        </div>
+        <div class="text-end shrink-0">
+          <p class="flex items-center justify-end gap-1.5 text-[15px] font-extrabold"><span aria-hidden="true">👥</span><span data-dash-livecount>–</span></p>
+          <p class="text-[13px] font-semibold text-white/90">Reading Live <span class="text-emerald-300" aria-hidden="true">●</span></p>
+        </div>
+      </div>
+      <p class="mt-3 text-[15px] font-semibold text-white/95">
+        <a data-dash-resume href={readUrl} class="hover:underline"><span data-dash-resumelabel>Start reading →</span></a>
+        <a href={habitUrl} class="ms-1 hover:underline" title="Edit plan" aria-label="Edit plan">✏️</a>
+      </p>
+      <div class="mt-2 h-3.5 rounded-full bg-[#5b3fa8]/60 overflow-hidden" role="progressbar" aria-label="Daily goal progress"><div data-dash-goalbar class="h-full w-0 rounded-full bg-gradient-to-r from-[#2e2069] to-[#17103a] transition-all duration-500"></div></div>
+      <div class="mt-1.5 flex items-center justify-between text-[15px] font-bold">
+        <span data-dash-juz>Juz –/30</span><span data-dash-pct>0%</span>
+      </div>
+      <a data-dash-read href={readUrl} class="mt-3 flex items-center justify-center rounded-full bg-[#7c5cf0] hover:bg-[#6d4fd8] active:scale-[0.99] transition text-white text-lg font-extrabold px-6 py-3.5 min-h-[56px] shadow-lg shadow-purple-950/30">Read Quran</a>
+    </section>
+
+    {/* meaning challenge hero */}
+    <section class="relative overflow-hidden rounded-[28px] border border-fuchsia-300/20 bg-[#12071f] text-white shadow-xl shadow-black/50" aria-label="The Meaning Challenge">
+      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 80% 20%, rgba(217,70,239,.35), transparent 45%), radial-gradient(circle at 15% 85%, rgba(139,92,246,.4), transparent 50%), radial-gradient(circle at 50% 50%, rgba(245,201,76,.08), transparent 60%);"></div>
+      <span data-dash-cd class="hidden absolute top-3 end-3 items-center gap-1.5 bg-[#f5b04c] text-night-900 text-[13px] font-extrabold rounded-full px-3 py-1.5 shadow">🕐 <span data-dash-cdtext></span></span>
+      <a data-dash-chgo href={readUrl} class="relative block p-5 pt-6">
+        <h2 class="text-[26px] leading-8 font-extrabold pe-24">The Meaning Challenge</h2>
+        <p class="mt-1 text-[15px] leading-6 text-white/85">Finish the Quran in a language you understand in 30 days.</p>
+        <p class="mt-3 flex items-center gap-2 text-[15px]"><span class="text-xl" aria-hidden="true">👥</span><b data-dash-parts class="text-lg">–</b><span class="text-white/80 font-medium">Participants</span></p>
+        <div class="mt-2 h-3.5 rounded-full bg-white/25 overflow-hidden" role="progressbar" aria-label="Challenge progress"><div data-dash-chbar class="h-full w-0 rounded-full bg-gradient-to-r from-brand-300 to-gold-300 transition-all duration-500"></div></div>
+        <div class="mt-1.5 flex items-center justify-between text-[15px] font-bold">
+          <span data-dash-chjuz>1/30 Juz</span><span data-dash-chpct>0%</span>
+        </div>
+      </a>
+    </section>
+
+    {/* range tabs */}
+    <div class="flex items-center gap-1" role="tablist" aria-label="Range">
       {['today', 'week', 'all'].map((r, i) => (
-        <button data-dash-range={r} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-sm font-extrabold transition min-h-[44px] ${i === 0 ? 'bg-brand-500 text-night-900' : 'bg-night-850 border border-white/10 text-ink-300'}`}>{r[0].toUpperCase() + r.slice(1)}</button>
+        <button data-dash-range={r} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-[17px] transition min-h-[48px] ${i === 0 ? 'bg-[#5b3ba8] text-white font-extrabold shadow-lg shadow-purple-950/40' : 'text-ink-300 font-semibold hover:text-white'}`}>{r[0].toUpperCase() + r.slice(1)}</button>
       ))}
     </div>
-    <div data-dash-tiles class="mt-3 grid grid-cols-2 gap-3"></div>
+    <div data-dash-tiles class="grid grid-cols-2 gap-3"></div>
 
-    {/* challenges */}
-    <h2 class="text-xl font-extrabold text-white mt-8 mb-3">🏆 Challenges</h2>
+    {/* more challenges */}
+    <h2 class="text-xl font-extrabold text-white pt-1">🏆 Challenges</h2>
     <div data-dash-challenges class="space-y-3"></div>
 
     {/* bookmarks */}
-    <h2 class="text-xl font-extrabold text-white mt-8 mb-3">🔖 Saved verses</h2>
+    <h2 class="text-xl font-extrabold text-white pt-1">🔖 Saved verses</h2>
     <div data-dash-marks class="space-y-2.5"></div>
 
-    <div class="mt-8 bg-night-850 border border-white/10 rounded-3xl p-5 text-sm text-ink-300 leading-7">
+    <div class="bg-night-850 border border-white/10 rounded-3xl p-5 text-sm text-ink-300 leading-7">
       <b class="text-ink-50">Streak rules:</b> +1 for every day you read. Miss one day and grace saves your streak — miss two in a row and it resets. Stay consistent!
     </div>
-    <a data-dash-read href={readUrl} class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3.5 min-h-[56px] inline-flex items-center justify-center gap-2">📖 Read Quran</a>
-    <button data-dash-logout class="mt-3 w-full text-xs font-bold text-ink-500 hover:text-brand-300 min-h-[44px]">Logout</button>
+    <button data-dash-logout class="w-full text-xs font-bold text-ink-500 hover:text-brand-300 min-h-[44px]">Logout</button>
   </div>
 </div>
 
 <AuthModal />
 
-<script define:vars={{ readUrl }}>
+<script define:vars={{ readUrl, habitUrl, surahShort, juzStarts }}>
   (() => {
     const root = document.querySelector('[data-dash]');
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
     const $ = (s) => root.querySelector(s);
     let H = null, range = 'today';
+    let prefsCache = { daily_goal: 1, streak_goal: 7 };
 
-    const CHALLENGE_DEFS = [
-      { slug: 'friday-kahf', title: 'Friday Challenge', sub: 'Recite Surah Al-Kahf', unit: 'verses', href: null },
-      { slug: 'meaning-30day', title: 'The Meaning Challenge', sub: 'Finish the Quran in a language you understand in 30 days', unit: 'verses', href: null },
-      { slug: 'nightly', title: 'Nightly Recitation', sub: 'Read before sleep', unit: 'verses', href: null },
-      { slug: 'ramadan-khatm', title: 'Ramadan Challenge', sub: 'Complete a full khatm — 30 Juz', unit: 'juz', href: null },
-    ];
-    const TARGETS = { 'friday-kahf': 110, 'meaning-30day': 6236, nightly: 110, 'ramadan-khatm': 30 };
+    const VERSE_COUNTS = surahShort.map((s) => s[1]);
+    const CUM = [];
+    VERSE_COUNTS.reduce((a, n, i) => (CUM[i] = a + n, a + n), 0);
+    const TOTAL_VERSES = CUM[CUM.length - 1] || 6236;
+
+    // Juz (1..30) containing (surah, verse), 1-indexed.
+    const juzOf = (surah, verse) => {
+      let j = 1;
+      for (let i = 0; i < juzStarts.length; i++) {
+        const [s, v] = juzStarts[i];
+        if (s < surah || (s === surah && v <= verse)) j = i + 1;
+        else break;
+      }
+      return Math.min(30, Math.max(1, j));
+    };
+    // Juz containing the Nth verse of the Quran (N>=1).
+    const juzOfOrdinal = (n) => {
+      n = Math.min(TOTAL_VERSES, Math.max(1, n || 1));
+      let s = 1;
+      for (let i = 0; i < CUM.length; i++) { if (CUM[i] >= n) { s = i + 1; break; } }
+      let v = n - (s > 1 ? CUM[s - 2] : 0);
+      return juzOf(s, v);
+    };
+    const surahName = (n) => (surahShort[n - 1] ? `${n} ${surahShort[n - 1][0]}` : `Surah ${n}`);
+    const surahLen = (n) => (surahShort[n - 1] ? surahShort[n - 1][1] : 0);
+
+    const setFace = (el, user) => {
+      if (!el) return;
+      try {
+        if (H?.faceFor) {
+          const html = H.faceFor(user);
+          if (String(html).trim().startsWith('<')) { el.innerHTML = html; return; }
+        }
+      } catch {}
+      el.innerHTML = '';
+      el.textContent = (user?.avatar_emoji && !H?.AVATAR_SVGS?.[user.avatar_emoji]) ? user.avatar_emoji : (user?.name || 'R').trim().charAt(0).toUpperCase() || 'R';
+    };
 
     const paintTiles = (s) => {
       const box = $('[data-dash-tiles]');
       if (!box) return;
       box.innerHTML = [
         ['💗', 'Hasanat', H.fmtCompact(s.hasanat || 0)],
-        ['📄', 'Verses', String(s.verses || 0)],
+        ['📖', 'Verses', String(s.verses || 0)],
         ['⏱️', 'Time', H.fmtTime(s.seconds || 0)],
         ['📑', 'Pages', String(s.pages || 0)],
-      ].map(([i, t, v]) => `<div class="bg-night-850 border border-white/10 rounded-2xl p-4 text-center"><div class="text-3xl">${i}</div><div class="text-sm text-ink-300 mt-1">${t}</div><div class="font-extrabold text-2xl text-white">${v}</div></div>`).join('');
+      ].map(([i, t, v]) => `<div class="bg-night-850 border border-white/10 rounded-3xl px-3 py-5 text-center min-h-[150px] flex flex-col items-center justify-center gap-1"><div class="text-5xl leading-none">${i}</div><div class="font-extrabold text-2xl text-white mt-1">${v}</div><div class="text-sm font-semibold text-ink-300">${t}</div></div>`).join('');
     };
 
     const paintWeek = (days) => {
@@ -89,13 +181,100 @@ const readUrl = localizedPath(locale, '/tools/read/');
       const now = new Date();
       const monday = new Date(now);
       monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      const todayStr = now.toISOString().slice(0, 10);
       box.innerHTML = labels.map((d, i) => {
         const dt = new Date(monday);
         dt.setDate(monday.getDate() + i);
-        const on = set.has(dt.toISOString().slice(0, 10));
-        return `<span class="w-9 h-9 grid place-items-center rounded-full text-xs font-extrabold border ${on ? 'bg-brand-500 text-night-900 border-brand-500' : 'bg-night-850 text-ink-300 border-white/10'}">${d}</span>`;
+        const key = dt.toISOString().slice(0, 10);
+        const on = set.has(key);
+        const isToday = key === todayStr;
+        const cls = on
+          ? 'bg-emerald-400 text-night-900 border-emerald-400'
+          : isToday
+            ? 'bg-brand-500 text-white border-brand-400 ring-2 ring-brand-300/50'
+            : 'bg-transparent text-ink-300 border-white/15';
+        return `<span class="w-9 h-9 grid place-items-center rounded-full text-[15px] font-extrabold border transition ${cls}">${d}</span>`;
       }).join('');
     };
+
+    const paintGoal = async (sessionUser) => {
+      try {
+        const [prefs, today, all, resume, community] = await Promise.all([
+          H.Me.prefs().catch(() => ({ prefs: {} })),
+          H.Me.stats('today').catch(() => ({ stats: {} })),
+          H.Me.stats('all').catch(() => ({ stats: {} })),
+          H.Me.resume().catch(() => ({ resume: null })),
+          H.Me.community().catch(() => null),
+        ]);
+        prefsCache = { ...prefsCache, ...(prefs.prefs || {}) };
+        const goal = Math.max(1, prefsCache.daily_goal || 1);
+        const todayV = today.stats?.verses || 0;
+        const allV = all.stats?.verses || 0;
+        if ($('[data-dash-todayv]')) $('[data-dash-todayv]').textContent = todayV;
+        if ($('[data-dash-dailygoal]')) $('[data-dash-dailygoal]').textContent = goal;
+        if ($('[data-dash-goal]')) $('[data-dash-goal]').textContent = prefsCache.streak_goal || 7;
+        const bar = $('[data-dash-goalbar]');
+        if (bar) bar.style.width = `${Math.min(100, Math.round((todayV / goal) * 100))}%`;
+        if ($('[data-dash-livecount]')) $('[data-dash-livecount]').textContent = community ? H.fmtCompact(community.readingToday || 0) : '–';
+        const pct = ((allV / TOTAL_VERSES) * 100);
+        if ($('[data-dash-pct]')) $('[data-dash-pct]').textContent = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}%`;
+        const readBtn = $('[data-dash-read]');
+        const resumeLink = $('[data-dash-resume]');
+        const resumeLbl = $('[data-dash-resumelabel]');
+        const juzEl = $('[data-dash-juz]');
+        const r = resume?.resume;
+        if (r && r.surah) {
+          if (resumeLbl) resumeLbl.textContent = `${surahName(r.surah)} | ${r.verse}/${surahLen(r.surah)}`;
+          const href = `${String(readUrl).replace(/\/$/, '')}/${r.surah}/?verse=${r.verse}`;
+          if (readBtn) readBtn.href = href;
+          if (resumeLink) resumeLink.href = href;
+          if (juzEl) juzEl.textContent = `Juz ${juzOf(r.surah, r.verse)}/30`;
+        } else {
+          if (resumeLbl) resumeLbl.textContent = 'Start from Al-Faatiha →';
+          if (juzEl) juzEl.textContent = 'Juz –/30';
+        }
+        return { allV };
+      } catch { return { allV: 0 }; }
+    };
+
+    const paintHero = async (sessionUser, allV) => {
+      try {
+        const [saved, community] = await Promise.all([
+          H.Me.challenges().catch(() => ({ challenges: [] })),
+          H.Me.community().catch(() => null),
+        ]);
+        const target = 6236;
+        const progress = Math.min(target, allV || 0);
+        const pct = (progress / target) * 100;
+        const bar = $('[data-dash-chbar]');
+        if (bar) bar.style.width = `${pct}%`;
+        if ($('[data-dash-chpct]')) $('[data-dash-chpct]').textContent = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}%`;
+        if ($('[data-dash-chjuz]')) $('[data-dash-chjuz]').textContent = `${juzOfOrdinal(Math.max(1, progress))}/30 Juz`;
+        if ($('[data-dash-parts]')) $('[data-dash-parts]').textContent = community ? H.fmtCompact(community.readers || 0) : '–';
+        // Countdown: challenge start (or account creation) + 30 days.
+        const row = (saved.challenges || []).find((c) => c.slug === 'meaning-30day');
+        const anchor = (row?.started_at || sessionUser?.created_at || Math.floor(Date.now() / 1000)) * 1000;
+        const left = anchor + 30 * 864e5 - Date.now();
+        const cd = $('[data-dash-cd]');
+        const cdt = $('[data-dash-cdtext]');
+        if (cd && cdt) {
+          if (progress >= target) { cdt.textContent = 'Completed 🎉'; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
+          else if (left <= 0) { cdt.textContent = 'Keep going 💪'; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
+          else {
+            const d = Math.floor(left / 864e5), h = Math.floor((left % 864e5) / 36e5);
+            cdt.textContent = `${d} d ${h} hr left`;
+            cd.classList.remove('hidden'); cd.classList.add('inline-flex');
+          }
+        }
+      } catch { /* hero optional */ }
+    };
+
+    const OTHER_CHALLENGES = [
+      { slug: 'friday-kahf', title: 'Friday Challenge', sub: 'Recite Surah Al-Kahf', unit: 'verses', href: `${String(readUrl).replace(/\/$/, '')}/18/` },
+      { slug: 'nightly', title: 'Nightly Recitation', sub: 'Read before sleep', unit: 'verses', href: readUrl },
+      { slug: 'ramadan-khatm', title: 'Ramadan Challenge', sub: 'Complete a full khatm — 30 Juz', unit: 'juz', href: readUrl },
+    ];
+    const TARGETS = { 'friday-kahf': 110, nightly: 110, 'ramadan-khatm': 30 };
 
     const paintChallenges = async () => {
       const box = $('[data-dash-challenges]');
@@ -103,17 +282,15 @@ const readUrl = localizedPath(locale, '/tools/read/');
       const saved = await H.Me.challenges().catch(() => ({ challenges: [] }));
       const map = new Map((saved.challenges || []).map((c) => [c.slug, c]));
       const week = await H.Me.stats('week').catch(() => ({ stats: { verses: 0 } }));
-      const all = await H.Me.stats('all').catch(() => ({ stats: { verses: 0 } }));
-      const auto = { 'meaning-30day': all.stats?.verses || 0, nightly: week.stats?.verses || 0 };
-      box.innerHTML = CHALLENGE_DEFS.map((c) => {
+      const auto = { nightly: week.stats?.verses || 0 };
+      box.innerHTML = OTHER_CHALLENGES.map((c) => {
         const target = TARGETS[c.slug];
         const progress = Math.min(target, Math.max(map.get(c.slug)?.progress || 0, auto[c.slug] || 0));
         const pct = Math.round((progress / target) * 100);
-        const href = c.slug === 'friday-kahf' ? `${readUrl}18/` : readUrl;
-        return `<a href="${href}" class="block bg-night-850 border border-white/10 rounded-3xl p-5 hover:border-brand-500/50 transition">
+        return `<a href="${c.href}" class="block bg-night-850 border border-white/10 rounded-3xl p-5 hover:border-brand-500/50 transition">
           <p class="font-extrabold text-lg text-white">${c.title}</p>
           <p class="text-sm text-ink-300">${c.sub}</p>
-          <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mt-3"><div class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full" style="width:${pct}%"></div></div>
+          <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mt-3"><div class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full transition-all" style="width:${pct}%"></div></div>
           <div class="mt-1.5 flex justify-between text-xs font-bold text-ink-300"><span>${progress}/${target} ${c.unit}</span><span>${pct}%</span></div>
         </a>`;
       }).join('');
@@ -129,7 +306,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
       }
       box.innerHTML = bookmarks.map((b) => {
         const href = b.kind === 'verse' && b.ref.includes(':')
-          ? `${readUrl}${b.ref.split(':')[0]}/?verse=${b.ref.split(':')[1]}`
+          ? `${String(readUrl).replace(/\/$/, '')}/${b.ref.split(':')[0]}/?verse=${b.ref.split(':')[1]}`
           : readUrl;
         return `<div class="flex items-center gap-3 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">
           <span class="font-bold text-ink-50">${b.kind === 'verse' ? `Surah ${b.ref.replace(':', ':')}` : b.ref}</span>
@@ -154,9 +331,10 @@ const readUrl = localizedPath(locale, '/tools/read/');
       range = btn.dataset.dashRange;
       root.querySelectorAll('[data-dash-range]').forEach((b) => {
         const on = b === btn;
-        b.classList.toggle('bg-brand-500', on);
-        b.classList.toggle('text-night-900', on);
-        b.classList.toggle('bg-night-850', !on);
+        b.classList.toggle('bg-[#5b3ba8]', on);
+        b.classList.toggle('text-white', on);
+        b.classList.toggle('font-extrabold', on);
+        b.classList.toggle('shadow-lg', on);
         b.classList.toggle('text-ink-300', !on);
         b.setAttribute('aria-selected', String(on));
       });
@@ -170,10 +348,13 @@ const readUrl = localizedPath(locale, '/tools/read/');
     document.addEventListener('hn:auth', () => window.location.reload());
 
     (async () => {
-      H = await import('/habits/habit.js?v=3');
+      H = await import('/habits/habit.js?v=4');
       const { user } = await H.Auth.session().catch(() => ({ user: null }));
+      $('[data-dash-loading]')?.classList.add('hidden');
       if (!user) { $('[data-dash-gate]')?.classList.remove('hidden'); return; }
       $('[data-dash-live]')?.classList.remove('hidden');
+      setFace($('[data-dash-avatar]'), user);
+      if (window.hnUpdateNav) window.hnUpdateNav(user);
       $('[data-dash-name]').textContent = (user.name || 'Reader').split(' ')[0];
       const [{ streak }, week] = await Promise.all([
         H.Me.streak().catch(() => ({ streak: { current: 0 } })),
@@ -181,14 +362,11 @@ const readUrl = localizedPath(locale, '/tools/read/');
       ]);
       $('[data-dash-streak]').textContent = streak?.current || 0;
       paintWeek(week.days);
+      const { allV } = await paintGoal(user);
+      await paintHero(user, allV);
       await loadRange();
       await paintChallenges();
       await paintMarks();
-      const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
-      if (resume) {
-        const a = $('[data-dash-read]');
-        if (a) a.href = `${readUrl}${resume.surah}/?verse=${resume.verse}`;
-      }
     })();
   })();
 </script>

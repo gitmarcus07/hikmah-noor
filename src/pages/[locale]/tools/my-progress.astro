@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ProgressDashboard from '../../../components/ProgressDashboard.astro';
+import AppTabBar from '../../../components/AppTabBar.astro';
 import { nonDefaultLocales } from '../../../i18n/utils';
 
 export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
@@ -18,4 +19,5 @@ const crumbs = [
 <BaseLayout title="My Quran Progress — Streak, Stats & Challenges" description="Your verses, hasanat, reading time, streak and challenge progress — saved to your free account." keywords="quran progress, quran streak, hasanat tracker, quran challenges" locale={locale} canonicalPath="/tools/my-progress/" faq={faq} crumbs={crumbs} noindex={true}>
   <ProgressDashboard locale={locale} />
   <p class="mx-auto max-w-3xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+  <AppTabBar locale={locale} active="home" />
 </BaseLayout>

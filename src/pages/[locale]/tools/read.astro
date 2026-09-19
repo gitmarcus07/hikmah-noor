@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import AuthModal from '../../../components/AuthModal.astro';
+import AppTabBar from '../../../components/AppTabBar.astro';
 import { nonDefaultLocales, localizedPath } from '../../../i18n/utils';
 import surahsMeta from '../../../data/surahs-meta.json';
 
@@ -46,6 +47,7 @@ const crumbs = [
     </div>
   </div>
   <AuthModal />
+  <AppTabBar locale={locale} active="reading" />
   <script define:vars={{ readBase: localizedPath(locale, '/tools/read/') }}>
     (() => {
       const root = document.querySelector('[data-picker]');
@@ -58,7 +60,7 @@ const crumbs = [
       root.querySelector('[data-pk-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
       (async () => {
         try {
-          const { Auth, Me } = await import('/habits/habit.js?v=3');
+          const { Auth, Me } = await import('/habits/habit.js?v=4');
           const { user } = await Auth.session();
           if (!user) return;
           root.querySelector('[data-pk-login]')?.classList.add('hidden');

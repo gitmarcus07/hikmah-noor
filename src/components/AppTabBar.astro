@@ -1,0 +1,36 @@
+---
+/* App bottom tab bar (mobile) — Home / Reading / Explore / Leaderboard / Settings.
+ * Shown on logged-in app screens. Desktop keeps the top header (md:hidden).
+ * Includes its own spacer so page content is never covered.
+ */
+import { localizedPath } from '../i18n/utils';
+
+interface Props {
+  locale?: string;
+  active?: 'home' | 'reading' | 'explore' | 'leaderboard' | 'settings';
+}
+const { locale = 'en', active = 'home' } = Astro.props;
+
+const TABS = [
+  { key: 'home', label: 'Home', path: '/tools/my-progress/', icon: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>' },
+  { key: 'reading', label: 'Reading', path: '/tools/read/', icon: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 20.5V5.5"/><path d="M8 7.5h8M8 11h8M8 14.5h5"/>' },
+  { key: 'explore', label: 'Explore', path: '/tools/', icon: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>' },
+  { key: 'leaderboard', label: 'Leaderboard', path: '/leaderboard/', icon: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.6c2.9.3 5 2.1 5.7 5.4"/>' },
+  { key: 'settings', label: 'Settings', path: '/profile/', icon: '<circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09A1.7 1.7 0 0 0 10.1 3V3a2 2 0 1 1 4 0v.09c0 .68.4 1.3 1.01 1.56a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09c.26.61.88 1.01 1.56 1.01H21a2 2 0 1 1 0 4h-.09c-.68 0-1.3.4-1.51 1.01Z"/>' },
+] as const;
+---
+<div class="h-[84px] md:hidden" aria-hidden="true"></div>
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-50 bg-night-900/95 backdrop-blur border-t border-white/10" aria-label="App">
+  <div class="grid grid-cols-5 px-1 pt-1.5" style="padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));">
+    {TABS.map((t) => {
+      const on = t.key === active;
+      return (
+        <a href={localizedPath(locale, t.path)} aria-current={on ? 'page' : undefined} class={`flex flex-col items-center gap-0.5 rounded-2xl py-1.5 min-h-[56px] transition ${on ? 'text-brand-300' : 'text-ink-500 hover:text-ink-200'}`}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={on ? 2.4 : 2} stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={t.icon} />
+          <span class={`text-[10px] font-extrabold leading-4 ${on ? '' : 'font-semibold'}`}>{t.label}</span>
+          {on && <span class="w-8 h-1 rounded-full bg-brand-500 mt-0.5" aria-hidden="true"></span>}
+        </a>
+      );
+    })}
+  </div>
+</nav>
