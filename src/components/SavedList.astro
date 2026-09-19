@@ -1,0 +1,162 @@
+---
+/* Saved verses list — shared by Favourites (verse bookmarks) and Bookmarks
+ * (everything saved) pages. Login-gated. Shows Arabic + translation text
+ * via /api/verse, with open + remove actions.
+ */
+import AuthModal from './AuthModal.astro';
+import { localizedPath } from '../i18n/utils';
+import surahsMeta from '../data/surahs-meta.json';
+
+interface Props {
+  locale?: string;
+  mode?: 'favs' | 'marks';
+}
+const { locale = 'en', mode = 'marks' } = Astro.props;
+const readBase = localizedPath(locale, '/tools/read/');
+const favsOnly = mode === 'favs';
+const surahShort = (surahsMeta as any[]).map((s) => [s.num, s.name]);
+const title = favsOnly ? 'Favourites' : 'Bookmarks';
+const sub = favsOnly
+  ? 'Verses you loved — tap 🤍 on any verse while reading.'
+  : 'Everything you saved — verses, surahs and more.';
+---
+
+<div class="max-w-md mx-auto px-4 py-5" data-saved data-mode={mode}>
+  <div data-sv-loading class="animate-pulse space-y-2.5">
+    <div class="h-28 bg-night-850 border border-white/10 rounded-3xl"></div>
+    <div class="h-28 bg-night-850 border border-white/10 rounded-3xl"></div>
+    <div class="h-28 bg-night-850 border border-white/10 rounded-3xl"></div>
+  </div>
+
+  <div data-sv-gate class="hidden text-center bg-night-850 border border-white/10 rounded-[28px] p-8">
+    <div class="text-5xl">{favsOnly ? '🤍' : '🔖'}</div>
+    <h1 class="text-2xl font-extrabold text-white mt-3">Login to see your {favsOnly ? 'favourites' : 'bookmarks'}</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">{sub}</p>
+    <button data-sv-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+  </div>
+
+  <div data-sv-live class="hidden space-y-3">
+    <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-300">{favsOnly ? '🤍 Favourites' : '🔖 Bookmarks'}</p>
+    <h1 class="text-3xl font-extrabold text-white -mt-2">{title} <span data-sv-count class="text-base font-bold text-ink-500"></span></h1>
+    <div data-sv-empty class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8">
+      <div class="text-5xl">{favsOnly ? '🤍' : '🔖'}</div>
+      <p class="mt-3 font-extrabold text-lg text-white">Nothing here yet</p>
+      <p class="mt-1 text-sm text-ink-300">{sub}</p>
+      <a data-sv-read href={readBase} class="mt-4 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">📖 Read Quran</a>
+    </div>
+    <div data-sv-list class="space-y-3"></div>
+  </div>
+</div>
+
+<AuthModal />
+
+<script define:vars={{ readBase, surahShort, favsOnly }}>
+  (() => {
+    const root = document.querySelector('[data-saved]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const $ = (s) => root.querySelector(s);
+    const mode = root.dataset.saved;
+    let H = null;
+
+    const surahName = (n) => (surahShort[n - 1] ? surahShort[n - 1][0] : `Surah ${n}`);
+    const parseRef = (b) => {
+      if (b.kind === 'verse' && String(b.ref || '').includes(':')) {
+        const [s, v] = b.ref.split(':').map(Number);
+        if (s >= 1 && s <= 114 && v >= 1) return { surah: s, verse: v };
+      }
+      return null;
+    };
+    const openHref = (b) => {
+      const p = parseRef(b);
+      if (p) return `${String(readBase).replace(/\/$/, '')}/${p.surah}/?verse=${p.verse}`;
+      if (b.kind === 'surah' && /^\d+$/.test(String(b.ref || '').trim())) {
+        return `${String(readBase).replace(/\/$/, '')}/${Number(b.ref)}/`;
+      }
+      return readBase;
+    };
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+    $('[data-sv-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
+    document.addEventListener('hn:auth', () => window.location.reload());
+
+    (async () => {
+      try { H = await import('/habits/habit.js?v=5'); } catch {
+        $('[data-sv-loading]')?.classList.add('hidden');
+        $('[data-sv-gate]')?.classList.remove('hidden');
+        return;
+      }
+      let user = null;
+      try { user = (await H.Auth.session()).user; } catch {}
+      $('[data-sv-loading]')?.classList.add('hidden');
+      if (!user) { $('[data-sv-gate]')?.classList.remove('hidden'); return; }
+      $('[data-sv-live]')?.classList.remove('hidden');
+
+      let prefsLang = 'en';
+      try {
+        const p = await H.Me.prefs().catch(() => ({ prefs: {} }));
+        if (['en', 'ur', 'hi'].includes(p.prefs?.translation)) prefsLang = p.prefs.translation;
+      } catch {}
+      let list = [];
+      try {
+        const { bookmarks } = await H.Me.bookmarks().catch(() => ({ bookmarks: [] }));
+        list = bookmarks || [];
+      } catch {}
+      if (mode === 'favs') list = list.filter((b) => b.kind === 'verse');
+
+      const cnt = $('[data-sv-count]');
+      if (cnt) cnt.textContent = list.length ? `(${list.length})` : '';
+      const box = $('[data-sv-list]');
+      if (!list.length) {
+        $('[data-sv-empty]')?.classList.remove('hidden');
+        return;
+      }
+      box.innerHTML = list.map((b, i) => {
+        const p = parseRef(b);
+        const label = p ? `Surah ${surahName(p.surah)} ${p.surah}:${p.verse}` : esc(`${b.kind} ${b.ref || ''}`);
+        return `<article data-sv-card="${i}" class="bg-night-850 border border-white/10 rounded-3xl p-5">
+          <div class="flex items-center gap-2">
+            <span class="text-xl" aria-hidden="true">${mode === 'favs' ? '🤍' : '🔖'}</span>
+            <p class="font-extrabold text-ink-50 truncate">${esc(label)}</p>
+            <button data-sv-del="${i}" class="ms-auto shrink-0 text-xs font-bold text-ink-500 hover:text-red-300 min-h-[44px] min-w-[44px]" aria-label="Remove">✕</button>
+          </div>
+          <p data-sv-ar="${i}" class="font-arabic text-2xl leading-[2] text-right mt-2 text-white" lang="ar" dir="rtl">…</p>
+          <p data-sv-tr="${i}" class="mt-1 text-[15px] leading-7 text-ink-300">…</p>
+          <a href="${openHref(b)}" class="mt-3 inline-flex items-center justify-center gap-1.5 text-sm font-extrabold text-brand-300 hover:text-brand-200 min-h-[44px]">Open in reader →</a>
+        </article>`;
+      }).join('');
+
+      // Remove buttons.
+      box.querySelectorAll('[data-sv-del]').forEach((btn) => btn.addEventListener('click', async () => {
+        const b = list[Number(btn.dataset.svDel)];
+        if (!b) return;
+        btn.textContent = '…';
+        try { await H.Me.removeBookmark(b.kind, b.ref); } catch {}
+        document.querySelector(`[data-sv-card="${btn.dataset.svDel}"]`)?.remove();
+        const left = box.querySelectorAll('[data-sv-card]').length;
+        if (cnt) cnt.textContent = left ? `(${left})` : '';
+        if (!left) $('[data-sv-empty]')?.classList.remove('hidden');
+      }));
+
+      // Fill verse text (Arabic + preferred translation).
+      await Promise.all(list.map(async (b, i) => {
+        const p = parseRef(b);
+        if (!p) {
+          const ar = box.querySelector(`[data-sv-ar="${i}"]`);
+          const tr = box.querySelector(`[data-sv-tr="${i}"]`);
+          if (ar) ar.style.display = 'none';
+          if (tr) tr.textContent = '';
+          return;
+        }
+        try {
+          const v = await H.Me.fetchVerse(p.surah, p.verse, prefsLang).catch(() => null);
+          if (!v) return;
+          const ar = box.querySelector(`[data-sv-ar="${i}"]`);
+          const tr = box.querySelector(`[data-sv-tr="${i}"]`);
+          if (ar) ar.textContent = v.ar || '';
+          if (tr) tr.textContent = v.text || '';
+        } catch {}
+      }));
+    })();
+  })();
+</script>

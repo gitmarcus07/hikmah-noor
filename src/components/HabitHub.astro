@@ -160,7 +160,7 @@ const startUrl = localizedPath(locale, '/tools/habit-start/');
     const boot = async () => {
       // Ayah of the Day — public, no login.
       try {
-        const H = await import('/habits/habit.js?v=4');
+        const H = await import('/habits/habit.js?v=5');
         const list = await (await fetch('/habits/ayahs.json')).json();
         const a = list[H.ayahOfDayIndex(new Date().toISOString().slice(0, 10), list.length) % list.length];
         if (a) {
@@ -171,10 +171,10 @@ const startUrl = localizedPath(locale, '/tools/habit-start/');
       } catch {}
       // Session → locked or live.
       try {
-        const { Auth } = await import('/habits/habit.js?v=4');
+        const { Auth } = await import('/habits/habit.js?v=5');
         const { user } = await Auth.session();
         if (user) {
-          const H = await import('/habits/habit.js?v=4');
+          const H = await import('/habits/habit.js?v=5');
           await renderLive(H, user);
         }
       } catch {}
@@ -183,12 +183,12 @@ const startUrl = localizedPath(locale, '/tools/habit-start/');
     $$('[data-habit-login]').forEach((b) => b.addEventListener('click', () => window.hnAuthModal?.open()));
     $('[data-habit-logout]')?.addEventListener('click', async () => {
       try {
-        const { Auth } = await import('/habits/habit.js?v=4');
+        const { Auth } = await import('/habits/habit.js?v=5');
         await Auth.logout();
       } finally { window.location.reload(); }
     });
     document.addEventListener('hn:auth', async (e) => {
-      const H = await import('/habits/habit.js?v=4');
+      const H = await import('/habits/habit.js?v=5');
       if (e.detail?.isNew) { window.location.href = root.querySelector('[data-habit-continue]')?.href || readUrl; return; }
       const { Auth } = H;
       const { user } = await Auth.session();

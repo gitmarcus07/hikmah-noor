@@ -23,11 +23,11 @@ export default defineConfig({
     mdx(),
     sitemap({
       // Keep noindex redirect stubs, login-gated habit pages,
-      // and account pages (profile, leaderboard, user shells) out.
+      // and account/app-shell pages out.
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
         !/\/tools\/(read|my-progress)\//.test(page) &&
-        !/\/(profile|leaderboard|user)\//.test(page),
+        !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|gems|mushaf|challenges)\//.test(page),
     }),
   ],
 });

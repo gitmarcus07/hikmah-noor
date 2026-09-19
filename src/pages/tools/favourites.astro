@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import SavedList from '../../components/SavedList.astro';
+import AppTabBar from '../../components/AppTabBar.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Reading', path: '/tools/read/' },
+  { name: 'Favourites', path: '/tools/favourites/' },
+];
+---
+<BaseLayout title="My Favourites — Loved Verses" description="Verses you loved while reading the Quran — your personal favourites, saved to your free account." locale={locale} canonicalPath="/tools/favourites/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="Favourites" />
+  <SavedList locale={locale} mode="favs" />
+  <AppTabBar locale={locale} active="reading" />
+</BaseLayout>

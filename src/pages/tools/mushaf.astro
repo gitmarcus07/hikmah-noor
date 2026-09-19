@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MushafReader from '../../components/MushafReader.astro';
+import AppTabBar from '../../components/AppTabBar.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Explore', path: '/explore/' },
+  { name: 'Mushaf', path: '/tools/mushaf/' },
+];
+---
+<BaseLayout title="Mushaf — Classic Quran Pages" description="Read the Holy Quran in classic Mushaf page format — 604 Madani pages with audio. Free, works offline-friendly." locale={locale} canonicalPath="/tools/mushaf/" crumbs={crumbs} noindex={true} hideFooter>
+  <MushafReader locale={locale} />
+  <AppTabBar locale={locale} active="explore" />
+</BaseLayout>

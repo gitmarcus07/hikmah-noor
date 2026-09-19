@@ -153,7 +153,7 @@ const TABS = [
     }));
 
     (async () => {
-      H = await import('/habits/habit.js?v=4');
+      H = await import('/habits/habit.js?v=5');
       await load();
       try {
         const { resume } = await H.Me.resume().catch(() => ({ resume: null }));

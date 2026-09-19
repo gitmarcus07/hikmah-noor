@@ -649,7 +649,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     });
 
     (async () => {
-      H = await import('/habits/habit.js?v=4');
+      H = await import('/habits/habit.js?v=5');
       let user = null;
       try {
         const s = await H.Auth.session();

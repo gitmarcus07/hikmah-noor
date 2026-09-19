@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import SavedList from '../../components/SavedList.astro';
+import AppTabBar from '../../components/AppTabBar.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Reading', path: '/tools/read/' },
+  { name: 'Bookmarks', path: '/tools/bookmarks/' },
+];
+---
+<BaseLayout title="My Bookmarks — Saved Verses" description="Everything you bookmarked while reading the Quran — verses and more, saved to your free account." locale={locale} canonicalPath="/tools/bookmarks/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="Bookmarks" />
+  <SavedList locale={locale} mode="marks" />
+  <AppTabBar locale={locale} active="reading" />
+</BaseLayout>

@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import ChallengeLevels from '../../../components/ChallengeLevels.astro';
+import AppTabBar from '../../../components/AppTabBar.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Explore', path: '/explore/' },
+  { name: 'Quran Challenges', path: '/tools/challenges/' },
+];
+---
+<BaseLayout title="Quran Challenges — Levels & Badges" description="Quran challenge levels — complete reading challenges to unlock Alif, Laam, Meem and Wow badges. Free, login tracks your progress." locale={locale} canonicalPath="/tools/challenges/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="Quran Challenges" />
+  <ChallengeLevels locale={locale} />
+  <p class="mx-auto max-w-md px-4 pb-2 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+  <AppTabBar locale={locale} active="explore" />
+</BaseLayout>

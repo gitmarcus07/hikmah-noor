@@ -1,0 +1,208 @@
+---
+/* Classic Mushaf reader — authentic Madani page layout (604 pages) with
+ * Uthmani-style Arabic, ayah markers, sequential audio, JUMP and font size.
+ * Pure reading (no login needed, nothing tracked).
+ */
+import { localizedPath } from '../i18n/utils';
+import parasMeta from '../data/paras-meta.json';
+
+interface Props { locale?: string; }
+const { locale = 'en' } = Astro.props;
+const exploreUrl = localizedPath(locale, '/explore/');
+const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]);
+---
+
+<div class="sticky top-14 z-40 bg-[#1b2340]/95 backdrop-blur-md border-b border-white/10">
+  <div class="max-w-md mx-auto px-3 py-2 flex items-center gap-1.5">
+    <a href={exploreUrl} class="w-11 h-11 shrink-0 grid place-items-center rounded-full text-white text-2xl hover:bg-white/10 transition" aria-label="Back to Explore">←</a>
+    <p class="text-white text-lg font-semibold">Page</p>
+    <p data-m-page class="text-white text-lg font-semibold tabular-nums">1</p>
+    <button data-m-play class="ms-auto w-11 h-11 shrink-0 grid place-items-center rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition" aria-label="Play page audio">▶</button>
+    <button data-m-jumpopen class="h-11 px-5 shrink-0 rounded-full bg-[#7c5cf0] hover:bg-[#6d4fd8] text-white text-[15px] font-extrabold tracking-wide transition">JUMP</button>
+    <button data-m-font class="w-11 h-11 shrink-0 grid place-items-center rounded-full text-white text-2xl hover:bg-white/10 transition" aria-label="Text size">⋮</button>
+  </div>
+  <div data-m-fontrow class="hidden max-w-md mx-auto px-4 pb-2.5 flex items-center gap-2">
+    <button data-m-smaller class="flex-1 rounded-full border border-white/20 text-white font-extrabold py-2 min-h-[44px]">A−</button>
+    <button data-m-bigger class="flex-1 rounded-full border border-white/20 text-white font-extrabold py-2 min-h-[44px]">A+</button>
+  </div>
+</div>
+
+<div class="max-w-md mx-auto px-3 py-3" data-mushaf>
+  <div data-m-loading class="animate-pulse bg-white rounded-2xl h-[70dvh]"></div>
+
+  <div data-m-error class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8">
+    <div class="text-5xl">📖</div>
+    <p data-m-errmsg class="mt-3 font-extrabold text-lg text-white">Could not load this page</p>
+    <p class="mt-1 text-sm text-ink-300">Check your connection and try again.</p>
+    <button data-m-retry class="mt-4 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Retry →</button>
+  </div>
+
+  <div data-m-live class="hidden">
+    <article data-m-paper class="bg-white text-night-900 rounded-2xl px-5 py-8 shadow-xl min-h-[70dvh]" style="font-size:32px">
+      <p data-m-text class="font-arabic leading-[2.3] text-justify" lang="ar" dir="rtl"></p>
+    </article>
+    <p data-m-juz class="mt-2 text-center text-xs font-bold text-ink-500"></p>
+    <div class="mt-2 flex items-center gap-2">
+      <button data-m-prev class="flex-1 rounded-full border-2 border-white/20 hover:border-white/50 text-white font-extrabold py-3 min-h-[52px] transition">← Prev</button>
+      <button data-m-next class="flex-1 rounded-full border-2 border-white/20 hover:border-white/50 text-white font-extrabold py-3 min-h-[52px] transition">Next →</button>
+    </div>
+  </div>
+</div>
+
+{/* jump dialog */}
+<div data-m-jump class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Jump to page">
+  <div class="absolute inset-0 bg-black/70" data-m-jumpclose></div>
+  <div class="absolute inset-x-4 top-[30%] mx-auto max-w-xs bg-night-850 border border-white/10 rounded-3xl p-5">
+    <p class="font-extrabold text-lg text-white text-center">Jump to page</p>
+    <p class="text-center text-xs text-ink-500">1 – 604</p>
+    <input data-m-jumpinput type="number" min="1" max="604" inputmode="numeric" placeholder="Page number"
+      class="mt-3 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-center text-xl font-extrabold text-ink-50 outline-none focus:ring-2 ring-brand-400" />
+    <button data-m-jumpgo class="mt-3 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Go →</button>
+  </div>
+</div>
+
+<script define:vars={{ juzStarts }}>
+  (() => {
+    const root = document.querySelector('[data-mushaf]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const $ = (s) => root.querySelector(s);
+    const bar = (s) => document.querySelector(s);
+    let H = null, page = 1, verses = [], audio = null, queue = [], qi = 0, playing = false;
+    const pad3 = (n) => String(n).padStart(3, '0');
+    const FS_KEY = 'hn-mushaf-fs', PAGE_KEY = 'hn-mushaf-page';
+
+    const juzOf = (surah, verse) => {
+      let j = 1;
+      for (let i = 0; i < juzStarts.length; i++) {
+        const [s, v] = juzStarts[i];
+        if (s < surah || (s === surah && v <= verse)) j = i + 1;
+        else break;
+      }
+      return Math.min(30, Math.max(1, j));
+    };
+
+    const applyFs = () => {
+      const fs = Math.min(44, Math.max(24, Number(localStorage.getItem(FS_KEY)) || 32));
+      const paper = $('[data-m-paper]');
+      if (paper) paper.style.fontSize = `${fs}px`;
+    };
+
+    const paintTop = () => {
+      const p = bar('[data-m-page]');
+      if (p) p.textContent = page;
+    };
+
+    const stopAudio = () => {
+      playing = false;
+      try { audio?.pause(); } catch {}
+      const b = bar('[data-m-play]');
+      if (b) b.textContent = '▶';
+      root.querySelectorAll('[data-m-cur]').forEach((el) => el.removeAttribute('data-m-cur'));
+    };
+
+    const playQueue = () => {
+      if (qi >= queue.length) { stopAudio(); return; }
+      const { s, v } = queue[qi];
+      if (!audio) {
+        audio = new Audio();
+        audio.onended = () => { qi += 1; playQueue(); };
+        audio.onerror = () => { qi += 1; playQueue(); };
+      }
+      root.querySelectorAll('[data-m-cur]').forEach((el) => el.removeAttribute('data-m-cur'));
+      root.querySelector(`[data-mv="${s}:${v}"]`)?.setAttribute('data-m-cur', '1');
+      audio.src = `https://everyayah.com/data/Alafasy_128kbps/${pad3(s)}${pad3(v)}.mp3`;
+      audio.play().catch(() => stopAudio());
+    };
+
+    bar('[data-m-play]')?.addEventListener('click', () => {
+      if (playing) { stopAudio(); return; }
+      if (!verses.length) return;
+      playing = true;
+      const b = bar('[data-m-play]');
+      if (b) b.textContent = '⏸';
+      queue = verses.map((x) => ({ s: x.surah, v: x.verse }));
+      qi = 0;
+      playQueue();
+    });
+
+    const loadPage = async (n) => {
+      page = Math.min(604, Math.max(1, Number(n) || 1));
+      try { localStorage.setItem(PAGE_KEY, String(page)); } catch {}
+      stopAudio();
+      paintTop();
+      $('[data-m-loading]')?.classList.remove('hidden');
+      $('[data-m-live]')?.classList.add('hidden');
+      $('[data-m-error]')?.classList.add('hidden');
+      try {
+        if (!H) H = await import('/habits/habit.js?v=5');
+        const d = await H.Me.fetchPage(page);
+        verses = d.verses || [];
+        if (!verses.length) throw new Error('empty');
+        const text = $('[data-m-text]');
+        if (text) {
+          text.innerHTML = verses.map((x) =>
+            `<span>${x.ar}</span          ><span data-mv="${x.surah}:${x.verse}" class="inline-grid place-items-center min-w-[1.9em] h-[1.9em] px-1 mx-1 rounded-full border-2 border-current text-[0.55em] font-bold align-middle" title="${x.surah}:${x.verse}">${x.verse}</span>`
+          ).join(' ');
+        }
+        const first = verses[0], last = verses[verses.length - 1];
+        const jz = $('[data-m-juz]');
+        if (jz) jz.textContent = `Juz ${juzOf(first.surah, first.verse)} • ${first.surah}:${first.verse} – ${last.surah}:${last.verse}`;
+        $('[data-m-loading]')?.classList.add('hidden');
+        $('[data-m-live]')?.classList.remove('hidden');
+        window.scrollTo({ top: 0 });
+      } catch (err) {
+        $('[data-m-loading]')?.classList.add('hidden');
+        const em = $('[data-m-errmsg]');
+        if (em) em.textContent = err?.hint || err?.message === 'no_pages' ? 'Mushaf pages are still loading on the server — try again soon.' : 'Could not load this page';
+        $('[data-m-error]')?.classList.remove('hidden');
+      }
+    };
+
+    root.querySelector('[data-m-prev]')?.addEventListener('click', () => loadPage(page - 1));
+    root.querySelector('[data-m-next]')?.addEventListener('click', () => loadPage(page + 1));
+    $('[data-m-retry]')?.addEventListener('click', () => loadPage(page));
+    document.querySelector('[data-m-font]')?.addEventListener('click', () => {
+      document.querySelector('[data-m-fontrow]')?.classList.toggle('hidden');
+    });
+    bar('[data-m-smaller]')?.addEventListener('click', () => {
+      const fs = Math.max(24, (Number(localStorage.getItem(FS_KEY)) || 32) - 2);
+      try { localStorage.setItem(FS_KEY, String(fs)); } catch {}
+      applyFs();
+    });
+    bar('[data-m-bigger]')?.addEventListener('click', () => {
+      const fs = Math.min(44, (Number(localStorage.getItem(FS_KEY)) || 32) + 2);
+      try { localStorage.setItem(FS_KEY, String(fs)); } catch {}
+      applyFs();
+    });
+
+    const jumpBox = document.querySelector('[data-m-jump]');
+    const openJump = () => {
+      jumpBox?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const inp = document.querySelector('[data-m-jumpinput]');
+      if (inp) { inp.value = String(page); inp.focus(); inp.select(); }
+    };
+    const closeJump = () => { jumpBox?.classList.add('hidden'); document.body.style.overflow = ''; };
+    bar('[data-m-jumpopen]')?.addEventListener('click', openJump);
+    document.querySelector('[data-m-jumpclose]')?.addEventListener('click', closeJump);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeJump(); });
+    document.querySelector('[data-m-jumpgo]')?.addEventListener('click', () => {
+      const v = Number(document.querySelector('[data-m-jumpinput]')?.value);
+      closeJump();
+      if (v >= 1 && v <= 604) loadPage(v);
+    });
+
+    applyFs();
+    let start = 1;
+    try { start = Number(localStorage.getItem(PAGE_KEY)) || 1; } catch {}
+    try {
+      const q = new URLSearchParams(window.location.search).get('page');
+      if (q && Number(q) >= 1 && Number(q) <= 604) start = Number(q);
+    } catch {}
+    loadPage(start);
+  })();
+</script>
+<style>
+  [data-m-cur] { background: #fde68a; border-radius: 0.5rem; }
+</style>

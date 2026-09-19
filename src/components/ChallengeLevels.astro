@@ -1,0 +1,120 @@
+---
+/* Quran Challenges — level cards (Alif/Laam/Meem/Wow) backed by the real
+ * challenge progress: badges unlock when each challenge completes.
+ * Login-gated (personal progress).
+ */
+import AuthModal from './AuthModal.astro';
+import { localizedPath } from '../i18n/utils';
+
+interface Props { locale?: string; }
+const { locale = 'en' } = Astro.props;
+const readBase = localizedPath(locale, '/tools/read/');
+
+const LEVELS = [
+  { slug: 'friday-kahf', letter: 'ا', name: 'Alif Level', bg: 'from-[#fed7aa] via-[#fdba74] to-[#fb923c]', dark: false, href: `${localizedPath(locale, '/tools/read/18/')}`, target: 110, unit: 'verses' },
+  { slug: 'nightly', letter: 'ل', name: 'Laam Level', bg: 'from-[#fda4af] via-[#f43f5e] to-[#881337]', dark: true, href: readBase, target: 110, unit: 'verses' },
+  { slug: 'meaning-30day', letter: 'م', name: 'Meem Level', bg: 'from-[#6ee7b7] via-[#34d399] to-[#065f46]', dark: true, href: readBase, target: 6236, unit: 'verses' },
+  { slug: 'ramadan-khatm', letter: 'و', name: 'Wow Level', bg: 'from-[#c4b5fd] via-[#8b5cf6] to-[#4c1d95]', dark: true, href: readBase, target: 30, unit: 'juz' },
+] as const;
+---
+
+<div class="max-w-md mx-auto px-4 py-5" data-levels>
+  <div data-lv-loading class="animate-pulse space-y-3.5">
+    <div class="h-36 bg-night-850 border border-white/10 rounded-[28px]"></div>
+    <div class="h-36 bg-night-850 border border-white/10 rounded-[28px]"></div>
+  </div>
+
+  <div data-lv-gate class="hidden text-center bg-night-850 border border-white/10 rounded-[28px] p-8">
+    <div class="text-5xl">🏆</div>
+    <h1 class="text-2xl font-extrabold text-white mt-3">Login to earn badges</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">Complete challenges below to unlock your badges!</p>
+    <button data-lv-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+  </div>
+
+  <div data-lv-live class="hidden space-y-3.5">
+    <div class="text-center">
+      <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300">🏆 Quran Challenges</p>
+      <h1 class="text-3xl font-extrabold text-white mt-1">Levels</h1>
+      <p data-lv-count class="mt-1 text-sm font-bold text-ink-300"></p>
+    </div>
+    <div class="space-y-3.5">
+      {LEVELS.map((l) => (
+        <a data-lv-card={l.slug} href={l.href} class={`group relative overflow-hidden flex items-center gap-4 rounded-[28px] p-5 min-h-[132px] shadow-xl shadow-black/30 hover:scale-[1.01] active:scale-[0.99] transition bg-gradient-to-br ${l.bg}`}>
+          <span class="w-16 h-16 shrink-0 grid place-items-center rounded-2xl bg-white/20 font-arabic text-5xl text-white drop-shadow" aria-hidden="true">{l.letter}</span>
+          <span class="min-w-0 flex-1">
+            <span class={`block text-[26px] leading-8 font-extrabold ${l.dark ? 'text-white' : 'text-night-900'}`}>{l.name}</span>
+            <span data-lv-state class={`block mt-0.5 text-sm font-bold ${l.dark ? 'text-white/85' : 'text-night-900/70'}`}>…</span>
+            <span class="block mt-2 h-2.5 rounded-full bg-black/20 overflow-hidden"><span data-lv-bar class="block h-full w-0 rounded-full bg-white/90 transition-all duration-500"></span></span>
+          </span>
+          <span data-lv-badge class="shrink-0 text-3xl" aria-hidden="true">🔒</span>
+        </a>
+      ))}
+    </div>
+    <p class="text-center text-xs text-ink-500 leading-5">Complete the challenges to unlock your badges!</p>
+  </div>
+</div>
+
+<AuthModal />
+
+<script define:vars={{ readBase }}>
+  (() => {
+    const root = document.querySelector('[data-levels]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const $ = (s) => root.querySelector(s);
+    const LEVELS = [
+      { slug: 'friday-kahf', target: 110, unit: 'verses' },
+      { slug: 'nightly', target: 110, unit: 'verses' },
+      { slug: 'meaning-30day', target: 6236, unit: 'verses' },
+      { slug: 'ramadan-khatm', target: 30, unit: 'juz' },
+    ];
+    let H = null;
+
+    $('[data-lv-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
+    document.addEventListener('hn:auth', () => window.location.reload());
+
+    (async () => {
+      try { H = await import('/habits/habit.js?v=5'); } catch {
+        $('[data-lv-loading]')?.classList.add('hidden');
+        $('[data-lv-gate]')?.classList.remove('hidden');
+        return;
+      }
+      let user = null;
+      try { user = (await H.Auth.session()).user; } catch {}
+      $('[data-lv-loading]')?.classList.add('hidden');
+      if (!user) { $('[data-lv-gate]')?.classList.remove('hidden'); return; }
+      $('[data-lv-live]')?.classList.remove('hidden');
+
+      const [saved, week, all] = await Promise.all([
+        H.Me.challenges().catch(() => ({ challenges: [] })),
+        H.Me.stats('week').catch(() => ({ stats: { verses: 0 } })),
+        H.Me.stats('all').catch(() => ({ stats: { verses: 0 } })),
+      ]);
+      const map = new Map((saved.challenges || []).map((c) => [c.slug, c]));
+      const auto = { nightly: week.stats?.verses || 0, 'meaning-30day': all.stats?.verses || 0 };
+      const cards = [...document.querySelectorAll('[data-lv-card]')];
+      let earned = 0;
+      cards.forEach((card) => {
+        const slug = card.dataset.lvCard;
+        const def = LEVELS.find((l) => l.slug === slug);
+        if (!def) return;
+        const progress = Math.min(def.target, Math.max(map.get(slug)?.progress || 0, auto[slug] || 0));
+        const done = progress >= def.target;
+        if (done) earned += 1;
+        const pct = Math.round((progress / def.target) * 100);
+        const bar = card.querySelector('[data-lv-bar]');
+        if (bar) bar.style.width = `${pct}%`;
+        const st = card.querySelector('[data-lv-state]');
+        if (st) {
+          st.textContent = done ? '🔓 Badge earned!' : `🔒 ${progress}/${def.target} ${def.unit}`;
+          st.classList.toggle('text-emerald-300', done);
+          st.classList.toggle('text-ink-300', !done);
+        }
+        const badge = card.querySelector('[data-lv-badge]');
+        if (badge) badge.textContent = done ? '🏅' : '🔒';
+      });
+      const cnt = $('[data-lv-count]');
+      if (cnt) cnt.textContent = `${earned}/${cards.length} badges earned`;
+    })();
+  })();
+</script>

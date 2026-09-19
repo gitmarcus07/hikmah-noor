@@ -80,3 +80,9 @@ mark {
 /* mobile: prevent horizontal overflow from long Arabic */
 img, table { max-width: 100%; }
 table { display: block; overflow-x: auto; }
+
+/* members on phones get app chrome only: no hamburger, no search */
+@media (max-width: 1023.98px) {
+  body.hn-member #menuWrap { display: none; }
+  body.hn-member [data-nav-search] { display: none; }
+}

@@ -13,27 +13,39 @@ const crumbs = [
 const CARDS = [
   {
     title: 'Search Quran', sub: 'Search Translation & Ayaat!',
-    href: localizedPath(locale, '/search/'),
+    href: localizedPath(locale, '/tools/search-quran/'),
     bg: 'bg-gradient-to-br from-[#c4a5f5] via-[#a985ee] to-[#8b6ff0]',
     titleCls: 'text-white', subCls: 'text-white/85', icon: '🔍',
   },
   {
     title: 'Quranic Gems', sub: "Gems of understanding — let's start now!",
-    href: localizedPath(locale, '/meanings/'),
+    href: localizedPath(locale, '/tools/gems/'),
     bg: 'bg-gradient-to-br from-[#b79df7] via-[#9d7ff2] to-[#7c5cf0]',
     titleCls: 'text-white', subCls: 'text-white/85', icon: '💎',
   },
   {
     title: 'Mushaf', sub: 'Classic Mushaf format!',
-    href: localizedPath(locale, '/quran/'),
+    href: localizedPath(locale, '/tools/mushaf/'),
     bg: 'bg-gradient-to-br from-[#a7f3d0] via-[#6ee7b7] to-[#34d399]',
     titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '📖',
   },
   {
     title: 'Quran Challenges', sub: 'How far can you go?',
-    href: `${localizedPath(locale, '/tools/my-progress/')}#challenges`,
+    href: localizedPath(locale, '/tools/challenges/'),
     bg: 'bg-gradient-to-br from-[#fed7aa] via-[#fdba74] to-[#fb923c]',
     titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '⛰️',
+  },
+  {
+    title: 'Favourites', sub: 'Verses you loved!',
+    href: localizedPath(locale, '/tools/favourites/'),
+    bg: 'bg-gradient-to-br from-[#fda4af] via-[#fb7185] to-[#e11d48]',
+    titleCls: 'text-white', subCls: 'text-white/85', icon: '🤍',
+  },
+  {
+    title: 'Bookmarks', sub: 'Everything you saved!',
+    href: localizedPath(locale, '/tools/bookmarks/'),
+    bg: 'bg-gradient-to-br from-[#c4b5fd] via-[#8b5cf6] to-[#5b21b6]',
+    titleCls: 'text-white', subCls: 'text-white/85', icon: '🔖',
   },
 ];
 ---

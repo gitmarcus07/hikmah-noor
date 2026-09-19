@@ -100,7 +100,7 @@ const crumbLd = crumbs.length ? {
         <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/about/')}><Icon name="about" size={17} />{dict.nav.about}</a>
       </nav>
       <div class="ms-auto flex items-center gap-1 sm:gap-2">
-        <a href={localizedPath(locale, '/search/')} class="w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
+        <a data-nav-search href={localizedPath(locale, '/search/')} class="w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
         {/* auth: login button (guest) / avatar chip (member) — toggled by nav script below */}
         <a data-nav-login href={localizedPath(locale, '/profile/')} class="hidden sm:inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0">👤 Login</a>
         <a data-nav-profile href={localizedPath(locale, '/profile/')} class="hidden items-center gap-2 bg-white/5 hover:bg-white/10 border border-brand-500/40 rounded-full ps-1 pe-3 py-1 text-sm font-bold text-ink-50 shrink-0" aria-label="My profile">
@@ -223,7 +223,7 @@ const crumbLd = crumbs.length ? {
       // ---- site-wide auth chip: guest → Login, member → avatar + name ----
       // Faces resolve via habit.js (custom photo → SVG avatar → initial).
       let HN = null, lastUser = undefined;
-      import('/habits/habit.js?v=4').then((m) => {
+      import('/habits/habit.js?v=5').then((m) => {
         HN = m;
         if (lastUser !== undefined) paintNav(lastUser);
       }).catch(() => {});
@@ -247,6 +247,8 @@ const crumbLd = crumbs.length ? {
       };
       const paintNav = (user) => {
         lastUser = user || null;
+        // Members on phones get app-only chrome (see global.css .hn-member).
+        document.body.classList.toggle('hn-member', !!user);
         const login = document.querySelector('[data-nav-login]');
         const chip = document.querySelector('[data-nav-profile]');
         const mName = document.querySelector('[data-nav-mobile-name]');

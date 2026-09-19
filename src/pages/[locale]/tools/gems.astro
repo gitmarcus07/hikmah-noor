@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import GemsBoard from '../../../components/GemsBoard.astro';
+import AppTabBar from '../../../components/AppTabBar.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Explore', path: '/explore/' },
+  { name: 'Quranic Gems', path: '/tools/gems/' },
+];
+---
+<BaseLayout title="Quranic Gems — Verses for Every Heart" description="Quranic gems by topic — patience, gratitude, forgiveness, fear, love and more. Tap a topic to read its verses." locale={locale} canonicalPath="/tools/gems/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="Quranic Gems" />
+  <GemsBoard locale={locale} />
+  <p class="mx-auto max-w-md px-4 pb-2 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+  <AppTabBar locale={locale} active="explore" />
+</BaseLayout>

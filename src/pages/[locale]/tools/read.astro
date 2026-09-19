@@ -9,7 +9,8 @@ import surahsMeta from '../../../data/surahs-meta.json';
 export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
 const { locale } = Astro.params;
 const readBase = localizedPath(locale, '/tools/read/');
-const progressSavedUrl = `${localizedPath(locale, '/tools/my-progress/')}#saved`;
+const favsUrl = localizedPath(locale, '/tools/favourites/');
+const marksUrl = localizedPath(locale, '/tools/bookmarks/');
 const surahData = (surahsMeta as any[]).map((s) => [s.num, s.name, s.englishName, s.verseCount]);
 const faq = [
   { q: 'Do I need to login to read?', a: 'No — every surah is free to read with translation and audio. A free login only syncs your place and bookmarks across devices.' },
@@ -49,12 +50,12 @@ const crumbs = [
 
     {/* favourites + bookmarks */}
     <div class="mt-4 grid grid-cols-2 gap-3">
-      <a href={progressSavedUrl} class="rounded-3xl border-2 border-rose-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
+      <a href={favsUrl} class="rounded-3xl border-2 border-rose-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
         <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-rose-600 text-4xl shadow-lg shadow-rose-950/50" aria-hidden="true">🤍</span>
         <span class="mt-2 block text-[17px] text-ink-200">Favourites</span>
         <span data-r-favcount class="block text-2xl font-extrabold text-white">0</span>
       </a>
-      <a href={progressSavedUrl} class="rounded-3xl border-2 border-violet-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
+      <a href={marksUrl} class="rounded-3xl border-2 border-violet-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
         <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-4xl shadow-lg shadow-violet-950/50" aria-hidden="true">🔖</span>
         <span class="mt-2 block text-[17px] text-ink-200">Bookmarks</span>
         <span data-r-markcount class="block text-2xl font-extrabold text-white">0</span>
@@ -204,7 +205,7 @@ const crumbs = [
 
       paintSelection();
       (async () => {
-        try { H = await import('/habits/habit.js?v=4'); } catch { return; }
+        try { H = await import('/habits/habit.js?v=5'); } catch { return; }
         let user = null;
         try { user = (await H.Auth.session()).user; } catch {}
         if (!user) return;

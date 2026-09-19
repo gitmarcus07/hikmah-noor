@@ -1,5 +1,5 @@
 // Hikmah Noor habit client — DOM-free API + math helpers.
-// Loaded as static module: await import('/habits/habit.js?v=4')
+// Loaded as static module: await import('/habits/habit.js?v=5')
 // IMPORTANT: when this file changes, bump the ?v= number in every
 // dynamic import (grep for "habits/habit.js") so browsers/CDN fetch
 // the new copy instead of serving a stale cached one.
@@ -43,6 +43,11 @@ export const Me = {
   leaderboard: (by = 'hasanat', limit = 20) =>
     req(`/api/leaderboard?by=${encodeURIComponent(by)}&limit=${encodeURIComponent(limit)}`),
   community: () => req('/api/community'),
+  searchVerses: (q, lang = 'en', limit = 12) =>
+    req(`/api/quran-search?q=${encodeURIComponent(q)}&lang=${encodeURIComponent(lang)}&limit=${encodeURIComponent(limit)}`),
+  fetchVerse: (surah, verse, lang = 'en') =>
+    req(`/api/verse?surah=${encodeURIComponent(surah)}&verse=${encodeURIComponent(verse)}&lang=${encodeURIComponent(lang)}`),
+  fetchPage: (n) => req(`/api/page?n=${encodeURIComponent(n)}`),
   logEvent: (ev) => req('/api/me/events', { method: 'POST', body: JSON.stringify(ev) }),
   streak: () => req('/api/me/streak'),
   resume: () => req('/api/me/resume'),

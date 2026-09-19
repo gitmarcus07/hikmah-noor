@@ -15,7 +15,7 @@
     window.__hnMemberOnly = true;
     (async () => {
       try {
-        const H = await import('/habits/habit.js?v=4');
+        const H = await import('/habits/habit.js?v=5');
         const { user } = await H.Auth.session().catch(() => ({ user: null }));
         if (!user) return;
         document.querySelectorAll('[data-member-only]').forEach((el) => el.classList.remove('hidden'));
