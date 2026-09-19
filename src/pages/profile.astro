@@ -10,7 +10,7 @@ const crumbs = [
   { name: 'Profile', path: '/profile/' },
 ];
 ---
-<BaseLayout title="My Profile — Login, Account & Details" description="Login, create your free account and manage your profile — name, username, country, bio and avatar. Your Quran progress syncs everywhere." keywords="profile, login, signup, account, user profile" locale={locale} canonicalPath="/profile/" crumbs={crumbs} noindex={true}>
+<BaseLayout title="My Profile — Login, Account & Details" description="Login, create your free account and manage your profile — name, username, country, bio and avatar. Your Quran progress syncs everywhere." keywords="profile, login, signup, account, user profile" locale={locale} canonicalPath="/profile/" crumbs={crumbs} noindex={true} hideFooter>
   <AppHeader locale={locale} title="Profile" />
   <ProfileSection locale={locale} />
   <AppTabBar locale={locale} active="settings" />

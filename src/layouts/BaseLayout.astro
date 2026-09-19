@@ -15,9 +15,10 @@ interface Props {
   pubDate?: string;
   faq?: { q: string; a: string }[];
   crumbs?: { name: string; path: string }[];
+  hideFooter?: boolean;
 }
 
-const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [] } = Astro.props;
+const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
@@ -99,12 +100,12 @@ const crumbLd = crumbs.length ? {
         <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/about/')}><Icon name="about" size={17} />{dict.nav.about}</a>
       </nav>
       <div class="ms-auto flex items-center gap-1 sm:gap-2">
-        <a href={localizedPath(locale, '/search/')} class="w-9 h-9 grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
+        <a href={localizedPath(locale, '/search/')} class="w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
         {/* auth: login button (guest) / avatar chip (member) — toggled by nav script below */}
         <a data-nav-login href={localizedPath(locale, '/profile/')} class="hidden sm:inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0">👤 Login</a>
         <a data-nav-profile href={localizedPath(locale, '/profile/')} class="hidden items-center gap-2 bg-white/5 hover:bg-white/10 border border-brand-500/40 rounded-full ps-1 pe-3 py-1 text-sm font-bold text-ink-50 shrink-0" aria-label="My profile">
           <span data-nav-avatar class="w-7 h-7 grid place-items-center rounded-full bg-brand-500/20 text-base overflow-hidden">👤</span>
-          <span data-nav-name class="max-w-[80px] truncate">Profile</span>
+          <span data-nav-name class="max-w-[80px] truncate hidden min-[440px]:block">Profile</span>
         </a>
         <div class="relative" id="langWrap">
           <button id="langBtn" class="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-full ps-2.5 pe-2 py-1.5 text-sm shadow shrink-0" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
@@ -287,7 +288,7 @@ const crumbLd = crumbs.length ? {
     <slot />
   </main>
 
-  <footer class="bg-[#0b0a15] text-ink-300 mt-12 border-t border-white/10">
+  {!hideFooter && (<footer class="bg-[#0b0a15] text-ink-300 mt-12 border-t border-white/10">
     <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
       <div class="md:col-span-2">
         <div class="font-extrabold text-xl mb-2 text-white">☪ Hikmah Noor</div>
@@ -329,6 +330,6 @@ const crumbLd = crumbs.length ? {
         <span class="flex gap-3">{locales.map(l => <a class="hover:text-gold-300" href={localizedPath(l, '/')}>{localeFlags[l]} {localeNames[l]}</a>)}</span>
       </div>
     </div>
-  </footer>
+  </footer>)}
 </body>
 </html>

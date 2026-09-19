@@ -14,7 +14,7 @@ const crumbs = [
   { name: 'My Progress', path: '/tools/my-progress/' },
 ];
 ---
-<BaseLayout title="My Quran Progress — Streak, Stats & Challenges" description="Your verses, hasanat, reading time, streak and challenge progress — saved to your free account." keywords="quran progress, quran streak, hasanat tracker, quran challenges" locale={locale} canonicalPath="/tools/my-progress/" faq={faq} crumbs={crumbs} noindex={true}>
+<BaseLayout title="My Quran Progress — Streak, Stats & Challenges" description="Your verses, hasanat, reading time, streak and challenge progress — saved to your free account." keywords="quran progress, quran streak, hasanat tracker, quran challenges" locale={locale} canonicalPath="/tools/my-progress/" faq={faq} crumbs={crumbs} noindex={true} hideFooter>
   <ProgressDashboard locale={locale} />
   <AppTabBar locale={locale} active="home" />
 </BaseLayout>
