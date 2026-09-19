@@ -94,16 +94,16 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
             class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
         </label>
         <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username <span data-p-lock-u class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
           <input name="username" data-p-uname maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads" autocapitalize="none" spellcheck="false"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50" />
           <span data-p-unamestatus class="mt-1 hidden text-[11px] font-bold leading-4" role="status"></span>
-          <span class="mt-1 block text-[11px] text-ink-500 leading-4">3–30 chars: a–z, 0–9, . and _ — must start &amp; end with a letter or number. No two people can share one. Set it to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
+          <span class="mt-1 block text-[11px] text-ink-500 leading-4">3–30 chars: a–z, 0–9, . and _ — must start &amp; end with a letter or number. Set once, never changeable. No two people can share one. Set it to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
         </label>
         <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country *</span>
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country * <span data-p-lock-c class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
           <select name="country" data-p-country
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
             <option value="">Select country…</option>
           </select>
         </label>
@@ -118,8 +118,8 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
             class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[64px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 resize-y"></textarea>
         </label>
         <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Gender</span>
-          <select name="gender" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Gender <span data-p-lock-g class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
+          <select name="gender" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
             <option value="">Prefer not to say</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
@@ -138,6 +138,34 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         <p data-p-msg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
         <button type="submit" data-p-save class="sm:col-span-2 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[56px]">Save profile ✓</button>
       </form>
+    </section>
+
+    {/* visibility — name, username & photo are always public */}
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Profile visibility">
+      <h2 class="text-lg font-extrabold text-white">👁️ Who sees what</h2>
+      <p class="text-sm text-ink-500 mt-0.5">Your name, username and photo are always public. Toggle the rest on your public profile &amp; leaderboard.</p>
+      <div class="mt-3 grid gap-2 sm:grid-cols-2">
+        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
+          <input type="checkbox" name="show_country" checked class="w-5 h-5 shrink-0 accent-brand-500" />
+          <span class="text-sm font-bold text-ink-200">Country</span>
+        </label>
+        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
+          <input type="checkbox" name="show_city" checked class="w-5 h-5 shrink-0 accent-brand-500" />
+          <span class="text-sm font-bold text-ink-200">City</span>
+        </label>
+        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
+          <input type="checkbox" name="show_bio" checked class="w-5 h-5 shrink-0 accent-brand-500" />
+          <span class="text-sm font-bold text-ink-200">Bio</span>
+        </label>
+        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
+          <input type="checkbox" name="show_gender" checked class="w-5 h-5 shrink-0 accent-brand-500" />
+          <span class="text-sm font-bold text-ink-200">Gender</span>
+        </label>
+        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer sm:col-span-2">
+          <input type="checkbox" name="show_stats" checked class="w-5 h-5 shrink-0 accent-brand-500" />
+          <span class="text-sm font-bold text-ink-200">Reading stats <span class="font-normal text-ink-500">(verses, hasanat, streak &amp; rank)</span></span>
+        </label>
+      </div>
     </section>
 
     {/* security (email accounts) */}
@@ -346,6 +374,22 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       f.bio.value = u.bio || '';
       f.gender.value = ['male', 'female', 'other'].includes(u.gender) ? u.gender : '';
       f.language.value = ['en', 'hi', 'ur', 'ar'].includes(u.language) ? u.language : 'en';
+      // One-time fields lock after their first set.
+      const setLocked = (sel, badgeSel, locked) => {
+        const el = f.querySelector(sel);
+        if (el) { el.disabled = locked; el.classList.toggle('opacity-50', locked); }
+        const badge = root.querySelector(badgeSel);
+        if (badge) badge.classList.toggle('hidden', !locked);
+      };
+      setLocked('[name="username"]', '[data-p-lock-u]', !!(u.username));
+      setLocked('[name="country"]', '[data-p-lock-c]', !!(u.country));
+      setLocked('[name="gender"]', '[data-p-lock-g]', !!(u.gender));
+      // Visibility toggles (default: visible).
+      const vis = (k) => u[k] !== 0;
+      ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'].forEach((k) => {
+        const c = root.querySelector(`[name="${k}"]`);
+        if (c) c.checked = vis(k);
+      });
       picked = u.avatar_emoji || '';
       photo = u.avatar || '';
       const urlInput = $('[data-p-photourl]');
@@ -386,6 +430,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     // Username: force lowercase + Instagram charset, live availability.
     const unameInput = $('[data-p-uname]');
     unameInput?.addEventListener('input', () => {
+      if (unameInput.disabled) return;
       const clean = unameInput.value.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
       if (clean !== unameInput.value) unameInput.value = clean;
       clearTimeout(unameTimer);
@@ -456,24 +501,44 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
         const fd = new FormData(form);
         const str = (k) => String(fd.get(k) ?? '');
-        const unameVal = str('username').trim().toLowerCase();
-        const unameErr = unameLocalError(unameVal);
-        if (unameErr) {
-          paintUnameStatus('bad', `✗ ${unameErr}`);
-          throw new Error(unameErr);
+        // Locked (one-time) fields are omitted so the server keeps them.
+        const lockedU = !!(profile && profile.username);
+        const lockedC = !!(profile && profile.country);
+        const lockedG = !!(profile && profile.gender);
+        let unameVal = '';
+        if (!lockedU) {
+          unameVal = str('username').trim().toLowerCase();
+          const unameErr = unameLocalError(unameVal);
+          if (unameErr) {
+            paintUnameStatus('bad', `✗ ${unameErr}`);
+            throw new Error(unameErr);
+          }
         }
         // Country is compulsory — challenge windows follow country time.
-        const ctryVal = str('country').trim();
-        if (!ctryVal) {
-          const sel = form.querySelector('[data-p-country]');
-          sel?.focus();
-          throw new Error('Please select your country — challenges unlock on your country time.');
+        let ctryVal = '';
+        if (!lockedC) {
+          ctryVal = str('country').trim();
+          if (!ctryVal) {
+            const sel = form.querySelector('[data-p-country]');
+            sel?.focus();
+            throw new Error('Please select your country — challenges unlock on your country time.');
+          }
         }
+        const visBox = (k) => {
+          const c = root.querySelector(`[name="${k}"]`);
+          return c ? !!c.checked : undefined;
+        };
         console.log('[profile] saving…');
         const data = await withTimeout(H.Me.saveProfile({
-          name: str('name'), username: unameVal, country: str('country'),
-          city: str('city'), bio: str('bio'), gender: str('gender'),
+          name: str('name'),
+          username: lockedU ? undefined : unameVal,
+          country: lockedC ? undefined : ctryVal,
+          city: str('city'), bio: str('bio'),
+          gender: lockedG ? undefined : str('gender'),
           language: str('language'), avatar_emoji: picked, avatar_url: photo,
+          show_country: visBox('show_country'), show_city: visBox('show_city'),
+          show_bio: visBox('show_bio'), show_gender: visBox('show_gender'),
+          show_stats: visBox('show_stats'),
         }));
         if (!data?.user) throw new Error('Server returned an empty response — please retry.');
         profile = data.user;

@@ -48,16 +48,35 @@ function toPublicProfile(row) {
   };
 }
 
+const VIS_DEFAULT = { show_country: 1, show_city: 1, show_bio: 1, show_gender: 1, show_stats: 1 };
+
+// Visibility lives in its own query so a missing 0004 migration degrades
+// to "everything visible" instead of breaking the whole profile read.
+async function visibilityOf(env, userId) {
+  try {
+    const r = await env.DB.prepare(
+      'SELECT show_country, show_city, show_bio, show_gender, show_stats FROM users WHERE id = ?'
+    ).bind(userId).first();
+    if (!r) return { ...VIS_DEFAULT };
+    const v = (x) => (x === 0 ? 0 : 1);
+    return {
+      show_country: v(r.show_country), show_city: v(r.show_city), show_bio: v(r.show_bio),
+      show_gender: v(r.show_gender), show_stats: v(r.show_stats),
+    };
+  } catch { return { ...VIS_DEFAULT }; }
+}
+
 async function fullProfile(env, userId) {
+  const vis = await visibilityOf(env, userId);
   try {
     const row = await env.DB.prepare(`SELECT ${FULL_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
     if (!row) return null;
-    return toPublicProfile(row);
+    return { ...toPublicProfile(row), ...vis };
   } catch {
     // Pre-migration DB: base columns only.
     const row = await env.DB.prepare(`SELECT ${BASE_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
     if (!row) return null;
-    return toPublicProfile(row);
+    return { ...toPublicProfile(row), ...vis };
   }
 }
 
@@ -82,6 +101,17 @@ export async function onRequestPut(context) {
   const baseVals = [];
   const fail = (msg, code = 'invalid_profile', status = 400) => json({ error: code, hint: msg }, status);
 
+  // --- one-time fields: username, country, gender (set once, then immutable) ---
+  let stored = null;
+  if (body.username !== undefined || body.country !== undefined || body.gender !== undefined) {
+    stored = await env.DB.prepare('SELECT username, country, gender FROM users WHERE id = ?').bind(user.id).first().catch(() => null);
+  }
+  const isLockedChange = (field, next) => {
+    const prev = (stored && stored[field]) || '';
+    return !!prev && next !== prev;
+  };
+  const lockedFail = (field) => fail(`Your ${field} is already set and cannot be changed.`, 'field_locked', 403);
+
   // --- name (always available) ---
   if (body.name !== undefined) {
     const name = String(body.name || '').trim().slice(0, 60);
@@ -96,6 +126,7 @@ export async function onRequestPut(context) {
   if (body.username !== undefined) {
     const username = String(body.username || '').trim().toLowerCase().slice(0, 30);
     if (username) {
+      if (isLockedChange('username', username)) return lockedFail('username');
       const ruleErr = usernameRuleError(username);
       if (ruleErr) return fail(ruleErr);
       const taken = await env.DB.prepare(
@@ -110,6 +141,7 @@ export async function onRequestPut(context) {
   if (body.country !== undefined) {
     const country = String(body.country || '').trim().slice(0, 60);
     if (!country) return fail('Please select your country — challenges unlock on your country time.', 'country_required');
+    if (isLockedChange('country', country)) return lockedFail('country');
     sets.push('country = ?');
     vals.push(country);
   }
@@ -128,6 +160,7 @@ export async function onRequestPut(context) {
   if (body.gender !== undefined) {
     const gender = String(body.gender || '').trim().slice(0, 24);
     if (!GENDERS.has(gender)) return fail('Please pick a valid option for gender.');
+    if (isLockedChange('gender', gender)) return lockedFail('gender');
     sets.push('gender = ?');
     vals.push(gender);
   }
@@ -157,6 +190,13 @@ export async function onRequestPut(context) {
     }
     sets.push('avatar_url = ?');
     vals.push(avatar_url.slice(0, 25000));
+  }
+  // --- visibility toggles (name, username, photo are always public) ---
+  for (const k of ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats']) {
+    if (body[k] !== undefined) {
+      sets.push(`${k} = ?`);
+      vals.push(body[k] ? 1 : 0);
+    }
   }
   sets.push('updated_at = ?');
   vals.push(nowSec());
@@ -198,9 +238,11 @@ export async function onRequestPut(context) {
   try {
     await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
   } catch (e) {
-    // Pre-migration DB (no profile columns): persist base fields only.
-    if (!/no such column/i.test(String((e && e.message) || '')) || !baseSets.length) throw e;
-    await env.DB.prepare(`UPDATE users SET ${baseSets.join(', ')} WHERE id = ?`).bind(...baseVals).run();
+    // Pre-migration DB (missing columns): persist base fields only.
+    if (!/no such column/i.test(String((e && e.message) || ''))) throw e;
+    if (baseSets.length) {
+      await env.DB.prepare(`UPDATE users SET ${baseSets.join(', ')} WHERE id = ?`).bind(...baseVals).run();
+    }
   }
   const profile = await fullProfile(env, user.id);
   return json({ ok: true, user: profile, passwordChanged: pwChanged });

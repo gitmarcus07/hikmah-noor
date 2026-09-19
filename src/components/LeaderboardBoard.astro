@@ -8,6 +8,7 @@ interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
 const readUrl = localizedPath(locale, '/tools/read/');
 const profileUrl = localizedPath(locale, '/profile/');
+const userBase = localizedPath(locale, '/user/');
 
 const TABS = [
   ['hasanat', '💗 Hasanat'],
@@ -54,7 +55,7 @@ const TABS = [
   <p class="mt-5 text-center text-xs text-ink-500 leading-5">Only readers with a <b>@username</b> appear here — emails and real names stay private.<br /><a href={profileUrl} class="font-bold text-gold-300 hover:text-amber-200">Set your username on your profile →</a></p>
 </div>
 
-<script define:vars={{ readUrl }}>
+<script define:vars={{ readUrl, userBase }}>
   (() => {
     const root = document.querySelector('[data-lb]');
     if (!root || root.dataset.wired) return;
@@ -74,7 +75,7 @@ const TABS = [
     };
 
     const row = (l) => `
-      <div class="flex items-center gap-3 bg-night-850 border border-white/10 rounded-2xl px-4 py-3">
+      <a href="${userBase}?u=${encodeURIComponent(l.username)}" class="flex items-center gap-3 bg-night-850 border border-white/10 hover:border-brand-500/50 rounded-2xl px-4 py-3 transition">
         <span class="w-8 text-center font-extrabold ${l.rank <= 3 ? 'text-gold-300' : 'text-ink-500'}">${l.rank}</span>
         <span class="w-10 h-10 shrink-0 grid place-items-center rounded-full bg-brand-500/15 border border-white/10 overflow-hidden text-lg font-extrabold text-white">${face(l)}</span>
         <span class="min-w-0">
@@ -85,16 +86,16 @@ const TABS = [
           <span class="block font-extrabold text-lg text-white">${fmt(l.value)}</span>
           <span class="block text-[11px] font-bold text-ink-500">${UNITS[by]}</span>
         </span>
-      </div>`;
+      </a>`;
 
     const podiumCard = (l, i) => `
-      <div class="bg-night-850 border ${i === 0 ? 'border-gold-300/50' : 'border-white/10'} rounded-3xl p-4 text-center">
+      <a href="${userBase}?u=${encodeURIComponent(l.username)}" class="bg-night-850 border ${i === 0 ? 'border-gold-300/50' : 'border-white/10'} hover:border-brand-500/50 rounded-3xl p-4 text-center transition">
         <div class="text-2xl">${MEDALS[i]}</div>
         <div class="mx-auto mt-2 w-14 h-14 grid place-items-center rounded-full bg-brand-500/15 border border-white/10 overflow-hidden text-xl font-extrabold text-white">${face(l)}</div>
         <p class="mt-2 font-bold text-sm text-ink-50 truncate">@${esc(l.username)}</p>
         <p class="font-extrabold text-gold-300">${fmt(l.value)}</p>
         <p class="text-[11px] font-bold text-ink-500">${UNITS[by]}</p>
-      </div>`;
+      </a>`;
 
     const paint = (d) => {
       const leaders = d.leaders || [];

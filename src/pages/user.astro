@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AppHeader from '../components/AppHeader.astro';
+import PublicProfile from '../components/PublicProfile.astro';
+import AppTabBar from '../components/AppTabBar.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Leaderboard', path: '/leaderboard/' },
+  { name: 'Profile', path: '/user/' },
+];
+---
+<BaseLayout title="Reader Profile" description="View a Hikmah Noor reader's public profile — photo, name, details and reading stats they chose to share." locale={locale} canonicalPath="/user/" crumbs={crumbs} noindex={true}>
+  <AppHeader locale={locale} title="Profile" />
+  <PublicProfile locale={locale} />
+  <AppTabBar locale={locale} active="leaderboard" />
+</BaseLayout>
