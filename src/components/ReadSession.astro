@@ -224,7 +224,7 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
     document.addEventListener('visibilitychange', () => { if (document.hidden) flushTime(); });
 
     (async () => {
-      H = await import('/habits/habit.js');
+      H = await import('/habits/habit.js?v=2');
       $('[data-s-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
       document.addEventListener('hn:auth', () => window.location.reload());
       const { user } = await H.Auth.session().catch(() => ({ user: null }));

@@ -58,7 +58,7 @@ const crumbs = [
       root.querySelector('[data-pk-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
       (async () => {
         try {
-          const { Auth, Me } = await import('/habits/habit.js');
+          const { Auth, Me } = await import('/habits/habit.js?v=2');
           const { user } = await Auth.session();
           if (!user) return;
           root.querySelector('[data-pk-login]')?.classList.add('hidden');

@@ -1,5 +1,8 @@
 // Hikmah Noor habit client — DOM-free API + math helpers.
-// Loaded as static module: await import('/habits/habit.js')
+// Loaded as static module: await import('/habits/habit.js?v=2')
+// IMPORTANT: when this file changes, bump the ?v= number in every
+// dynamic import (grep for "habits/habit.js") so browsers/CDN fetch
+// the new copy instead of serving a stale cached one.
 // (same pattern as /finance/calc.js). Auth uses httpOnly cookie
 // sessions, so no token handling here — just same-origin fetch.
 

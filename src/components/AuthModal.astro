@@ -101,7 +101,7 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
 
     modal.querySelector('[data-auth-google]')?.addEventListener('click', async () => {
       try {
-        const { Auth } = await import('/habits/habit.js');
+        const { Auth } = await import('/habits/habit.js?v=2');
         Auth.google();
       } catch { window.location.href = '/api/auth/google'; }
     });
@@ -117,7 +117,7 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
       btn.style.opacity = '0.6';
       try {
         const fd = new FormData(form);
-        const { Auth } = await import('/habits/habit.js');
+        const { Auth } = await import('/habits/habit.js?v=2');
         const data = mode === 'login'
           ? await Auth.login(fd.get('email'), fd.get('password'))
           : await Auth.register(fd.get('name'), fd.get('email'), fd.get('password'));

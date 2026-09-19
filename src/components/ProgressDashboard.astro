@@ -170,7 +170,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
     document.addEventListener('hn:auth', () => window.location.reload());
 
     (async () => {
-      H = await import('/habits/habit.js');
+      H = await import('/habits/habit.js?v=2');
       const { user } = await H.Auth.session().catch(() => ({ user: null }));
       if (!user) { $('[data-dash-gate]')?.classList.remove('hidden'); return; }
       $('[data-dash-live]')?.classList.remove('hidden');

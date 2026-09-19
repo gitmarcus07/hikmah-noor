@@ -272,6 +272,10 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
 
     $('[data-p-form]')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!H?.Me?.saveProfile) {
+        showMsg('[data-p-msg]', false, 'App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
+        return;
+      }
       const form = e.currentTarget;
       const btn = form.querySelector('button');
       btn.disabled = true;
@@ -297,6 +301,10 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
 
     $('[data-p-pw]')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!H?.Me?.saveProfile) {
+        showMsg('[data-p-pwmsg]', false, 'App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
+        return;
+      }
       const form = e.currentTarget;
       const fd = new FormData(form);
       try {
@@ -315,6 +323,10 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
     });
 
     $('[data-p-delete]')?.addEventListener('click', async () => {
+      if (!H?.Me?.deleteAccount) {
+        alert('App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
+        return;
+      }
       if (!confirm('Delete your account and all progress permanently?')) return;
       if (!confirm('Last chance — this cannot be undone. Delete?')) return;
       try {
@@ -333,7 +345,7 @@ const AVATARS = ['🕌','🌙','⭐','🤲','📖','💚','🕋','🌟','🦋','
     });
 
     (async () => {
-      H = await import('/habits/habit.js');
+      H = await import('/habits/habit.js?v=2');
       let user = null;
       try {
         const s = await H.Auth.session();

@@ -192,7 +192,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
       const sum = root.querySelector('[data-ob-summary]');
       if (sum) sum.textContent = `${prefs.daily_goal} verse${prefs.daily_goal > 1 ? 's' : ''} a day • ${prefs.streak_goal}-day streak goal${prefs.reminder_time ? ` • reminder at ${prefs.reminder_time}` : ''}.`;
       try {
-        const { Auth, Me } = await import('/habits/habit.js');
+        const { Auth, Me } = await import('/habits/habit.js?v=2');
         const { user } = await Auth.session();
         if (!user) { window.hnAuthModal?.open(); if (nextBtn) nextBtn.disabled = false; step = panes.length - 2; paint(); return; }
         if (prefs.alerts_on && 'Notification' in window && Notification.permission === 'default') {
@@ -211,7 +211,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
       if (step === panes.length - 1) return;
       // Gate every step behind login (compulsory).
       try {
-        const { Auth } = await import('/habits/habit.js');
+        const { Auth } = await import('/habits/habit.js?v=2');
         const { user } = await Auth.session();
         if (!user) { window.hnAuthModal?.open(); return; }
       } catch { window.hnAuthModal?.open(); return; }
