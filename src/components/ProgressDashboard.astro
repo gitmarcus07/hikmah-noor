@@ -276,6 +276,70 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
     ];
     const TARGETS = { 'friday-kahf': 110, nightly: 110, 'ramadan-khatm': 30 };
 
+    // ---- real-time challenge windows (device local time) ----
+    const NIGHT_START = 20; // Nightly Recitation opens 8 PM…
+    const NIGHT_END = 5;    // …until 5 AM.
+    // Expected Ramadan (1st) starts — approximate, moon sighting varies by ±1 day.
+    const RAMADAN_STARTS = [[2026,2,18],[2027,2,7],[2028,1,27],[2029,1,16],[2030,1,5],[2030,12,26],[2031,12,15],[2032,12,4]];
+    const isFriday = () => new Date().getDay() === 5;
+    const isNight = () => { const h = new Date().getHours(); return h >= NIGHT_START || h < NIGHT_END; };
+    const hijriMonth = () => {
+      try {
+        const parts = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { month: 'numeric' }).formatToParts(new Date());
+        const m = parts.find((p) => p.type === 'month');
+        return m ? Number(m.value) : null;
+      } catch { return null; }
+    };
+    const inRamadanTable = (d = new Date()) => RAMADAN_STARTS.some(([y, m, day]) => {
+      const s = new Date(y, m - 1, day);
+      return d >= s && d < new Date(s.getTime() + 30 * 864e5);
+    });
+    const isRamadan = () => {
+      const hm = hijriMonth();
+      if (hm !== null && Number.isFinite(hm)) return hm === 9;
+      return inRamadanTable();
+    };
+    const fmtLeft = (ms) => {
+      if (ms === null || ms === undefined) return '';
+      if (ms <= 0) return 'soon';
+      const d = Math.floor(ms / 864e5), h = Math.floor((ms % 864e5) / 36e5), m = Math.floor((ms % 36e5) / 6e4);
+      return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+    };
+    const nextFridayIn = () => {
+      const n = new Date(); const d = new Date(n);
+      d.setDate(n.getDate() + ((5 - n.getDay() + 7) % 7));
+      d.setHours(0, 0, 0, 0);
+      if (d <= n) d.setDate(d.getDate() + 7);
+      return d - n;
+    };
+    const nextNightIn = () => {
+      const n = new Date(); const d = new Date(n);
+      d.setHours(NIGHT_START, 0, 0, 0);
+      if (d <= n) d.setDate(d.getDate() + 1);
+      return d - n;
+    };
+    const nextRamadanIn = () => {
+      const n = new Date();
+      for (const [y, m, day] of RAMADAN_STARTS) {
+        const s = new Date(y, m - 1, day);
+        if (s > n) return s - n;
+      }
+      return null;
+    };
+    const challengeWindow = (slug) => {
+      if (slug === 'friday-kahf') {
+        return isFriday() ? { locked: false } : { locked: true, label: 'Friday only', left: nextFridayIn() };
+      }
+      if (slug === 'nightly') {
+        return isNight() ? { locked: false } : { locked: true, label: 'Opens 8 PM', left: nextNightIn() };
+      }
+      if (slug === 'ramadan-khatm') {
+        if (isRamadan()) return { locked: false };
+        return { locked: true, label: 'Ramadan only', left: nextRamadanIn() };
+      }
+      return { locked: false };
+    };
+
     const paintChallenges = async () => {
       const box = $('[data-dash-challenges]');
       if (!box) return;
@@ -287,12 +351,24 @@ const juzStarts = (parasMeta as any[]).map((p) => [p.start.surah, p.start.verse]
         const target = TARGETS[c.slug];
         const progress = Math.min(target, Math.max(map.get(c.slug)?.progress || 0, auto[c.slug] || 0));
         const pct = Math.round((progress / target) * 100);
-        return `<a href="${c.href}" class="block bg-night-850 border border-white/10 rounded-3xl p-5 hover:border-brand-500/50 transition">
-          <p class="font-extrabold text-lg text-white">${c.title}</p>
-          <p class="text-sm text-ink-300">${c.sub}</p>
+        const win = challengeWindow(c.slug);
+        const lockLine = win.locked
+          ? `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-full px-3 py-1.5">🔒 ${win.label}${win.left ? ` • opens in ${fmtLeft(win.left)}` : ''}</p>`
+          : `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-emerald-400/10 border border-emerald-300/30 rounded-full px-3 py-1.5">🔓 Open now</p>`;
+        const inner = `
+          <div class="flex items-start gap-2">
+            <div class="min-w-0 flex-1">
+              <p class="font-extrabold text-lg text-white">${c.title}</p>
+              <p class="text-sm text-ink-300">${c.sub}</p>
+            </div>
+            <span class="text-2xl shrink-0" aria-hidden="true">${win.locked ? '🔒' : '🔓'}</span>
+          </div>
           <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mt-3"><div class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full transition-all" style="width:${pct}%"></div></div>
           <div class="mt-1.5 flex justify-between text-xs font-bold text-ink-300"><span>${progress}/${target} ${c.unit}</span><span>${pct}%</span></div>
-        </a>`;
+          ${lockLine}`;
+        return win.locked
+          ? `<div class="block bg-night-850 border border-white/10 rounded-3xl p-5" role="note" aria-label="${c.title} — locked, ${win.label}">${inner}</div>`
+          : `<a href="${c.href}" class="block bg-night-850 border border-white/10 rounded-3xl p-5 hover:border-brand-500/50 transition">${inner}</a>`;
       }).join('');
     };
 
