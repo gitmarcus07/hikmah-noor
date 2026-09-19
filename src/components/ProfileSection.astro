@@ -177,7 +177,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
 
 <AuthModal />
 
-<script define:vars={{ readUrl }}>
+<script define:vars={{ readUrl, progressUrl }}>
   (() => {
     const root = document.querySelector('[data-profile]');
     if (!root || root.dataset.wired) return;
@@ -532,16 +532,16 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       }
     });
 
-    // Fresh login via modal: reload only when the member view isn't already
-    // on screen (otherwise a save would wipe its own success message).
+    // Fresh login via modal: take the user Home (dashboard). If the member
+    // view is already on screen, just refresh the nav chip — never reload
+    // (a reload would wipe the just-shown success message).
     document.addEventListener('hn:auth', async (e) => {
       try {
         if (document.querySelector('[data-p-live]:not(.hidden)')) {
           if (window.hnUpdateNav && e.detail?.user) window.hnUpdateNav(e.detail.user);
           return;
         }
-        const { user } = await H.Auth.session();
-        if (user) window.location.reload();
+        window.location.href = progressUrl;
       } catch { /* modal flow */ }
     });
 

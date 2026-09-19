@@ -36,8 +36,9 @@ export async function onRequest(context) {
       await env.DB.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').bind(profile.avatar, user.id).run();
     }
     const token = await createSession(env, user.id);
+    // New users set up their plan; returning users land on their Home dashboard.
     const headers = {
-      location: `${appUrl}${isNew ? '/tools/habit-start/' : '/?welcome=1'}`,
+      location: `${appUrl}${isNew ? '/tools/habit-start/' : '/tools/my-progress/'}`,
       'set-cookie': `${sessionCookie(token)}; hn_oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`,
     };
     return new Response(null, { status: 302, headers });
