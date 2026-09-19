@@ -1,0 +1,25 @@
+---
+/* MemberOnly — renders children hidden for guests/Google, reveals them for
+ * logged-in members. Used to keep tracking pitches off content pages while
+ * members still get tracking cross-links. Identical HTML for bots and guests
+ * (no cloaking): enhancement happens client-side after a session check.
+ */
+---
+<div data-member-only class="hidden">
+  <slot />
+</div>
+
+<script is:inline>
+  (() => {
+    if (window.__hnMemberOnly) return;
+    window.__hnMemberOnly = true;
+    (async () => {
+      try {
+        const H = await import('/habits/habit.js?v=4');
+        const { user } = await H.Auth.session().catch(() => ({ user: null }));
+        if (!user) return;
+        document.querySelectorAll('[data-member-only]').forEach((el) => el.classList.remove('hidden'));
+      } catch { /* guests keep the content-only view */ }
+    })();
+  })();
+</script>

@@ -143,7 +143,8 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     {/* visibility — name, username & photo are always public */}
     <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30" aria-label="Profile visibility">
       <h2 class="text-lg font-extrabold text-white">👁️ Who sees what</h2>
-      <p class="text-sm text-ink-500 mt-0.5">Your name, username and photo are always public. Toggle the rest on your public profile &amp; leaderboard.</p>
+      <p class="text-sm text-ink-500 mt-0.5">Your name, username and photo are always public. Toggle the rest — applies instantly, no save needed.</p>
+      <p data-p-vismsg class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
       <div class="mt-3 grid gap-2 sm:grid-cols-2">
         <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
           <input type="checkbox" name="show_country" checked class="w-5 h-5 shrink-0 accent-brand-500" />
@@ -490,6 +491,43 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       syncPhotoUI();
     });
 
+    // Visibility toggles save instantly (no Save-profile click needed).
+    const VIS_KEYS = ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'];
+    const paintVisMsg = (ok, text, sticky = false) => {
+      const msg = $('[data-p-vismsg]');
+      if (!msg) return;
+      msg.textContent = text;
+      msg.classList.remove('hidden', 'text-emerald-300', 'text-red-300');
+      msg.classList.add(ok ? 'text-emerald-300' : 'text-red-300');
+      if (ok && !sticky) setTimeout(() => msg.classList.add('hidden'), 2500);
+    };
+    VIS_KEYS.forEach((key) => {
+      const box = root.querySelector(`[name="${key}"]`);
+      box?.addEventListener('change', async () => {
+        const on = box.checked;
+        if (!H?.Me?.saveProfile) {
+          box.checked = !on;
+          paintVisMsg(false, 'App updated — hard-refresh (Ctrl+Shift+R) and retry.', true);
+          return;
+        }
+        box.disabled = true;
+        paintVisMsg(true, 'Saving…');
+        try {
+          await withTimeout(H.Me.saveProfile({ [key]: on }));
+          const fresh = await withTimeout(H.Me.profile()).catch(() => null);
+          if (fresh?.user) { profile = fresh.user; paintHeader(profile); fillForm(profile); }
+          paintVisMsg(true, '✓ Saved.');
+          console.log('[profile] visibility saved:', key, on);
+        } catch (err) {
+          box.checked = !on;
+          console.error('[profile] visibility failed:', err);
+          paintVisMsg(false, err?.hint || err?.message || 'Could not save — try again.', true);
+        } finally {
+          box.disabled = false;
+        }
+      });
+    });
+
     const saveForm = $('[data-p-form]');
     saveForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -524,10 +562,6 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
             throw new Error('Please select your country — challenges unlock on your country time.');
           }
         }
-        const visBox = (k) => {
-          const c = root.querySelector(`[name="${k}"]`);
-          return c ? !!c.checked : undefined;
-        };
         console.log('[profile] saving…');
         const data = await withTimeout(H.Me.saveProfile({
           name: str('name'),
@@ -536,9 +570,6 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
           city: str('city'), bio: str('bio'),
           gender: lockedG ? undefined : str('gender'),
           language: str('language'), avatar_emoji: picked, avatar_url: photo,
-          show_country: visBox('show_country'), show_city: visBox('show_city'),
-          show_bio: visBox('show_bio'), show_gender: visBox('show_gender'),
-          show_stats: visBox('show_stats'),
         }));
         if (!data?.user) throw new Error('Server returned an empty response — please retry.');
         profile = data.user;

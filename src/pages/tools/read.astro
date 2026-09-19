@@ -11,8 +11,8 @@ const readBase = localizedPath(locale, '/tools/read/');
 const progressSavedUrl = `${localizedPath(locale, '/tools/my-progress/')}#saved`;
 const surahData = (surahsMeta as any[]).map((s) => [s.num, s.name, s.englishName, s.verseCount]);
 const faq = [
-  { q: 'Do I need to login to read?', a: 'You can browse, but verses, streaks and hasanat only save to your free account — login first so nothing is lost.' },
-  { q: 'Where do I continue from?', a: 'Your last position saves automatically. Pick your surah and verse below — it starts filled with where you left off.' },
+  { q: 'Do I need to login to read?', a: 'No — every surah is free to read with translation and audio. A free login only syncs your place and bookmarks across devices.' },
+  { q: 'Where do I continue from?', a: 'Pick your surah and verse below — the buttons start filled with where you left off. Login syncs it to all your devices.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -20,10 +20,10 @@ const crumbs = [
   { name: 'Read', path: '/tools/read/' },
 ];
 ---
-<BaseLayout title="Read Quran — Gamified Reading Session" description="Read verse by verse with timer, audio, hasanat counter, streaks and Juz progress. Free — login saves everything." keywords="read quran, quran reading tracker, quran streak, hasanat counter" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs} hideFooter>
+<BaseLayout title="Read Quran Online — All Surahs with Translation, Transliteration & Audio" description="Read all 114 surahs in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Free to read, no signup needed." keywords="read quran online, surah with translation, quran transliteration, quran audio, read surah" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs} hideFooter>
   <AppHeader locale={locale} title="Reading" />
   <div class="max-w-md mx-auto px-4 py-5" data-reading>
-    <p class="text-center text-[17px] font-bold text-white leading-7">Your daily Quran — every verse saves to your streak, timer and hasanat.</p>
+    <p class="text-center text-[17px] font-bold text-white leading-7">Choose a surah below — read in Arabic with translation, transliteration and audio.</p>
 
     {/* surah selector */}
     <button data-r-surahbtn class="mt-4 w-full flex items-center gap-3 text-start bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-3xl p-5 min-h-[76px] transition">

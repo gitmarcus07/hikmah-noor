@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
+import MemberOnly from '../../components/MemberOnly.astro';
 import { getCollection } from 'astro:content';
 import { getDict, localizedPath } from '../../i18n/utils';
 import { paras } from '../../lib/paras';
@@ -32,7 +33,7 @@ const faq = [
       <a href="#guides" role="tab" aria-selected="false" class="px-4 py-2.5 text-ink-300 hover:text-brand-300">Guides</a>
     </div>
     <input id="parafilter" placeholder="Search para — number or name…" class="mt-5 block w-full max-w-xl mx-auto bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-5 py-3.5 min-h-[52px] mb-2 outline-none focus:ring-2 ring-brand-400" />
-    <a href={localizedPath(locale, '/tools/habit-start/')} class="mb-2 flex justify-center text-sm font-bold text-brand-300 hover:text-brand-200">🌱 Track your para reading — daily goal & streak, free →</a>
+<MemberOnly><a href={localizedPath(locale, '/tools/habit-start/')} class="mb-2 flex justify-center text-sm font-bold text-brand-300 hover:text-brand-200">🌱 Track your para reading — daily goal & streak, free →</a></MemberOnly>
     <div id="paragrid" class="mt-2">
       {paras.map(p => (
         <a href={localizedPath(locale, `/quran/${p.slug}/`)} data-search={`${p.num} ${p.name} ${p.transliteration} para juz`} class="pararow flex items-center gap-4 py-3 border-b border-white/10 hover:bg-white/5 px-2 rounded-lg transition">

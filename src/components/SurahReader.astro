@@ -8,6 +8,7 @@ interface Props {
   locale: string;
 }
 import { localizedPath } from '../i18n/utils';
+import MemberOnly from './MemberOnly.astro';
 const { surah, prev, next, locale } = Astro.props;
 const pad = (n: number) => String(n).padStart(3, '0');
 const audioBase = 'https://everyayah.com/data/Alafasy_128kbps/';
@@ -97,11 +98,13 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   ) : <span />}
 </div>
 
+<MemberOnly>
 <a href={localizedPath(locale, `/tools/read/${surah.num}/`)} class="mt-4 flex items-center gap-3 bg-brand-500/10 hover:bg-brand-500/15 border border-brand-500/40 rounded-2xl px-4 py-3.5 min-h-[52px] transition">
   <span class="text-xl" aria-hidden="true">🌱</span>
   <span class="text-sm font-bold text-ink-50">Track this surah — timer, hasanat & streak, free</span>
   <span class="ms-auto text-brand-300 font-extrabold">→</span>
 </a>
+</MemberOnly>
 
 <script>
   (() => {
