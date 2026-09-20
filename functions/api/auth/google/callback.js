@@ -23,7 +23,7 @@ export async function onRequest(context) {
     if (!profile) return fail('/tools/habit-start/?auth=error');
 
     const now = nowSec();
-    let user = await env.DB.prepare('SELECT id, name, email, avatar_url, provider FROM users WHERE email = ?')
+    let user = await env.DB.prepare('SELECT id, name, email, avatar_url, avatar_emoji, provider FROM users WHERE email = ?')
       .bind(profile.email).first();
     let isNew = false;
     if (!user) {
@@ -38,8 +38,11 @@ export async function onRequest(context) {
     } else {
       // Same address previously used with email+password (or a deleted
       // account re-created): link it — keep the row so either method logs
-      // into the same account, just fill a missing avatar.
-      if (!user.avatar_url && profile.avatar) {
+      // into the same account. Backfill the Google photo ONLY when the user
+      // has no avatar at all: gallery picks store avatar_url='' + an
+      // avatar_emoji id, and refilling the photo here would silently wipe
+      // the gallery choice on every Google re-login.
+      if (!user.avatar_url && !user.avatar_emoji && profile.avatar) {
         await env.DB.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').bind(profile.avatar, user.id).run();
       }
     }

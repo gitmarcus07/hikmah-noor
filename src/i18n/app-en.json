@@ -244,6 +244,7 @@
     "tranSize": "Translation",
     "trlitSize": "Transliteration",
     "translation": "Translation",
+    "bioPh": "A line about you — e.g. learning Quran daily 🤲",
     "privacyT": "👁️ Who sees what",
     "privacyD": "Your username is always public on the leaderboard. Toggle the rest.",
     "myProgress": "📊 My progress",

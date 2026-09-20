@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import ReadSession from '../../../../components/ReadSession.astro';
+import AppTabBar from '../../../../components/AppTabBar.astro';
 import { nonDefaultLocales } from '../../../../i18n/utils';
 import parasMeta from '../../../../data/paras-meta.json';
 import surahsMeta from '../../../../data/surahs-meta.json';
@@ -48,7 +49,8 @@ const crumbs = [
   canonicalPath={`/tools/read/${num}/`}
   noindex={true}
   crumbs={crumbs}
+  hideFooter
 >
   <ReadSession locale={locale} surah={surah} juzTotals={juzTotals} juzOfSurah={juzOfSurah} />
-  <p class="mx-auto max-w-2xl px-4 pb-8 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+  <AppTabBar locale={locale} active="reading" />
 </BaseLayout>

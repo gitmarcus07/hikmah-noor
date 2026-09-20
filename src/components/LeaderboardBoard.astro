@@ -278,39 +278,45 @@ const userBase = localizedPath(locale, '/user/');
         const full = await H.Me.profile().catch(() => ({ user }));
         myProfile = full.user || user;
         form?.classList.remove('hidden');
-        const set = (sel, on) => {
-          const c = modal.querySelector(sel);
-          if (c) c.checked = on !== 0;
-        };
-        set('[data-lb-f-show_name]', myProfile.show_name);
-        set('[data-lb-f-show_avatar]', myProfile.show_avatar);
-        set('[data-lb-f-show_city]', myProfile.show_city);
-        set('[data-lb-f-show_bio]', myProfile.show_bio);
-        set('[data-lb-f-show_gender]', myProfile.show_gender);
-        set('[data-lb-f-show_stats]', myProfile.show_stats);
-        const sel = modal.querySelector('[data-lb-f-country]');
-        if (sel) {
-          sel.innerHTML = '';
-          if (!myProfile.country) {
-            const o0 = document.createElement('option');
-            o0.value = ''; o0.textContent = tLb.lb.selectCountry;
-            sel.appendChild(o0);
-          }
-          COUNTRIES.forEach((c) => {
-            const o = document.createElement('option');
-            o.value = c; o.textContent = c;
-            if (c === myProfile.country) o.selected = true;
-            sel.appendChild(o);
-          });
-          if (myProfile.country && !COUNTRIES.includes(myProfile.country)) {
-            const o = document.createElement('option');
-            o.value = myProfile.country; o.textContent = myProfile.country; o.selected = true;
-            sel.appendChild(o);
-          }
-          sel.disabled = !!myProfile.country;
-        }
-        modal.querySelector('[data-lb-clock]')?.classList.toggle('hidden', !myProfile.country);
+        paintToggles();
       } catch { gate?.classList.remove('hidden'); }
+    };
+    // Paint toggles from server truth (used on open AND after save, so a
+    // silently-dropped field can never masquerade as saved).
+    const paintToggles = () => {
+      if (!modal || !myProfile) return;
+      const set = (sel, on) => {
+        const c = modal.querySelector(sel);
+        if (c) c.checked = on !== 0;
+      };
+      set('[data-lb-f-show_name]', myProfile.show_name);
+      set('[data-lb-f-show_avatar]', myProfile.show_avatar);
+      set('[data-lb-f-show_city]', myProfile.show_city);
+      set('[data-lb-f-show_bio]', myProfile.show_bio);
+      set('[data-lb-f-show_gender]', myProfile.show_gender);
+      set('[data-lb-f-show_stats]', myProfile.show_stats);
+      const sel = modal.querySelector('[data-lb-f-country]');
+      if (sel) {
+        sel.innerHTML = '';
+        if (!myProfile.country) {
+          const o0 = document.createElement('option');
+          o0.value = ''; o0.textContent = tLb.lb.selectCountry;
+          sel.appendChild(o0);
+        }
+        COUNTRIES.forEach((c) => {
+          const o = document.createElement('option');
+          o.value = c; o.textContent = c;
+          if (c === myProfile.country) o.selected = true;
+          sel.appendChild(o);
+        });
+        if (myProfile.country && !COUNTRIES.includes(myProfile.country)) {
+          const o = document.createElement('option');
+          o.value = myProfile.country; o.textContent = myProfile.country; o.selected = true;
+          sel.appendChild(o);
+        }
+        sel.disabled = !!myProfile.country;
+      }
+      modal.querySelector('[data-lb-clock]')?.classList.toggle('hidden', !myProfile.country);
     };
     const closeModal = () => {
       modal?.classList.add('hidden');
@@ -335,6 +341,7 @@ const userBase = localizedPath(locale, '/user/');
         if (btn) { btn.disabled = true; btn.textContent = tLb.lb.saving; }
         const data = await H.Me.saveProfile(payload);
         myProfile = data.user || myProfile;
+        paintToggles();
         msg(true, tLb.lb.saved);
         await load();
         setTimeout(closeModal, 700);

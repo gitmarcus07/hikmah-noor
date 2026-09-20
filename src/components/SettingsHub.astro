@@ -186,8 +186,30 @@ const CHIP = 'w-11 h-11 shrink-0 grid place-items-center rounded-2xl text-[22px]
     let H = null, loggedIn = false;
 
     const lockScroll = (on) => { document.body.style.overflow = on ? 'hidden' : ''; };
-    const openM = (sel) => { document.querySelector(sel)?.classList.remove('hidden'); lockScroll(true); };
-    const closeM = (sel) => { document.querySelector(sel)?.classList.add('hidden'); lockScroll(false); };
+    // Modal history: opening pushes a state so the phone back button closes
+    // the modal (one step back, stays in Settings) instead of leaving.
+    let pushed = 0;
+    const openM = (sel) => {
+      const m = document.querySelector(sel);
+      if (!m) return;
+      m.classList.remove('hidden');
+      lockScroll(true);
+      try { history.pushState({ hnModal: sel }, ''); pushed += 1; } catch { /* ignore */ }
+    };
+    const closeAllM = () => {
+      ['[data-hub-pmodal]', '[data-hub-amodal]', '[data-hub-rmodal]'].forEach((s) => document.querySelector(s)?.classList.add('hidden'));
+      lockScroll(false);
+      pushed = 0;
+    };
+    const closeM = (sel) => {
+      if (pushed > 0) {
+        pushed -= 1;
+        try { history.back(); return; } catch { /* fall through */ }
+      }
+      document.querySelector(sel)?.classList.add('hidden');
+      lockScroll(false);
+    };
+    window.addEventListener('popstate', closeAllM);
 
     // search filters rows (and hides emptied sections)
     $('[data-hub-q]')?.addEventListener('input', (e) => {
@@ -225,9 +247,9 @@ const CHIP = 'w-11 h-11 shrink-0 grid place-items-center rounded-2xl text-[22px]
 
     // purchase + appearance modals
     $('[data-hub-purchase]')?.addEventListener('click', () => openM('[data-hub-pmodal]'));
-    root.querySelectorAll('[data-hub-pclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-pmodal]')));
+    document.querySelectorAll('[data-hub-pclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-pmodal]')));
     $('[data-hub-appearance]')?.addEventListener('click', () => openM('[data-hub-amodal]'));
-    root.querySelectorAll('[data-hub-aclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-amodal]')));
+    document.querySelectorAll('[data-hub-aclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-amodal]')));
 
     // language: expand, pick → save profile language (members) + go localized
     const cur = $('[data-hub-curlang]');
@@ -253,7 +275,7 @@ const CHIP = 'w-11 h-11 shrink-0 grid place-items-center rounded-2xl text-[22px]
       el.classList.add(ok ? 'text-emerald-300' : 'text-red-300');
     };
     $('[data-hub-reset]')?.addEventListener('click', () => openM('[data-hub-rmodal]'));
-    root.querySelectorAll('[data-hub-rclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-rmodal]')));
+    document.querySelectorAll('[data-hub-rclose]').forEach((b) => b.addEventListener('click', () => closeM('[data-hub-rmodal]')));
     document.querySelector('[data-hub-rreset]')?.addEventListener('click', async () => {
       const btn = document.querySelector('[data-hub-rreset]');
       try {
@@ -274,8 +296,7 @@ const CHIP = 'w-11 h-11 shrink-0 grid place-items-center rounded-2xl text-[22px]
     });
     document.querySelector('[data-hub-rdelete]')?.addEventListener('click', async () => {
       if (!H?.Me?.deleteAccount) return;
-      if (!confirm(`${tHub.deleteBtn}?`)) return;
-      if (!confirm(tHub.resetD)) return;
+      // The styled modal above is the confirmation — proceed directly.
       try {
         await H.Me.deleteAccount();
         window.location.href = '/';

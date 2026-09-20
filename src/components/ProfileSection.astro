@@ -285,6 +285,21 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         </div>
       </div>
 
+      {/* bio */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="bio" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">{t.vis.bio}</span>
+          <span data-s-sum-bio class="text-xs font-bold text-ink-500 truncate max-w-[140px]"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="bio" class="hidden px-4 pb-4 space-y-2">
+          <textarea data-s-bioinput rows="2" maxlength="280" placeholder={t.account.bioPh}
+            class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[64px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 resize-y"></textarea>
+          <button data-s-save="bio" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">{t.account.save}</button>
+          <p data-s-msg-bio class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
       {/* font size */}
       <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
         <button data-s-toggle="fontsize" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
@@ -522,6 +537,8 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       $('[data-s-genderlock]')?.classList.toggle('hidden', !profile.gender);
       if ($('[data-s-nameinput]')) $('[data-s-nameinput]').value = profile.name || '';
       if ($('[data-s-emailinput]')) $('[data-s-emailinput]').value = profile.email || '';
+      if ($('[data-s-bioinput]')) $('[data-s-bioinput]').value = profile.bio || '';
+      sum('[data-s-sum-bio]', profile.bio ? (profile.bio.length > 24 ? `${profile.bio.slice(0, 24)}…` : profile.bio) : tAcc.account.notSet);
       // password section only for email accounts
       const isEmail = profile.provider === 'email';
       $('[data-s-pwform]')?.classList.toggle('hidden', !isEmail);
@@ -705,6 +722,10 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         const data = await withTimeout(H.Me.saveProfile({ gender: val('[data-s-gender]') }));
         profile = data.user;
       },
+      bio: async () => {
+        const data = await withTimeout(H.Me.saveProfile({ bio: val('[data-s-bioinput]') }));
+        profile = data.user;
+      },
       fontsize: async () => {
         const data = await withTimeout(H.Me.savePrefs({
           font_size_translation: Number($('[data-s-fstran]')?.value || 1),
@@ -767,13 +788,20 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       try { await H.Auth.logout(); } finally { window.location.reload(); }
     });
     $('[data-s-delete]')?.addEventListener('click', async () => {
-      if (!confirm(tAcc.account.deleteD)) return;
-      if (!confirm(tAcc.account.deleteBtn)) return;
+      if (!window.hnConfirm) return;
+      const ok = await window.hnConfirm({
+        title: tAcc.account.deleteBtn,
+        body: tAcc.account.deleteD,
+        ok: tAcc.account.deleteBtn,
+        cancel: tAcc.settings.cancel,
+        danger: true,
+      });
+      if (!ok) return;
       try {
         await H.Me.deleteAccount();
         window.location.href = '/';
       } catch {
-        alert(tAcc.account.saveFail);
+        await window.hnAlert(tAcc.account.saveFail);
       }
     });
     document.addEventListener('hn:auth', () => window.location.reload());

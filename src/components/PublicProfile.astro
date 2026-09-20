@@ -31,7 +31,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
       <p data-pub-username class="text-brand-300 font-bold"></p>
       <p data-pub-meta class="mt-1 text-xs text-ink-500"></p>
       <p data-pub-bio class="mt-2 text-sm text-ink-200 leading-6"></p>
-      <p data-pub-gender class="mt-2 hidden inline-flex items-center gap-1.5 text-xs font-bold text-ink-300 bg-white/5 border border-white/10 rounded-full px-3 py-1.5"></p>
+      <p data-pub-gender class="mt-2 hidden items-center gap-1.5 text-xs font-bold text-ink-300 bg-white/5 border border-white/10 rounded-full px-3 py-1.5"></p>
     </section>
 
     <section data-pub-stats class="hidden bg-night-850 border border-white/10 rounded-3xl p-5 shadow-xl shadow-black/30">
@@ -67,7 +67,7 @@ const readUrl = localizedPath(locale, '/tools/read/');
         return;
       }
       let H = null;
-      try { H = await import('/habits/habit.js?v=4'); } catch {}
+      try { H = await import('/habits/habit.js?v=5'); } catch {}
       let d = null;
       try {
         const r = await fetch(`/api/user?u=${encodeURIComponent(u)}`, { credentials: 'same-origin' });
@@ -107,8 +107,8 @@ const readUrl = localizedPath(locale, '/tools/read/');
       const g = $('[data-pub-gender]');
       if (g) {
         const label = GENDERS[usr.gender];
-        if (label) { g.textContent = label; g.classList.remove('hidden'); }
-        else g.classList.add('hidden');
+        if (label) { g.textContent = label; g.classList.remove('hidden'); g.classList.add('inline-flex'); }
+        else { g.classList.add('hidden'); g.classList.remove('inline-flex'); }
       }
       if (d.stats) {
         $('[data-pub-stats]')?.classList.remove('hidden');

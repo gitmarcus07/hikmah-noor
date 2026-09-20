@@ -45,7 +45,7 @@ const profileUrl = localizedPath(locale, '/profile/');
   </div>
 </div>
 
-<script define:vars={{ tN: n }}>
+<script define:vars={{ tN: n, tNOk: t.settings.ok, tNCancel: t.settings.cancel, tNDel: t.settings.deleteBtn }}>
   (() => {
     const root = document.querySelector('[data-notes]');
     if (!root || root.dataset.wired) return;
@@ -178,7 +178,10 @@ const profileUrl = localizedPath(locale, '/profile/');
         return;
       }
       if (delBtn) {
-        if (!confirm(tN.confirmDelete)) return;
+        const ok = window.hnConfirm
+          ? await window.hnConfirm({ title: tNDel, body: tN.confirmDelete, ok: tNDel, cancel: tNCancel, danger: true })
+          : confirm(tN.confirmDelete);
+        if (!ok) return;
         try {
           await api(`/api/me/notes?id=${encodeURIComponent(delBtn.dataset.nDel)}`, { method: 'DELETE' });
           await load();
