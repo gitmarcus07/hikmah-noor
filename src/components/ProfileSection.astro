@@ -1,7 +1,9 @@
 ---
-/* Profile section — login / signup / logout + editable details
- * (name, username, avatar, country, city, bio, gender, language).
- * Works standalone on /profile/ pages. Uses AuthModal + /habits/habit.js.
+/* Account Settings hub (Quranly-style) — avatar + rows that expand into
+ * editors: Alerts, Notifications, Hide Hasanat, Reciter, Quran Script,
+ * Daily Quran Goal, Change Password, Change Email, Change Name, Gender,
+ * Font Size, Translation (+ Username, Country, Photo). Privacy toggles and
+ * Session (logout/delete) below. Uses AuthModal + /habits/habit.js.
  */
 import AuthModal from './AuthModal.astro';
 import { localizedPath } from '../i18n/utils';
@@ -9,205 +11,353 @@ import { localizedPath } from '../i18n/utils';
 interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
 const progressUrl = localizedPath(locale, '/tools/my-progress/');
-const readUrl = localizedPath(locale, '/tools/read/');
-const homeUrl = localizedPath(locale, '/');
 const leaderboardUrl = localizedPath(locale, '/leaderboard/');
 ---
 
-<div class="max-w-3xl mx-auto px-4 py-8" data-profile>
+<div class="max-w-md mx-auto px-4 py-5" data-settings>
   {/* loading */}
-  <div data-p-loading class="animate-pulse space-y-3">
-    <div class="h-40 bg-night-850 border border-white/10 rounded-3xl"></div>
+  <div data-s-loading class="animate-pulse space-y-3">
+    <div class="h-24 bg-night-850 border border-white/10 rounded-3xl"></div>
     <div class="h-64 bg-night-850 border border-white/10 rounded-3xl"></div>
   </div>
 
   {/* logged-out gate */}
-  <div data-p-gate class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8 shadow-xl shadow-black/30">
+  <div data-s-gate class="hidden text-center bg-night-850 border border-white/10 rounded-3xl p-8 shadow-xl shadow-black/30">
     <div class="mx-auto w-20 h-20 grid place-items-center rounded-full bg-brand-500/15 border border-brand-500/30 text-5xl" aria-hidden="true">👤</div>
-    <p class="mt-4 text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-300">Your profile</p>
-    <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">Login or create a free account</h1>
-    <p class="mt-2 text-ink-300 text-[15px] leading-7 max-w-md mx-auto">Save your name, country and reading progress. Pick up your Quran habit on any device — 100% free, forever.</p>
+    <h1 class="text-2xl font-extrabold text-white mt-4">Login or create a free account</h1>
+    <p class="mt-2 text-ink-300 text-[15px] leading-7">Save your settings and reading progress — 100% free, forever.</p>
     <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-      <button data-p-open-login class="bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login →</button>
-      <button data-p-open-register class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Create free account</button>
-    </div>
-    <div class="mt-5 flex flex-wrap justify-center gap-2 text-xs font-bold text-ink-300">
-      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">🔥 Streaks</span>
-      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">📖 Resume reading</span>
-      <span class="bg-white/5 border border-white/10 rounded-full px-3 py-1.5">🔖 Saved verses</span>
+      <button data-s-open-login class="bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login →</button>
+      <button data-s-open-register class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Create free account</button>
     </div>
   </div>
 
   {/* logged-in view */}
-  <div data-p-live class="hidden space-y-4">
-    {/* settings categories — jump without scrolling to the bottom */}
-    <nav aria-label="Settings sections" class="sticky top-14 z-30 -mx-1 px-1 py-2 bg-night-950/90 backdrop-blur-md">
-      <div class="flex gap-2 overflow-x-auto pb-1" role="list">
-        <a href="#p-profile" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-brand-500/15 border border-brand-500/40 text-brand-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:bg-brand-500/25 transition">👤 Profile</a>
-        <a href="#p-privacy" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">👁️ Privacy</a>
-        <a href="#p-password" data-p-navpw role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">🔑 Password</a>
-        <a href="#p-session" role="listitem" class="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-ink-200 text-sm font-extrabold px-4 py-2.5 min-h-[44px] hover:border-brand-400 transition">⚙️ Session</a>
-      </div>
-    </nav>
-    {/* header card */}
-    <section class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30">
-      <div class="flex items-start gap-4">
-        <div data-p-avatar class="w-20 h-20 shrink-0 grid place-items-center rounded-full bg-brand-500/15 border-2 border-brand-500/40 text-4xl overflow-hidden" aria-hidden="true">👤</div>
-        <div class="min-w-0 flex-1">
-          <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-brand-300">Asalam Alaykum</p>
-          <h1 data-p-name class="text-2xl font-extrabold text-white truncate">Reader</h1>
-          <p class="text-sm text-ink-300 truncate"><span data-p-username class="font-bold text-brand-300"></span> <span data-p-email class="text-ink-500"></span></p>
-          <p data-p-meta class="mt-1 text-xs text-ink-500 leading-5"></p>
-          <p data-p-bio class="mt-2 text-sm text-ink-200 leading-6"></p>
+  <div data-s-live class="hidden space-y-4">
+    <div class="flex items-center gap-3">
+      <button data-s-back aria-label="Back" class="w-12 h-9 shrink-0 grid place-items-center rounded-full border border-white/25 text-white text-lg hover:bg-white/10 transition">←</button>
+      <h1 class="flex-1 text-center text-[20px] font-extrabold text-white">Account Settings</h1>
+      <span class="w-12" aria-hidden="true"></span>
+    </div>
+
+    {/* identity */}
+    <div class="flex flex-col items-center text-center">
+      <button data-s-photo aria-label="Change profile photo" class="relative w-24 h-24 grid place-items-center rounded-full overflow-hidden bg-emerald-300 text-night-900 text-4xl font-extrabold ring-2 ring-white/20 hover:ring-brand-400 transition">
+        <span data-s-face>👤</span>
+        <span class="absolute bottom-1 end-1 w-7 h-7 grid place-items-center rounded-full bg-brand-500 text-night-900 text-sm border-2 border-night-950" aria-hidden="true">📷</span>
+      </button>
+      <h2 data-s-name class="mt-2 text-lg font-extrabold text-white">Reader</h2>
+      <p data-s-email class="text-sm text-ink-500 truncate max-w-full"></p>
+      <span data-s-provider class="mt-1.5 text-[11px] font-extrabold uppercase tracking-wide bg-white/5 border border-white/10 rounded-full px-3 py-1 text-ink-300"></span>
+    </div>
+
+    <div data-s-rows class="space-y-2.5">
+      {/* photo editor */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="photo" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Profile photo</span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="photo" class="hidden px-4 pb-4">
+          <div data-s-gallery class="grid grid-cols-6 gap-2" role="radiogroup" aria-label="Avatar gallery"></div>
+          <div class="mt-3 flex gap-2">
+            <label class="flex-1 inline-flex items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-white/15 hover:border-brand-400 rounded-2xl px-4 py-3 min-h-[52px] text-sm font-extrabold text-ink-200 transition">
+              📷 Upload
+              <input data-s-file type="file" accept="image/*" class="sr-only" />
+            </label>
+            <button type="button" data-s-photorm class="hidden items-center justify-center gap-2 text-sm font-bold text-red-300 border border-red-400/30 rounded-2xl px-4 py-3 min-h-[52px]">Remove</button>
+          </div>
+          <input data-s-photourl type="url" inputmode="url" maxlength="500" placeholder="…or paste an https:// image link"
+            class="mt-2 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 text-sm" />
+          <p data-s-msg-photo class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
         </div>
-        <span data-p-provider class="shrink-0 text-[11px] font-extrabold uppercase tracking-wide bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-ink-300"></span>
-      </div>
-      {/* mini stats */}
-      <div data-p-stats class="mt-4 grid grid-cols-3 gap-2 text-center"></div>
-      <div class="mt-4 flex flex-col sm:flex-row gap-2">
-        <a data-p-read href={readUrl} class="flex-1 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📖 Continue reading</a>
-        <a href={progressUrl} class="flex-1 inline-flex items-center justify-center gap-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📊 My progress</a>
-      </div>
-      <a href={leaderboardUrl} class="mt-2 flex items-center justify-center gap-2 text-sm font-extrabold text-gold-300 hover:text-amber-200 min-h-[44px]">🏆 Global leaderboard →</a>
-    </section>
-
-    {/* edit form */}
-    <section id="p-profile" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Edit profile">
-      <h2 class="text-lg font-extrabold text-white">✏️ Profile details</h2>
-      <p class="text-sm text-ink-500 mt-0.5">Shown on your progress page and greetings. Email stays private.</p>
-
-      <p class="mt-4 text-xs font-extrabold uppercase tracking-widest text-ink-500">Choose an avatar</p>
-      <p class="mt-1 text-xs text-ink-500">Pick a design below — or use your own photo. Your choice shows here instantly.</p>
-      <div data-p-gallery class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2" role="radiogroup" aria-label="Avatar gallery">
-        {/* filled by script from habit.js (single source of truth) */}
       </div>
 
-      <div class="mt-4 rounded-2xl border border-white/10 bg-night-800 p-4">
-        <p class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Custom photo <span class="normal-case font-bold">(optional)</span></p>
-        <div class="mt-2 flex flex-col sm:flex-row gap-2">
-          <label data-p-upload class="flex-1 inline-flex items-center justify-center gap-2 cursor-pointer border-2 border-dashed border-white/15 hover:border-brand-400 rounded-2xl px-4 py-3 min-h-[52px] text-sm font-extrabold text-ink-200 transition">
-            📷 Upload photo
-            <input data-p-file type="file" accept="image/*" class="sr-only" />
-          </label>
-          <button type="button" data-p-photorm class="hidden items-center justify-center gap-2 text-sm font-bold text-red-300 hover:text-red-200 border border-red-400/30 rounded-2xl px-4 py-3 min-h-[52px]">Remove</button>
+      {/* username */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="username" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Username</span>
+          <span data-s-sum-username class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="username" class="hidden px-4 pb-4">
+          <p class="text-xs text-ink-500 leading-5">Set once — shows on the <a href={leaderboardUrl} class="font-bold text-gold-300">global leaderboard</a>. 3–30 chars: a–z, 0–9, . and _</p>
+          <input data-s-username maxlength="30" autocapitalize="none" spellcheck="false" placeholder="e.g. ahmed_reads"
+            class="mt-2 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50" />
+          <button data-s-save="username" class="mt-2 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-username class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
         </div>
-        <input data-p-photourl type="url" inputmode="url" maxlength="500" placeholder="…or paste an https:// image link"
-          class="mt-2 w-full bg-night-850 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 text-sm" />
-        <p class="mt-1.5 text-[11px] text-ink-500 leading-4">Uploads are resized on your device before saving. A photo replaces the gallery avatar.</p>
       </div>
 
-      <form data-p-form class="mt-4 grid gap-3 sm:grid-cols-2">
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Display name *</span>
-          <input name="name" required minlength="2" maxlength="60" autocomplete="name" placeholder="Your name"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Username <span data-p-lock-u class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
-          <input name="username" data-p-uname maxlength="30" autocomplete="username" placeholder="e.g. ahmed_reads" autocapitalize="none" spellcheck="false"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50" />
-          <span data-p-unamestatus class="mt-1 hidden text-[11px] font-bold leading-4" role="status"></span>
-          <span class="mt-1 block text-[11px] text-ink-500 leading-4">3–30 chars: a–z, 0–9, . and _ — must start &amp; end with a letter or number. Set once, never changeable. No two people can share one. Set it to appear on the <a href={leaderboardUrl} class="font-bold text-gold-300 hover:text-amber-200">global leaderboard</a>.</span>
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Country * <span data-p-lock-c class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
-          <select name="country" data-p-country
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
+      {/* country */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="country" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Country</span>
+          <span data-s-sum-country class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="country" class="hidden px-4 pb-4">
+          <p class="text-xs text-ink-500 leading-5">Set once — challenges unlock on your country time.</p>
+          <select data-s-country class="mt-2 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
             <option value="">Select country…</option>
           </select>
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">City</span>
-          <input name="city" maxlength="60" autocomplete="address-level2" placeholder="City"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-        </label>
-        <label class="block sm:col-span-2">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Bio <span data-p-biocount class="text-ink-500 normal-case font-bold"></span></span>
-          <textarea name="bio" rows="2" maxlength="280" placeholder="A line about you — e.g. learning Quran daily, from Delhi 🤲"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[64px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400 resize-y"></textarea>
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Gender <span data-p-lock-g class="hidden text-gold-300 normal-case tracking-normal">🔒 set once</span></span>
-          <select name="gender" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
+          <button data-s-save="country" class="mt-2 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-country class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* alerts */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="alerts" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Alerts</span>
+          <span data-s-sum-alerts class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="alerts" class="hidden px-4 pb-4 space-y-2">
+          <label class="block text-xs font-extrabold uppercase tracking-widest text-ink-500">Daily reminder</label>
+          <select data-s-reminder class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="">No reminder</option>
+            <option value="09:00">09:00</option>
+            <option value="12:00">12:00</option>
+            <option value="15:00">15:00</option>
+            <option value="18:00">18:00</option>
+          </select>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input data-s-second type="checkbox" class="w-5 h-5 accent-brand-500" />
+            <span class="text-sm font-bold text-ink-200">Second reminder if I forget?</span>
+          </label>
+          <button data-s-save="alerts" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-alerts class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* notifications */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="notifications" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Notifications</span>
+          <span data-s-sum-notifications class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="notifications" class="hidden px-4 pb-4 space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input data-s-alertson type="checkbox" class="w-5 h-5 accent-brand-500" />
+            <span class="text-sm font-bold text-ink-200">Allow reading alerts on this device</span>
+          </label>
+          <button data-s-save="notifications" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-notifications class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* hide hasanat */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="hide" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Hide Hasanat</span>
+          <span data-s-sum-hide class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="hide" class="hidden px-4 pb-4 space-y-2">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input data-s-hideh type="checkbox" class="w-5 h-5 accent-brand-500" />
+            <span class="text-sm font-bold text-ink-200">Hide my hasanat counts in the app</span>
+          </label>
+          <button data-s-save="hide" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-hide class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* reciter */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="reciter" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Reciter</span>
+          <span data-s-sum-reciter class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="reciter" class="hidden px-4 pb-4 space-y-2">
+          <select data-s-reciter class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="Alafasy_128kbps">Sheikh Mishary Al Afasy</option>
+          </select>
+          <label class="block text-xs font-extrabold uppercase tracking-widest text-ink-500">Speed: <span data-s-speedval class="text-ink-200">1×</span></label>
+          <input data-s-speed type="range" min="0.5" max="1.5" step="0.25" value="1" class="w-full accent-brand-500" aria-label="Recitation speed" />
+          <p class="text-[11px] text-ink-500">More reciters unlock after we verify their audio feeds.</p>
+          <button data-s-save="reciter" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-reciter class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* quran script */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="script" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Quran Script</span>
+          <span data-s-sum-script class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="script" class="hidden px-4 pb-4 space-y-2">
+          <p data-s-scriptprev class="font-arabic text-center text-white" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+          <input data-s-fsscript type="range" min="1.25" max="3.5" step="0.25" value="2" class="w-full accent-brand-500" aria-label="Quranic script size" />
+          <button data-s-save="script" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-script class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* daily goal */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="goal" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Daily Quran Goal</span>
+          <span data-s-sum-goal class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="goal" class="hidden px-4 pb-4 space-y-2">
+          <label class="block text-xs font-extrabold uppercase tracking-widest text-ink-500">Verses per day (1–110)</label>
+          <input data-s-dailygoal type="number" min="1" max="110" value="1"
+            class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400" />
+          <button data-s-save="goal" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-goal class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* password */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="password" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Change Password</span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="password" class="hidden px-4 pb-4 space-y-2">
+          <div data-s-pwform class="space-y-2">
+            <input data-s-currentpw type="password" autocomplete="current-password" placeholder="Current password"
+              class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+            <input data-s-newpw type="password" minlength="8" autocomplete="new-password" placeholder="New password (min 8)"
+              class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+            <button data-s-save="password" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Update password</button>
+          </div>
+          <p data-s-pwnote class="hidden text-xs text-ink-500 leading-5">Google accounts manage their password via Google.</p>
+          <p data-s-msg-password class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* email */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="email" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Change Email Address</span>
+          <span data-s-sum-email class="text-xs font-bold text-ink-500 truncate max-w-[140px]"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="email" class="hidden px-4 pb-4 space-y-2">
+          <input data-s-emailinput type="email" autocomplete="email" placeholder="New email address"
+            class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+          <button data-s-save="email" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-email class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* name */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="name" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Change Name</span>
+          <span data-s-sum-name class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="name" class="hidden px-4 pb-4 space-y-2">
+          <input data-s-nameinput type="text" maxlength="60" autocomplete="name" placeholder="Your name"
+            class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+          <button data-s-save="name" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-name class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* gender */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="gender" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Gender</span>
+          <span data-s-sum-gender class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="gender" class="hidden px-4 pb-4 space-y-2">
+          <p data-s-genderlock class="hidden text-xs font-bold text-gold-300">🔒 Set once and can't be changed.</p>
+          <select data-s-gender class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50">
             <option value="">Prefer not to say</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Language</span>
-          <select name="language" class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
-            <option value="en">English</option>
-            <option value="hi">हिन्दी (Hindi)</option>
-            <option value="ur">اردو (Urdu)</option>
-            <option value="ar">العربية (Arabic)</option>
-          </select>
-        </label>
-        <p data-p-msg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
-        <button type="submit" data-p-save class="sm:col-span-2 w-full bg-brand-500 hover:bg-brand-400 disabled:opacity-60 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[56px]">Save profile ✓</button>
-      </form>
-    </section>
+          <button data-s-save="gender" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-gender class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
 
-    {/* visibility — name, username & photo are always public */}
-    <section id="p-privacy" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Profile visibility">
-      <h2 class="text-lg font-extrabold text-white">👁️ Who sees what</h2>
-      <p class="text-sm text-ink-500 mt-0.5">Your name, username and photo are always public. Toggle the rest — applies instantly, no save needed.</p>
-      <p data-p-vismsg class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
-      <div class="mt-3 grid gap-2 sm:grid-cols-2">
-        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
-          <input type="checkbox" name="show_country" checked class="w-5 h-5 shrink-0 accent-brand-500" />
-          <span class="text-sm font-bold text-ink-200">Country</span>
-        </label>
-        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
-          <input type="checkbox" name="show_city" checked class="w-5 h-5 shrink-0 accent-brand-500" />
-          <span class="text-sm font-bold text-ink-200">City</span>
-        </label>
-        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
-          <input type="checkbox" name="show_bio" checked class="w-5 h-5 shrink-0 accent-brand-500" />
-          <span class="text-sm font-bold text-ink-200">Bio</span>
-        </label>
-        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer">
-          <input type="checkbox" name="show_gender" checked class="w-5 h-5 shrink-0 accent-brand-500" />
-          <span class="text-sm font-bold text-ink-200">Gender</span>
-        </label>
-        <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[56px] cursor-pointer sm:col-span-2">
-          <input type="checkbox" name="show_stats" checked class="w-5 h-5 shrink-0 accent-brand-500" />
-          <span class="text-sm font-bold text-ink-200">Reading stats <span class="font-normal text-ink-500">(verses, hasanat, streak &amp; rank)</span></span>
-        </label>
+      {/* font size */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="fontsize" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Font Size</span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="fontsize" class="hidden px-4 pb-4 space-y-2">
+          <label class="block text-xs font-extrabold uppercase tracking-widest text-ink-500">Translation</label>
+          <input data-s-fstran type="range" min="0.875" max="1.5" step="0.125" value="1" class="w-full accent-brand-500" aria-label="Translation size" />
+          <label class="block text-xs font-extrabold uppercase tracking-widest text-ink-500">Transliteration</label>
+          <input data-s-fstrlit type="range" min="0.875" max="1.5" step="0.125" value="1" class="w-full accent-brand-500" aria-label="Transliteration size" />
+          <button data-s-save="fontsize" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-fontsize class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+
+      {/* translation */}
+      <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        <button data-s-toggle="translation" class="w-full flex items-center gap-3 px-4 py-4 min-h-[56px] text-left hover:bg-white/5 transition">
+          <span class="flex-1 font-bold text-ink-50 text-[15px]">Translation</span>
+          <span data-s-sum-translation class="text-xs font-bold text-ink-500"></span>
+          <span class="text-ink-500 text-xl" aria-hidden="true">›</span>
+        </button>
+        <div data-s-panel="translation" class="hidden px-4 pb-4 space-y-2">
+          <select data-s-translation class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400">
+            <option value="ur">Urdu — Fateh Muhammad Jalandhry</option>
+            <option value="en">English — Dr. Mustafa Khattab</option>
+            <option value="hi">Hindi — Suhel Farooq Khan</option>
+          </select>
+          <button data-s-save="translation" class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Save</button>
+          <p data-s-msg-translation class="hidden text-xs font-bold leading-5" role="status"></p>
+        </div>
+      </div>
+    </div>
+
+    {/* privacy */}
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-5" aria-label="Profile visibility">
+      <h2 class="text-[17px] font-extrabold text-white">👁️ Who sees what</h2>
+      <p class="text-xs text-ink-500 mt-0.5 leading-5">Your username is always public on the leaderboard. Toggle the rest.</p>
+      <p data-s-vismsg class="hidden mt-2 text-xs font-bold leading-5" role="status"></p>
+      <div class="mt-3 grid gap-2">
+        {[
+          ['show_name', 'Name', 'Show your display name'],
+          ['show_avatar', 'Picture', 'Show your profile photo'],
+          ['show_country', 'Country', 'Show your country'],
+          ['show_city', 'City', 'Show your city'],
+          ['show_bio', 'Bio', 'Show your bio'],
+          ['show_gender', 'Gender', 'Show your gender'],
+          ['show_stats', 'Reading stats', 'Verses, hasanat, streak & rank'],
+        ].map(([k, t, s]) => (
+          <label class="flex items-center gap-3 bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[56px] cursor-pointer">
+            <input type="checkbox" name={k} checked class="w-5 h-5 shrink-0 accent-brand-500" />
+            <span class="min-w-0"><span class="block text-sm font-bold text-ink-200">{t}</span><span class="block text-[11px] text-ink-500">{s}</span></span>
+          </label>
+        ))}
       </div>
     </section>
 
-    {/* security (email accounts) */}
-    <section data-p-security id="p-password" class="hidden bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32" aria-label="Password">
-      <h2 class="text-lg font-extrabold text-white">🔑 Change password</h2>
-      <form data-p-pw class="mt-3 grid gap-3 sm:grid-cols-2">
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">Current password</span>
-          <input name="current_password" type="password" autocomplete="current-password" placeholder="••••••••"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400" />
-        </label>
-        <label class="block">
-          <span class="text-xs font-extrabold uppercase tracking-widest text-ink-500">New password (min 8)</span>
-          <input name="new_password" type="password" minlength="8" autocomplete="new-password" placeholder="New password"
-            class="mt-1.5 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400" />
-        </label>
-        <p data-p-pwmsg class="hidden sm:col-span-2 text-sm font-bold leading-6 rounded-2xl px-4 py-3" role="status"></p>
-        <button class="sm:col-span-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-2xl px-5 py-3 min-h-[52px]">Update password</button>
-      </form>
-    </section>
+    {/* quick links */}
+    <div class="flex gap-2">
+      <a href={progressUrl} class="flex-1 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-5 py-3 min-h-[52px]">📊 My progress</a>
+      <a href={leaderboardUrl} class="flex-1 inline-flex items-center justify-center gap-2 border-2 border-white/15 hover:border-brand-400 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">🏆 Leaderboard</a>
+    </div>
 
     {/* session */}
-    <section id="p-session" class="bg-night-850 border border-white/10 rounded-3xl p-6 shadow-xl shadow-black/30 scroll-mt-32">
-      <h2 class="text-lg font-extrabold text-white">⚙️ Session</h2>
-      <div class="mt-3 flex flex-col sm:flex-row gap-2">
-        <button data-p-logout class="flex-1 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Logout</button>
-        <a href={homeUrl} class="flex-1 inline-flex items-center justify-center text-sm font-bold text-ink-500 hover:text-brand-300 min-h-[52px]">← Back home</a>
+    <section class="bg-night-850 border border-white/10 rounded-3xl p-5">
+      <h2 class="text-[17px] font-extrabold text-white">⚙️ Session</h2>
+      <div class="mt-3 flex flex-col gap-2">
+        <button data-s-logout class="w-full bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Logout</button>
       </div>
       <details class="mt-4 text-sm">
         <summary class="cursor-pointer font-bold text-red-300 min-h-[44px] inline-flex items-center">Delete my account…</summary>
         <p class="mt-2 text-ink-300 leading-6">This permanently removes your profile, streaks, stats and bookmarks. This cannot be undone.</p>
-        <button data-p-delete class="mt-3 bg-red-500/15 hover:bg-red-500/25 border border-red-400/40 text-red-200 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Delete account permanently</button>
+        <button data-s-delete class="mt-3 bg-red-500/15 hover:bg-red-500/25 border border-red-400/40 text-red-200 font-extrabold rounded-full px-5 py-3 min-h-[52px]">Delete account permanently</button>
       </details>
     </section>
   </div>
@@ -215,114 +365,58 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
 
 <AuthModal />
 
-<script define:vars={{ readUrl, progressUrl }}>
+<script define:vars={{ progressUrl }}>
   (() => {
-    const root = document.querySelector('[data-profile]');
+    const root = document.querySelector('[data-settings]');
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
     const $ = (s) => root.querySelector(s);
 
     const COUNTRIES = ['Afghanistan','Algeria','Australia','Austria','Azerbaijan','Bahrain','Bangladesh','Belgium','Bosnia & Herzegovina','Brazil','Brunei','Bulgaria','Cambodia','Canada','Chad','China','Denmark','Djibouti','Egypt','Ethiopia','Fiji','Finland','France','Gambia','Germany','Ghana','Greece','Guinea','Guyana','India','Indonesia','Iran','Iraq','Ireland','Italy','Japan','Jordan','Kazakhstan','Kenya','Kosovo','Kuwait','Kyrgyzstan','Lebanon','Libya','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Morocco','Mozambique','Myanmar','Nepal','Netherlands','New Zealand','Niger','Nigeria','Norway','Oman','Pakistan','Palestine','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Senegal','Singapore','Somalia','South Africa','South Korea','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Trinidad & Tobago','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uzbekistan','Yemen','Zimbabwe','Other'];
 
-    // Populate country select
-    const countrySel = $('[data-p-country]');
-    COUNTRIES.forEach((c) => {
-      const o = document.createElement('option');
-      o.value = c; o.textContent = c;
-      countrySel?.appendChild(o);
-    });
+    let H = null, profile = null, prefs = null, picked = '', photo = '';
 
-    let H = null, profile = null, picked = '', photo = '';
-
-    const showMsg = (sel, ok, text) => {
-      const el = $(sel);
-      if (!el) return;
-      el.textContent = text;
-      el.classList.remove('hidden', 'bg-emerald-400/15', 'text-emerald-200', 'border', 'border-emerald-300/30', 'bg-red-400/10', 'text-red-200');
-      el.classList.add(ok ? 'bg-emerald-400/15' : 'bg-red-400/10', ok ? 'text-emerald-200' : 'text-red-200');
-    };
-
-    // Guarantees the user always sees a result — a hanging request
-    // becomes a timeout message instead of a dead button.
     const withTimeout = (p, ms = 25000) =>
       Promise.race([
         p,
         new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out — check your connection and retry.')), ms)),
       ]);
 
-    // Instagram-like username rules (mirrors functions/api username logic).
-    const UNAME_RE = /^[a-z0-9][a-z0-9._]{1,28}[a-z0-9]$/;
-    const UNAME_BLOCKED = new Set(['admin', 'administrator', 'support', 'official', 'hikmahnoor', 'hikmah_noor', 'root', 'system']);
-    const unameLocalError = (v) => {
-      if (!v) return null;
-      if (v.length < 3) return 'Username needs at least 3 characters.';
-      if (v.length > 30) return 'Username can be at most 30 characters.';
-      if (!UNAME_RE.test(v)) return 'Use a–z, 0–9, . and _ — start & end with a letter or number.';
-      if (v.includes('..')) return 'Username cannot contain consecutive dots.';
-      if (UNAME_BLOCKED.has(v)) return 'That username is reserved — pick another.';
-      return null;
-    };
-    const paintUnameStatus = (kind, text) => {
-      const st = $('[data-p-unamestatus]');
-      if (!st) return;
-      st.textContent = text || '';
-      st.classList.toggle('hidden', !text);
-      st.classList.remove('text-emerald-300', 'text-red-300', 'text-ink-500');
-      st.classList.add(kind === 'ok' ? 'text-emerald-300' : kind === 'bad' ? 'text-red-300' : 'text-ink-500');
-    };
-    let unameTimer = null;
-    const checkUsernameLive = async () => {
-      const input = $('[data-p-uname]');
-      const v = String(input?.value || '').trim();
-      if (!v) { paintUnameStatus('', ''); return 'empty'; }
-      const local = unameLocalError(v);
-      if (local) { paintUnameStatus('bad', `✗ ${local}`); return 'invalid'; }
-      paintUnameStatus('', 'Checking…');
-      try {
-        const r = await fetch(`/api/username-check?u=${encodeURIComponent(v)}`, { credentials: 'same-origin' });
-        const d = await r.json();
-        if (d.available) {
-          paintUnameStatus('ok', d.mine ? '✓ This is your username.' : '✓ Username available!');
-          return 'ok';
-        }
-        paintUnameStatus('bad', d.reason === 'taken' ? '✗ Username already taken — try another.' : '✗ That username is not allowed.');
-        return 'taken';
-      } catch {
-        paintUnameStatus('', '');
-        return 'unknown';
-      }
+    const msg = (sel, ok, text) => {
+      const el = $(sel);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove('hidden', 'text-emerald-300', 'text-red-300');
+      el.classList.add(ok ? 'text-emerald-300' : 'text-red-300');
+      if (ok) setTimeout(() => el.classList.add('hidden'), 3000);
     };
 
-    // Visible face via habit.js (photo → SVG → emoji → initial).
     const faceHTML = (u) => {
       try {
         if (H?.faceFor) return H.faceFor(u);
-      } catch { /* fall through to local fallback */ }
+      } catch { /* fallback */ }
       if (u?.avatar) return `<img src="${String(u.avatar).replace(/"/g, '')}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />`;
       return (u?.avatar_emoji || (u?.name || 'R').trim().charAt(0).toUpperCase() || 'R');
     };
-    const setFace = (el, html) => {
+    const paintFace = () => {
+      const el = $('[data-s-face]');
       if (!el) return;
-      if (String(html).trim().startsWith('<')) { el.innerHTML = html; }
+      const html = faceHTML({ ...(profile || {}), avatar_emoji: picked, avatar: photo || '' });
+      if (String(html).trim().startsWith('<')) el.innerHTML = html;
       else { el.innerHTML = ''; el.textContent = html; }
     };
-    // Live preview (unsaved) combining the current picks.
-    const previewUser = () => ({ ...(profile || {}), avatar_emoji: picked, avatar: photo || '' });
-    const paintPreview = () => setFace($('[data-p-avatar]'), faceHTML(previewUser()));
 
     const renderGallery = () => {
-      const box = $('[data-p-gallery]');
+      const box = $('[data-s-gallery]');
       if (!box || !H?.AVATAR_IDS || box.dataset.done) return;
       box.dataset.done = '1';
       H.AVATAR_IDS.forEach((id) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.dataset.avatar = id;
-        b.setAttribute('role', 'radio');
-        b.setAttribute('aria-checked', 'false');
+        b.dataset.avatarId = id;
         b.title = (H.AVATAR_NAMES && H.AVATAR_NAMES[id]) || id;
         b.setAttribute('aria-label', b.title);
-        b.className = 'relative aspect-square overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 hover:border-brand-400 hover:scale-[1.03] active:scale-95 transition min-h-[52px]';
+        b.className = 'relative aspect-square overflow-hidden rounded-2xl border-2 border-white/10 bg-white/5 hover:border-brand-400 transition min-h-[44px]';
         b.innerHTML = H.AVATAR_SVGS[id];
         b.addEventListener('click', () => selectAvatar(id));
         box.appendChild(b);
@@ -330,128 +424,167 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
       paintGallery();
     };
     const paintGallery = () => {
-      root.querySelectorAll('[data-avatar]').forEach((b) => {
-        const on = b.dataset.avatar === picked;
-        b.classList.toggle('border-gold-300', on);
-        b.classList.toggle('ring-2', on);
-        b.classList.toggle('ring-gold-300/60', on);
+      root.querySelectorAll('[data-s-gallery] button').forEach((b) => {
+        const on = b.dataset.avatarId === picked;
+        b.classList.toggle('border-gold-300', !!on);
+        b.classList.toggle('ring-2', !!on);
+        b.classList.toggle('ring-gold-300/60', !!on);
         b.classList.toggle('border-white/10', !on);
-        b.setAttribute('aria-checked', String(on));
       });
+    };
+    const savePhoto = async () => {
+      try {
+        const data = await withTimeout(H.Me.saveProfile({ avatar_emoji: picked, avatar_url: photo }));
+        if (data?.user) { profile = data.user; fillIdentity(); }
+        msg('[data-s-msg-photo]', true, '✓ Photo saved.');
+        if (window.hnUpdateNav) window.hnUpdateNav(profile);
+      } catch (err) {
+        msg('[data-s-msg-photo]', false, err?.hint || err?.message || 'Could not save photo.');
+      }
     };
     const selectAvatar = (id) => {
       picked = picked === id ? '' : id;
       if (picked) {
-        // Gallery choice replaces any custom photo.
         photo = '';
-        const urlInput = $('[data-p-photourl]');
+        const urlInput = $('[data-s-photourl]');
         if (urlInput) urlInput.value = '';
         syncPhotoUI();
       }
       paintGallery();
-      paintPreview();
+      paintFace();
+      savePhoto();
     };
     const syncPhotoUI = () => {
-      const rm = $('[data-p-photorm]');
+      const rm = $('[data-s-photorm]');
       if (rm) { rm.classList.toggle('hidden', !photo); rm.classList.toggle('inline-flex', !!photo); }
     };
 
-    const paintHeader = (u) => {
-      setFace($('[data-p-avatar]'), faceHTML(u));
-      if ($('[data-p-name]')) $('[data-p-name]').textContent = u.name || 'Reader';
-      if ($('[data-p-username]')) $('[data-p-username]').textContent = u.username ? `@${u.username}` : '';
-      if ($('[data-p-email]')) $('[data-p-email]').textContent = u.email || '';
-      const loc = [u.city, u.country].filter(Boolean).join(', ');
-      const since = u.created_at ? new Date(u.created_at * 1000).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }) : '';
-      if ($('[data-p-meta]')) $('[data-p-meta]').textContent = [loc, since ? `Member since ${since}` : ''].filter(Boolean).join(' • ');
-      if ($('[data-p-bio]')) { $('[data-p-bio]').textContent = u.bio || ''; $('[data-p-bio]').classList.toggle('hidden', !u.bio); }
-      if ($('[data-p-provider]')) $('[data-p-provider]').textContent = u.provider === 'google' ? '◉ Google' : '✉ Email';
-      if (window.hnUpdateNav) window.hnUpdateNav(u);
+    const fillIdentity = () => {
+      if (!profile) return;
+      if ($('[data-s-name]')) $('[data-s-name]').textContent = profile.name || 'Reader';
+      if ($('[data-s-email]')) $('[data-s-email]').textContent = profile.email || '';
+      if ($('[data-s-provider]')) $('[data-s-provider]').textContent = profile.provider === 'google' ? '◉ Google' : '✉ Email';
+      paintFace();
     };
 
-    const fillForm = (u) => {
-      const f = $('[data-p-form]');
-      if (!f) return;
-      f.name.value = u.name || '';
-      f.username.value = u.username || '';
-      if (countrySel) countrySel.value = COUNTRIES.includes(u.country) ? u.country : (u.country ? '' : '');
-      if (u.country && !COUNTRIES.includes(u.country)) {
-        const o = document.createElement('option');
-        o.value = u.country; o.textContent = u.country; o.selected = true;
-        countrySel?.appendChild(o);
-      }
-      f.city.value = u.city || '';
-      f.bio.value = u.bio || '';
-      f.gender.value = ['male', 'female', 'other'].includes(u.gender) ? u.gender : '';
-      f.language.value = ['en', 'hi', 'ur', 'ar'].includes(u.language) ? u.language : 'en';
-      // One-time fields lock after their first set.
-      const setLocked = (sel, badgeSel, locked) => {
-        const el = f.querySelector(sel);
-        if (el) { el.disabled = locked; el.classList.toggle('opacity-50', locked); }
-        const badge = root.querySelector(badgeSel);
-        if (badge) badge.classList.toggle('hidden', !locked);
-      };
-      setLocked('[name="username"]', '[data-p-lock-u]', !!(u.username));
-      setLocked('[name="country"]', '[data-p-lock-c]', !!(u.country));
-      setLocked('[name="gender"]', '[data-p-lock-g]', !!(u.gender));
-      // Visibility toggles (default: visible).
-      const vis = (k) => u[k] !== 0;
-      ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'].forEach((k) => {
-        const c = root.querySelector(`[name="${k}"]`);
-        if (c) c.checked = vis(k);
-      });
-      picked = u.avatar_emoji || '';
-      photo = u.avatar || '';
-      const urlInput = $('[data-p-photourl]');
+    const sum = (sel, text) => {
+      const el = $(sel);
+      if (el) el.textContent = text || '';
+    };
+
+    const fillAll = () => {
+      fillIdentity();
+      picked = profile.avatar_emoji || '';
+      photo = profile.avatar || '';
+      const urlInput = $('[data-s-photourl]');
       if (urlInput) urlInput.value = /^https:\/\//.test(photo) ? photo : '';
       renderGallery();
       paintGallery();
       syncPhotoUI();
-      const bc = $('[data-p-biocount]');
-      if (bc) bc.textContent = `(${(u.bio || '').length}/280)`;
+      // summaries
+      sum('[data-s-sum-username]', profile.username ? `@${profile.username}` : 'not set');
+      sum('[data-s-sum-country]', profile.country || 'not set');
+      sum('[data-s-sum-name]', profile.name || '');
+      sum('[data-s-sum-email]', profile.email || '');
+      sum('[data-s-sum-gender]', profile.gender || 'not set');
+      const uname = $('[data-s-username]');
+      if (uname) {
+        uname.value = profile.username || '';
+        uname.disabled = !!profile.username;
+      }
+      const countrySel = $('[data-s-country]');
+      if (countrySel && !countrySel.dataset.done) {
+        countrySel.dataset.done = '1';
+        COUNTRIES.forEach((c) => {
+          const o = document.createElement('option');
+          o.value = c; o.textContent = c;
+          countrySel.appendChild(o);
+        });
+      }
+      if (countrySel) {
+        if (profile.country && !COUNTRIES.includes(profile.country)) {
+          const o = document.createElement('option');
+          o.value = profile.country; o.textContent = profile.country;
+          countrySel.appendChild(o);
+        }
+        countrySel.value = profile.country || '';
+        countrySel.disabled = !!profile.country;
+      }
+      const gSel = $('[data-s-gender]');
+      if (gSel) {
+        gSel.value = ['male', 'female', 'other'].includes(profile.gender) ? profile.gender : '';
+        gSel.disabled = !!profile.gender;
+      }
+      $('[data-s-genderlock]')?.classList.toggle('hidden', !profile.gender);
+      if ($('[data-s-nameinput]')) $('[data-s-nameinput]').value = profile.name || '';
+      if ($('[data-s-emailinput]')) $('[data-s-emailinput]').value = profile.email || '';
+      // password section only for email accounts
+      const isEmail = profile.provider === 'email';
+      $('[data-s-pwform]')?.classList.toggle('hidden', !isEmail);
+      $('[data-s-pwnote]')?.classList.toggle('hidden', isEmail);
+      // prefs editors
+      const p = prefs || {};
+      if ($('[data-s-reminder]')) $('[data-s-reminder]').value = p.reminder_time || '';
+      if ($('[data-s-second]')) $('[data-s-second]').checked = !!p.second_reminder;
+      if ($('[data-s-alertson]')) $('[data-s-alertson]').checked = !!p.alerts_on;
+      if ($('[data-s-hideh]')) $('[data-s-hideh]').checked = !!p.hide_hasanat;
+      if ($('[data-s-reciter]')) $('[data-s-reciter]').value = p.reciter || 'Alafasy_128kbps';
+      if ($('[data-s-speed]')) {
+        $('[data-s-speed]').value = p.reciter_speed || 1;
+        if ($('[data-s-speedval]')) $('[data-s-speedval]').textContent = `${p.reciter_speed || 1}×`;
+      }
+      if ($('[data-s-fsscript]')) {
+        $('[data-s-fsscript]').value = p.font_size_script || 2;
+        paintScriptPrev();
+      }
+      if ($('[data-s-dailygoal]')) $('[data-s-dailygoal]').value = p.daily_goal || 1;
+      if ($('[data-s-fstran]')) $('[data-s-fstran]').value = p.font_size_translation || 1;
+      if ($('[data-s-fstrlit]')) $('[data-s-fstrlit]').value = p.font_size_translit || 1;
+      if ($('[data-s-translation]')) $('[data-s-translation]').value = ['ur', 'en', 'hi'].includes(p.translation) ? p.translation : 'ur';
+      sum('[data-s-sum-alerts]', p.reminder_time ? `⏰ ${p.reminder_time}` : 'off');
+      sum('[data-s-sum-notifications]', p.alerts_on ? 'on' : 'off');
+      sum('[data-s-sum-hide]', p.hide_hasanat ? 'hidden' : 'shown');
+      sum('[data-s-sum-reciter]', 'Al Afasy');
+      sum('[data-s-sum-script]', `${p.font_size_script || 2}rem`);
+      sum('[data-s-sum-goal]', `${p.daily_goal || 1}/day`);
+      sum('[data-s-sum-translation]', ({ ur: 'Urdu', en: 'English', hi: 'Hindi' })[p.translation] || 'Urdu');
+      // privacy toggles
+      ['show_name', 'show_avatar', 'show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'].forEach((k) => {
+        const c = root.querySelector(`[name="${k}"]`);
+        if (c) c.checked = profile[k] !== 0;
+      });
     };
 
-    const paintStats = async () => {
-      const box = $('[data-p-stats]');
-      if (!box) return;
-      try {
-        const [{ streak }, all] = await Promise.all([
-          H.Me.streak().catch(() => ({ streak: { current: 0, longest: 0 } })),
-          H.Me.stats('all').catch(() => ({ stats: { verses: 0, hasanat: 0 } })),
-        ]);
-        const tiles = [
-          ['🔥', `${streak?.current || 0}`, 'day streak'],
-          ['📖', `${all?.stats?.verses || 0}`, 'verses'],
-          ['💗', H.fmtCompact(all?.stats?.hasanat || 0), 'hasanat'],
-        ];
-        box.innerHTML = tiles.map(([i, v, t]) => `<div class="bg-night-800 border border-white/10 rounded-2xl px-2 py-3"><div class="text-xl">${i}</div><div class="font-extrabold text-lg text-white">${v}</div><div class="text-[11px] font-bold text-ink-500">${t}</div></div>`).join('');
-      } catch { /* stats optional */ }
+    const paintScriptPrev = () => {
+      const r = $('[data-s-fsscript]');
+      const el = $('[data-s-scriptprev]');
+      if (r && el) el.style.fontSize = `${r.value}rem`;
     };
-
-    $('[data-p-open-login]')?.addEventListener('click', () => window.hnAuthModal?.open('login'));
-    $('[data-p-open-register]')?.addEventListener('click', () => window.hnAuthModal?.open('register'));
-
-    const bioInput = $('[data-p-form]')?.querySelector('[name="bio"]');
-    bioInput?.addEventListener('input', () => {
-      const bc = $('[data-p-biocount]');
-      if (bc) bc.textContent = `(${bioInput.value.length}/280)`;
+    $('[data-s-fsscript]')?.addEventListener('input', paintScriptPrev);
+    $('[data-s-speed]')?.addEventListener('input', () => {
+      if ($('[data-s-speedval]')) $('[data-s-speedval]').textContent = `${$('[data-s-speed]').value}×`;
     });
 
-    // Username: force lowercase + Instagram charset, live availability.
-    const unameInput = $('[data-p-uname]');
-    unameInput?.addEventListener('input', () => {
-      if (unameInput.disabled) return;
-      const clean = unameInput.value.toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
-      if (clean !== unameInput.value) unameInput.value = clean;
-      clearTimeout(unameTimer);
-      unameTimer = setTimeout(checkUsernameLive, 450);
+    // accordion
+    root.querySelectorAll('[data-s-toggle]').forEach((btn) => btn.addEventListener('click', () => {
+      const panel = root.querySelector(`[data-s-panel="${btn.dataset.sToggle}"]`);
+      panel?.classList.toggle('hidden');
+    }));
+    // avatar button jumps to the photo editor
+    $('[data-s-photo]')?.addEventListener('click', () => {
+      root.querySelector('[data-s-panel="photo"]')?.classList.remove('hidden');
+      root.querySelector('[data-s-panel="photo"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    $('[data-s-back]')?.addEventListener('click', () => {
+      try { if (window.history.length > 1) window.history.back(); else window.location.href = progressUrl; }
+      catch { window.location.href = progressUrl; }
     });
 
-    // Custom photo: upload (resized on-device) or https link.
-    $('[data-p-file]')?.addEventListener('change', (e) => {
+    // photo upload
+    $('[data-s-file]')?.addEventListener('change', (e) => {
       const file = e.currentTarget.files?.[0];
       if (!file) return;
-      if (!file.type.startsWith('image/')) { showMsg('[data-p-msg]', false, 'Please choose an image file.'); return; }
+      if (!file.type.startsWith('image/')) { msg('[data-s-msg-photo]', false, 'Please choose an image file.'); return; }
       const img = new Image();
       const objUrl = URL.createObjectURL(file);
       img.onload = () => {
@@ -465,175 +598,171 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
           ctx.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
           photo = cw.toDataURL('image/jpeg', 0.82);
           picked = '';
-          const urlInput = $('[data-p-photourl]');
+          const urlInput = $('[data-s-photourl]');
           if (urlInput) urlInput.value = '';
           URL.revokeObjectURL(objUrl);
           paintGallery();
-          paintPreview();
+          paintFace();
           syncPhotoUI();
-          showMsg('[data-p-msg]', true, '✓ Photo ready — hit Save profile to keep it.');
-          setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 3000);
-        } catch { showMsg('[data-p-msg]', false, 'Could not read that image.'); }
+          savePhoto();
+        } catch { msg('[data-s-msg-photo]', false, 'Could not read that image.'); }
       };
-      img.onerror = () => { URL.revokeObjectURL(objUrl); showMsg('[data-p-msg]', false, 'Could not read that image.'); };
+      img.onerror = () => { URL.revokeObjectURL(objUrl); msg('[data-s-msg-photo]', false, 'Could not read that image.'); };
       img.src = objUrl;
     });
-
-    $('[data-p-photourl]')?.addEventListener('change', (e) => {
+    $('[data-s-photourl]')?.addEventListener('change', (e) => {
       const v = String(e.currentTarget.value || '').trim();
       if (!v) return;
-      if (!/^https:\/\//.test(v)) { showMsg('[data-p-msg]', false, 'Photo link must start with https://'); return; }
+      if (!/^https:\/\//.test(v)) { msg('[data-s-msg-photo]', false, 'Photo link must start with https://'); return; }
       photo = v;
       picked = '';
       paintGallery();
-      paintPreview();
+      paintFace();
       syncPhotoUI();
+      savePhoto();
     });
-
-    $('[data-p-photorm]')?.addEventListener('click', () => {
+    $('[data-s-photorm]')?.addEventListener('click', () => {
       photo = '';
-      const urlInput = $('[data-p-photourl]');
+      const urlInput = $('[data-s-photourl]');
       if (urlInput) urlInput.value = '';
-      const fileInput = $('[data-p-file]');
+      const fileInput = $('[data-s-file]');
       if (fileInput) fileInput.value = '';
-      paintPreview();
+      paintFace();
       syncPhotoUI();
+      savePhoto();
     });
 
-    // Visibility toggles save instantly (no Save-profile click needed).
-    const VIS_KEYS = ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'];
-    const paintVisMsg = (ok, text, sticky = false) => {
-      const msg = $('[data-p-vismsg]');
-      if (!msg) return;
-      msg.textContent = text;
-      msg.classList.remove('hidden', 'text-emerald-300', 'text-red-300');
-      msg.classList.add(ok ? 'text-emerald-300' : 'text-red-300');
-      if (ok && !sticky) setTimeout(() => msg.classList.add('hidden'), 2500);
+    // per-row savers
+    const val = (sel) => String($(sel)?.value ?? '').trim();
+    const SAVERS = {
+      username: async () => {
+        const v = val('[data-s-username]').toLowerCase();
+        const data = await withTimeout(H.Me.saveProfile({ username: v }));
+        profile = data.user;
+      },
+      country: async () => {
+        const v = val('[data-s-country]');
+        if (!v) throw new Error('Please select your country.');
+        const data = await withTimeout(H.Me.saveProfile({ country: v }));
+        profile = data.user;
+      },
+      alerts: async () => {
+        const data = await withTimeout(H.Me.savePrefs({
+          reminder_time: val('[data-s-reminder]') || null,
+          second_reminder: $('[data-s-second]')?.checked ? 1 : 0,
+        }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      notifications: async () => {
+        if ('Notification' in window && $('[data-s-alertson]')?.checked && Notification.permission === 'default') {
+          try { await Notification.requestPermission(); } catch {}
+        }
+        const data = await withTimeout(H.Me.savePrefs({ alerts_on: $('[data-s-alertson]')?.checked ? 1 : 0 }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      hide: async () => {
+        const data = await withTimeout(H.Me.savePrefs({ hide_hasanat: $('[data-s-hideh]')?.checked ? 1 : 0 }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      reciter: async () => {
+        const data = await withTimeout(H.Me.savePrefs({
+          reciter: val('[data-s-reciter]') || 'Alafasy_128kbps',
+          reciter_speed: Number($('[data-s-speed]')?.value || 1),
+        }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      script: async () => {
+        const data = await withTimeout(H.Me.savePrefs({ font_size_script: Number($('[data-s-fsscript]')?.value || 2) }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      goal: async () => {
+        const data = await withTimeout(H.Me.savePrefs({ daily_goal: Number($('[data-s-dailygoal]')?.value || 1) }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      password: async () => {
+        await withTimeout(H.Me.saveProfile({
+          current_password: val('[data-s-currentpw]'),
+          new_password: val('[data-s-newpw]'),
+        }));
+        if ($('[data-s-currentpw]')) $('[data-s-currentpw]').value = '';
+        if ($('[data-s-newpw]')) $('[data-s-newpw]').value = '';
+      },
+      email: async () => {
+        const v = val('[data-s-emailinput]').toLowerCase();
+        const data = await withTimeout(H.Me.saveProfile({ email: v }));
+        profile = data.user;
+      },
+      name: async () => {
+        const v = val('[data-s-nameinput]');
+        const data = await withTimeout(H.Me.saveProfile({ name: v }));
+        profile = data.user;
+      },
+      gender: async () => {
+        const data = await withTimeout(H.Me.saveProfile({ gender: val('[data-s-gender]') }));
+        profile = data.user;
+      },
+      fontsize: async () => {
+        const data = await withTimeout(H.Me.savePrefs({
+          font_size_translation: Number($('[data-s-fstran]')?.value || 1),
+          font_size_translit: Number($('[data-s-fstrlit]')?.value || 1),
+        }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
+      translation: async () => {
+        const data = await withTimeout(H.Me.savePrefs({ translation: val('[data-s-translation]') || 'ur' }));
+        prefs = { ...prefs, ...(data.prefs || {}) };
+      },
     };
-    VIS_KEYS.forEach((key) => {
+    root.querySelectorAll('[data-s-save]').forEach((btn) => btn.addEventListener('click', async () => {
+      const key = btn.dataset.sSave;
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      try {
+        await SAVERS[key]();
+        const fresh = await withTimeout(H.Me.profile()).catch(() => null);
+        if (fresh?.user) profile = fresh.user;
+        try {
+          const p = await withTimeout(H.Me.prefs()).catch(() => null);
+          if (p?.prefs) prefs = { ...prefs, ...p.prefs };
+        } catch { /* keep */ }
+        fillAll();
+        if (window.hnUpdateNav) window.hnUpdateNav(profile);
+        msg(`[data-s-msg-${key}]`, true, '✓ Saved.');
+      } catch (err) {
+        msg(`[data-s-msg-${key}]`, false, err?.hint || err?.message || 'Could not save — try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    }));
+
+    // privacy toggles save instantly
+    ['show_name', 'show_avatar', 'show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats'].forEach((key) => {
       const box = root.querySelector(`[name="${key}"]`);
       box?.addEventListener('change', async () => {
         const on = box.checked;
-        if (!H?.Me?.saveProfile) {
-          box.checked = !on;
-          paintVisMsg(false, 'App updated — hard-refresh (Ctrl+Shift+R) and retry.', true);
-          return;
-        }
         box.disabled = true;
-        paintVisMsg(true, 'Saving…');
+        msg('[data-s-vismsg]', true, 'Saving…');
         try {
-          await withTimeout(H.Me.saveProfile({ [key]: on }));
-          const fresh = await withTimeout(H.Me.profile()).catch(() => null);
-          if (fresh?.user) { profile = fresh.user; paintHeader(profile); fillForm(profile); }
-          paintVisMsg(true, '✓ Saved.');
-          console.log('[profile] visibility saved:', key, on);
+          const data = await withTimeout(H.Me.saveProfile({ [key]: on }));
+          if (data?.user) { profile = data.user; fillIdentity(); }
+          msg('[data-s-vismsg]', true, '✓ Saved.');
         } catch (err) {
           box.checked = !on;
-          console.error('[profile] visibility failed:', err);
-          paintVisMsg(false, err?.hint || err?.message || 'Could not save — try again.', true);
+          msg('[data-s-vismsg]', false, err?.hint || err?.message || 'Could not save — try again.');
         } finally {
           box.disabled = false;
         }
       });
     });
 
-    const saveForm = $('[data-p-form]');
-    saveForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const btn = form.querySelector('[data-p-save]') || form.querySelector('button');
-      const origLabel = btn ? btn.textContent : '';
-      try {
-        if (!H?.Me?.saveProfile) throw new Error('App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
-        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-        const fd = new FormData(form);
-        const str = (k) => String(fd.get(k) ?? '');
-        // Locked (one-time) fields are omitted so the server keeps them.
-        const lockedU = !!(profile && profile.username);
-        const lockedC = !!(profile && profile.country);
-        const lockedG = !!(profile && profile.gender);
-        let unameVal = '';
-        if (!lockedU) {
-          unameVal = str('username').trim().toLowerCase();
-          const unameErr = unameLocalError(unameVal);
-          if (unameErr) {
-            paintUnameStatus('bad', `✗ ${unameErr}`);
-            throw new Error(unameErr);
-          }
-        }
-        // Country is compulsory — challenge windows follow country time.
-        let ctryVal = '';
-        if (!lockedC) {
-          ctryVal = str('country').trim();
-          if (!ctryVal) {
-            const sel = form.querySelector('[data-p-country]');
-            sel?.focus();
-            throw new Error('Please select your country — challenges unlock on your country time.');
-          }
-        }
-        console.log('[profile] saving…');
-        const data = await withTimeout(H.Me.saveProfile({
-          name: str('name'),
-          username: lockedU ? undefined : unameVal,
-          country: lockedC ? undefined : ctryVal,
-          city: str('city'), bio: str('bio'),
-          gender: lockedG ? undefined : str('gender'),
-          language: str('language'), avatar_emoji: picked, avatar_url: photo,
-        }));
-        if (!data?.user) throw new Error('Server returned an empty response — please retry.');
-        profile = data.user;
-        // Re-read server truth so the screen always matches the database.
-        try {
-          const fresh = await withTimeout(H.Me.profile());
-          if (fresh?.user) profile = fresh.user;
-        } catch { /* keep PUT response */ }
-        paintHeader(profile);
-        fillForm(profile);
-        paintPreview();
-        paintUnameStatus('', '');
-        if (window.hnUpdateNav) window.hnUpdateNav(profile);
-        console.log('[profile] saved ok');
-        showMsg('[data-p-msg]', true, '✓ Profile saved.');
-      } catch (err) {
-        console.error('[profile] save failed:', err);
-        showMsg('[data-p-msg]', false, err?.hint || err?.message || 'Could not save — try again.');
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = origLabel; }
-        setTimeout(() => $('[data-p-msg]')?.classList.add('hidden'), 5000);
-      }
-    });
-
-    $('[data-p-pw]')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!H?.Me?.saveProfile) {
-        showMsg('[data-p-pwmsg]', false, 'App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
-        return;
-      }
-      const form = e.currentTarget;
-      const fd = new FormData(form);
-      try {
-        await withTimeout(H.Me.saveProfile({
-          current_password: String(fd.get('current_password') ?? ''),
-          new_password: String(fd.get('new_password') ?? ''),
-        }));
-        showMsg('[data-p-pwmsg]', true, '✓ Password updated.');
-        form.reset();
-      } catch (err) {
-        showMsg('[data-p-pwmsg]', false, err.hint || 'Could not update password.');
-      } finally {
-        setTimeout(() => $('[data-p-pwmsg]')?.classList.add('hidden'), 4000);
-      }
-    });
-
-    $('[data-p-logout]')?.addEventListener('click', async () => {
+    $('[data-s-open-login]')?.addEventListener('click', () => window.hnAuthModal?.open('login'));
+    $('[data-s-open-register]')?.addEventListener('click', () => window.hnAuthModal?.open('register'));
+    $('[data-s-logout]')?.addEventListener('click', async () => {
       try { await H.Auth.logout(); } finally { window.location.reload(); }
     });
-
-    $('[data-p-delete]')?.addEventListener('click', async () => {
-      if (!H?.Me?.deleteAccount) {
-        alert('App updated — please hard-refresh (Ctrl+Shift+R) and try again.');
-        return;
-      }
+    $('[data-s-delete]')?.addEventListener('click', async () => {
       if (!confirm('Delete your account and all progress permanently?')) return;
       if (!confirm('Last chance — this cannot be undone. Delete?')) return;
       try {
@@ -643,19 +772,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         alert('Could not delete — try again.');
       }
     });
-
-    // Fresh login via modal: take the user Home (dashboard). If the member
-    // view is already on screen, just refresh the nav chip — never reload
-    // (a reload would wipe the just-shown success message).
-    document.addEventListener('hn:auth', async (e) => {
-      try {
-        if (document.querySelector('[data-p-live]:not(.hidden)')) {
-          if (window.hnUpdateNav && e.detail?.user) window.hnUpdateNav(e.detail.user);
-          return;
-        }
-        window.location.href = progressUrl;
-      } catch { /* modal flow */ }
-    });
+    document.addEventListener('hn:auth', () => window.location.reload());
 
     (async () => {
       H = await import('/habits/habit.js?v=5');
@@ -664,26 +781,19 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         const s = await H.Auth.session();
         user = s.user;
       } catch { user = null; }
-      $('[data-p-loading]')?.classList.add('hidden');
-      if (!user) { $('[data-p-gate]')?.classList.remove('hidden'); return; }
+      $('[data-s-loading]')?.classList.add('hidden');
+      if (!user) { $('[data-s-gate]')?.classList.remove('hidden'); return; }
       try {
-        const full = await H.Me.profile().catch(() => ({ user }));
+        const [full, p] = await Promise.all([
+          H.Me.profile().catch(() => ({ user })),
+          H.Me.prefs().catch(() => ({ prefs: {} })),
+        ]);
         profile = full.user || user;
-      } catch { profile = user; }
-      $('[data-p-live]')?.classList.remove('hidden');
-      paintHeader(profile);
-      fillForm(profile);
-      if (profile.provider === 'email') $('[data-p-security]')?.classList.remove('hidden');
-      else $('[data-p-navpw]')?.classList.add('hidden');
-      paintStats();
-      // Continue-reading deep link
-      try {
-        const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
-        if (resume) {
-          const a = $('[data-p-read]');
-          if (a) { const base = String(readUrl).replace(/\/$/, ''); a.href = `${base}/${resume.surah}/?verse=${resume.verse}`; }
-        }
-      } catch {}
+        prefs = p.prefs || {};
+      } catch { profile = user; prefs = {}; }
+      $('[data-s-live]')?.classList.remove('hidden');
+      fillAll();
+      if (window.hnUpdateNav) window.hnUpdateNav(profile);
     })();
   })();
 </script>

@@ -1,7 +1,10 @@
 ---
-/* Global leaderboard — top readers by hasanat, verses or streak.
- * Only readers with a @username appear (public, no emails/names).
+/* Global leaderboard (Quranly-style) — purple header with profile avatar +
+ * privacy shield, UTC-reset note, Global board by hasanat, top-3 highlight
+ * cards, dark rows, and a leaderboard privacy modal (Show Name / Show
+ * Picture / visibility toggles + country). Only @username readers appear.
  */
+import AuthModal from './AuthModal.astro';
 import { localizedPath } from '../i18n/utils';
 
 interface Props { locale?: string; }
@@ -9,25 +12,18 @@ const { locale = 'en' } = Astro.props;
 const readUrl = localizedPath(locale, '/tools/read/');
 const profileUrl = localizedPath(locale, '/profile/');
 const userBase = localizedPath(locale, '/user/');
-
-const TABS = [
-  ['hasanat', '💗 Hasanat'],
-  ['verses', '📖 Verses'],
-  ['streak', '🔥 Streak'],
-] as const;
 ---
 
-<div class="max-w-3xl mx-auto px-4 py-8" data-lb>
-  <div class="text-center">
-    <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300">🏆 Global leaderboard</p>
-    <h1 class="text-3xl md:text-4xl font-extrabold text-white mt-1">Top readers</h1>
-    <p class="mt-2 text-ink-300 text-[15px]">Readers around the world, ranked by their Quran habit. Updated live.</p>
-  </div>
-
-  <div class="mt-5 flex gap-2" role="tablist" aria-label="Ranking">
-    {TABS.map(([v, label], i) => (
-      <button data-lb-by={v} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-sm font-extrabold transition min-h-[44px] ${i === 0 ? 'bg-gold-300 text-night-900' : 'bg-night-850 border border-white/10 text-ink-300'}`}>{label}</button>
-    ))}
+<div class="max-w-md mx-auto px-4 py-5" data-lb>
+  {/* purple header */}
+  <div class="rounded-[28px] bg-gradient-to-br from-[#9d7ff2] via-[#8b5cf6] to-[#7c3aed] p-5 shadow-xl shadow-purple-950/40">
+    <div class="grid grid-cols-[48px_1fr_48px] items-center gap-2">
+      <a href={profileUrl} aria-label="My profile" data-lb-avatar class="w-12 h-12 grid place-items-center rounded-full overflow-hidden bg-emerald-300 text-night-900 text-lg font-extrabold ring-2 ring-white/40">👤</a>
+      <h1 class="text-center text-[24px] leading-8 font-extrabold text-white">Leaderboard</h1>
+      <button data-lb-privacy aria-label="Leaderboard privacy" title="Leaderboard privacy" class="w-12 h-12 grid place-items-center rounded-full hover:bg-white/15 active:scale-95 transition text-2xl">🛡️</button>
+    </div>
+    <p class="mt-3 text-center text-[13px] leading-5 font-medium text-white/85">Leaderboard operates On Global Time Zone &amp; resets Daily at UTC 00:00</p>
+    <div class="mt-3 mx-auto w-fit rounded-full bg-[#5b3ba8]/80 border border-white/25 px-6 py-2 text-[15px] font-extrabold text-white">Global</div>
   </div>
 
   <div data-lb-me class="hidden mt-4 flex items-center gap-3 bg-brand-500/10 border border-brand-500/40 rounded-2xl px-4 py-3">
@@ -37,9 +33,9 @@ const TABS = [
   </div>
 
   <div data-lb-loading class="mt-4 space-y-2.5 animate-pulse">
-    <div class="h-20 bg-night-850 border border-white/10 rounded-2xl"></div>
-    <div class="h-16 bg-night-850 border border-white/10 rounded-2xl"></div>
-    <div class="h-16 bg-night-850 border border-white/10 rounded-2xl"></div>
+    <div class="h-20 bg-night-850 border border-white/10 rounded-[26px]"></div>
+    <div class="h-16 bg-night-850 border border-white/10 rounded-[26px]"></div>
+    <div class="h-16 bg-night-850 border border-white/10 rounded-[26px]"></div>
   </div>
 
   <div data-lb-empty class="hidden mt-4 text-center bg-night-850 border border-white/10 rounded-3xl p-8">
@@ -49,53 +45,164 @@ const TABS = [
     <a data-lb-read href={readUrl} class="mt-4 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">📖 Start reading</a>
   </div>
 
-  <div data-lb-podium class="hidden mt-4 grid grid-cols-3 gap-2"></div>
-  <div data-lb-list class="mt-3 space-y-2.5"></div>
+  <div data-lb-top class="mt-4 space-y-2.5"></div>
+  <div data-lb-list class="mt-2.5 space-y-2.5"></div>
 
-  <p class="mt-5 text-center text-xs text-ink-500 leading-5">Only readers with a <b>@username</b> appear here — emails and real names stay private.<br /><a href={profileUrl} class="font-bold text-gold-300 hover:text-amber-200">Set your username on your profile →</a></p>
+  <p class="mt-5 text-center text-xs text-ink-500 leading-5">Only readers with a <b>@username</b> appear here — control what others see with the 🛡️ shield above.<br /><a href={profileUrl} class="font-bold text-gold-300 hover:text-amber-200">Set your username on your profile →</a></p>
 </div>
 
-<script define:vars={{ readUrl, userBase }}>
+{/* leaderboard privacy modal (consent style) */}
+<div data-lb-modal class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Leaderboard privacy">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" data-lb-mclose></div>
+  <div class="absolute inset-x-4 top-[6%] mx-auto max-w-md bg-[#17161f] rounded-[28px] p-6 shadow-2xl shadow-black/60 max-h-[88vh] overflow-y-auto">
+    <h2 class="text-center text-[22px] leading-8 font-extrabold text-white">Do you want to participate in Leaderboard?</h2>
+    <p class="mt-2 text-center text-[14px] leading-6 text-ink-300">This consent is specifically for the Leaderboard only (global — your name, picture and country as you allow below).</p>
+    <div data-lb-mgate class="hidden mt-4 text-center">
+      <a href={profileUrl} class="inline-flex items-center justify-center gap-2 bg-brand-500 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login to manage →</a>
+    </div>
+    <div data-lb-mform class="mt-4 space-y-3">
+      <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
+        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">Show Name</span><span class="block text-xs text-ink-500 leading-5">If off, you appear as Anonymous</span></span>
+        <input type="checkbox" data-lb-f-show_name checked class="peer sr-only" />
+        <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
+      </label>
+      <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
+        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">Show Picture</span><span class="block text-xs text-ink-500 leading-5">If off, others see a generic avatar</span></span>
+        <input type="checkbox" data-lb-f-show_avatar checked class="peer sr-only" />
+        <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
+      </label>
+      <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+        <label class="block font-extrabold text-white text-[15px]" for="lb-country">Country</label>
+        <select data-lb-f-country id="lb-country" class="mt-2 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50"></select>
+        <p data-lb-clock class="hidden mt-1.5 text-[11px] font-bold text-gold-300">🔒 Country is set once and can't be changed.</p>
+      </div>
+      <div class="grid gap-3">
+        {[
+          ['show_city', 'City', 'Show your city next to your country'],
+          ['show_bio', 'Bio', 'Show your bio on your public card'],
+          ['show_gender', 'Gender', 'Show your gender on your public card'],
+          ['show_stats', 'Reading stats', 'Verses, hasanat, streak & rank on the board'],
+        ].map(([k, t, s]) => (
+          <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
+            <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">{t}</span><span class="block text-xs text-ink-500 leading-5">{s}</span></span>
+            <input type="checkbox" data-lb-f={k} checked class="peer sr-only" />
+            <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
+          </label>
+        ))}
+      </div>
+      <p data-lb-mmsg class="hidden text-sm font-bold text-center leading-6" role="status"></p>
+      <button data-lb-msave class="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-extrabold rounded-full px-6 py-3.5 min-h-[56px] transition">Submit</button>
+    </div>
+  </div>
+</div>
+
+<AuthModal />
+
+<script define:vars={{ readUrl, userBase, profileUrl }}>
   (() => {
     const root = document.querySelector('[data-lb]');
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
     const $ = (s) => root.querySelector(s);
-    let H = null, by = 'hasanat';
+    const modal = document.querySelector('[data-lb-modal]');
+    let H = null, myProfile = null;
 
-    const UNITS = { hasanat: 'hasanat', verses: 'verses', streak: 'day streak' };
-    const MEDALS = ['🥇', '🥈', '🥉'];
-    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const fmt = (v) => by === 'streak' ? String(v) : (H?.fmtCompact ? H.fmtCompact(v) : String(v));
-    const face = (l) => {
-      try {
-        if (H?.faceFor) return H.faceFor({ avatar: l.avatar, avatar_emoji: l.avatar_emoji, name: l.username });
-      } catch { /* fallback below */ }
-      return esc((l.username || '?').charAt(0).toUpperCase());
+    const COUNTRIES = ['Afghanistan','Algeria','Australia','Austria','Azerbaijan','Bahrain','Bangladesh','Belgium','Bosnia & Herzegovina','Brazil','Brunei','Bulgaria','Cambodia','Canada','Chad','China','Denmark','Djibouti','Egypt','Ethiopia','Fiji','Finland','France','Gambia','Germany','Ghana','Greece','Guinea','Guyana','India','Indonesia','Iran','Iraq','Ireland','Italy','Japan','Jordan','Kazakhstan','Kenya','Kosovo','Kuwait','Kyrgyzstan','Lebanon','Libya','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Morocco','Mozambique','Myanmar','Nepal','Netherlands','New Zealand','Niger','Nigeria','Norway','Oman','Pakistan','Palestine','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Senegal','Singapore','Somalia','South Africa','South Korea','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Trinidad & Tobago','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uzbekistan','Yemen','Zimbabwe','Other'];
+    // Country → [flag emoji, board code].
+    const FLAGS = {
+      'Afghanistan': ['🇦🇫','AFG'], 'Algeria': ['🇩🇿','ALG'], 'Australia': ['🇦🇺','AUS'], 'Austria': ['🇦🇹','AUT'],
+      'Azerbaijan': ['🇦🇿','AZE'], 'Bahrain': ['🇧🇭','BHR'], 'Bangladesh': ['🇧🇩','BAN'], 'Belgium': ['🇧🇪','BEL'],
+      'Bosnia & Herzegovina': ['🇧🇦','BIH'], 'Brazil': ['🇧🇷','BRA'], 'Brunei': ['🇧🇳','BRU'], 'Bulgaria': ['🇧🇬','BUL'],
+      'Cambodia': ['🇰🇭','CAM'], 'Canada': ['🇨🇦','CAN'], 'Chad': ['🇹🇩','CHA'], 'China': ['🇨🇳','CHN'],
+      'Denmark': ['🇩🇰','DEN'], 'Djibouti': ['🇩🇯','DJI'], 'Egypt': ['🇪🇬','EGY'], 'Ethiopia': ['🇪🇹','ETH'],
+      'Fiji': ['🇫🇯','FIJ'], 'Finland': ['🇫🇮','FIN'], 'France': ['🇫🇷','FRA'], 'Gambia': ['🇬🇲','GAM'],
+      'Germany': ['🇩🇪','GER'], 'Ghana': ['🇬🇭','GHA'], 'Greece': ['🇬🇷','GRE'], 'Guinea': ['🇬🇳','GUI'],
+      'Guyana': ['🇬🇾','GUY'], 'India': ['🇮🇳','IND'], 'Indonesia': ['🇮🇩','IDN'], 'Iran': ['🇮🇷','IRI'],
+      'Iraq': ['🇮🇶','IRQ'], 'Ireland': ['🇮🇪','IRL'], 'Italy': ['🇮🇹','ITA'], 'Japan': ['🇯🇵','JPN'],
+      'Jordan': ['🇯🇴','JOR'], 'Kazakhstan': ['🇰🇿','KAZ'], 'Kenya': ['🇰🇪','KEN'], 'Kosovo': ['🇽🇰','KOS'],
+      'Kuwait': ['🇰🇼','KUW'], 'Kyrgyzstan': ['🇰🇬','KGZ'], 'Lebanon': ['🇱🇧','LBN'], 'Libya': ['🇱🇾','LBA'],
+      'Malaysia': ['🇲🇾','MAS'], 'Maldives': ['🇲🇻','MDV'], 'Mali': ['🇲🇱','MLI'], 'Malta': ['🇲🇹','MLT'],
+      'Mauritania': ['🇲🇷','MTN'], 'Mauritius': ['🇲🇺','MRI'], 'Morocco': ['🇲🇦','MAR'], 'Mozambique': ['🇲🇿','MOZ'],
+      'Myanmar': ['🇲🇲','MYA'], 'Nepal': ['🇳🇵','NEP'], 'Netherlands': ['🇳🇱','NED'], 'New Zealand': ['🇳🇿','NZL'],
+      'Niger': ['🇳🇪','NIG'], 'Nigeria': ['🇳🇬','NGA'], 'Norway': ['🇳🇴','NOR'], 'Oman': ['🇴🇲','OMA'],
+      'Pakistan': ['🇵🇰','PAK'], 'Palestine': ['🇵🇸','PLE'], 'Philippines': ['🇵🇭','PHI'], 'Poland': ['🇵🇱','POL'],
+      'Portugal': ['🇵🇹','POR'], 'Qatar': ['🇶🇦','QAT'], 'Romania': ['🇷🇴','ROU'], 'Russia': ['🇷🇺','RUS'],
+      'Saudi Arabia': ['🇸🇦','KSA'], 'Senegal': ['🇸🇳','SEN'], 'Singapore': ['🇸🇬','SGP'], 'Somalia': ['🇸🇴','SOM'],
+      'South Africa': ['🇿🇦','RSA'], 'South Korea': ['🇰🇷','KOR'], 'Spain': ['🇪🇸','ESP'], 'Sri Lanka': ['🇱🇰','SRI'],
+      'Sudan': ['🇸🇩','SUD'], 'Suriname': ['🇸🇷','SUR'], 'Sweden': ['🇸🇪','SWE'], 'Switzerland': ['🇨🇭','SUI'],
+      'Syria': ['🇸🇾','SYR'], 'Taiwan': ['🇹🇼','TPE'], 'Tajikistan': ['🇹🇯','TJK'], 'Tanzania': ['🇹🇿','TAN'],
+      'Thailand': ['🇹🇭','THA'], 'Trinidad & Tobago': ['🇹🇹','TTO'], 'Tunisia': ['🇹🇳','TUN'], 'Turkey': ['🇹🇷','TUR'],
+      'Turkmenistan': ['🇹🇲','TKM'], 'Uganda': ['🇺🇬','UGA'], 'Ukraine': ['🇺🇦','UKR'], 'United Arab Emirates': ['🇦🇪','UAE'],
+      'United Kingdom': ['🇬🇧','UK'], 'United States': ['🇺🇸','USA'], 'Uzbekistan': ['🇺🇿','UZB'], 'Yemen': ['🇾🇪','YEM'],
+      'Zimbabwe': ['🇿🇼','ZIM'],
     };
 
-    const row = (l) => `
-      <a href="${userBase}?u=${encodeURIComponent(l.username)}" class="flex items-center gap-3 bg-night-850 border border-white/10 hover:border-brand-500/50 rounded-2xl px-4 py-3 transition">
-        <span class="w-8 text-center font-extrabold ${l.rank <= 3 ? 'text-gold-300' : 'text-ink-500'}">${l.rank}</span>
-        <span class="w-10 h-10 shrink-0 grid place-items-center rounded-full bg-brand-500/15 border border-white/10 overflow-hidden text-lg font-extrabold text-white">${face(l)}</span>
-        <span class="min-w-0">
-          <span class="block font-bold text-ink-50 truncate">@${esc(l.username)}</span>
-          <span class="block text-xs text-ink-500 truncate">${esc(l.country) || '🌍 Global reader'}</span>
-        </span>
-        <span class="ms-auto text-end shrink-0">
-          <span class="block font-extrabold text-lg text-white">${fmt(l.value)}</span>
-          <span class="block text-[11px] font-bold text-ink-500">${UNITS[by]}</span>
-        </span>
-      </a>`;
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const flagLine = (country) => {
+      const f = FLAGS[country];
+      if (f) return `<span class="text-base" aria-hidden="true">${f[0]}</span><span class="font-bold text-[15px] text-white">${f[1]}</span>`;
+      if (country) return `<span class="font-bold text-[13px] text-ink-300 truncate">${esc(country)}</span>`;
+      return '';
+    };
+    const face = (l) => {
+      try {
+        if (H?.faceFor) return H.faceFor({ avatar: l.avatar, avatar_emoji: l.avatar_emoji, name: l.username || 'Reader' });
+      } catch { /* fallback below */ }
+      return esc(((l.username || 'R').charAt(0) || 'R').toUpperCase());
+    };
+    const faceHTML = (inner) => String(inner).trim().startsWith('<') ? inner : esc(inner);
+    const displayName = (l) => (l.username ? `@${l.username}` : 'Anonymous');
+    const profileHref = (l) => (l.username ? `${userBase}?u=${encodeURIComponent(l.username)}` : profileUrl);
 
-    const podiumCard = (l, i) => `
-      <a href="${userBase}?u=${encodeURIComponent(l.username)}" class="bg-night-850 border ${i === 0 ? 'border-gold-300/50' : 'border-white/10'} hover:border-brand-500/50 rounded-3xl p-4 text-center transition">
-        <div class="text-2xl">${MEDALS[i]}</div>
-        <div class="mx-auto mt-2 w-14 h-14 grid place-items-center rounded-full bg-brand-500/15 border border-white/10 overflow-hidden text-xl font-extrabold text-white">${face(l)}</div>
-        <p class="mt-2 font-bold text-sm text-ink-50 truncate">@${esc(l.username)}</p>
-        <p class="font-extrabold text-gold-300">${fmt(l.value)}</p>
-        <p class="text-[11px] font-bold text-ink-500">${UNITS[by]}</p>
-      </a>`;
+    const BADGE = [
+      'background:linear-gradient(135deg,#ffe9a8,#f5b04c);color:#5b3400',
+      'background:linear-gradient(135deg,#f1f5f9,#cbd5e1);color:#334155',
+      'background:linear-gradient(135deg,#fcd9b8,#c97b2d);color:#3f2200',
+    ];
+    const hexBadge = (rank) => {
+      const i = rank - 1;
+      const label = rank === 1 ? '1st' : rank === 2 ? '2' : rank === 3 ? '3' : String(rank);
+      const style = i < 3 ? BADGE[i] : 'background:rgba(139,92,246,.35);color:#e9e4ff';
+      return `<span class="shrink-0 w-9 h-10 grid place-items-center text-[13px] font-extrabold" style="clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);${style}" aria-label="Rank ${rank}">${label}</span>`;
+    };
+
+    const topCard = (l) => {
+      const tag = l.username
+        ? `<a href="${userBase}?u=${encodeURIComponent(l.username)}" class="flex items-center gap-3">`
+        : `<span class="flex items-center gap-3">`;
+      const close = l.username ? '</a>' : '</span>';
+      const gold = l.rank === 1;
+      return `
+      <div class="rounded-[26px] p-[1.5px] ${gold ? 'bg-gradient-to-r from-[#ffe9a8] via-[#f5b04c] to-[#ffe9a8]' : 'bg-white/10'} shadow-xl shadow-black/30">
+        <div class="rounded-[25px] bg-gradient-to-br ${gold ? 'from-[#8b5cf6] to-[#6d28d9]' : 'from-[#7c6aa8]/60 to-[#4c3f7d]/60'} backdrop-blur px-4 py-3.5">
+          ${tag}
+            <span class="w-14 h-14 shrink-0 grid place-items-center rounded-full bg-white/15 border border-white/25 overflow-hidden text-2xl font-extrabold text-white">${faceHTML(face(l))}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block font-extrabold text-[19px] text-white truncate">${esc(displayName(l))}</span>
+              <span class="mt-0.5 flex items-center gap-1.5">${flagLine(l.country)}</span>
+            </span>
+            <span class="shrink-0 flex items-center gap-2">
+              ${hexBadge(l.rank)}
+              <span class="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[15px] font-extrabold text-white">💗 ${H.fmtCompact(l.value)}</span>
+            </span>
+          ${close}
+        </div>
+      </div>`;
+    };
+
+    const rowHtml = (l) => {
+      const inner = `
+        ${hexBadge(l.rank)}
+        <span class="w-12 h-12 shrink-0 grid place-items-center rounded-full bg-emerald-300/90 text-night-900 overflow-hidden text-xl font-extrabold">${faceHTML(face(l))}</span>
+        <span class="min-w-0 flex-1">
+          <span class="block font-bold text-[17px] text-white truncate">${esc(displayName(l))}</span>
+          <span class="mt-0.5 flex items-center gap-1.5">${flagLine(l.country)}</span>
+        </span>
+        <span class="shrink-0 flex items-center gap-1.5 text-[19px] font-extrabold text-white">💗 ${H.fmtCompact(l.value)}</span>`;
+      return l.username
+        ? `<a href="${userBase}?u=${encodeURIComponent(l.username)}" class="flex items-center gap-3 bg-[#14121f] border border-white/5 hover:border-brand-500/40 rounded-[22px] px-4 py-3 transition">${inner}</a>`
+        : `<span class="flex items-center gap-3 bg-[#14121f] border border-white/5 rounded-[22px] px-4 py-3">${inner}</span>`;
+    };
 
     const paint = (d) => {
       const leaders = d.leaders || [];
@@ -106,32 +213,30 @@ const TABS = [
         const r = me?.querySelector('[data-lb-merank]');
         const v = me?.querySelector('[data-lb-meval]');
         if (r) r.textContent = `#${d.me.rank}`;
-        if (v) v.textContent = `• ${fmt(d.me.value)} ${UNITS[by]}`;
+        if (v) v.textContent = `• ${H.fmtCompact(d.me.value)} hasanat`;
       } else {
         me?.classList.add('hidden');
       }
       if (!leaders.length) {
         $('[data-lb-empty]')?.classList.remove('hidden');
-        $('[data-lb-podium]')?.classList.add('hidden');
+        const top = $('[data-lb-top]');
         const list = $('[data-lb-list]');
+        if (top) top.innerHTML = '';
         if (list) list.innerHTML = '';
         return;
       }
       $('[data-lb-empty]')?.classList.add('hidden');
-      const pod = $('[data-lb-podium]');
-      if (pod) {
-        pod.classList.remove('hidden');
-        pod.innerHTML = leaders.slice(0, 3).map(podiumCard).join('');
-      }
+      const top = $('[data-lb-top]');
+      if (top) top.innerHTML = leaders.slice(0, 3).map(topCard).join('');
       const list = $('[data-lb-list]');
-      if (list) list.innerHTML = leaders.slice(3).map(row).join('');
+      if (list) list.innerHTML = leaders.slice(3).map(rowHtml).join('');
     };
 
     const load = async () => {
       $('[data-lb-loading]')?.classList.remove('hidden');
       $('[data-lb-empty]')?.classList.add('hidden');
       try {
-        const d = await H.Me.leaderboard(by, 30);
+        const d = await H.Me.leaderboard('hasanat', 30);
         paint(d);
       } catch {
         $('[data-lb-loading]')?.classList.add('hidden');
@@ -139,21 +244,113 @@ const TABS = [
       }
     };
 
-    root.querySelectorAll('[data-lb-by]').forEach((btn) => btn.addEventListener('click', async () => {
-      by = btn.dataset.lbBy;
-      root.querySelectorAll('[data-lb-by]').forEach((b) => {
-        const on = b === btn;
-        b.classList.toggle('bg-gold-300', on);
-        b.classList.toggle('text-night-900', on);
-        b.classList.toggle('bg-night-850', !on);
-        b.classList.toggle('text-ink-300', !on);
-        b.setAttribute('aria-selected', String(on));
-      });
-      await load();
-    }));
+    // ---- header avatar (links to profile) ----
+    const setHeaderFace = (user) => {
+      const el = $('[data-lb-avatar]');
+      if (!el || !user) return;
+      try {
+        const html = H.faceFor(user);
+        if (String(html).trim().startsWith('<')) el.innerHTML = html;
+        else el.textContent = html;
+      } catch { /* keep fallback */ }
+    };
+
+    // ---- privacy modal ----
+    const msg = (ok, text) => {
+      const el = modal?.querySelector('[data-lb-mmsg]');
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove('hidden', 'text-emerald-300', 'text-red-300');
+      el.classList.add(ok ? 'text-emerald-300' : 'text-red-300');
+    };
+    const openModal = async () => {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const gate = modal.querySelector('[data-lb-mgate]');
+      const form = modal.querySelector('[data-lb-mform]');
+      gate?.classList.add('hidden');
+      form?.classList.add('hidden');
+      try {
+        const { user } = await H.Auth.session().catch(() => ({ user: null }));
+        if (!user) { gate?.classList.remove('hidden'); return; }
+        const full = await H.Me.profile().catch(() => ({ user }));
+        myProfile = full.user || user;
+        form?.classList.remove('hidden');
+        const set = (sel, on) => {
+          const c = modal.querySelector(sel);
+          if (c) c.checked = on !== 0;
+        };
+        set('[data-lb-f-show_name]', myProfile.show_name);
+        set('[data-lb-f-show_avatar]', myProfile.show_avatar);
+        set('[data-lb-f-show_city]', myProfile.show_city);
+        set('[data-lb-f-show_bio]', myProfile.show_bio);
+        set('[data-lb-f-show_gender]', myProfile.show_gender);
+        set('[data-lb-f-show_stats]', myProfile.show_stats);
+        const sel = modal.querySelector('[data-lb-f-country]');
+        if (sel) {
+          sel.innerHTML = '';
+          if (!myProfile.country) {
+            const o0 = document.createElement('option');
+            o0.value = ''; o0.textContent = 'Select country…';
+            sel.appendChild(o0);
+          }
+          COUNTRIES.forEach((c) => {
+            const o = document.createElement('option');
+            o.value = c; o.textContent = c;
+            if (c === myProfile.country) o.selected = true;
+            sel.appendChild(o);
+          });
+          if (myProfile.country && !COUNTRIES.includes(myProfile.country)) {
+            const o = document.createElement('option');
+            o.value = myProfile.country; o.textContent = myProfile.country; o.selected = true;
+            sel.appendChild(o);
+          }
+          sel.disabled = !!myProfile.country;
+        }
+        modal.querySelector('[data-lb-clock]')?.classList.toggle('hidden', !myProfile.country);
+      } catch { gate?.classList.remove('hidden'); }
+    };
+    const closeModal = () => {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+    $('[data-lb-privacy]')?.addEventListener('click', openModal);
+    modal?.querySelector('[data-lb-mclose]')?.addEventListener('click', closeModal);
+    modal?.querySelector('[data-lb-msave]')?.addEventListener('click', async () => {
+      const btn = modal.querySelector('[data-lb-msave]');
+      const get = (sel) => !!modal.querySelector(sel)?.checked;
+      const payload = {
+        show_name: get('[data-lb-f-show_name]'),
+        show_avatar: get('[data-lb-f-show_avatar]'),
+        show_city: get('[data-lb-f-show_city]'),
+        show_bio: get('[data-lb-f-show_bio]'),
+        show_gender: get('[data-lb-f-show_gender]'),
+        show_stats: get('[data-lb-f-show_stats]'),
+      };
+      const sel = modal.querySelector('[data-lb-f-country]');
+      if (sel && !sel.disabled && sel.value) payload.country = sel.value;
+      try {
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+        const data = await H.Me.saveProfile(payload);
+        myProfile = data.user || myProfile;
+        msg(true, '✓ Saved.');
+        await load();
+        setTimeout(closeModal, 700);
+      } catch (err) {
+        msg(false, err?.hint || err?.message || 'Could not save — try again.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+      }
+    });
 
     (async () => {
       H = await import('/habits/habit.js?v=5');
+      try {
+        const { user } = await H.Auth.session().catch(() => ({ user: null }));
+        if (user) setHeaderFace(user);
+        if (window.hnUpdateNav) window.hnUpdateNav(user);
+      } catch { /* guest board still renders */ }
       await load();
       try {
         const { resume } = await H.Me.resume().catch(() => ({ resume: null }));

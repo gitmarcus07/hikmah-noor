@@ -2,7 +2,7 @@
 // Editable: name, username, country, city, bio, gender, language,
 // avatar_emoji, avatar_url + optional email-user password change.
 import {
-  clearSessionCookie, hashPassword, json, nowSec, readJson, requireUser, verifyPassword,
+  clearSessionCookie, hashPassword, json, nowSec, readJson, requireUser, validEmail, verifyPassword,
 } from '../lib/auth.js';
 
 const GENDERS = new Set(['', 'male', 'female', 'other', 'prefer-not-to-say']);
@@ -28,8 +28,12 @@ const KNOWN_AVATARS = new Set(['hilal', 'kaaba', 'dome', 'star8', 'fanoos', 'tas
 // fall back to base columns only if a query errors with no such column.
 const BASE_COLS = ['id', 'email', 'name', 'avatar_url', 'provider', 'created_at'];
 const FULL_COLS = [...BASE_COLS, 'username', 'country', 'city', 'bio', 'gender', 'language', 'avatar_emoji', 'updated_at'];
+// Migration 0007: leaderboard-privacy flags (degrade to visible when missing).
+const FULL7_COLS = [...FULL_COLS, 'show_name', 'show_avatar'];
+const NEW7_COLS = new Set(['show_name', 'show_avatar']);
 
 function toPublicProfile(row) {
+  const vis1 = (x) => (x === 0 ? 0 : 1);
   return {
     id: row.id,
     name: row.name || '',
@@ -43,41 +47,56 @@ function toPublicProfile(row) {
     gender: row.gender || '',
     language: row.language || 'en',
     avatar_emoji: row.avatar_emoji || '',
+    show_name: vis1(row.show_name),
+    show_avatar: vis1(row.show_avatar),
     created_at: row.created_at || 0,
     updated_at: row.updated_at || 0,
   };
 }
 
-const VIS_DEFAULT = { show_country: 1, show_city: 1, show_bio: 1, show_gender: 1, show_stats: 1 };
+const VIS_DEFAULT = { show_country: 1, show_city: 1, show_bio: 1, show_gender: 1, show_stats: 1, show_name: 1, show_avatar: 1 };
 
-// Visibility lives in its own query so a missing 0004 migration degrades
-// to "everything visible" instead of breaking the whole profile read.
+// Visibility lives in its own query so a missing migration degrades
+// gracefully instead of breaking the whole profile read.
 async function visibilityOf(env, userId) {
-  try {
-    const r = await env.DB.prepare(
-      'SELECT show_country, show_city, show_bio, show_gender, show_stats FROM users WHERE id = ?'
-    ).bind(userId).first();
+  const pick = (r) => {
     if (!r) return { ...VIS_DEFAULT };
     const v = (x) => (x === 0 ? 0 : 1);
     return {
       show_country: v(r.show_country), show_city: v(r.show_city), show_bio: v(r.show_bio),
       show_gender: v(r.show_gender), show_stats: v(r.show_stats),
+      show_name: v(r.show_name), show_avatar: v(r.show_avatar),
     };
-  } catch { return { ...VIS_DEFAULT }; }
+  };
+  try {
+    const r = await env.DB.prepare(
+      'SELECT show_country, show_city, show_bio, show_gender, show_stats, show_name, show_avatar FROM users WHERE id = ?'
+    ).bind(userId).first();
+    if (r && r.show_name !== undefined) return pick(r);
+    throw new Error('no 0007 cols');
+  } catch {
+    try {
+      const r = await env.DB.prepare(
+        'SELECT show_country, show_city, show_bio, show_gender, show_stats FROM users WHERE id = ?'
+      ).bind(userId).first();
+      const base = pick(r);
+      return { ...base, show_name: 1, show_avatar: 1 };
+    } catch { return { ...VIS_DEFAULT }; }
+  }
 }
 
 async function fullProfile(env, userId) {
   const vis = await visibilityOf(env, userId);
-  try {
-    const row = await env.DB.prepare(`SELECT ${FULL_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
-    if (!row) return null;
-    return { ...toPublicProfile(row), ...vis };
-  } catch {
-    // Pre-migration DB: base columns only.
-    const row = await env.DB.prepare(`SELECT ${BASE_COLS.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
-    if (!row) return null;
-    return { ...toPublicProfile(row), ...vis };
+  const selectCols = async (cols) =>
+    env.DB.prepare(`SELECT ${cols.join(', ')} FROM users WHERE id = ?`).bind(userId).first();
+  for (const cols of [FULL7_COLS, FULL_COLS, BASE_COLS]) {
+    try {
+      const row = await selectCols(cols);
+      if (!row) return null;
+      return { ...toPublicProfile(row), ...vis };
+    } catch { /* try the next (older) column set */ }
   }
+  return null;
 }
 
 export async function onRequestGet(context) {
@@ -120,6 +139,19 @@ export async function onRequestPut(context) {
     vals.push(name);
     baseSets.push('name = ?');
     baseVals.push(name);
+  }
+
+  // --- email change (any account; must stay unique) ---
+  if (body.email !== undefined) {
+    const email = String(body.email || '').trim().toLowerCase();
+    if (!validEmail(email)) return fail('That email address doesn’t look right.', 'invalid_email');
+    if (email !== (user.email || '').toLowerCase()) {
+      const taken = await env.DB.prepare('SELECT id FROM users WHERE email = ? AND id != ?')
+        .bind(email, user.id).first();
+      if (taken) return fail('That email is already in use by another account.', 'email_taken', 409);
+      sets.push('email = ?');
+      vals.push(email);
+    }
   }
 
   // --- username (unique, optional, Instagram-like rules, stored lowercase) ---
@@ -192,7 +224,7 @@ export async function onRequestPut(context) {
     vals.push(avatar_url.slice(0, 25000));
   }
   // --- visibility toggles (name, username, photo are always public) ---
-  for (const k of ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats']) {
+  for (const k of ['show_country', 'show_city', 'show_bio', 'show_gender', 'show_stats', 'show_name', 'show_avatar']) {
     if (body[k] !== undefined) {
       sets.push(`${k} = ?`);
       vals.push(body[k] ? 1 : 0);
@@ -235,13 +267,30 @@ export async function onRequestPut(context) {
   }
   vals.push(user.id);
   baseVals.push(user.id);
+  const runUpdate = (s, v) => env.DB.prepare(`UPDATE users SET ${s.join(', ')} WHERE id = ?`).bind(...v).run();
+  const noSuchCol = (e) => /no such column/i.test(String((e && e.message) || ''));
   try {
-    await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).bind(...vals).run();
+    await runUpdate(sets, vals);
   } catch (e) {
-    // Pre-migration DB (missing columns): persist base fields only.
-    if (!/no such column/i.test(String((e && e.message) || ''))) throw e;
-    if (baseSets.length) {
-      await env.DB.prepare(`UPDATE users SET ${baseSets.join(', ')} WHERE id = ?`).bind(...baseVals).run();
+    if (!noSuchCol(e)) throw e;
+    // Pre-0007 DB (missing show_name/show_avatar): retry without them.
+    const dropIdx = new Set();
+    sets.forEach((s, i) => {
+      const col = s.split(' = ')[0];
+      if (NEW7_COLS.has(col)) dropIdx.add(i);
+    });
+    if (dropIdx.size) {
+      const s2 = sets.filter((_, i) => !dropIdx.has(i));
+      const v2 = vals.filter((_, i) => !dropIdx.has(i)); // trailing user.id index untouched
+      try {
+        await runUpdate(s2, v2);
+      } catch (e2) {
+        if (!noSuchCol(e2)) throw e2;
+        if (baseSets.length) await runUpdate(baseSets, baseVals);
+      }
+    } else if (baseSets.length) {
+      // Older pre-migration DB (missing columns): persist base fields only.
+      await runUpdate(baseSets, baseVals);
     }
   }
   const profile = await fullProfile(env, user.id);
