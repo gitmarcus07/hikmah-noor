@@ -65,7 +65,8 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
     };
     const friendly = (code) => ({
       invalid_credentials: 'Wrong email or password. Try again.',
-      email_taken: 'This email already has an account — try logging in.',
+      google_only: 'This email uses Google login — tap “Continue with Google” above.',
+      email_taken: 'This email already has an account — try logging in, or use Google if you signed up with it.',
       invalid_email: 'That email address doesn’t look right.',
       weak_password: 'Password needs at least 8 characters.',
       too_many_requests: 'Too many attempts — wait a bit and retry.',
@@ -132,5 +133,20 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
     });
     submit('login');
     submit('register');
+
+    // Google OAuth failures land back here as ?auth=error (see
+    // functions/api/auth/google/callback.js). Auto-open with an
+    // explanation instead of silently showing Login again.
+    try {
+      if (new URLSearchParams(window.location.search).get('auth') === 'error') {
+        window.hnAuthModal.open('login');
+        const loginForm = forms.login;
+        if (loginForm) showError(loginForm, 'Google login didn’t complete — please try again, or use email.');
+        // Drop the flag so a refresh doesn’t re-open the modal.
+        const clean = new URL(window.location.href);
+        clean.searchParams.delete('auth');
+        window.history.replaceState(null, '', clean.toString());
+      }
+    } catch { /* non-fatal */ }
   })();
 </script>

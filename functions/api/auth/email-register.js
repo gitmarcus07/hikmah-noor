@@ -17,8 +17,13 @@ export async function onRequest(context) {
   if (!validEmail(email)) return json({ error: 'invalid_email' }, 400);
   if (password.length < 8) return json({ error: 'weak_password', hint: 'Minimum 8 characters.' }, 400);
 
-  const exists = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first();
-  if (exists) return json({ error: 'email_taken', hint: 'Try logging in instead.' }, 409);
+  const exists = await env.DB.prepare('SELECT id, provider FROM users WHERE email = ?').bind(email).first();
+  if (exists) {
+    const hint = exists.provider === 'google'
+      ? 'This email already uses Google login — tap “Continue with Google”.'
+      : 'Try logging in instead.';
+    return json({ error: 'email_taken', hint }, 409);
+  }
 
   const now = nowSec();
   const id = newUserId();
@@ -32,6 +37,6 @@ export async function onRequest(context) {
   return json(
     { ok: true, isNew: true, user: { id, name, email, avatar: '', provider: 'email' } },
     200,
-    { 'set-cookie': sessionCookie(token) }
+    { 'set-cookie': sessionCookie(token, 2592000, request) }
   );
 }

@@ -2,7 +2,7 @@
 // Editable: name, username, country, city, bio, gender, language,
 // avatar_emoji, avatar_url + optional email-user password change.
 import {
-  hashPassword, json, nowSec, readJson, requireUser, verifyPassword,
+  clearSessionCookie, hashPassword, json, nowSec, readJson, requireUser, verifyPassword,
 } from '../lib/auth.js';
 
 const GENDERS = new Set(['', 'male', 'female', 'other', 'prefer-not-to-say']);
@@ -268,6 +268,6 @@ export async function onRequestDelete(context) {
   return json(
     { ok: true },
     200,
-    { 'set-cookie': 'hn_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0' },
+    { 'set-cookie': clearSessionCookie(request) },
   );
 }

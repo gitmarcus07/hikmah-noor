@@ -15,6 +15,12 @@ export async function onRequest(context) {
   const password = String(body?.password || '');
   const row = await env.DB.prepare('SELECT id, name, email, avatar_url, provider, password_hash FROM users WHERE email = ?')
     .bind(email).first();
+  // Same address, different method: a Google-created account has no
+  // password, so email+password can never succeed — tell the user to use
+  // Google instead of a generic "wrong password" dead-end.
+  if (row && !row.password_hash) {
+    return json({ error: 'google_only', hint: 'This email uses Google login — tap “Continue with Google”.' }, 401);
+  }
   const ok = row && row.password_hash && (await verifyPassword(password, row.password_hash));
   if (!ok) return json({ error: 'invalid_credentials' }, 401);
 
@@ -22,6 +28,6 @@ export async function onRequest(context) {
   return json(
     { ok: true, user: { id: row.id, name: row.name, email: row.email, avatar: row.avatar_url, provider: row.provider } },
     200,
-    { 'set-cookie': sessionCookie(token) }
+    { 'set-cookie': sessionCookie(token, 2592000, request) }
   );
 }

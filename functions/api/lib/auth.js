@@ -33,12 +33,37 @@ export function getCookie(request, name) {
   return null;
 }
 
-export function sessionCookie(token, maxAge = 2592000) {
-  return `hn_session=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${maxAge}`;
+export function isSecureRequest(request) {
+  try {
+    const url = new URL(request.url);
+    if (url.protocol === 'https:') return true;
+  } catch { /* fall through to header check */ }
+  // Cloudflare / reverse-proxy hint when URL is rewritten.
+  const proto = request.headers.get('x-forwarded-proto') || request.headers.get('cf-visitor') || '';
+  return /https/i.test(proto);
 }
 
-export function clearSessionCookie() {
-  return `hn_session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`;
+// `Secure` cookies are rejected by browsers on http:// (e.g. localhost
+// dev), which made logins look successful but never stick — the app kept
+// showing "Login". Only send `Secure` over https.
+export function sessionCookie(token, maxAge = 2592000, request = null) {
+  const secure = request ? isSecureRequest(request) : true;
+  return `hn_session=${encodeURIComponent(token)}; HttpOnly;${secure ? ' Secure;' : ''} SameSite=Lax; Path=/; Max-Age=${maxAge}`;
+}
+
+export function clearSessionCookie(request = null) {
+  const secure = request ? isSecureRequest(request) : true;
+  return `hn_session=; HttpOnly;${secure ? ' Secure;' : ''} SameSite=Lax; Path=/; Max-Age=0`;
+}
+
+export function oauthStateCookie(state, request = null) {
+  const secure = request ? isSecureRequest(request) : true;
+  return `hn_oauth_state=${state}; HttpOnly;${secure ? ' Secure;' : ''} SameSite=Lax; Path=/; Max-Age=600`;
+}
+
+export function clearOauthStateCookie(request = null) {
+  const secure = request ? isSecureRequest(request) : true;
+  return `hn_oauth_state=; HttpOnly;${secure ? ' Secure;' : ''} SameSite=Lax; Path=/; Max-Age=0`;
 }
 
 // ---- passwords (PBKDF2-HMAC-SHA256, WebCrypto — no native deps) ----
@@ -135,7 +160,12 @@ export async function getSessionUser(env, request) {
        WHERE s.token_hash = ?`
     ).bind(tokenHash).first();
   }
-  if (!row) return null;
+  if (!row) {
+    // Token exists but the user row is gone (account deleted elsewhere).
+    // Drop the orphan session so the browser stops sending a dead cookie.
+    await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run().catch(() => null);
+    return null;
+  }
   if (row.expires_at < nowSec()) {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();
     return null;

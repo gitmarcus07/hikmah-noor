@@ -1,13 +1,16 @@
 // GET /api/auth/google/callback — Google redirects here with ?code=&state=.
 import {
-  createSession, exchangeGoogleCode, fetchGoogleProfile, getCookie,
+  clearOauthStateCookie, createSession, exchangeGoogleCode, fetchGoogleProfile, getCookie,
   json, newUserId, nowSec, sessionCookie,
 } from '../../lib/auth.js';
 
 export async function onRequest(context) {
   const { env, request } = context;
-  const appUrl = (env.APP_URL || 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
-  const fail = (to) => Response.redirect(`${appUrl}${to}`, 302);
+  // Redirect same-origin (relative URL) so the session cookie set on this
+  // host is never lost. The old code redirected to an absolute APP_URL,
+  // which dropped the cookie whenever the user logged in from localhost,
+  // a preview deploy or a custom domain — the app then kept showing Login.
+  const fail = (to) => Response.redirect(new URL(to, request.url).toString(), 302);
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
@@ -32,15 +35,20 @@ export async function onRequest(context) {
       await env.DB.prepare('INSERT INTO streaks (user_id) VALUES (?)').bind(id).run();
       user = { id, name: profile.name, email: profile.email, avatar_url: profile.avatar, provider: 'google' };
       isNew = true;
-    } else if (!user.avatar_url && profile.avatar) {
-      await env.DB.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').bind(profile.avatar, user.id).run();
+    } else {
+      // Same address previously used with email+password (or a deleted
+      // account re-created): link it — keep the row so either method logs
+      // into the same account, just fill a missing avatar.
+      if (!user.avatar_url && profile.avatar) {
+        await env.DB.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').bind(profile.avatar, user.id).run();
+      }
     }
     const token = await createSession(env, user.id);
     // New users set up their plan; returning users land on their Home dashboard.
-    const headers = {
-      location: `${appUrl}${isNew ? '/tools/habit-start/' : '/tools/my-progress/'}`,
-      'set-cookie': `${sessionCookie(token)}; hn_oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`,
-    };
+    const headers = new Headers();
+    headers.set('location', isNew ? '/tools/habit-start/' : '/tools/my-progress/');
+    headers.append('set-cookie', sessionCookie(token, 2592000, request));
+    headers.append('set-cookie', clearOauthStateCookie(request));
     return new Response(null, { status: 302, headers });
   } catch (e) {
     return json({ error: 'oauth_failed' }, 500);

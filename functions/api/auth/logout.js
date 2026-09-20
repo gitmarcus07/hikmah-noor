@@ -8,5 +8,5 @@ export async function onRequest(context) {
   if (token) {
     await env.DB.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(await sha256Hex(token)).run();
   }
-  return json({ ok: true }, 200, { 'set-cookie': clearSessionCookie() });
+  return json({ ok: true }, 200, { 'set-cookie': clearSessionCookie(request) });
 }
