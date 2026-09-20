@@ -44,7 +44,7 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     {/* identity */}
     <div class="flex flex-col items-center text-center">
       <button data-s-photo aria-label="Change profile photo" class="relative w-24 h-24 grid place-items-center rounded-full overflow-hidden bg-emerald-300 text-night-900 text-4xl font-extrabold ring-2 ring-white/20 hover:ring-brand-400 transition">
-        <span data-s-face>👤</span>
+        <span data-s-face class="block w-full h-full grid place-items-center overflow-hidden">👤</span>
         <span class="absolute bottom-1 end-1 w-7 h-7 grid place-items-center rounded-full bg-brand-500 text-night-900 text-sm border-2 border-night-950" aria-hidden="true">📷</span>
       </button>
       <h2 data-s-name class="mt-2 text-lg font-extrabold text-white">Reader</h2>
@@ -451,7 +451,19 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     const savePhoto = async () => {
       try {
         const data = await withTimeout(H.Me.saveProfile({ avatar_emoji: picked, avatar_url: photo }));
-        if (data?.user) { profile = data.user; fillIdentity(); }
+        if (data?.user) profile = data.user;
+        // Re-read server truth so a silently-dropped pick can't masquerade as saved.
+        try {
+          const fresh = await withTimeout(H.Me.profile());
+          if (fresh?.user) profile = fresh.user;
+        } catch { /* keep PUT response */ }
+        picked = profile.avatar_emoji || '';
+        photo = profile.avatar || '';
+        const urlInput = $('[data-s-photourl]');
+        if (urlInput) urlInput.value = /^https:\/\//.test(photo) ? photo : '';
+        paintGallery();
+        syncPhotoUI();
+        fillIdentity();
         msg('[data-s-msg-photo]', true, tAcc.account.photoReady);
         if (window.hnUpdateNav) window.hnUpdateNav(profile);
       } catch (err) {
@@ -668,9 +680,16 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
         profile = data.user;
       },
       alerts: async () => {
+        const reminder = val('[data-s-reminder]') || null;
+        const second = $('[data-s-second]')?.checked ? 1 : 0;
+        // Enabling any reminder needs the browser permission first — this
+        // popup lets us send reminders, verses and challenge alerts.
+        if ((reminder || second) && 'Notification' in window && Notification.permission === 'default') {
+          try { await Notification.requestPermission(); } catch {}
+        }
         const data = await withTimeout(H.Me.savePrefs({
-          reminder_time: val('[data-s-reminder]') || null,
-          second_reminder: $('[data-s-second]')?.checked ? 1 : 0,
+          reminder_time: reminder,
+          second_reminder: second,
         }));
         prefs = { ...prefs, ...(data.prefs || {}) };
       },

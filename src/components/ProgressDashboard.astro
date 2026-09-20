@@ -74,8 +74,6 @@ const COUNTRY_TZ: Record<string, string> = {
   <div data-dash-live class="hidden space-y-4">
     {/* country nudge — challenges follow country time */}
     <a data-dash-countrynudge href={profileUrl} class="hidden items-center gap-2 rounded-2xl border border-gold-300/40 bg-gold-300/10 px-4 py-3 text-sm font-bold text-gold-300 min-h-[52px]">🌍 {t.dash.countryNudge}</a>
-    {/* onboarding nudge — fresh accounts finish the 7-step setup */}
-    <a data-dash-onboard href={habitUrl} class="hidden items-center gap-2 rounded-2xl border border-brand-500/50 bg-brand-500/15 px-4 py-3 text-sm font-extrabold text-white min-h-[52px]">🌱 {t.dash.onboardNudge}</a>
     {/* header: greeting + streak pill (sticky) */}
     <div class="sticky top-14 z-30 py-2 bg-night-950/90 backdrop-blur-md flex items-center gap-3">
       <div data-dash-avatar class="w-12 h-12 shrink-0 grid place-items-center rounded-full overflow-hidden ring-2 ring-white/25 bg-gradient-to-br from-emerald-300 to-teal-500 text-xl font-extrabold text-night-900" aria-hidden="true">?</div>
@@ -192,6 +190,18 @@ const COUNTRY_TZ: Record<string, string> = {
       <p class="mt-2 text-[15px] leading-7 text-ink-200">{t.journey.lockedD}</p>
       <button data-dash-jlockclose class="mt-5 w-full text-brand-300 font-bold px-6 py-3 min-h-[52px] border-t border-white/10 hover:bg-white/5 transition">{t.journey.close}</button>
     </div>
+  </div>
+</div>
+
+{/* 7-step setup — first priority for fresh accounts */}
+<div data-dash-setupmodal class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Setup">
+  <div class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+  <div class="absolute inset-x-8 top-[30%] mx-auto max-w-sm bg-[#2e2e33] rounded-[26px] p-7 text-center shadow-2xl shadow-black/60">
+    <div class="text-5xl">🌱</div>
+    <h2 class="mt-2 text-[22px] font-extrabold text-white">{t.dash.setupT}</h2>
+    <p class="mt-2 text-[15px] leading-7 text-ink-200">{t.ob.sub}</p>
+    <a href={habitUrl} class="mt-5 flex items-center justify-center w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3.5 min-h-[56px]">{t.ob.buildPlan}</a>
+    <button data-dash-setuplate class="mt-2 w-full text-ink-300 font-bold px-6 py-3 min-h-[48px] hover:text-white transition">{t.settings.cancel}</button>
   </div>
 </div>
 
@@ -613,6 +623,10 @@ const COUNTRY_TZ: Record<string, string> = {
     }));
 
     $('[data-dash-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
+    document.querySelector('[data-dash-setuplate]')?.addEventListener('click', () => {
+      document.querySelector('[data-dash-setupmodal]')?.classList.add('hidden');
+      document.body.style.overflow = '';
+    });
     document.addEventListener('hn:auth', () => window.location.reload());
 
     (async () => {
@@ -640,12 +654,15 @@ const COUNTRY_TZ: Record<string, string> = {
       paintWeek(week.days);
       const { allV } = await paintGoal(user);
       paintStreak();
-      // Fresh accounts (never onboarded) get the 7-step setup entry point.
-      const ob = $('[data-dash-onboard]');
-      if (ob) {
-        const show = !prefsCache.onboarded;
-        ob.classList.toggle('hidden', !show);
-        ob.classList.toggle('flex', show);
+      // Fresh accounts (never onboarded) get the 7-step setup FIRST — a
+      // blocking popup, dismissable for this view only.
+      if (!prefsCache.onboarded) {
+        const m = document.querySelector('[data-dash-setupmodal]');
+        if (m && !m.dataset.done) {
+          m.dataset.done = '1';
+          m.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
       }
       await paintHero(user, allV);
       await loadRange();
