@@ -4,7 +4,6 @@ import ArticleCard from './ArticleCard.astro';
 import SearchBox from './SearchBox.astro';
 import Icon from './Icon.astro';
 import SiteArt from './SiteArt.astro';
-import HabitHub from './HabitHub.astro';
 import { localizedPath } from '../i18n/utils';
 
 interface Props {
@@ -55,9 +54,6 @@ const library = [
   </section>
 
   <div class="max-w-7xl mx-auto px-4">
-    <!-- 1b. QURAN HABIT (login-gated trackers) -->
-    <HabitHub locale={locale} />
-
     <!-- 2. LIBRARY BAND -->
     <section class="py-6 sm:py-8" aria-label={h.libraryTitle ?? 'Library'}>
       <div class="relative overflow-hidden bg-gradient-to-br from-night-800 to-[#151130] rounded-3xl p-6 sm:p-8 md:p-10 text-white shadow-xl shadow-black/40 border border-white/10">
