@@ -5,10 +5,11 @@
  * Picture / visibility toggles + country). Only @username readers appear.
  */
 import AuthModal from './AuthModal.astro';
-import { localizedPath } from '../i18n/utils';
+import { localizedPath, getDict } from '../i18n/utils';
 
 interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
+const t = getDict(locale).app;
 const readUrl = localizedPath(locale, '/tools/read/');
 const profileUrl = localizedPath(locale, '/profile/');
 const userBase = localizedPath(locale, '/user/');
@@ -19,17 +20,17 @@ const userBase = localizedPath(locale, '/user/');
   <div class="rounded-[28px] bg-gradient-to-br from-[#9d7ff2] via-[#8b5cf6] to-[#7c3aed] p-5 shadow-xl shadow-purple-950/40">
     <div class="grid grid-cols-[48px_1fr_48px] items-center gap-2">
       <a href={profileUrl} aria-label="My profile" data-lb-avatar class="w-12 h-12 grid place-items-center rounded-full overflow-hidden bg-emerald-300 text-night-900 text-lg font-extrabold ring-2 ring-white/40">👤</a>
-      <h1 class="text-center text-[24px] leading-8 font-extrabold text-white">Leaderboard</h1>
+      <h1 class="text-center text-[24px] leading-8 font-extrabold text-white">{t.lb.title}</h1>
       <button data-lb-privacy aria-label="Leaderboard privacy" title="Leaderboard privacy" class="w-12 h-12 grid place-items-center rounded-full hover:bg-white/15 active:scale-95 transition text-2xl">🛡️</button>
     </div>
-    <p class="mt-3 text-center text-[13px] leading-5 font-medium text-white/85">Leaderboard operates On Global Time Zone &amp; resets Daily at UTC 00:00</p>
-    <div class="mt-3 mx-auto w-fit rounded-full bg-[#5b3ba8]/80 border border-white/25 px-6 py-2 text-[15px] font-extrabold text-white">Global</div>
+    <p class="mt-3 text-center text-[13px] leading-5 font-medium text-white/85">{t.lb.utc}</p>
+    <div class="mt-3 mx-auto w-fit rounded-full bg-[#5b3ba8]/80 border border-white/25 px-6 py-2 text-[15px] font-extrabold text-white">{t.lb.global}</div>
   </div>
 
   <div data-lb-me class="hidden mt-4 flex items-center gap-3 bg-brand-500/10 border border-brand-500/40 rounded-2xl px-4 py-3">
     <span class="text-2xl">⭐</span>
-    <p class="text-sm font-bold text-ink-50">You rank <b data-lb-merank class="text-gold-300">#–</b> <span data-lb-meval class="text-ink-300"></span></p>
-    <a href={readUrl} class="ms-auto text-sm font-extrabold text-brand-300 hover:text-brand-200 shrink-0">Read →</a>
+    <p class="text-sm font-bold text-ink-50">{t.lb.youRank} <b data-lb-merank class="text-gold-300">#–</b> <span data-lb-meval class="text-ink-300"></span></p>
+    <a href={readUrl} class="ms-auto text-sm font-extrabold text-brand-300 hover:text-brand-200 shrink-0">{t.lb.read}</a>
   </div>
 
   <div data-lb-loading class="mt-4 space-y-2.5 animate-pulse">
@@ -40,65 +41,65 @@ const userBase = localizedPath(locale, '/user/');
 
   <div data-lb-empty class="hidden mt-4 text-center bg-night-850 border border-white/10 rounded-3xl p-8">
     <div class="text-5xl">🌱</div>
-    <p class="mt-3 font-extrabold text-lg text-white">No readers on this board yet</p>
-    <p class="mt-1 text-sm text-ink-300">Be the first — read a verse today and claim the top spot.</p>
-    <a data-lb-read href={readUrl} class="mt-4 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">📖 Start reading</a>
+    <p class="mt-3 font-extrabold text-lg text-white">{t.lb.emptyT}</p>
+    <p class="mt-1 text-sm text-ink-300">{t.lb.emptyD}</p>
+    <a data-lb-read href={readUrl} class="mt-4 inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">📖 {t.lb.startReading}</a>
   </div>
 
   <div data-lb-top class="mt-4 space-y-2.5"></div>
   <div data-lb-list class="mt-2.5 space-y-2.5"></div>
 
-  <p class="mt-5 text-center text-xs text-ink-500 leading-5">Only readers with a <b>@username</b> appear here — control what others see with the 🛡️ shield above.<br /><a href={profileUrl} class="font-bold text-gold-300 hover:text-amber-200">Set your username on your profile →</a></p>
+  <p class="mt-5 text-center text-xs text-ink-500 leading-5">{t.lb.footA}<br /><a href={profileUrl} class="font-bold text-gold-300 hover:text-amber-200">{t.lb.footB}</a></p>
 </div>
 
 {/* leaderboard privacy modal (consent style) */}
 <div data-lb-modal class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Leaderboard privacy">
   <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" data-lb-mclose></div>
   <div class="absolute inset-x-4 top-[6%] mx-auto max-w-md bg-[#17161f] rounded-[28px] p-6 shadow-2xl shadow-black/60 max-h-[88vh] overflow-y-auto">
-    <h2 class="text-center text-[22px] leading-8 font-extrabold text-white">Do you want to participate in Leaderboard?</h2>
-    <p class="mt-2 text-center text-[14px] leading-6 text-ink-300">This consent is specifically for the Leaderboard only (global — your name, picture and country as you allow below).</p>
+    <h2 class="text-center text-[22px] leading-8 font-extrabold text-white">{t.lb.privT}</h2>
+    <p class="mt-2 text-center text-[14px] leading-6 text-ink-300">{t.lb.privD}</p>
     <div data-lb-mgate class="hidden mt-4 text-center">
-      <a href={profileUrl} class="inline-flex items-center justify-center gap-2 bg-brand-500 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login to manage →</a>
+      <a href={profileUrl} class="inline-flex items-center justify-center gap-2 bg-brand-500 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">{t.lb.loginManage}</a>
     </div>
     <div data-lb-mform class="mt-4 space-y-3">
       <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
-        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">Show Name</span><span class="block text-xs text-ink-500 leading-5">If off, you appear as Anonymous</span></span>
+        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">{t.lb.showName}</span><span class="block text-xs text-ink-500 leading-5">{t.lb.showNameD}</span></span>
         <input type="checkbox" data-lb-f-show_name checked class="peer sr-only" />
         <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
       </label>
       <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
-        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">Show Picture</span><span class="block text-xs text-ink-500 leading-5">If off, others see a generic avatar</span></span>
+        <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">{t.lb.showPic}</span><span class="block text-xs text-ink-500 leading-5">{t.lb.showPicD}</span></span>
         <input type="checkbox" data-lb-f-show_avatar checked class="peer sr-only" />
         <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
       </label>
       <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
-        <label class="block font-extrabold text-white text-[15px]" for="lb-country">Country</label>
+        <label class="block font-extrabold text-white text-[15px]" for="lb-country">{t.lb.country}</label>
         <select data-lb-f-country id="lb-country" class="mt-2 w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3 min-h-[52px] text-ink-50 outline-none focus:ring-2 ring-brand-400 disabled:opacity-50"></select>
-        <p data-lb-clock class="hidden mt-1.5 text-[11px] font-bold text-gold-300">🔒 Country is set once and can't be changed.</p>
+        <p data-lb-clock class="hidden mt-1.5 text-[11px] font-bold text-gold-300">{t.lb.countryLocked}</p>
       </div>
       <div class="grid gap-3">
         {[
-          ['show_city', 'City', 'Show your city next to your country'],
-          ['show_bio', 'Bio', 'Show your bio on your public card'],
-          ['show_gender', 'Gender', 'Show your gender on your public card'],
-          ['show_stats', 'Reading stats', 'Verses, hasanat, streak & rank on the board'],
-        ].map(([k, t, s]) => (
+          ['show_city', t.vis.city, t.vis.cityD],
+          ['show_bio', t.vis.bio, t.vis.bioD],
+          ['show_gender', t.vis.gender, t.vis.genderD],
+          ['show_stats', t.vis.stats, t.vis.statsD],
+        ].map(([k, t2, s]) => (
           <label class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 cursor-pointer">
-            <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">{t}</span><span class="block text-xs text-ink-500 leading-5">{s}</span></span>
+            <span class="min-w-0 flex-1"><span class="block font-extrabold text-white text-[15px]">{t2}</span><span class="block text-xs text-ink-500 leading-5">{s}</span></span>
             <input type="checkbox" data-lb-f={k} checked class="peer sr-only" />
             <span class="shrink-0 w-12 h-7 rounded-full bg-white/15 relative transition peer-checked:bg-brand-500 after:content-[''] after:absolute after:top-1 after:start-1 after:w-5 after:h-5 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-5" aria-hidden="true"></span>
           </label>
         ))}
       </div>
       <p data-lb-mmsg class="hidden text-sm font-bold text-center leading-6" role="status"></p>
-      <button data-lb-msave class="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-extrabold rounded-full px-6 py-3.5 min-h-[56px] transition">Submit</button>
+      <button data-lb-msave class="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-extrabold rounded-full px-6 py-3.5 min-h-[56px] transition">{t.lb.submit}</button>
     </div>
   </div>
 </div>
 
-<AuthModal />
+<AuthModal locale={locale} />
 
-<script define:vars={{ readUrl, userBase, profileUrl }}>
+<script define:vars={{ readUrl, userBase, profileUrl, tLb: t }}>
   (() => {
     const root = document.querySelector('[data-lb]');
     if (!root || root.dataset.wired) return;
@@ -151,7 +152,7 @@ const userBase = localizedPath(locale, '/user/');
       return esc(((l.username || 'R').charAt(0) || 'R').toUpperCase());
     };
     const faceHTML = (inner) => String(inner).trim().startsWith('<') ? inner : esc(inner);
-    const displayName = (l) => (l.username ? `@${l.username}` : 'Anonymous');
+    const displayName = (l) => (l.username ? `@${l.username}` : tLb.lb.anon);
     const profileHref = (l) => (l.username ? `${userBase}?u=${encodeURIComponent(l.username)}` : profileUrl);
 
     const BADGE = [
@@ -213,7 +214,7 @@ const userBase = localizedPath(locale, '/user/');
         const r = me?.querySelector('[data-lb-merank]');
         const v = me?.querySelector('[data-lb-meval]');
         if (r) r.textContent = `#${d.me.rank}`;
-        if (v) v.textContent = `• ${H.fmtCompact(d.me.value)} hasanat`;
+        if (v) v.textContent = `• ${H.fmtCompact(d.me.value)} ${tLb.dash.hasanat}`;
       } else {
         me?.classList.add('hidden');
       }
@@ -292,7 +293,7 @@ const userBase = localizedPath(locale, '/user/');
           sel.innerHTML = '';
           if (!myProfile.country) {
             const o0 = document.createElement('option');
-            o0.value = ''; o0.textContent = 'Select country…';
+            o0.value = ''; o0.textContent = tLb.lb.selectCountry;
             sel.appendChild(o0);
           }
           COUNTRIES.forEach((c) => {
@@ -331,16 +332,16 @@ const userBase = localizedPath(locale, '/user/');
       const sel = modal.querySelector('[data-lb-f-country]');
       if (sel && !sel.disabled && sel.value) payload.country = sel.value;
       try {
-        if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+        if (btn) { btn.disabled = true; btn.textContent = tLb.lb.saving; }
         const data = await H.Me.saveProfile(payload);
         myProfile = data.user || myProfile;
-        msg(true, '✓ Saved.');
+        msg(true, tLb.lb.saved);
         await load();
         setTimeout(closeModal, 700);
       } catch (err) {
-        msg(false, err?.hint || err?.message || 'Could not save — try again.');
+        msg(false, err?.hint || err?.message || tLb.account.saveFail);
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+        if (btn) { btn.disabled = false; btn.textContent = tLb.lb.submit; }
       }
     });
 

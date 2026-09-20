@@ -1,4 +1,5 @@
 ---
+import { getDict } from '../i18n/utils';
 // Login is compulsory for habit features. This modal is the single
 // entry point: Google OAuth button + Email login/register tabs.
 // Dispatches `hn:auth` (detail: {user}) on success so host pages
@@ -7,8 +8,11 @@ interface Props {
   id?: string;
   title?: string;
   subtitle?: string;
+  locale?: string;
 }
-const { id = 'authModal', title = 'Login to save your progress', subtitle = 'Your reading, streaks and goals sync to your account — pick up where you left off, on any device.' } = Astro.props;
+const { id = 'authModal', locale = 'en' } = Astro.props;
+const t = getDict(locale).app.auth;
+const { title = t.title, subtitle = t.sub } = Astro.props;
 ---
 <div id={id} class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Login">
   <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" data-auth-close></div>
@@ -23,35 +27,35 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
 
     <button data-auth-google class="mt-5 w-full flex items-center justify-center gap-3 bg-white hover:bg-ink-200 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px] transition">
       <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.3H12v4.5h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.1.1 3.5 2.7.2.1c2.2-2 3.8-5 3.8-8.9z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5l-.1.1-3.6 2.8v.1C3.5 21.4 7.4 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-.1-.1-3.6-2.8-.1.1C.5 8.7 0 10.2 0 12s.5 3.3 1.4 4.7l3.8-2.3z"/><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.4 0 3.5 2.6 1.4 6.3l3.8 3.4c1-2.9 3.7-5 6.8-5z"/></svg>
-      Continue with Google
+      {t.google}
     </button>
 
-    <div class="my-4 flex items-center gap-3 text-xs font-bold text-ink-500"><span class="flex-1 border-t border-white/10"></span>OR WITH EMAIL<span class="flex-1 border-t border-white/10"></span></div>
+    <div class="my-4 flex items-center gap-3 text-xs font-bold text-ink-500"><span class="flex-1 border-t border-white/10"></span>{t.orEmail}<span class="flex-1 border-t border-white/10"></span></div>
 
     <div class="grid grid-cols-2 gap-2 bg-night-800 border border-white/10 rounded-2xl p-1.5" role="tablist" aria-label="Email mode">
-      <button data-auth-tab="login" class="rounded-xl px-4 py-2.5 text-sm font-extrabold bg-brand-500 text-night-900" role="tab" aria-selected="true">Login</button>
-      <button data-auth-tab="register" class="rounded-xl px-4 py-2.5 text-sm font-extrabold text-ink-300" role="tab" aria-selected="false">Sign up</button>
+      <button data-auth-tab="login" class="rounded-xl px-4 py-2.5 text-sm font-extrabold bg-brand-500 text-night-900" role="tab" aria-selected="true">{t.login}</button>
+      <button data-auth-tab="register" class="rounded-xl px-4 py-2.5 text-sm font-extrabold text-ink-300" role="tab" aria-selected="false">{t.signup}</button>
     </div>
 
     <form data-auth-form="login" class="mt-4 space-y-3">
-      <input name="email" type="email" required autocomplete="email" placeholder="Email address" class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-      <input name="password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+      <input name="email" type="email" required autocomplete="email" placeholder={t.emailPh} class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+      <input name="password" type="password" required autocomplete="current-password" placeholder={t.pwPh} class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
       <p data-auth-error class="hidden text-sm font-semibold text-red-300 leading-6"></p>
-      <button class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">Login →</button>
+      <button class="w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">{t.loginBtn}</button>
     </form>
 
     <form data-auth-form="register" class="mt-4 space-y-3 hidden">
-      <input name="name" type="text" required autocomplete="name" maxlength="60" placeholder="Your name" class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-      <input name="email" type="email" required autocomplete="email" placeholder="Email address" class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
-      <input name="password" type="password" required autocomplete="new-password" minlength="8" placeholder="Password (min 8 characters)" class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+      <input name="name" type="text" required autocomplete="name" maxlength="60" placeholder={t.namePh} class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+      <input name="email" type="email" required autocomplete="email" placeholder={t.emailPh} class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+      <input name="password" type="password" required autocomplete="new-password" minlength="8" placeholder={t.pw8Ph} class="w-full bg-night-800 border border-white/10 rounded-2xl px-4 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
       <p data-auth-error class="hidden text-sm font-semibold text-red-300 leading-6"></p>
-      <button class="w-full bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">Create free account →</button>
-      <p class="text-xs text-ink-500 leading-5">100% free, forever. No card, no premium tier.</p>
+      <button class="w-full bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">{t.signupBtn}</button>
+      <p class="text-xs text-ink-500 leading-5">{t.freeNote}</p>
     </form>
   </div>
 </div>
 
-<script define:vars={{ modalId: id }}>
+<script define:vars={{ modalId: id, tAuth: t }}>
   (() => {
     const modal = document.getElementById(modalId);
     if (!modal || modal.dataset.wired) return;
@@ -64,14 +68,14 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
       el.classList.remove('hidden');
     };
     const friendly = (code) => ({
-      invalid_credentials: 'Wrong email or password. Try again.',
-      google_only: 'This email uses Google login — tap “Continue with Google” above.',
-      email_taken: 'This email already has an account — try logging in, or use Google if you signed up with it.',
-      invalid_email: 'That email address doesn’t look right.',
-      weak_password: 'Password needs at least 8 characters.',
-      too_many_requests: 'Too many attempts — wait a bit and retry.',
-      oauth_not_configured: 'Google login isn’t set up yet — use email for now.',
-    }[code] || 'Something went wrong. Please retry.');
+      invalid_credentials: tAuth.fInvalid,
+      google_only: tAuth.fGoogleOnly,
+      email_taken: tAuth.fTaken,
+      invalid_email: tAuth.fEmail,
+      weak_password: tAuth.fWeak,
+      too_many_requests: tAuth.fMany,
+      oauth_not_configured: tAuth.fNc,
+    }[code] || tAuth.fFall);
 
     const tabs = [...modal.querySelectorAll('[data-auth-tab]')];
     const forms = {
@@ -141,7 +145,7 @@ const { id = 'authModal', title = 'Login to save your progress', subtitle = 'You
       if (new URLSearchParams(window.location.search).get('auth') === 'error') {
         window.hnAuthModal.open('login');
         const loginForm = forms.login;
-        if (loginForm) showError(loginForm, 'Google login didn’t complete — please try again, or use email.');
+        if (loginForm) showError(loginForm, tAuth.oauthFail);
         // Drop the flag so a refresh doesn’t re-open the modal.
         const clean = new URL(window.location.href);
         clean.searchParams.delete('auth');

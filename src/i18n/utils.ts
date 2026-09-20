@@ -27,11 +27,17 @@ import en from './en.json';
 import hi from './hi.json';
 import ur from './ur.json';
 import ar from './ar.json';
+import appEn from './app-en.json';
+import appHi from './app-hi.json';
+import appUr from './app-ur.json';
+import appAr from './app-ar.json';
 
 const dicts = { en, hi, ur, ar } as const;
+const appDicts = { en: appEn, hi: appHi, ur: appUr, ar: appAr } as const;
 
 export function getDict(locale: string) {
-  return (dicts as any)[locale] ?? en;
+  const base = (dicts as any)[locale] ?? en;
+  return { ...base, app: (appDicts as any)[locale] ?? appEn };
 }
 
 export function localizedPath(locale: string, path = '/') {

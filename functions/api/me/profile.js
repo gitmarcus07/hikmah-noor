@@ -306,7 +306,7 @@ export async function onRequestDelete(context) {
   if (!confirm) return json({ error: 'confirm_required', hint: 'Pass {confirm:true} to delete.' }, 400);
   const id = user.id;
   // Manual cascade (D1 FK enforcement varies) — child tables first.
-  for (const t of ['sessions', 'prefs', 'reading_events', 'streaks', 'challenge_progress', 'bookmarks', 'resume_points', 'rate_limits']) {
+  for (const t of ['sessions', 'prefs', 'reading_events', 'streaks', 'challenge_progress', 'bookmarks', 'resume_points', 'notes', 'rate_limits']) {
     try {
       const col = t === 'rate_limits' ? null : t === 'sessions' ? 'user_id' : 'user_id';
       if (!col) continue;

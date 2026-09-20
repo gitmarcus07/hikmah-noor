@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import NotesBoard from '../../../components/NotesBoard.astro';
+import AppTabBar from '../../../components/AppTabBar.astro';
+import { nonDefaultLocales, getDict } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const t = getDict(locale).app;
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Settings', path: '/settings/' },
+  { name: 'Notes', path: '/tools/notes/' },
+];
+---
+<BaseLayout title="Personal Notes — Private Reading Notes" description="Private personal notes saved to your free account — thoughts while reading the Quran." locale={locale} canonicalPath="/tools/notes/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title={t.notes.title} backHref="/settings/" />
+  <NotesBoard locale={locale} />
+  <AppTabBar locale={locale} active="settings" />
+</BaseLayout>

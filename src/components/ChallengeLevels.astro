@@ -4,10 +4,11 @@
  * Login-gated (personal progress).
  */
 import AuthModal from './AuthModal.astro';
-import { localizedPath } from '../i18n/utils';
+import { localizedPath, getDict } from '../i18n/utils';
 
 interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
+const t = getDict(locale).app;
 const readBase = localizedPath(locale, '/tools/read/');
 
 const LEVELS = [
@@ -26,15 +27,15 @@ const LEVELS = [
 
   <div data-lv-gate class="hidden text-center bg-night-850 border border-white/10 rounded-[28px] p-8">
     <div class="text-5xl">🏆</div>
-    <h1 class="text-2xl font-extrabold text-white mt-3">Login to earn badges</h1>
-    <p class="mt-1 text-ink-300 text-[15px]">Complete challenges below to unlock your badges!</p>
-    <button data-lv-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+    <h1 class="text-2xl font-extrabold text-white mt-3">{t.levels.gateT}</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">{t.levels.gateD}</p>
+    <button data-lv-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">{t.dash.gateBtn}</button>
   </div>
 
   <div data-lv-live class="hidden space-y-3.5">
     <div class="text-center">
-      <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300">🏆 Quran Challenges</p>
-      <h1 class="text-3xl font-extrabold text-white mt-1">Levels</h1>
+      <p class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300">🏆 {t.explore.chT}</p>
+      <h1 class="text-3xl font-extrabold text-white mt-1">{t.levels.title}</h1>
       <p data-lv-count class="mt-1 text-sm font-bold text-ink-300"></p>
     </div>
     <div class="space-y-3.5">
@@ -50,13 +51,13 @@ const LEVELS = [
         </a>
       ))}
     </div>
-    <p class="text-center text-xs text-ink-500 leading-5">Complete the challenges to unlock your badges!</p>
+    <p class="text-center text-xs text-ink-500 leading-5">{t.levels.foot}</p>
   </div>
 </div>
 
-<AuthModal />
+<AuthModal locale={locale} />
 
-<script define:vars={{ readBase }}>
+<script define:vars={{ readBase, tLv: t }}>
   (() => {
     const root = document.querySelector('[data-levels]');
     if (!root || root.dataset.wired) return;
@@ -106,7 +107,8 @@ const LEVELS = [
         if (bar) bar.style.width = `${pct}%`;
         const st = card.querySelector('[data-lv-state]');
         if (st) {
-          st.textContent = done ? '🔓 Badge earned!' : `🔒 ${progress}/${def.target} ${def.unit}`;
+          const unit = def.unit === 'juz' ? tLv.dash.juzU : tLv.dash.versesU;
+          st.textContent = done ? `🔓 ${tLv.levels.earned}` : `🔒 ${progress}/${def.target} ${unit}`;
           st.classList.toggle('text-emerald-300', done);
           st.classList.toggle('text-ink-300', !done);
         }
@@ -114,7 +116,7 @@ const LEVELS = [
         if (badge) badge.textContent = done ? '🏅' : '🔒';
       });
       const cnt = $('[data-lv-count]');
-      if (cnt) cnt.textContent = `${earned}/${cards.length} badges earned`;
+      if (cnt) cnt.textContent = `${earned}/${cards.length} ${tLv.levels.badges}`;
     })();
   })();
 </script>

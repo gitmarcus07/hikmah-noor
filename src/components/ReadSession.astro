@@ -5,7 +5,7 @@
  * Login compulsory: guests get the auth gate.
  */
 import AuthModal from './AuthModal.astro';
-import { localizedPath } from '../i18n/utils';
+import { localizedPath, getDict } from '../i18n/utils';
 
 interface Props {
   locale: string;
@@ -14,6 +14,7 @@ interface Props {
   juzOfSurah: number | null;
 }
 const { locale, surah, juzTotals, juzOfSurah } = Astro.props;
+const t = getDict(locale).app;
 const progressUrl = localizedPath(locale, '/tools/my-progress/');
 const pad = (n: number) => String(n).padStart(3, '0');
 const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong reader', 'Khatm walker', 'Light upon light'];
@@ -35,14 +36,14 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
     <span class="text-[11px] font-extrabold bg-white/10 rounded-full px-2.5 py-1" data-s-level>Lvl 01</span>
     <div class="min-w-0">
       <p class="font-extrabold text-lg leading-6" data-s-levelname>Break the egg</p>
-      <p class="text-xs text-ink-300">Lifetime: <b data-s-lifetime>0</b> verses</p>
+      <p class="text-xs text-ink-300">{t.read.lifetime}: <b data-s-lifetime>0</b> <span data-s-lifetimeu>{t.read.versesSuffix}</span></p>
     </div>
     <span class="ms-auto font-extrabold text-3xl tabular-nums tracking-widest" data-s-clock>00:00</span>
   </div>
 
   {/* goal bar */}
   <div class="mt-3 bg-emerald-400/90 text-night-900 rounded-2xl px-5 py-3 font-extrabold hidden items-center gap-2" data-s-goalbar>
-    <span>Goal</span><span data-s-goalplus class="text-xs bg-white/30 rounded-full px-2 py-0.5"></span>
+    <span>{t.read.goal}</span><span data-s-goalplus class="text-xs bg-white/30 rounded-full px-2 py-0.5"></span>
     <span class="ms-auto">✓</span>
   </div>
   <p class="mt-2 text-center text-sm font-bold text-ink-200"><span data-s-juzlabel></span> <span data-s-left></span></p>
@@ -71,29 +72,29 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
   {/* controls */}
   <div class="mt-5 flex items-center gap-3">
     <button data-s-prev class="w-14 h-14 shrink-0 grid place-items-center rounded-2xl border-2 border-brand-500/60 text-brand-300 text-2xl hover:bg-white/5" aria-label="Previous">←</button>
-    <button data-s-done class="flex-1 bg-emerald-400 hover:bg-emerald-300 text-night-900 font-extrabold rounded-2xl py-4 min-h-[56px] text-lg">I'm Done</button>
+    <button data-s-done class="flex-1 bg-emerald-400 hover:bg-emerald-300 text-night-900 font-extrabold rounded-2xl py-4 min-h-[56px] text-lg">{t.read.done}</button>
     <div class="relative shrink-0">
       <span data-s-plus class="absolute -top-7 right-1 text-sm font-extrabold text-ink-200"></span>
       <button data-s-next class="w-14 h-14 grid place-items-center rounded-2xl bg-white text-night-900 text-2xl font-extrabold hover:bg-ink-200" aria-label="Next">→</button>
     </div>
   </div>
-  <p class="mt-3 text-center text-xs text-ink-500">Hasanat ≈ Arabic letters × 10 per verse (estimated). Timer pauses while audio plays translation.</p>
+  <p class="mt-3 text-center text-xs text-ink-500">{t.read.note}</p>
 
   {/* auth gate */}
   <div data-s-gate class="hidden fixed inset-0 z-[70]">
     <div class="absolute inset-0 bg-black/70"></div>
     <div class="absolute inset-x-4 top-[20%] mx-auto max-w-sm bg-night-850 border border-white/10 rounded-3xl p-6 text-center">
       <div class="text-4xl">🔒</div>
-      <h2 class="text-xl font-extrabold text-white mt-2">Login to read & earn</h2>
-      <p class="mt-1 text-sm text-ink-300">Your verses, streak and hasanat save to your free account.</p>
-      <button data-s-login class="mt-4 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">Login / Sign up →</button>
+      <h2 class="text-xl font-extrabold text-white mt-2">{t.read.gateT}</h2>
+      <p class="mt-1 text-sm text-ink-300">{t.read.gateD}</p>
+      <button data-s-login class="mt-4 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">{t.read.gateBtn}</button>
     </div>
   </div>
 </div>
 
-<AuthModal />
+<AuthModal locale={locale} />
 
-<script define:vars={{ surah, juzTotals, pad3: pad(surah.num), progressUrl }}>
+<script define:vars={{ surah, juzTotals, pad3: pad(surah.num), progressUrl, tApp: t }}>
   (() => {
     const root = document.querySelector('[data-session]');
     if (!root || root.dataset.wired) return;
@@ -134,12 +135,12 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
       if (jt) {
         const readBefore = verses.slice(0, idx).length;
         const left = Math.max(0, jt.verses - readBefore - doneStack.length);
-        $('[data-s-juzlabel]').textContent = `Juz ${jt.num}: ${jt.verses} verses`;
-        $('[data-s-left]').textContent = `• ${left} left`;
+        $('[data-s-juzlabel]').textContent = `${tApp.dash.juz} ${jt.num}: ${jt.verses} ${tApp.dash.verses}`;
+        $('[data-s-left]').textContent = `• ${left} ${tApp.read.left}`;
         $('[data-s-juzbar]').style.width = `${Math.round(((doneStack.length + (verses.length - jt.verses > 0 ? 0 : 0)) / jt.verses) * 100)}%`;
       } else {
-        $('[data-s-juzlabel]').textContent = `Surah ${surah.name} • ${surah.verseCount} verses`;
-        $('[data-s-left]').textContent = `• ${verses.length - idx - 1} left`;
+        $('[data-s-juzlabel]').textContent = `Surah ${surah.name} • ${surah.verseCount} ${tApp.dash.verses}`;
+        $('[data-s-left]').textContent = `• ${verses.length - idx - 1} ${tApp.read.left}`;
         $('[data-s-juzbar]').style.width = `${Math.round((doneStack.length / verses.length) * 100)}%`;
       }
     };

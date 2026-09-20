@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const locale = 'en';
+---
+<BaseLayout title="Terms & Conditions — Hikmah Noor" description="Terms of using Hikmah Noor: free service, accounts, acceptable use and content." locale={locale} crumbs={[{ name: 'Home', path: '/' }, { name: 'Terms', path: '/terms/' }]} canonicalPath="/terms/">
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-extrabold mb-3 text-white">Terms & Conditions</h1>
+  <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
+    <p><b>Free service.</b> Hikmah Noor is 100% free forever — no card, no premium tier, no purchases. Reading content, habit tracking, streaks and the leaderboard cost nothing.</p>
+    <p><b>Accounts.</b> A free account (Google or email) saves your goals, streaks, reading stats, bookmarks and notes so they sync across devices. You may delete your account anytime from Settings → Reset Stats / Delete account — deletion is permanent.</p>
+    <p><b>Acceptable use.</b> Use the app for personal learning. Don't abuse, scrape or disrupt the service, and don't post harmful content in public areas (usernames, bios).</p>
+    <p><b>Content.</b> Quran text, translations and guides are provided for learning. Seek qualified scholarly guidance for religious rulings. Translations and countdown dates are estimates.</p>
+    <p><b>Liability.</b> The service is provided as-is. We are not liable for decisions made from app content.</p>
+    <p><b>Changes.</b> Terms may be updated; continued use means acceptance. Questions: use the Contact page.</p>
+  </div>
+</div>
+</BaseLayout>

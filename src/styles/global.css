@@ -81,8 +81,9 @@ mark {
 img, table { max-width: 100%; }
 table { display: block; overflow-x: auto; }
 
-/* members on phones get app chrome only: no hamburger, no search */
+/* members on phones get app chrome only: no hamburger, no search, no header avatar */
 @media (max-width: 1023.98px) {
   body.hn-member #menuWrap { display: none; }
   body.hn-member [data-nav-search] { display: none; }
+  body.hn-member [data-nav-profile] { display: none; }
 }

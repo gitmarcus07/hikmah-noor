@@ -6,12 +6,13 @@
  * Login compulsory (auth gate). Mobile-first, max-w-md app column.
  */
 import AuthModal from './AuthModal.astro';
-import { localizedPath } from '../i18n/utils';
+import { localizedPath, getDict } from '../i18n/utils';
 import surahsMeta from '../data/surahs-meta.json';
 import parasMeta from '../data/paras-meta.json';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
+const t = getDict(locale).app;
 const readUrl = localizedPath(locale, '/tools/read/');
 const habitUrl = localizedPath(locale, '/tools/habit-start/');
 const profileUrl = localizedPath(locale, '/profile/');
@@ -65,21 +66,21 @@ const COUNTRY_TZ: Record<string, string> = {
 
   <div data-dash-gate class="hidden text-center bg-night-850 border border-white/10 rounded-[28px] p-8">
     <div class="text-5xl">🔒</div>
-    <h1 class="text-2xl font-extrabold text-white mt-3">Login to open your home</h1>
-    <p class="mt-1 text-ink-300 text-[15px]">Goals, streaks, challenges and bookmarks live in your free account.</p>
-    <button data-dash-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
+    <h1 class="text-2xl font-extrabold text-white mt-3">{t.dash.gateT}</h1>
+    <p class="mt-1 text-ink-300 text-[15px]">{t.dash.gateD}</p>
+    <button data-dash-login class="mt-5 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">{t.dash.gateBtn}</button>
   </div>
 
   <div data-dash-live class="hidden space-y-4">
     {/* country nudge — challenges follow country time */}
-    <a data-dash-countrynudge href={profileUrl} class="hidden items-center gap-2 rounded-2xl border border-gold-300/40 bg-gold-300/10 px-4 py-3 text-sm font-bold text-gold-300 min-h-[52px]">🌍 Set your country so challenges unlock on your time →</a>
+    <a data-dash-countrynudge href={profileUrl} class="hidden items-center gap-2 rounded-2xl border border-gold-300/40 bg-gold-300/10 px-4 py-3 text-sm font-bold text-gold-300 min-h-[52px]">🌍 {t.dash.countryNudge}</a>
     {/* onboarding nudge — fresh accounts finish the 7-step setup */}
-    <a data-dash-onboard href={habitUrl} class="hidden items-center gap-2 rounded-2xl border border-brand-500/50 bg-brand-500/15 px-4 py-3 text-sm font-extrabold text-white min-h-[52px]">🌱 Finish your 7-step setup — build your plan →</a>
+    <a data-dash-onboard href={habitUrl} class="hidden items-center gap-2 rounded-2xl border border-brand-500/50 bg-brand-500/15 px-4 py-3 text-sm font-extrabold text-white min-h-[52px]">🌱 {t.dash.onboardNudge}</a>
     {/* header: greeting + streak pill (sticky) */}
     <div class="sticky top-14 z-30 py-2 bg-night-950/90 backdrop-blur-md flex items-center gap-3">
       <div data-dash-avatar class="w-12 h-12 shrink-0 grid place-items-center rounded-full overflow-hidden ring-2 ring-white/25 bg-gradient-to-br from-emerald-300 to-teal-500 text-xl font-extrabold text-night-900" aria-hidden="true">?</div>
       <div class="min-w-0">
-        <p class="text-[13px] leading-5 text-ink-300">Asalam Alaykum,</p>
+        <p class="text-[13px] leading-5 text-ink-300">{t.dash.greeting}</p>
         <h1 class="text-[22px] leading-7 font-extrabold text-white truncate" data-dash-name>Reader</h1>
       </div>
       <div class="ms-auto flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-2.5 py-2 shrink-0">
@@ -99,24 +100,24 @@ const COUNTRY_TZ: Record<string, string> = {
     <section class="rounded-[28px] p-5 text-white shadow-xl shadow-purple-950/40 bg-gradient-to-br from-[#b79df7] via-[#a58bf5] to-[#8b6ff0]" aria-label="Daily goal">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h2 class="text-[26px] leading-7 font-extrabold">Goal</h2>
-          <p class="mt-0.5 text-[15px] font-medium text-white/90">Per Day Verses</p>
+          <h2 class="text-[26px] leading-7 font-extrabold">{t.dash.goal}</h2>
+          <p class="mt-0.5 text-[15px] font-medium text-white/90">{t.dash.perDay}</p>
           <p class="text-[15px] font-bold"><span data-dash-todayv>0</span>/<span data-dash-dailygoal>1</span></p>
         </div>
         <div class="text-end shrink-0">
           <p class="flex items-center justify-end gap-1.5 text-[15px] font-extrabold"><span aria-hidden="true">👥</span><span data-dash-livecount>–</span></p>
-          <p class="text-[13px] font-semibold text-white/90">Reading Live <span class="text-emerald-300" aria-hidden="true">●</span></p>
+          <p class="text-[13px] font-semibold text-white/90">{t.dash.live} <span class="text-emerald-300" aria-hidden="true">●</span></p>
         </div>
       </div>
       <p class="mt-3 text-[15px] font-semibold text-white/95">
-        <a data-dash-resume href={readUrl} class="hover:underline"><span data-dash-resumelabel>Start reading →</span></a>
+        <a data-dash-resume href={readUrl} class="hover:underline"><span data-dash-resumelabel>{t.dash.startReading}</span></a>
         <a href={habitUrl} class="ms-1 hover:underline" title="Edit plan" aria-label="Edit plan">✏️</a>
       </p>
       <div class="mt-2 h-3.5 rounded-full bg-[#5b3fa8]/60 overflow-hidden" role="progressbar" aria-label="Daily goal progress"><div data-dash-goalbar class="h-full w-0 rounded-full bg-gradient-to-r from-[#2e2069] to-[#17103a] transition-all duration-500"></div></div>
       <div class="mt-1.5 flex items-center justify-between text-[15px] font-bold">
-        <span data-dash-juz>Juz –/30</span><span data-dash-pct>0%</span>
+        <span data-dash-juz>{t.dash.juz} –/30</span><span data-dash-pct>0%</span>
       </div>
-      <a data-dash-read href={readUrl} class="mt-3 flex items-center justify-center rounded-full bg-[#7c5cf0] hover:bg-[#6d4fd8] active:scale-[0.99] transition text-white text-lg font-extrabold px-6 py-3.5 min-h-[56px] shadow-lg shadow-purple-950/30">Read Quran</a>
+      <a data-dash-read href={readUrl} class="mt-3 flex items-center justify-center rounded-full bg-[#7c5cf0] hover:bg-[#6d4fd8] active:scale-[0.99] transition text-white text-lg font-extrabold px-6 py-3.5 min-h-[56px] shadow-lg shadow-purple-950/30">{t.dash.readQuran}</a>
     </section>
 
     {/* meaning challenge hero */}
@@ -124,31 +125,27 @@ const COUNTRY_TZ: Record<string, string> = {
       <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 80% 20%, rgba(217,70,239,.35), transparent 45%), radial-gradient(circle at 15% 85%, rgba(139,92,246,.4), transparent 50%), radial-gradient(circle at 50% 50%, rgba(245,201,76,.08), transparent 60%);"></div>
       <span data-dash-cd class="hidden absolute top-3 end-3 items-center gap-1.5 bg-[#f5b04c] text-night-900 text-[13px] font-extrabold rounded-full px-3 py-1.5 shadow">🕐 <span data-dash-cdtext></span></span>
       <a data-dash-chgo href={readUrl} class="relative block p-5 pt-6">
-        <h2 class="text-[26px] leading-8 font-extrabold pe-24">The Meaning Challenge</h2>
-        <p class="mt-1 text-[15px] leading-6 text-white/85">Finish the Quran in a language you understand in 30 days.</p>
-        <p class="mt-3 flex items-center gap-2 text-[15px]"><span class="text-xl" aria-hidden="true">👥</span><b data-dash-parts class="text-lg">–</b><span class="text-white/80 font-medium">Participants</span></p>
+        <h2 class="text-[26px] leading-8 font-extrabold pe-24">{t.dash.meaningT}</h2>
+        <p class="mt-1 text-[15px] leading-6 text-white/85">{t.dash.meaningD}</p>
+        <p class="mt-3 flex items-center gap-2 text-[15px]"><span class="text-xl" aria-hidden="true">👥</span><b data-dash-parts class="text-lg">–</b><span class="text-white/80 font-medium">{t.dash.participants}</span></p>
         <div class="mt-2 h-3.5 rounded-full bg-white/25 overflow-hidden" role="progressbar" aria-label="Challenge progress"><div data-dash-chbar class="h-full w-0 rounded-full bg-gradient-to-r from-brand-300 to-gold-300 transition-all duration-500"></div></div>
         <div class="mt-1.5 flex items-center justify-between text-[15px] font-bold">
-          <span data-dash-chjuz>1/30 Juz</span><span data-dash-chpct>0%</span>
+          <span data-dash-chjuz>1/30 {t.dash.juz}</span><span data-dash-chpct>0%</span>
         </div>
       </a>
     </section>
 
     {/* range tabs */}
     <div class="flex items-center gap-1" role="tablist" aria-label="Range">
-      {['today', 'week', 'all'].map((r, i) => (
-        <button data-dash-range={r} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-[17px] transition min-h-[48px] ${i === 0 ? 'bg-[#5b3ba8] text-white font-extrabold shadow-lg shadow-purple-950/40' : 'text-ink-300 font-semibold hover:text-white'}`}>{r[0].toUpperCase() + r.slice(1)}</button>
+      {[[ 'today', t.dash.today ], [ 'week', t.dash.week ], [ 'all', t.dash.all ]].map(([r, label], i) => (
+        <button data-dash-range={r} role="tab" aria-selected={i === 0 ? 'true' : 'false'} class={`flex-1 rounded-full px-4 py-2.5 text-[17px] transition min-h-[48px] ${i === 0 ? 'bg-[#5b3ba8] text-white font-extrabold shadow-lg shadow-purple-950/40' : 'text-ink-300 font-semibold hover:text-white'}`}>{label}</button>
       ))}
     </div>
     <div data-dash-tiles class="grid grid-cols-2 gap-3"></div>
 
     {/* more challenges */}
-    <h2 id="challenges" class="text-xl font-extrabold text-white pt-1 scroll-mt-32">🏆 Challenges</h2>
+    <h2 id="challenges" class="text-xl font-extrabold text-white pt-1 scroll-mt-32">🏆 {t.dash.challenges}</h2>
     <div data-dash-challenges class="space-y-3"></div>
-
-    <div class="bg-night-850 border border-white/10 rounded-3xl p-5 text-sm text-ink-300 leading-7">
-      <b class="text-ink-50">Streak rules:</b> +1 for every day you read. Miss one day and grace saves your streak — miss two in a row and it resets. Stay consistent!
-    </div>
   </div>
 </div>
 
@@ -156,10 +153,10 @@ const COUNTRY_TZ: Record<string, string> = {
 <div data-dash-streakmodal class="hidden fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label="Daily streak">
   <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" data-dash-mclose></div>
   <div class="absolute inset-x-8 top-[32%] mx-auto max-w-sm bg-[#2e2e33] rounded-[26px] p-7 text-center shadow-2xl shadow-black/60">
-    <h2 class="text-[22px] font-extrabold text-white">Daily streak</h2>
-    <p class="mt-2 text-[15px] leading-7 text-ink-200">Everyday you read Quran your daily streak goes up, if you miss a day it resets to 0</p>
+    <h2 class="text-[22px] font-extrabold text-white">{t.streak.title}</h2>
+    <p class="mt-2 text-[15px] leading-7 text-ink-200">{t.streak.text}</p>
     <p data-dash-mcount class="mt-3 text-lg font-extrabold text-orange-400"></p>
-    <button data-dash-mclose class="mt-5 w-full rounded-full border border-white/25 text-white font-bold px-6 py-3 min-h-[52px] hover:bg-white/10 transition">OK</button>
+    <button data-dash-mclose class="mt-5 w-full rounded-full border border-white/25 text-white font-bold px-6 py-3 min-h-[52px] hover:bg-white/10 transition">{t.streak.ok}</button>
   </div>
 </div>
 
@@ -168,12 +165,12 @@ const COUNTRY_TZ: Record<string, string> = {
   <div class="max-w-md mx-auto px-4 py-5 min-h-full">
     <div class="flex items-center gap-3">
       <button data-dash-jclose aria-label="Back" class="w-12 h-9 grid place-items-center rounded-full border border-white/25 text-white text-lg hover:bg-white/10 transition">←</button>
-      <h2 class="flex-1 text-center text-[20px] font-extrabold text-white">My Quranly Journey</h2>
+      <h2 class="flex-1 text-center text-[20px] font-extrabold text-white">{t.journey.title}</h2>
       <span class="w-12 text-center text-ink-500 text-xl" aria-hidden="true">ⓘ</span>
     </div>
     <div class="mt-4 rounded-[26px] bg-gradient-to-br from-[#b79df7] via-[#a58bf5] to-[#8b6ff0] p-5 text-white shadow-xl">
       <p class="flex items-center justify-between text-[15px] font-bold"><span>🔥 <span data-dash-jcount>0</span> day streak</span><span>🏆 Longest <span data-dash-jlong>0</span></span></p>
-      <p class="mt-1 text-[13px] font-semibold text-white/85"><span data-dash-jmv>0</span> verses • <span data-dash-jmh>0</span> hasanat this month</p>
+      <p class="mt-1 text-[13px] font-semibold text-white/85"><span data-dash-jmv>0</span> {t.journey.verses} • <span data-dash-jmh>0</span> {t.journey.hasanat} {t.journey.thisMonth}</p>
     </div>
     <div class="mt-4 rounded-[26px] bg-night-850 border border-white/10 p-5">
       <div class="flex items-center justify-between">
@@ -191,16 +188,16 @@ const COUNTRY_TZ: Record<string, string> = {
   {/* locked until a 7-day streak is reached */}
   <div data-dash-jlocked class="hidden absolute inset-0 z-10 grid place-items-center bg-black/70 backdrop-blur-sm p-8">
     <div class="w-full max-w-sm bg-[#2e2e33] rounded-[26px] p-7 text-center shadow-2xl">
-      <h3 class="text-[20px] font-extrabold text-white">Calendar Locked</h3>
-      <p class="mt-2 text-[15px] leading-7 text-ink-200">You’re on your way. Reach a 7-day streak to unlock the calendar and track your journey.</p>
-      <button data-dash-jlockclose class="mt-5 w-full text-brand-300 font-bold px-6 py-3 min-h-[52px] border-t border-white/10 hover:bg-white/5 transition">Close</button>
+      <h3 class="text-[20px] font-extrabold text-white">{t.journey.lockedT}</h3>
+      <p class="mt-2 text-[15px] leading-7 text-ink-200">{t.journey.lockedD}</p>
+      <button data-dash-jlockclose class="mt-5 w-full text-brand-300 font-bold px-6 py-3 min-h-[52px] border-t border-white/10 hover:bg-white/5 transition">{t.journey.close}</button>
     </div>
   </div>
 </div>
 
-<AuthModal />
+<AuthModal locale={locale} />
 
-<script define:vars={{ readUrl, habitUrl, surahShort, juzStarts, COUNTRY_TZ }}>
+<script define:vars={{ readUrl, habitUrl, surahShort, juzStarts, COUNTRY_TZ, tApp: t }}>
   (() => {
     const root = document.querySelector('[data-dash]');
     if (!root || root.dataset.wired) return;
@@ -252,13 +249,13 @@ const COUNTRY_TZ: Record<string, string> = {
       const box = $('[data-dash-tiles]');
       if (!box) return;
       const all = [
-        ['💗', 'Hasanat', H.fmtCompact(s.hasanat || 0)],
-        ['📖', 'Verses', String(s.verses || 0)],
-        ['⏱️', 'Time', H.fmtTime(s.seconds || 0)],
-        ['📑', 'Pages', String(s.pages || 0)],
+        ['💗', tApp.dash.hasanat, H.fmtCompact(s.hasanat || 0)],
+        ['📖', tApp.dash.verses, String(s.verses || 0)],
+        ['⏱️', tApp.dash.time, H.fmtTime(s.seconds || 0)],
+        ['📑', tApp.dash.pages, String(s.pages || 0)],
       ];
       // Settings → Hide Hasanat removes the tile everywhere on Home.
-      const tiles = prefsCache.hide_hasanat ? all.filter((t) => t[1] !== 'Hasanat') : all;
+      const tiles = prefsCache.hide_hasanat ? all.filter((t) => t[1] !== tApp.dash.hasanat) : all;
       box.innerHTML = tiles.map(([i, t, v]) => `<div class="bg-night-850 border border-white/10 rounded-3xl px-3 py-5 text-center min-h-[150px] flex flex-col items-center justify-center gap-1"><div class="text-5xl leading-none">${i}</div><div class="font-extrabold text-2xl text-white mt-1">${v}</div><div class="text-sm font-semibold text-ink-300">${t}</div></div>`).join('');
     };
 
@@ -310,7 +307,7 @@ const COUNTRY_TZ: Record<string, string> = {
       const c = $('[data-dash-mcount]');
       if (c) {
         const cur = streakCache.current || 0;
-        c.textContent = `🔥 ${cur} day streak • longest ${streakCache.longest || 0}`;
+        c.textContent = `🔥 ${cur} ${tApp.streak.dayStreak} • ${tApp.streak.longest} ${streakCache.longest || 0}`;
       }
       m.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
@@ -371,7 +368,7 @@ const COUNTRY_TZ: Record<string, string> = {
       const err = $('[data-dash-jerr]');
       err?.classList.add('hidden');
       const grid = $('[data-dash-jgrid]');
-      if (grid) grid.innerHTML = '<p class="col-span-7 text-center text-sm text-ink-500 py-6">Loading…</p>';
+      if (grid) grid.innerHTML = `<p class="col-span-7 text-center text-sm text-ink-500 py-6">${tApp.journey.loading}</p>`;
       try {
         const res = await fetch(`/api/me/calendar?month=${encodeURIComponent(month)}`, { credentials: 'same-origin' });
         const d = await res.json().catch(() => ({}));
@@ -379,7 +376,7 @@ const COUNTRY_TZ: Record<string, string> = {
         renderJourney(d);
       } catch (e) {
         if (err) {
-          err.textContent = 'Could not load your journey — check connection and retry.';
+          err.textContent = tApp.journey.loadFail;
           err.classList.remove('hidden');
         }
       }
@@ -435,10 +432,10 @@ const COUNTRY_TZ: Record<string, string> = {
           const href = `${String(readUrl).replace(/\/$/, '')}/${r.surah}/?verse=${r.verse}`;
           if (readBtn) readBtn.href = href;
           if (resumeLink) resumeLink.href = href;
-          if (juzEl) juzEl.textContent = `Juz ${juzOf(r.surah, r.verse)}/30`;
+          if (juzEl) juzEl.textContent = `${tApp.dash.juz} ${juzOf(r.surah, r.verse)}/30`;
         } else {
-          if (resumeLbl) resumeLbl.textContent = 'Start from Al-Faatiha →';
-          if (juzEl) juzEl.textContent = 'Juz –/30';
+          if (resumeLbl) resumeLbl.textContent = tApp.dash.startReading;
+          if (juzEl) juzEl.textContent = `${tApp.dash.juz} –/30`;
         }
         return { allV };
       } catch { return { allV: 0 }; }
@@ -456,7 +453,7 @@ const COUNTRY_TZ: Record<string, string> = {
         const bar = $('[data-dash-chbar]');
         if (bar) bar.style.width = `${pct}%`;
         if ($('[data-dash-chpct]')) $('[data-dash-chpct]').textContent = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}%`;
-        if ($('[data-dash-chjuz]')) $('[data-dash-chjuz]').textContent = `${juzOfOrdinal(Math.max(1, progress))}/30 Juz`;
+        if ($('[data-dash-chjuz]')) $('[data-dash-chjuz]').textContent = `${juzOfOrdinal(Math.max(1, progress))}/30 ${tApp.dash.juz}`;
         if ($('[data-dash-parts]')) $('[data-dash-parts]').textContent = community ? H.fmtCompact(community.readers || 0) : '–';
         // Countdown: challenge start (or account creation) + 30 days.
         const row = (saved.challenges || []).find((c) => c.slug === 'meaning-30day');
@@ -465,8 +462,8 @@ const COUNTRY_TZ: Record<string, string> = {
         const cd = $('[data-dash-cd]');
         const cdt = $('[data-dash-cdtext]');
         if (cd && cdt) {
-          if (progress >= target) { cdt.textContent = 'Completed 🎉'; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
-          else if (left <= 0) { cdt.textContent = 'Keep going 💪'; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
+          if (progress >= target) { cdt.textContent = tApp.dash.completed; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
+          else if (left <= 0) { cdt.textContent = tApp.dash.keepGoing; cd.classList.remove('hidden'); cd.classList.add('inline-flex'); }
           else {
             const d = Math.floor(left / 864e5), h = Math.floor((left % 864e5) / 36e5);
             cdt.textContent = `${d} d ${h} hr left`;
@@ -477,9 +474,9 @@ const COUNTRY_TZ: Record<string, string> = {
     };
 
     const OTHER_CHALLENGES = [
-      { slug: 'friday-kahf', title: 'Friday Challenge', sub: 'Recite Surah Al-Kahf', unit: 'verses', href: `${String(readUrl).replace(/\/$/, '')}/18/` },
-      { slug: 'nightly', title: 'Nightly Recitation', sub: 'Read before sleep', unit: 'verses', href: readUrl },
-      { slug: 'ramadan-khatm', title: 'Ramadan Challenge', sub: 'Complete a full khatm — 30 Juz', unit: 'juz', href: readUrl },
+      { slug: 'friday-kahf', title: tApp.dash.fridayT, sub: tApp.dash.fridayD, unit: 'verses', href: `${String(readUrl).replace(/\/$/, '')}/18/` },
+      { slug: 'nightly', title: tApp.dash.nightlyT, sub: tApp.dash.nightlyD, unit: 'verses', href: readUrl },
+      { slug: 'ramadan-khatm', title: tApp.dash.ramadanT, sub: tApp.dash.ramadanD, unit: 'juz', href: readUrl },
     ];
     const TARGETS = { 'friday-kahf': 110, nightly: 110, 'ramadan-khatm': 30 };
 
@@ -523,7 +520,7 @@ const COUNTRY_TZ: Record<string, string> = {
     };
     const fmtLeft = (ms) => {
       if (ms === null || ms === undefined) return '';
-      if (ms <= 0) return 'soon';
+      if (ms <= 0) return tApp.dash.soon;
       const d = Math.floor(ms / 864e5), h = Math.floor((ms % 864e5) / 36e5), m = Math.floor((ms % 36e5) / 6e4);
       return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
     };
@@ -550,14 +547,14 @@ const COUNTRY_TZ: Record<string, string> = {
     };
     const challengeWindow = (slug) => {
       if (slug === 'friday-kahf') {
-        return isFriday() ? { locked: false } : { locked: true, label: 'Friday only', left: nextFridayIn() };
+        return isFriday() ? { locked: false } : { locked: true, label: tApp.dash.fridayOnly, left: nextFridayIn() };
       }
       if (slug === 'nightly') {
-        return isNight() ? { locked: false } : { locked: true, label: 'Opens 8 PM', left: nextNightIn() };
+        return isNight() ? { locked: false } : { locked: true, label: tApp.dash.opens8pm, left: nextNightIn() };
       }
       if (slug === 'ramadan-khatm') {
         if (isRamadan()) return { locked: false };
-        return { locked: true, label: 'Ramadan only', left: nextRamadanIn() };
+        return { locked: true, label: tApp.dash.ramadanOnly, left: nextRamadanIn() };
       }
       return { locked: false };
     };
@@ -574,9 +571,10 @@ const COUNTRY_TZ: Record<string, string> = {
         const progress = Math.min(target, Math.max(map.get(c.slug)?.progress || 0, auto[c.slug] || 0));
         const pct = Math.round((progress / target) * 100);
         const win = challengeWindow(c.slug);
+        const unit = c.unit === 'juz' ? tApp.dash.juzU : tApp.dash.versesU;
         const lockLine = win.locked
-          ? `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-full px-3 py-1.5">🔒 ${win.label}${win.left ? ` • opens in ${fmtLeft(win.left)}` : ''}</p>`
-          : `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-emerald-400/10 border border-emerald-300/30 rounded-full px-3 py-1.5">🔓 Open now</p>`;
+          ? `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-full px-3 py-1.5">🔒 ${win.label}${win.left ? ` • ${tApp.dash.opensIn} ${fmtLeft(win.left)}` : ''}</p>`
+          : `<p class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-300 bg-emerald-400/10 border border-emerald-300/30 rounded-full px-3 py-1.5">🔓 ${tApp.dash.openNow}</p>`;
         const inner = `
           <div class="flex items-start gap-2">
             <div class="min-w-0 flex-1">
@@ -586,7 +584,7 @@ const COUNTRY_TZ: Record<string, string> = {
             <span class="text-2xl shrink-0" aria-hidden="true">${win.locked ? '🔒' : '🔓'}</span>
           </div>
           <div class="h-2.5 bg-white/10 rounded-full overflow-hidden mt-3"><div class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full transition-all" style="width:${pct}%"></div></div>
-          <div class="mt-1.5 flex justify-between text-xs font-bold text-ink-300"><span>${progress}/${target} ${c.unit}</span><span>${pct}%</span></div>
+          <div class="mt-1.5 flex justify-between text-xs font-bold text-ink-300"><span>${progress}/${target} ${unit}</span><span>${pct}%</span></div>
           ${lockLine}`;
         return win.locked
           ? `<div class="block bg-night-850 border border-white/10 rounded-3xl p-5" role="note" aria-label="${c.title} — locked, ${win.label}">${inner}</div>`

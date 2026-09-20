@@ -3,11 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import AuthModal from '../../components/AuthModal.astro';
 import AppHeader from '../../components/AppHeader.astro';
 import AppTabBar from '../../components/AppTabBar.astro';
-import { localizedPath } from '../../i18n/utils';
+import { localizedPath, getDict } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 import parasMeta from '../../data/paras-meta.json';
 
 const locale = 'en';
+const t = getDict(locale).app;
 const readBase = localizedPath(locale, '/tools/read/');
 const favsUrl = localizedPath(locale, '/tools/favourites/');
 const marksUrl = localizedPath(locale, '/tools/bookmarks/');
@@ -24,7 +25,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="Read Quran Online — All Surahs with Translation, Transliteration & Audio" description="Read all 114 surahs in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Free to read, no signup needed." keywords="read quran online, surah with translation, quran transliteration, quran audio, read surah" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs} hideFooter>
-  <AppHeader locale={locale} title="Reading" />
+  <AppHeader locale={locale} title={t.tabs.reading} />
   <div class="max-w-md mx-auto px-4 py-5" data-reading>
     <p class="text-center text-[17px] font-bold text-white leading-7">Choose a surah below — read in Arabic with translation, transliteration and audio.</p>
 
@@ -114,7 +115,7 @@ const crumbs = [
     </div>
   </div>
 
-  <AuthModal />
+  <AuthModal locale={locale} />
   <AppTabBar locale={locale} active="reading" />
   <script define:vars={{ readBase, surahData, juzData }}>
     (() => {
