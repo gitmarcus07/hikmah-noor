@@ -17,15 +17,46 @@ interface Props {
   faq?: { q: string; a: string }[];
   crumbs?: { name: string; path: string }[];
   hideFooter?: boolean;
+  /** 'light' renders the QuranGuide magazine chrome (guest landing only). */
+  theme?: 'dark' | 'light';
 }
 
-const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
+const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false, theme = 'dark' } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
 const canonical = `${site}${localizedPath(locale, canonicalPath || '/')}`;
 const fontCss = 'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap';
 const profileUrl = localizedPath(locale, '/profile/');
+const light = theme === 'light';
+// Light (magazine) chrome classes — dark defaults stay untouched.
+const bodyCls = light
+  ? 'bg-qg-bg text-qg-ink font-sans min-h-screen flex flex-col overflow-x-clip'
+  : 'bg-night-950 text-ink-50 font-sans min-h-screen flex flex-col overflow-x-clip';
+const hdrCls = light
+  ? 'sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-qg-line shadow-[0_2px_10px_rgba(0,0,0,0.03)]'
+  : 'sticky top-0 z-50 bg-night-900/95 backdrop-blur border-b border-white/10 shadow-lg shadow-black/30';
+const logoTx = light ? 'text-qg-green' : 'text-white';
+const navTx = light ? 'text-qg-nav hover:text-qg-green' : 'text-ink-300 hover:text-brand-300';
+const navToolsTx = light ? 'text-qg-green' : 'text-brand-300';
+const iconBtn = light
+  ? 'text-qg-nav hover:bg-qg-soft'
+  : 'text-ink-300 hover:bg-white/10';
+const loginChip = light
+  ? 'bg-white hover:bg-qg-soft border border-qg-line text-qg-green'
+  : 'bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50';
+const langPill = light
+  ? 'bg-qg-deep hover:bg-[#084337] text-white'
+  : 'bg-brand-500 hover:bg-brand-400 text-night-900';
+const dropPanel = light
+  ? 'bg-white text-qg-ink shadow-xl border border-qg-line'
+  : 'bg-night-850 text-ink-50 shadow-xl border border-white/10';
+const dropHover = light ? 'hover:bg-[#F4F8F6]' : 'hover:bg-white/10';
+const dropActive = light ? 'bg-qg-soft font-bold' : 'bg-white/10 font-bold';
+const mobPanel = light ? 'bg-white border-qg-line' : 'bg-night-850 border-white/10';
+const mobTile = light ? 'bg-qg-soft text-qg-green border-qg-line' : 'bg-brand-500/15 text-brand-300 border-white/10';
+const mobTx = light ? 'text-qg-ink' : 'text-ink-50';
+const mobSub = light ? 'text-qg-muted' : 'text-ink-500';
 
 const articleLd = type === 'article' ? {
   '@context': 'https://schema.org',
@@ -80,68 +111,68 @@ const crumbLd = crumbs.length ? {
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
 </head>
-<body class="bg-night-950 text-ink-50 font-sans min-h-screen flex flex-col overflow-x-clip">
+<body class={bodyCls}>
   <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:p-2 focus:bg-brand-500 focus:text-night-900">Skip to content</a>
 
-  <header class="sticky top-0 z-50 bg-night-900/95 backdrop-blur border-b border-white/10 shadow-lg shadow-black/30">
+  <header class={hdrCls}>
     <div class="relative max-w-7xl mx-auto px-3 sm:px-4 h-14 flex items-center gap-1.5 sm:gap-2">
-      <a href={localizedPath(locale, '/')} class="flex items-center gap-2 font-extrabold text-[17px] shrink-0 text-white min-w-0" aria-label="Hikmah Noor home">
+      <a href={localizedPath(locale, '/')} class={`flex items-center gap-2 font-extrabold text-[17px] shrink-0 min-w-0 ${logoTx}`} aria-label="Hikmah Noor home">
         <img src="/favicon.svg" alt="" width="28" height="28" class="w-7 h-7 shrink-0" />
         <span class="truncate">Hikmah Noor</span>
       </a>
-      <nav class="hidden lg:flex items-center gap-4 text-sm font-medium text-ink-300 ms-6" aria-label="Primary">
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/')}><Icon name="home" size={17} />{dict.nav.home}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/surahs/')}><Icon name="surahs" size={17} />{dict.nav.surahs}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/quran/')}><Icon name="quran" size={17} />{dict.nav.quran}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/duas/')}><Icon name="duas" size={17} />{dict.nav.duas}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/kalimas/')}><Icon name="kalimas" size={17} />{dict.nav.kalimas}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/meanings/')}><Icon name="meanings" size={17} />{dict.nav.meanings}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/waqiat/')}><Icon name="waqiat" size={17} />{dict.nav.waqiat}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300 font-semibold text-brand-300" href={localizedPath(locale, '/tools/')}><Icon name="tools" size={17} />{dict.nav.tools}</a>
-        <a class="inline-flex items-center gap-1.5 hover:text-brand-300" href={localizedPath(locale, '/about/')}><Icon name="about" size={17} />{dict.nav.about}</a>
+      <nav class={`hidden lg:flex items-center gap-4 text-sm font-medium ms-6 ${light ? 'text-qg-nav' : 'text-ink-300'}`} aria-label="Primary">
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/')}><Icon name="home" size={17} />{dict.nav.home}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/surahs/')}><Icon name="surahs" size={17} />{dict.nav.surahs}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/quran/')}><Icon name="quran" size={17} />{dict.nav.quran}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/duas/')}><Icon name="duas" size={17} />{dict.nav.duas}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/kalimas/')}><Icon name="kalimas" size={17} />{dict.nav.kalimas}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/meanings/')}><Icon name="meanings" size={17} />{dict.nav.meanings}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/waqiat/')}><Icon name="waqiat" size={17} />{dict.nav.waqiat}</a>
+        <a class={`inline-flex items-center gap-1.5 font-semibold ${navToolsTx}`} href={localizedPath(locale, '/tools/')}><Icon name="tools" size={17} />{dict.nav.tools}</a>
+        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/about/')}><Icon name="about" size={17} />{dict.nav.about}</a>
       </nav>
       <div class="ms-auto flex items-center gap-1 sm:gap-2">
-        <a data-nav-search href={localizedPath(locale, '/search/')} class="w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full text-ink-300 hover:bg-white/10 shrink-0" aria-label="Search"><Icon name="search" size={20} /></a>
+        <a data-nav-search href={localizedPath(locale, '/search/')} class={`w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full shrink-0 ${iconBtn}`} aria-label="Search"><Icon name="search" size={20} /></a>
         {/* auth: login button (guest) / avatar chip (member) — toggled by nav script below */}
-        <a data-nav-login href={localizedPath(locale, '/profile/')} class="hidden sm:inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50 font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0">👤 Login</a>
-        <a data-nav-profile href={localizedPath(locale, '/profile/')} class="hidden items-center gap-2 bg-white/5 hover:bg-white/10 border border-brand-500/40 rounded-full ps-1 pe-3 py-1 text-sm font-bold text-ink-50 shrink-0" aria-label="My profile">
-          <span data-nav-avatar class="w-7 h-7 grid place-items-center rounded-full bg-brand-500/20 text-base overflow-hidden">👤</span>
+        <a data-nav-login href={localizedPath(locale, '/profile/')} class={`hidden sm:inline-flex items-center gap-1.5 border font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0 ${loginChip}`}>👤 {dict.app.auth.login}</a>
+        <a data-nav-profile href={localizedPath(locale, '/profile/')} class={`hidden items-center gap-2 border rounded-full ps-1 pe-3 py-1 text-sm font-bold shrink-0 ${light ? 'bg-white hover:bg-qg-soft border-qg-green/40 text-qg-ink' : 'bg-white/5 hover:bg-white/10 border-brand-500/40 text-ink-50'}`} aria-label="My profile">
+          <span data-nav-avatar class={`w-7 h-7 grid place-items-center rounded-full overflow-hidden ${light ? 'bg-qg-soft text-qg-green' : 'bg-brand-500/20 text-base'}`}>👤</span>
           <span data-nav-name class="max-w-[80px] truncate hidden min-[440px]:block">Profile</span>
         </a>
         <div class="relative" id="langWrap">
-          <button id="langBtn" class="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-full ps-2.5 pe-2 py-1.5 text-sm shadow shrink-0" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
+          <button id="langBtn" class={`flex items-center gap-1.5 font-bold rounded-full ps-2.5 pe-2 py-1.5 text-sm shadow shrink-0 ${langPill}`} aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
             <Icon name="globe" size={17} />
             <span class="uppercase">{locale}</span>
             <span class="hidden md:inline font-semibold opacity-80">{localeNames[locale as keyof typeof localeNames]}</span>
             <span id="langChevron" class="text-xs opacity-70 transition-transform duration-150 inline-block">▾</span>
           </button>
           <div id="langMenu" class="hidden absolute end-0 top-full pt-2 z-50">
-            <div class="w-64 bg-night-850 text-ink-50 rounded-2xl shadow-xl border border-white/10 overflow-hidden py-1.5">
+            <div class={`w-64 rounded-2xl overflow-hidden py-1.5 ${dropPanel}`}>
               {locales.map(l => (
-                <a href={localizedPath(l, canonicalPath || '/')} class={`flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] hover:bg-white/10 ${l===locale?'bg-white/10 font-bold':''}`}>
-                  <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 text-xs font-extrabold">{l.toUpperCase()}</span>
-                  <span>{l === 'hi' ? 'हिन्दी' : l === 'en' ? 'English' : l === 'ur' ? 'اردو' : 'العربية'} <span class="text-ink-500 text-sm">({localeNames[l]})</span></span>
-                  {l===locale && <span class="ms-auto text-brand-300"><Icon name="check" size={18} /></span>}
+                <a href={localizedPath(l, canonicalPath || '/')} class={`flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] ${dropHover} ${l===locale?dropActive:''}`}>
+                  <span class={`w-9 h-9 shrink-0 grid place-items-center rounded-xl text-xs font-extrabold ${light ? 'bg-qg-soft text-qg-green' : 'bg-brand-500/15 text-brand-300'}`}>{l.toUpperCase()}</span>
+                  <span>{l === 'hi' ? 'हिन्दी' : l === 'en' ? 'English' : l === 'ur' ? 'اردو' : 'العربية'} <span class={`text-sm ${light ? 'text-qg-muted' : 'text-ink-500'}`}>({localeNames[l]})</span></span>
+                  {l===locale && <span class={`ms-auto ${light ? 'text-qg-green' : 'text-brand-300'}`}><Icon name="check" size={18} /></span>}
                 </a>
               ))}
             </div>
           </div>
         </div>
         <div class="relative lg:hidden" id="menuWrap">
-          <button id="menuBtn" class="w-9 h-9 grid place-items-center rounded-full hover:bg-white/10 text-ink-200 shrink-0" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
+          <button id="menuBtn" class={`w-9 h-9 grid place-items-center rounded-full shrink-0 ${iconBtn}`} aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
             <span id="menuIcoOpen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
             <span id="menuIcoClose" class="hidden"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
           </button>
         </div>
       </div>
       <div id="mobileMenu" class="hidden lg:hidden absolute inset-x-3 top-full z-50">
-        <nav class="bg-night-850 rounded-3xl shadow-xl border border-white/10 overflow-hidden" aria-label="Mobile">
-          <p class="px-4 pt-3.5 pb-1 text-[11px] font-extrabold uppercase tracking-widest text-ink-500">Browse</p>
+        <nav class={`rounded-3xl shadow-xl border overflow-hidden ${mobPanel}`} aria-label="Mobile">
+          <p class={`px-4 pt-3.5 pb-1 text-[11px] font-extrabold uppercase tracking-widest ${mobSub}`}>Browse</p>
           <div class="p-2">
-            <a href={localizedPath(locale, '/profile/')} data-nav-mobile class="flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] bg-brand-500/10 border border-brand-500/30 hover:bg-brand-500/20 active:bg-brand-500/25">
-              <span data-nav-mobile-avatar class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 border border-white/10 text-xl overflow-hidden">👤</span>
-              <span class="min-w-0"><span data-nav-mobile-name class="block text-[16px] font-semibold text-ink-50">Login / Profile</span><span class="block text-xs text-ink-500">Account & details →</span></span>
-              <span class="ms-auto text-ink-500"><Icon name="chevron" size={18} /></span>
+            <a href={localizedPath(locale, '/profile/')} data-nav-mobile class={`flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] border ${light ? 'bg-qg-soft border-qg-line hover:bg-[#DCEDE4]' : 'bg-brand-500/10 border-brand-500/30 hover:bg-brand-500/20 active:bg-brand-500/25'}`}>
+              <span data-nav-mobile-avatar class={`w-10 h-10 shrink-0 grid place-items-center rounded-xl border text-xl overflow-hidden ${mobTile}`}>👤</span>
+              <span class="min-w-0"><span data-nav-mobile-name class={`block text-[16px] font-semibold ${mobTx}`}>Login / Profile</span><span class={`block text-xs ${mobSub}`}>Account & details →</span></span>
+              <span class={`ms-auto ${mobSub}`}><Icon name="chevron" size={18} /></span>
             </a>
             {([
               ['home', dict.nav.home, localizedPath(locale, '/')],
@@ -154,18 +185,18 @@ const crumbLd = crumbs.length ? {
               ['tools', dict.nav.tools, localizedPath(locale, '/tools/')],
               ['about', dict.nav.about, localizedPath(locale, '/about/')],
             ] as const).map(([icon, label, href]) => (
-              <a href={href} class="flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] hover:bg-white/10 active:bg-white/15">
-                <span class="w-10 h-10 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 border border-white/10"><Icon name={icon} size={20} /></span>
-                <span class="text-[16px] font-semibold text-ink-50">{label}</span>
-                <span class="ms-auto text-ink-500"><Icon name="chevron" size={18} /></span>
+              <a href={href} class={`flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] ${dropHover} ${light ? 'active:bg-qg-soft' : 'active:bg-white/15'}`}>
+                <span class={`w-10 h-10 shrink-0 grid place-items-center rounded-xl border ${mobTile}`}><Icon name={icon} size={20} /></span>
+                <span class={`text-[16px] font-semibold ${mobTx}`}>{label}</span>
+                <span class={`ms-auto ${mobSub}`}><Icon name="chevron" size={18} /></span>
               </a>
             ))}
           </div>
-          <div class="border-t border-white/10 px-4 py-3 flex items-center gap-2">
-            <span class="text-xs font-bold text-ink-500 uppercase tracking-wide">Languages</span>
+          <div class={`border-t px-4 py-3 flex items-center gap-2 ${light ? 'border-qg-line' : 'border-white/10'}`}>
+            <span class={`text-xs font-bold uppercase tracking-wide ${mobSub}`}>Languages</span>
             <span class="ms-auto flex gap-1.5">
               {locales.map(l => (
-                <a href={localizedPath(l, canonicalPath || '/')} class={`w-9 h-9 grid place-items-center rounded-full text-xs font-extrabold border ${l===locale?'bg-brand-500 text-night-900 border-brand-500':'bg-white/5 text-brand-300 border-white/15'}`} aria-label={localeNames[l]}>{l.toUpperCase()}</a>
+                <a href={localizedPath(l, canonicalPath || '/')} class={`w-9 h-9 grid place-items-center rounded-full text-xs font-extrabold border ${l===locale?(light?'bg-qg-deep text-white border-qg-deep':'bg-brand-500 text-night-900 border-brand-500'):(light?'bg-qg-soft text-qg-green border-qg-line':'bg-white/5 text-brand-300 border-white/15')}`} aria-label={localeNames[l]}>{l.toUpperCase()}</a>
               ))}
             </span>
           </div>
@@ -291,7 +322,52 @@ const crumbLd = crumbs.length ? {
     <slot />
   </main>
 
-  {!hideFooter && (<footer class="bg-[#0b0a15] text-ink-300 mt-12 border-t border-white/10">
+  {!hideFooter && (light ? (
+  <footer class="bg-white text-qg-nav mt-12 border-t border-qg-line">
+    <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+      <div class="md:col-span-2">
+        <div class="font-extrabold text-xl mb-2 text-qg-green">☪ Hikmah Noor</div>
+        <p class="text-sm leading-6 text-qg-nav">{dict.footer.about}</p>
+        <p class="text-xs mt-3 text-qg-muted">{dict.footer.disclaimer}</p>
+      </div>
+      <div>
+        <div class="font-bold mb-3 text-qg-green">{dict.footer.pages}</div>
+        <ul class="space-y-2 text-sm">
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/about/')}>About Us</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/profile/')}>My Profile</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/leaderboard/')}>🏆 Leaderboard</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/contact/')}>Contact</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/privacy/')}>Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-bold mb-3 text-qg-green">{dict.footer.tools}</div>
+        <ul class="space-y-2 text-sm">
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/')}>All Tools</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/zakat/zakat-calculator/')}>Zakat Calculator</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/ramadan-countdown/')}>Ramadan Countdown</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-bold mb-3 text-qg-green">{dict.footer.cats}</div>
+        <ul class="space-y-2 text-sm">
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/surahs/')}>Surahs</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/duas/')}>Duas</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/kalimas/')}>Kalimas</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/meanings/')}>Meanings</a></li>
+          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/waqiat/')}>Waqiat</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-qg-line">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row gap-2 items-center justify-between text-xs text-qg-muted">
+        <span>© 2026 Hikmah Noor • {dict.footer.rights}</span>
+        <span class="flex gap-3">{locales.map(l => <a class="hover:text-qg-green" href={localizedPath(l, '/')}>{localeFlags[l]} {localeNames[l]}</a>)}</span>
+      </div>
+    </div>
+  </footer>
+  ) : (
+  <footer class="bg-[#0b0a15] text-ink-300 mt-12 border-t border-white/10">
     <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
       <div class="md:col-span-2">
         <div class="font-extrabold text-xl mb-2 text-white">☪ Hikmah Noor</div>
@@ -333,7 +409,8 @@ const crumbLd = crumbs.length ? {
         <span class="flex gap-3">{locales.map(l => <a class="hover:text-gold-300" href={localizedPath(l, '/')}>{localeFlags[l]} {localeNames[l]}</a>)}</span>
       </div>
     </div>
-  </footer>)}
+  </footer>))}
+  {light && <style>{':root{color-scheme:light}'}</style>}
   <ConfirmModal />
 </body>
 </html>

@@ -11,7 +11,7 @@ const { locale } = Astro.params;
 const dict = getDict(locale);
 
 const all = await getMixedLocale(locale);
-const latest = all.slice(0, 4);
+const latest = all.slice(0, 7);
 const catGroups: Record<string, typeof all> = {};
 for (const a of all) {
   (catGroups[a.data.category] ||= []).push(a);

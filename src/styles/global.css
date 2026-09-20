@@ -27,6 +27,18 @@
   /* Gold accents (kept from previous art) */
   --color-gold-300: #f5c94c;
   --color-gold-400: #d4af37;
+
+  /* QuranGuide light magazine theme (guest landing) */
+  --color-qg-bg: #FBFCFA;
+  --color-qg-card: #ffffff;
+  --color-qg-ink: #17352F;
+  --color-qg-nav: #23433C;
+  --color-qg-muted: #60736C;
+  --color-qg-green: #075B4C;
+  --color-qg-deep: #0B5A4A;
+  --color-qg-gold: #D8A62A;
+  --color-qg-line: #E6ECE8;
+  --color-qg-soft: #E9F4EF;
 }
 
 :root { color-scheme: dark; }
