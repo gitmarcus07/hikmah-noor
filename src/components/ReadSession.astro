@@ -93,7 +93,7 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
 
 <AuthModal />
 
-<script define:vars={{ surah, juzTotals, pad3: pad(surah.num) }}>
+<script define:vars={{ surah, juzTotals, pad3: pad(surah.num), progressUrl }}>
   (() => {
     const root = document.querySelector('[data-session]');
     if (!root || root.dataset.wired) return;
@@ -198,7 +198,13 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
       e.currentTarget.setAttribute('aria-pressed', String(repeat));
       e.currentTarget.style.opacity = repeat ? '1' : '0.55';
     });
-    $('[data-s-done]')?.addEventListener('click', async () => { await credit(); if (idx < verses.length - 1) { idx += 1; paintVerse(); paintJuz(); } });
+    // "I'm Done" credits the verse then exits reading (the → arrow
+    // alone moves forward). Back to the previous screen, Home as fallback.
+    $('[data-s-done]')?.addEventListener('click', async () => {
+      await credit();
+      try { if (window.history.length > 1) window.history.back(); else window.location.href = progressUrl; }
+      catch { window.location.href = progressUrl; }
+    });
     $('[data-s-next]')?.addEventListener('click', () => { if (idx < verses.length - 1) { idx += 1; paintVerse(); paintJuz(); } });
     $('[data-s-prev]')?.addEventListener('click', () => { if (idx > 0) { idx -= 1; paintVerse(); paintJuz(); } });
     $('[data-s-fav]')?.addEventListener('click', async (e) => {

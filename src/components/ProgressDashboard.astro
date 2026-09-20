@@ -205,7 +205,7 @@ const COUNTRY_TZ: Record<string, string> = {
     const root = document.querySelector('[data-dash]');
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
-    const $ = (s) => root.querySelector(s);
+    const $ = (s) => root.querySelector(s) || document.querySelector(s);
     let H = null, range = 'today';
     let prefsCache = { daily_goal: 1, streak_goal: 7 };
     let streakCache = { current: 0, longest: 0 };
@@ -305,12 +305,14 @@ const COUNTRY_TZ: Record<string, string> = {
 
     // ---- daily streak popup ----
     const openStreakModal = () => {
+      const m = $('[data-dash-streakmodal]');
+      if (!m) return; // never lock scroll if the modal is missing
       const c = $('[data-dash-mcount]');
       if (c) {
         const cur = streakCache.current || 0;
         c.textContent = `🔥 ${cur} day streak • longest ${streakCache.longest || 0}`;
       }
-      $('[data-dash-streakmodal]')?.classList.remove('hidden');
+      m.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     };
     const closeStreakModal = () => {
@@ -318,7 +320,7 @@ const COUNTRY_TZ: Record<string, string> = {
       document.body.style.overflow = '';
     };
     $('[data-dash-streakbtn]')?.addEventListener('click', openStreakModal);
-    root.querySelectorAll('[data-dash-mclose]').forEach((b) => b.addEventListener('click', closeStreakModal));
+    document.querySelectorAll('[data-dash-mclose]').forEach((b) => b.addEventListener('click', closeStreakModal));
 
     // ---- quran journey calendar ----
     let jMonth = new Date().toISOString().slice(0, 7);
@@ -383,7 +385,9 @@ const COUNTRY_TZ: Record<string, string> = {
       }
     };
     const openJourney = () => {
-      $('[data-dash-journey]')?.classList.remove('hidden');
+      const j = $('[data-dash-journey]');
+      if (!j) return; // never lock scroll if the modal is missing
+      j.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
       loadJourney(thisMonth());
     };

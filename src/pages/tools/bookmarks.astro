@@ -12,7 +12,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="My Bookmarks — Saved Verses" description="Everything you bookmarked while reading the Quran — verses and more, saved to your free account." locale={locale} canonicalPath="/tools/bookmarks/" crumbs={crumbs} noindex={true} hideFooter>
-  <AppHeader locale={locale} title="Bookmarks" />
+  <AppHeader locale={locale} title="Bookmarks" backHref="/tools/read/" />
   <SavedList locale={locale} mode="marks" />
   <AppTabBar locale={locale} active="reading" />
 </BaseLayout>

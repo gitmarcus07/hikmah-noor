@@ -473,9 +473,12 @@ const leaderboardUrl = localizedPath(locale, '/leaderboard/');
     };
 
     const fillAll = () => {
-      fillIdentity();
+      if (!profile) return;
+      // Preview picks must sync from the profile BEFORE any face paint,
+      // otherwise the preview override wipes the real photo with ''.
       picked = profile.avatar_emoji || '';
       photo = profile.avatar || '';
+      fillIdentity();
       const urlInput = $('[data-s-photourl]');
       if (urlInput) urlInput.value = /^https:\/\//.test(photo) ? photo : '';
       renderGallery();

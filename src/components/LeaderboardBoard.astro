@@ -236,7 +236,7 @@ const userBase = localizedPath(locale, '/user/');
       $('[data-lb-loading]')?.classList.remove('hidden');
       $('[data-lb-empty]')?.classList.add('hidden');
       try {
-        const d = await H.Me.leaderboard('hasanat', 30);
+        const d = await H.Me.leaderboard('hasanat', 10);
         paint(d);
       } catch {
         $('[data-lb-loading]')?.classList.add('hidden');

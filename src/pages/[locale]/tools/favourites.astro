@@ -14,7 +14,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="My Favourites — Loved Verses" description="Verses you loved while reading the Quran — your personal favourites, saved to your free account." locale={locale} canonicalPath="/tools/favourites/" crumbs={crumbs} noindex={true} hideFooter>
-  <AppHeader locale={locale} title="Favourites" />
+  <AppHeader locale={locale} title="Favourites" backHref="/tools/read/" />
   <SavedList locale={locale} mode="favs" />
   <p class="mx-auto max-w-md px-4 pb-2 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
   <AppTabBar locale={locale} active="reading" />

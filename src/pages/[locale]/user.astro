@@ -14,7 +14,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title="Reader Profile" description="View a Hikmah Noor reader's public profile — photo, name, details and reading stats they chose to share." locale={locale} canonicalPath="/user/" crumbs={crumbs} noindex={true}>
-  <AppHeader locale={locale} title="Profile" />
+  <AppHeader locale={locale} title="Profile" backHref="/leaderboard/" />
   <PublicProfile locale={locale} />
   <AppTabBar locale={locale} active="leaderboard" />
 </BaseLayout>
