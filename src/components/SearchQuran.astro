@@ -30,7 +30,7 @@ const LANGS = [
   <div class="flex gap-2">
     <div class="flex-[3] min-w-0 flex items-center gap-2 rounded-full border border-white/25 bg-white/[0.03] px-4 focus-within:border-brand-400 transition">
       <span class="text-xl text-ink-300" aria-hidden="true">🔍</span>
-      <input data-sq-q type="search" autocomplete="off" placeholder={t.search.ph} maxlength="100"
+      <input data-sq-q type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={t.search.ph} maxlength="100"
         class="w-full bg-transparent py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none text-[16px]" />
     </div>
     <select data-sq-scope aria-label="Search in"

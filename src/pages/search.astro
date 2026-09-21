@@ -16,7 +16,7 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
   <form method="get" action="/search/" class="mt-4" role="search">
     <div class="hn-searchwrap">
       <Icon name="search" size={19} />
-      <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" aria-label="Search" />
+      <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" aria-label="Search" />
       <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
     </div>
   </form>

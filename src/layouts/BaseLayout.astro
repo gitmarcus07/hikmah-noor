@@ -16,7 +16,7 @@ interface Props {
   faq?: { q: string; a: string }[];
   crumbs?: { name: string; path: string }[];
   hideFooter?: boolean;
-  /** Accepted for backward compat — theme is now global via toggle. */
+  /** Accepted for backward compat — ignored (site is light-theme only). */
   theme?: 'dark' | 'light';
 }
 
@@ -61,7 +61,7 @@ const moreLinks = [
 ] as const;
 ---
 <!doctype html>
-<html lang={locale} dir={dir} data-theme="light">
+<html lang={locale} dir={dir}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -86,17 +86,6 @@ const moreLinks = [
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
-  <script is:inline>
-    (() => {
-      try {
-        const saved = localStorage.getItem('hn-theme');
-        const theme = saved === 'dark' || saved === 'light'
-          ? saved
-          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.dataset.theme = theme;
-      } catch { document.documentElement.dataset.theme = 'light'; }
-    })();
-  </script>
   {articleLd && <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />}
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
@@ -135,10 +124,6 @@ const moreLinks = [
       </nav>
       <div class="ms-auto flex items-center gap-1.5">
         <a href={L('/search/')} class="hn-icon-btn !w-10 !h-10 !border-0" aria-label="Search"><Icon name="search" size={20} /></a>
-        <button id="themeBtn" class="hn-icon-btn !w-10 !h-10 !border-0" aria-label="Toggle dark mode" aria-pressed="false">
-          <span id="themeIconMoon"><Icon name="moon" size={20} /></span>
-          <span id="themeIconSun" class="hidden"><Icon name="sun" size={20} /></span>
-        </button>
         <div class="relative" id="langWrap">
           <button id="langBtn" class="hn-btn hn-btn-primary !min-h-[40px] !py-2 !px-3.5 text-sm !rounded-full" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
             <Icon name="globe" size={16} />
@@ -190,25 +175,6 @@ const moreLinks = [
 
   <script is:inline>
     (() => {
-      const root = document.documentElement;
-      const themeBtn = document.getElementById('themeBtn');
-      const moon = document.getElementById('themeIconMoon');
-      const sun = document.getElementById('themeIconSun');
-      const sync = () => {
-        const dark = root.dataset.theme === 'dark';
-        moon?.classList.toggle('hidden', dark);
-        sun?.classList.toggle('hidden', !dark);
-        themeBtn?.setAttribute('aria-pressed', String(dark));
-        const meta = document.querySelector('meta[name="theme-color"]');
-        meta?.setAttribute('content', dark ? '#101613' : '#FAF8F2');
-      };
-      sync();
-      themeBtn?.addEventListener('click', () => {
-        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        try { localStorage.setItem('hn-theme', next); } catch {}
-        sync();
-      });
       const langBtn = document.getElementById('langBtn');
       const langMenu = document.getElementById('langMenu');
       const moreBtn = document.getElementById('moreBtn');
@@ -259,18 +225,28 @@ const moreLinks = [
   {/* ============ MOBILE BOTTOM NAV ============ */}
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-50 border-t" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border);padding-bottom:env(safe-area-inset-bottom)" aria-label="Quick">
     <div class="grid grid-cols-5 h-[64px]">
-      {[
-        { label: dict.nav.home ?? 'Home', href: L('/'), icon: 'home' },
-        { label: 'Quran', href: L('/quran/'), icon: 'quran' },
-        { label: 'Duas', href: L('/duas/'), icon: 'duas' },
-        { label: 'Search', href: L('/search/'), icon: 'search' },
-        { label: 'More', href: L('/explore/'), icon: 'menu' },
-      ].map(m => (
-        <a href={m.href} class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold min-h-[56px]" style="color:var(--hn-muted)">
-          <Icon name={m.icon as any} size={21} />
-          {m.label}
-        </a>
-      ))}
+      {(() => {
+        const raw = Astro.url.pathname.replace(/\/$/, '') || '/';
+        const path = raw.replace(/^\/(hi|ur|ar)(?=\/|$)/, '') || '/';
+        const isHome = path === '/';
+        const isQuran = path === '/quran' || path.startsWith('/quran/') || path === '/surahs' || path.startsWith('/surahs/');
+        const isDuas = path === '/duas' || path.startsWith('/duas/');
+        const isSearch = path === '/search' || path.startsWith('/search/');
+        const tabs = [
+          { label: dict.nav.home ?? 'Home', href: L('/'), icon: 'home', active: isHome },
+          { label: 'Quran', href: L('/quran/'), icon: 'quran', active: isQuran },
+          { label: 'Duas', href: L('/duas/'), icon: 'duas', active: isDuas },
+          { label: 'Search', href: L('/search/'), icon: 'search', active: isSearch },
+          { label: 'More', href: L('/explore/'), icon: 'menu', active: !isHome && !isQuran && !isDuas && !isSearch },
+        ];
+        return tabs.map(m => (
+          <a href={m.href} aria-current={m.active ? 'page' : undefined} class="relative flex flex-col items-center justify-center gap-0.5 text-[11px] min-h-[56px]" style={m.active ? 'color:var(--hn-primary);font-weight:800' : 'color:var(--hn-muted);font-weight:600'}>
+            {m.active && <span aria-hidden="true" class="absolute top-0 h-[3px] w-10 rounded-b-full" style="background:var(--hn-primary)" />}
+            <Icon name={m.icon as any} size={21} />
+            {m.label}
+          </a>
+        ));
+      })()}
     </div>
   </nav>
 

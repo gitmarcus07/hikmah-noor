@@ -82,7 +82,7 @@ const recent = (latest ?? []).slice(0, 3);
         <form action={searchUrl} method="get" class="mt-5" role="search">
           <div class="hn-searchwrap">
             <Icon name="search" size={20} />
-            <input type="search" name="q" autocomplete="off" maxlength="100" aria-label="Search"
+            <input type="search" name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" maxlength="100" aria-label="Search"
               placeholder={m.searchPh ?? 'Search duas, surahs, topics...'} />
             <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">{m.searchBtn ?? 'Search'}</button>
           </div>

@@ -12,7 +12,7 @@ const indexUrl = localizedPath(locale, '/search-index.json');
 <div class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-3xl font-extrabold mb-4 text-white">🔍 {dict.nav.search}</h1>
   <form method="get" action={searchUrl} class="flex gap-2" role="search">
-    <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" class="flex-1 min-w-0 bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-4 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
+    <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" class="flex-1 min-w-0 bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-4 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
     <button class="bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-2xl px-6 min-h-[52px]">Go</button>
   </form>
   <div class="mt-3 flex flex-wrap gap-2" id="chips">

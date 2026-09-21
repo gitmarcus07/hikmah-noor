@@ -15,7 +15,7 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
 <div class="relative min-w-0 flex-1" data-searchbox>
   <form action={searchUrl} method="get" class="hn-searchwrap" role="search">
     <Icon name="search" size={19} />
-    <input id={id} name="q" placeholder={placeholder} autocomplete="off" role="combobox" aria-expanded="false" aria-controls={`${id}-suggest`} aria-autocomplete="list" />
+    <input id={id} name="q" placeholder={placeholder} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" role="combobox" aria-expanded="false" aria-controls={`${id}-suggest`} aria-autocomplete="list" />
     <button class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
   </form>
   <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 hn-card overflow-hidden" role="listbox"></div>
@@ -64,6 +64,9 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
       box.setAttribute('aria-expanded', 'false');
       active = -1;
     };
+    /* On phones the suggest popup would cover the live results below —
+       so suggestions only appear on larger screens. */
+    const allowSuggest = () => window.matchMedia('(min-width: 768px)').matches;
     const render = (list, q, total) => {
       rows = list;
       if (!list.length) {
@@ -86,7 +89,7 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
       clearTimeout(t);
       t = setTimeout(async () => {
         const q = box.value.toLowerCase().trim();
-        if (q.length < 1) { close(); return; }
+        if (q.length < 1 || !allowSuggest()) { close(); return; }
         const all = await load();
         const ranked = all.map(it => ({ it, s: score(it, q) })).filter(r => r.s > 0)
           .sort((a, b) => b.s - a.s || a.it.title.localeCompare(b.it.title));
@@ -113,6 +116,8 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
     document.addEventListener('click', (e) => {
       if (!e.target.closest('[data-searchbox]')) close();
     });
+    /* Dismiss suggestions on scroll so results stay visible (esp. mobile). */
+    document.addEventListener('scroll', () => close(), { passive: true, capture: true });
     form?.addEventListener('submit', () => close());
   })();
 </script>
