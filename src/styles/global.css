@@ -108,6 +108,12 @@ mark {
 
 img, table { max-width: 100%; }
 table { display: block; overflow-x: auto; }
+svg, video, iframe { max-width: 100%; }
+svg { height: auto; }
+
+/* Never let long links/strings break mobile layouts */
+.prose-islamic a { overflow-wrap: anywhere; }
+.hn-card-pad, .hn-reading-card { overflow-wrap: break-word; }
 
 /* ---------- Typography ---------- */
 .font-arabic { font-family: var(--font-arabic); }

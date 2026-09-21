@@ -55,6 +55,8 @@ const moreLinks = [
   { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
   { label: 'Paras', href: L('/quran/'), icon: 'quran' },
   { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
+  { label: 'Names of Allah', href: L('/names-of-allah/'), icon: 'star' },
+  { label: 'Names of Muhammad ﷺ', href: L('/names-muhammad/'), icon: 'heart' },
   { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
   { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
   { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
@@ -127,7 +129,7 @@ const moreLinks = [
         <div class="relative" id="langWrap">
           <button id="langBtn" class="hn-btn hn-btn-primary !min-h-[40px] !py-2 !px-3.5 text-sm !rounded-full" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
             <Icon name="globe" size={16} />
-            <span class="uppercase">{locale}</span>
+            <span class="uppercase hidden min-[380px]:inline">{locale}</span>
             <span class="hidden md:inline font-semibold opacity-80">{localeNames[locale as keyof typeof localeNames]}</span>
           </button>
           <div id="langMenu" class="hidden absolute end-0 top-full pt-2 z-50">
@@ -265,6 +267,7 @@ const moreLinks = [
           <li><a class="hover:underline" href={L('/duas/')}>Duas</a></li>
           <li><a class="hover:underline" href={L('/duas/morning-evening/')}>Adhkar</a></li>
           <li><a class="hover:underline" href={L('/kalimas/')}>Kalimas</a></li>
+          <li><a class="hover:underline" href={L('/names-of-allah/')}>99 Names</a></li>
         </ul>
       </div>
       <div>

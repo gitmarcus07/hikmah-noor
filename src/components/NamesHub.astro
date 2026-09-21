@@ -1,0 +1,123 @@
+---
+/* 99 Names hub — Allah and Prophet Muhammad (shared template, EN + locale). */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import { localizedPath } from '../i18n/utils';
+import { ALLAH_NAMES } from '../data/names-allah';
+import { PROPHET_NAMES } from '../data/names-prophet';
+
+interface Props { locale: string; kind: 'allah' | 'prophet'; }
+const { locale, kind } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const isAllah = kind === 'allah';
+const names = isAllah ? ALLAH_NAMES : PROPHET_NAMES;
+const path = isAllah ? '/names-of-allah/' : '/names-muhammad/';
+const otherPath = isAllah ? '/names-muhammad/' : '/names-of-allah/';
+const otherTitle = isAllah ? '99 Names of Prophet Muhammad ﷺ' : '99 Names of Allah';
+
+const title = isAllah
+  ? '99 Names of Allah (Asma-ul-Husna) with Meaning'
+  : '99 Names of Prophet Muhammad ﷺ with Meaning';
+const description = isAllah
+  ? 'All 99 names of Allah (Asma-ul-Husna) in Arabic with transliteration and English meaning — from Ar-Rahman to As-Sabur.'
+  : 'All 99 names and titles of Prophet Muhammad ﷺ in Arabic with transliteration and English meaning — Muhammad, Ahmad, Mustafa and more.';
+const keywords = isAllah
+  ? '99 names of allah, asma ul husna, allah names with meaning, ar rahman, ar rahim, al malik'
+  : '99 names of prophet muhammad, asma un nabi, muhammad ahmad mustafa, prophet names with meaning';
+const faq = isAllah
+  ? [
+      { q: 'How many names of Allah are there?', a: 'Allah has ninety-nine names — one hundred minus one — and whoever learns them by heart will enter Paradise (Sahih al-Bukhari, Sahih Muslim). All 99 are listed above in the well-known order.' },
+      { q: 'What is the greatest name of Allah?', a: 'Scholars differ over which is the greatest name (Ism-e-Azam). Learn all the names, call upon Allah by them, and consult scholars for details.' },
+      { q: 'How should I learn the 99 names?', a: 'Read a few daily with their meanings, revise often, and use them in dua — for example calling upon Ya Rahman, Ya Rahim, Ya Ghaffar.' },
+    ]
+  : [
+      { q: 'How many names does Prophet Muhammad ﷺ have?', a: 'Classical scholars compiled many names and titles from the Quran, hadith and Arabic descriptions. This page gathers 99 widely transmitted ones — Muhammad, Ahmad, Mustafa, Bashir, Nadhir and more.' },
+      { q: 'Are these names from hadith?', a: 'Several come directly from the Quran and authentic hadith (Muhammad, Ahmad, Shahid, Bashir, Nadhir, Siraj Munir, Mahi, Hashir, Aqib). Others are classical titles describing his attributes. Unlike the 99 Names of Allah, there is no single canonical enumeration.' },
+      { q: 'Why learn the names of the Prophet ﷺ?', a: 'Knowing his names deepens love and understanding of his mission — the praiser, the warner, the guide, the mercy to the worlds.' },
+    ];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: isAllah ? 'Names of Allah' : 'Names of Muhammad ﷺ', path },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={path}>
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">99 names</span>
+        <span class="hn-badge">Arabic + meaning</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{isAllah ? '99 Names of Allah' : '99 Names of Prophet Muhammad ﷺ'}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">
+        {isAllah
+          ? 'Asma-ul-Husna — the beautiful names in the well-known order, each with transliteration and a short meaning.'
+          : 'Asma-un-Nabi — his names and titles from the Quran, hadith and classical descriptions, each with a short meaning.'}
+      </p>
+      <div class="mt-4 max-w-xl">
+        <input id="namefilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search"
+          placeholder={isAllah ? 'Filter names — e.g. rahman, forgiver, light…' : 'Filter names — e.g. ahmad, guide, mercy…'} aria-label="Filter names" />
+      </div>
+    </div>
+
+    <p id="namecount" class="mt-6 mb-3 text-sm" style="color:var(--hn-muted)">99 names</p>
+    <div id="namegrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {names.map((nm: any) => (
+        <div class="namerow hn-card hn-card-pad" data-search={`${nm.translit} ${nm.meaning}`.toLowerCase()}>
+          <div class="flex items-start gap-3">
+            <span class="hn-verse-num shrink-0">{nm.n}</span>
+            <div class="min-w-0 flex-1">
+              <p class="font-arabic text-[26px] leading-[1.9]" lang="ar" dir="rtl">{nm.arabic}</p>
+              <p class="font-extrabold text-[15px] leading-6 mt-1">{nm.translit}</p>
+              <p class="text-[13.5px] leading-5" style="color:var(--hn-muted)">{nm.meaning}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('namefilter');
+        const count = document.getElementById('namecount');
+        const rows = [...document.querySelectorAll('.namerow')];
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          if (count) count.textContent = `${n} name${n === 1 ? '' : 's'}`;
+        });
+      })();
+    </script>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="Related">
+      <SectionHeader eyebrow="Related" title="Keep learning" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L(otherPath)} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-bold block text-[15px] leading-6">{otherTitle}</span>
+          <span class="text-[13px]" style="color:var(--hn-muted)">Arabic, transliteration and meaning</span>
+        </a>
+        <a href={L('/duas/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-bold block text-[15px] leading-6">Duas for everyday life</span>
+          <span class="text-[13px]" style="color:var(--hn-muted)">Call upon Allah by His beautiful names</span>
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
