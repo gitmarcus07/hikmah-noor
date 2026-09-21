@@ -1,0 +1,10 @@
+---
+import HadeesDetail from '../../components/HadeesDetail.astro';
+import { HADEES, hadeesBySlug } from '../../data/hadees';
+const locale = 'en';
+export async function getStaticPaths() {
+  return HADEES.map((h) => ({ params: { slug: h.slug }, props: { hadeesSlug: h.slug } }));
+}
+const hadees = hadeesBySlug((Astro.props as any).hadeesSlug);
+---
+<HadeesDetail hadees={hadees} locale={locale} />

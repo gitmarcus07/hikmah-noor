@@ -1,0 +1,99 @@
+---
+/* Hadees hub: all 40 short hadees for children -> per-hadees SEO detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { localizedPath } from '../i18n/utils';
+import { HADEES, HADEES_CATS } from '../data/hadees';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `40 Short Hadees for Children in Arabic, Urdu & English with Meaning`;
+const description = `All 40 short hadees for kids from Mufradat min Ahadith al-Arbaeen lil Atfal — Arabic, Urdu tarjuma, English meaning, transliteration, lesson and source. Each hadees has its own page.`;
+const keywords = '40 hadees for children, choti hadees in urdu, hadees in urdu, hadees in english, short hadith for kids, arbaeen lil atfal, bachon ki hadees, niyat wali hadees, roza dhaal hadees, gussa mat karo hadees';
+const faq = [
+  { q: 'How many hadees are in this collection?', a: '40 short sahih hadees in 8 sabaq (lessons), taken from the book Mufradat min Ahadith al-Arbaeen lil Atfal compiled by Abu Ghazi al-Islam. Open any hadees for Arabic, Urdu, English, lesson and source.' },
+  { q: 'Does every hadees have its own page?', a: 'Yes — each of the 40 hadees has a separate SEO page with Arabic text, transliteration, Urdu tarjuma, English meaning, kids lesson, narrator, grade, FAQ and its own keywords.' },
+  { q: 'Are these hadees authentic?', a: 'Yes — only famous short wordings from Sahih al-Bukhari and Sahih Muslim (Muttafaq Alayh) or Hasan (Tirmidhi for one hadees). Each page names its collection without invented numbers.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Hadees', path: '/hadees/' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/hadees/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">40 hadees</span>
+        <span class="hn-badge">8 sabaq</span>
+        <span class="hn-badge">Arabic + Urdu + English</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">40 Short Hadees for Children</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">From the book <em>Mufradat min Ahadith al-Arbaeen lil Atfal</em> (Abu Ghazi al-Islam) — one-line sahih hadees with Urdu tarjuma, English meaning and a kids lesson. Tap any hadees for its own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search hadees — e.g. niyat, roza, gussa, saf…" aria-label="Search hadees" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-6 max-w-3xl">
+      <input id="hadeesfilter" class="hn-input" placeholder="Filter 40 hadees — e.g. niyat, sadqa, saf, gussa…" aria-label="Filter hadees" />
+    </div>
+
+    {HADEES_CATS.map((c) => {
+      const list = HADEES.filter((h) => h.sabaq === c.num);
+      return (
+        <div class="mt-8">
+          <SectionHeader eyebrow={`Sabaq ${c.num}`} title={c.title} sub={c.desc} />
+          <div class="grid gap-3 md:grid-cols-2" data-sabaq={c.num}>
+            {list.map((h) => (
+              <a href={L(`/hadees/${h.slug}/`)} data-search={`${h.num} ${h.title} ${h.urdu} ${h.translation} ${h.arabic} ${(h.aliases || []).join(' ')}`.toLowerCase()} class="hadeesrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
+                <span class="hn-verse-num shrink-0">{h.num}</span>
+                <span class="min-w-0">
+                  <span class="font-arabic text-xl block leading-9" lang="ar" dir="rtl">{h.arabic}</span>
+                  <span class="font-extrabold block leading-6 mt-1">{h.title}</span>
+                  <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">{h.urdu}</span>
+                  <span class="mt-1.5 flex flex-wrap gap-1.5">
+                    <span class="hn-badge hn-badge-primary">{h.grade}</span>
+                    <span class="hn-badge">{h.source.split(',')[0]}</span>
+                  </span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('hadeesfilter');
+        const rows = [...document.querySelectorAll('.hadeesrow')];
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          rows.forEach((r) => r.classList.toggle('hidden', !!q && !(r.dataset.search || '').includes(q)));
+        });
+      })();
+    </script>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

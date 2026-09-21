@@ -1,0 +1,130 @@
+---
+/* Hadees detail — one SEO page per hadees: Arabic + Urdu + English + lesson. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ReadingCard from './hn/ReadingCard.astro';
+import { localizedPath } from '../i18n/utils';
+import { HADEES, HADEES_CATS } from '../data/hadees';
+
+interface Props { hadees: any; locale: string; }
+const { hadees, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const hadeesPath = `/hadees/${hadees.slug}/`;
+const cat = HADEES_CATS.find((c) => c.num === hadees.sabaq);
+
+const title = `${hadees.title} — Arabic, Urdu & English`;
+let description = `${hadees.arabic} — ${hadees.urdu} ${hadees.translation} Lesson: ${hadees.lesson} Source: ${hadees.source}.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = hadees.keywords;
+
+const faq = [
+  { q: `What does "${hadees.arabic}" mean?`, a: `${hadees.translation} Urdu: ${hadees.urdu}` },
+  { q: `What is the lesson of this hadees for children?`, a: hadees.lesson },
+  { q: `Where is this hadees from?`, a: `Source: ${hadees.source}${hadees.narrator ? ` (narrated by ${hadees.narrator})` : ''}. Grade: ${hadees.grade}. From the book Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam). Learn wording from a teacher; consult scholars for rulings.` },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Hadees', path: '/hadees/' },
+  { name: `Hadees ${hadees.num}`, path: hadeesPath },
+];
+const sIdx = HADEES.findIndex((h) => h.slug === hadees.slug);
+const prevH = sIdx > 0 ? HADEES[sIdx - 1] : null;
+const nextH = sIdx >= 0 && sIdx < HADEES.length - 1 ? HADEES[sIdx + 1] : null;
+const siblings = HADEES.filter((h) => h.sabaq === hadees.sabaq && h.slug !== hadees.slug);
+const others = HADEES.filter((h) => h.slug !== hadees.slug).slice(0, 4);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={hadeesPath}>
+  <div class="hn-read hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Hadees {hadees.num} of 40</span>
+      {cat && <span class="hn-badge hn-badge-gold">{cat.title}</span>}
+      <span class="hn-badge">{hadees.grade}</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{hadees.title}</h1>
+    <p class="mt-2 leading-7 font-semibold" lang="ur" dir="rtl" style="color:var(--hn-ink)">{hadees.urdu}</p>
+    <p class="mt-1 leading-7" style="color:var(--hn-muted)">{hadees.translation}</p>
+    {hadees.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {hadees.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    <div class="mt-5">
+      <ReadingCard arabic={hadees.arabic} translit={hadees.translit} translation={`${hadees.translation} | Urdu: ${hadees.urdu}`} reference={hadees.source} />
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2 mt-3">
+      <div class="hn-card hn-card-pad">
+        <p class="hn-block-label">Kids lesson</p>
+        <p class="text-[15px] leading-6" style="color:var(--hn-muted)">{hadees.lesson}</p>
+      </div>
+      <div class="hn-card hn-card-pad">
+        <p class="hn-block-label">Source & grade</p>
+        <p class="text-[15px] font-semibold leading-6">{hadees.source}</p>
+        {hadees.narrator && <p class="text-[14px] leading-6 mt-1" style="color:var(--hn-muted)">Narrated by {hadees.narrator}</p>}
+        <p class="mt-1.5 flex flex-wrap gap-1.5">
+          <span class="hn-badge hn-badge-primary">{hadees.grade}</span>
+          <span class="hn-badge">40 Hadees for Children</span>
+        </p>
+      </div>
+    </div>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">From: <strong style="color:var(--hn-ink)">Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam)</strong> • Hadees {hadees.num} of 40 • Verify wording with a teacher; rulings differ — consult scholars.</p>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    {siblings.length > 0 && (
+      <section class="mt-8" aria-label="Same lesson">
+        <SectionHeader eyebrow={`Sabaq ${hadees.sabaq}`} title={cat?.title ?? 'Same lesson'} href={L('/hadees/')} linkLabel="All 40 hadees" />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {siblings.map((r) => (
+            <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{r.num}. {r.title}</span>
+              <span class="font-arabic text-lg block leading-8" lang="ar" dir="rtl">{r.arabic}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="mt-8" aria-label="More hadees">
+      <SectionHeader eyebrow="Learn" title="More hadees" href={L('/hadees/')} linkLabel="All 40 hadees" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((r) => (
+          <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{r.num}. {r.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{r.urdu}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {(prevH || nextH) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More hadees">
+        {prevH ? (
+          <a href={L(`/hadees/${prevH.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous hadees</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevH.num}. {prevH.title}</span>
+          </a>
+        ) : <span />}
+        {nextH && (
+          <a href={L(`/hadees/${nextH.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next hadees →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextH.num}. {nextH.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>

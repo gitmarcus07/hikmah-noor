@@ -8,6 +8,7 @@ import { DUAS, DUA_CATS } from '../data/duas';
 import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
+import { HADEES } from '../data/hadees';
 
 /** Common alternate spellings / transliterations people actually type.
  * Keys are surah URL slugs WITHOUT the numeric prefix (e.g. `yaseen`). */
@@ -326,6 +327,31 @@ export function waqiahIndexItems(locale: string): IndexItem[] {
       category: 'waqiat',
       url: `${prefix}/waqiat/${w.slug}/`,
       tags: [...new Set(['waqiah', 'waqiat', 'qissa', 'story', w.title.toLowerCase(), w.prophet.toLowerCase(), ...(w.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
+/** Hadees hub + individual hadees entries for a locale (one SEO page per hadees). */
+export function hadeesIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: '40 Short Hadees for Children — Arabic, Urdu & English',
+      description: 'All 40 short hadees for kids: Arabic, Urdu tarjuma, English meaning, lesson and source. Each hadees has its own page.',
+      category: 'hadees',
+      url: `${prefix}/hadees/`,
+      tags: ['hadees', 'hadith', 'hadees in urdu', '40 hadees', 'choti hadees', 'bachon ki hadees', 'short hadith'],
+      locale,
+    },
+  ];
+  for (const h of HADEES) {
+    items.push({
+      title: `${h.title}`,
+      description: `${h.urdu} ${h.translation} Lesson: ${h.lesson} Source: ${h.source}.`,
+      category: 'hadees',
+      url: `${prefix}/hadees/${h.slug}/`,
+      tags: [...new Set(['hadees', 'hadith', 'hadees in urdu', `hadees ${h.num}`, h.title.toLowerCase(), h.urdu, h.translation.toLowerCase(), h.source.toLowerCase(), (h.narrator || '').toLowerCase(), h.grade.toLowerCase(), ...(h.aliases || []), ...h.keywords.split(',').map((s) => s.trim().toLowerCase())])].filter(Boolean),
       locale,
     });
   }

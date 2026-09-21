@@ -2,7 +2,7 @@
 import { nonDefaultLocales } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 import parasMeta from '../../data/paras-meta.json';
-import { toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems, waqiahIndexItems, guideIndexItems, tagSurah } from '../../lib/search';
+import { toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems, waqiahIndexItems, hadeesIndexItems, guideIndexItems, tagSurah } from '../../lib/search';
 
 export async function getStaticPaths() {
   return nonDefaultLocales.map(locale => ({ params: { locale } }));
@@ -35,7 +35,7 @@ export async function GET({ params }: any) {
     tags: ['quran', 'para', 'parah', 'juz', `para ${p.num}`, `juz ${p.num}`, p.name.toLowerCase(), String(p.num)],
     locale,
   }));
-  const items = [...toolIndexItems(locale), ...duaIndexItems(locale), ...kalimaIndexItems(locale), ...meaningIndexItems(locale), ...waqiahIndexItems(locale), ...guideIndexItems(locale), ...paraItems, ...surahItems, ...list.map(e => ({
+  const items = [...toolIndexItems(locale), ...duaIndexItems(locale), ...kalimaIndexItems(locale), ...meaningIndexItems(locale), ...waqiahIndexItems(locale), ...hadeesIndexItems(locale), ...guideIndexItems(locale), ...paraItems, ...surahItems, ...list.map(e => ({
     title: e.data.title,
     description: e.data.description,
     category: e.data.category,
