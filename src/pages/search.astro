@@ -39,6 +39,7 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
     const out = document.getElementById('results');
     const count = document.getElementById('count');
     const chips = document.getElementById('chips');
+    const typeFilter = document.getElementById('typefilter');
     const typeBtns = [...document.querySelectorAll('#typefilter button')];
     let typeFilter = '';
     let items = [];
@@ -100,6 +101,7 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
     const run = async () => {
       const q = box.value.toLowerCase().trim();
       if (chips) chips.style.display = q ? 'none' : '';
+      if (typeFilter) typeFilter.style.display = q ? 'none' : '';
       const all = (await load()).filter(inType);
       if (!q) {
         render(all.map(it => ({ it, s: 1 })).slice(0, 10), '');

@@ -9,8 +9,10 @@ interface Props {
   searchUrl: string;
   placeholder: string;
   id?: string;
+  /** Allow the suggest popup on phones too (e.g. homepage hero). Default false. */
+  mobileSuggest?: boolean;
 }
-const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
+const { locale, indexUrl, searchUrl, placeholder, id = 'q', mobileSuggest = false } = Astro.props;
 ---
 <div class="relative min-w-0 flex-1" data-searchbox>
   <form action={searchUrl} method="get" class="hn-searchwrap" role="search">
@@ -20,7 +22,7 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
   </form>
   <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 hn-card overflow-hidden" role="listbox"></div>
 </div>
-<script define:vars={{ indexUrl, searchUrl, inputId: id }}>
+<script define:vars={{ indexUrl, searchUrl, inputId: id, mobileSuggest }}>
   (() => {
     const box = document.querySelector(`[data-searchbox] #${CSS.escape(inputId)}`);
     if (!box) return;
@@ -89,7 +91,7 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q' } = Astro.props;
       clearTimeout(t);
       t = setTimeout(async () => {
         const q = box.value.toLowerCase().trim();
-        if (q.length < 1 || !allowSuggest()) { close(); return; }
+        if (q.length < 1 || (!allowSuggest() && !mobileSuggest)) { close(); return; }
         const all = await load();
         const ranked = all.map(it => ({ it, s: score(it, q) })).filter(r => r.s > 0)
           .sort((a, b) => b.s - a.s || a.it.title.localeCompare(b.it.title));

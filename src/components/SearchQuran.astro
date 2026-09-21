@@ -9,6 +9,8 @@ interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
 const t = getDict(locale).app;
 const exploreUrl = localizedPath(locale, '/explore/');
+const gemsBase = localizedPath(locale, '/tools/gems/');
+const gemsTitle = t.explore.gemsT;
 const readBase = localizedPath(locale, '/tools/read/');
 
 const LANGS = [
@@ -18,23 +20,23 @@ const LANGS = [
 ] as const;
 ---
 
-<div class="sticky top-14 z-40 bg-night-950/90 backdrop-blur-md border-b border-white/5">
+<div class="sticky top-14 z-40 border-b" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border)">
   <div class="max-w-md mx-auto px-4 py-2.5 grid grid-cols-[52px_1fr_auto] items-center gap-2">
-    <a href={exploreUrl} class="h-[44px] px-4 grid place-items-center rounded-full border border-white/25 text-white text-xl hover:bg-white/5 transition" aria-label="Back to Explore">←</a>
-    <h1 class="text-center text-[22px] leading-7 font-extrabold text-white truncate">{t.search.title}</h1>
-    <button data-sq-lang class="h-[44px] px-3 flex items-center justify-center gap-1 rounded-full bg-black border border-white/10 text-white text-[15px] font-extrabold min-w-[76px]" aria-label="Translation language">ENG <span class="text-brand-300 text-lg leading-none">›</span></button>
+    <a data-sq-back href={exploreUrl} class="hn-icon-btn !rounded-full text-xl" aria-label="Back">←</a>
+    <h1 data-sq-title class="text-center text-[22px] leading-7 font-extrabold truncate">{t.search.title}</h1>
+    <button data-sq-lang class="h-[44px] px-3 flex items-center justify-center gap-1 rounded-full text-[15px] font-extrabold min-w-[76px]" style="background:var(--hn-card);border:1px solid var(--hn-border);color:var(--hn-ink)" aria-label="Translation language">ENG <span class="text-lg leading-none" style="color:var(--hn-primary)">›</span></button>
   </div>
 </div>
 
 <div class="max-w-md mx-auto px-4 py-4" data-searchq>
   <div class="flex gap-2">
-    <div class="flex-[3] min-w-0 flex items-center gap-2 rounded-full border border-white/25 bg-white/[0.03] px-4 focus-within:border-brand-400 transition">
-      <span class="text-xl text-ink-300" aria-hidden="true">🔍</span>
+    <div class="flex-[3] min-w-0 flex items-center gap-2 rounded-full px-4 transition" style="border:1px solid var(--hn-border);background:var(--hn-card)">
+      <span class="text-xl" style="color:var(--hn-muted)" aria-hidden="true">🔍</span>
       <input data-sq-q type="search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={t.search.ph} maxlength="100"
         class="w-full bg-transparent py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none text-[16px]" />
     </div>
     <select data-sq-scope aria-label="Search in"
-      class="flex-[2] min-w-0 bg-night-850 border border-white/25 rounded-full px-3 min-h-[52px] text-ink-50 text-[15px] font-semibold outline-none focus:border-brand-400">
+      class="flex-[2] min-w-0 rounded-full px-3 min-h-[52px] text-[15px] font-semibold outline-none" style="background:var(--hn-card);border:1px solid var(--hn-border);color:var(--hn-ink)">
       <option value="tr">{t.account.translation}</option>
       <option value="ar">العربية</option>
     </select>
@@ -45,7 +47,7 @@ const LANGS = [
   <div data-sq-list class="mt-3 space-y-3"></div>
 </div>
 
-<script define:vars={{ readBase, tSq: t }}>
+<script define:vars={{ readBase, gemsBase, gemsTitle, tSq: t }}>
   (() => {
     const root = document.querySelector('[data-searchq]');
     if (!root || root.dataset.wired) return;
@@ -64,7 +66,7 @@ const LANGS = [
     const paintLang = () => {
       // Pill lives in the page header, outside [data-searchq].
       const b = document.querySelector('[data-sq-lang]');
-      if (b) b.innerHTML = `${LANG_LABEL[lang]} <span class="text-brand-300 text-lg leading-none">›</span>`;
+      if (b) b.innerHTML = `${LANG_LABEL[lang]} <span class="text-lg leading-none" style="color:var(--hn-primary)">›</span>`;
     };
     // Header pill lives outside [data-searchq] root.
     const langBtn = document.querySelector('[data-sq-lang]');
@@ -130,12 +132,19 @@ const LANGS = [
     $('[data-sq-q]')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(true); });
     $('[data-sq-scope]')?.addEventListener('change', () => run(true));
 
-    // Deep link from Gems: ?q=…&lang=…
+    // Deep link from Gems: ?q=…&lang=…&from=gems
     try {
       const params = new URLSearchParams(window.location.search);
       const q0 = (params.get('q') || '').slice(0, 100);
       const l0 = (params.get('lang') || '').toLowerCase();
       if (['en', 'ur', 'hi'].includes(l0)) lang = l0;
+      if (params.get('from') === 'gems') {
+        const back = document.querySelector('[data-sq-back]');
+        if (back) back.setAttribute('href', gemsBase);
+        const heading = document.querySelector('[data-sq-title]');
+        if (heading) heading.textContent = gemsTitle;
+        document.title = `${gemsTitle} | Hikmah Noor`;
+      }
       if (q0) {
         const input = $('[data-sq-q]');
         if (input) input.value = q0;

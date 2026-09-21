@@ -4,61 +4,52 @@
  * is a query against the translation search index.
  */
 import { localizedPath } from '../i18n/utils';
+import Icon from './Icon.astro';
 
 interface Props { locale?: string; }
 const { locale = 'en' } = Astro.props;
 const searchBase = localizedPath(locale, '/tools/search-quran/');
 
-const GRADS = [
-  'from-rose-400 to-red-600',
-  'from-blue-500 to-blue-800',
-  'from-amber-300 to-yellow-600',
-  'from-emerald-400 to-green-700',
-  'from-sky-400 to-blue-700',
-  'from-pink-300 to-pink-500',
-  'from-violet-400 to-purple-700',
-  'from-orange-200 to-orange-400',
-];
-
-const GEMS: [string, string, string][] = [
-  // [label, emoji, search query]
-  ['Dhikr', '🤲', 'remembrance'],
-  ['Justice', '⚖️', 'justice'],
-  ['Love', '❤️', 'love'],
-  ['Parents', '👪', 'parents'],
-  ['Charity', '🎁', 'charity'],
-  ['No regrets', '😌', 'grief'],
-  ['Problems', '🌧️', 'hardship'],
-  ['Forgiveness', '🙏', 'forgiveness'],
-  ['Kind', '🫶', 'kind'],
-  ['Fearless', '🦁', 'fear'],
-  ['Confidence', '🛡️', 'trust'],
-  ['Access', '🙌', 'ask'],
-  ['Control', '✋', 'anger'],
-  ['Money', '💰', 'wealth'],
-  ['Good', '👍', 'good'],
-  ['Lie', '🚫', 'lie'],
-  ['Fear', '😨', 'fear'],
-  ['Patience', '⏳', 'patience'],
-  ['Gratitude', '🌟', 'gratitude'],
-  ['Depression and sadness', '💭', 'sad'],
-  ['Watched', '👀', 'watchful'],
-  ['Signs', '🌙', 'signs'],
-  ['Master', '👑', 'lord'],
-  ['Rope', '🪢', 'rope'],
-  ['Heart', '💓', 'heart'],
-  ['Blind', '🙈', 'blind'],
-  ['Dawah', '📢', 'invite'],
-  ['Time', '⏰', 'time'],
+const GEMS: [string, string][] = [
+  // [label, search query]
+  ['Dhikr', 'remembrance'],
+  ['Justice', 'justice'],
+  ['Love', 'love'],
+  ['Parents', 'parents'],
+  ['Charity', 'charity'],
+  ['No regrets', 'grief'],
+  ['Problems', 'hardship'],
+  ['Forgiveness', 'forgiveness'],
+  ['Kind', 'kind'],
+  ['Fearless', 'fear'],
+  ['Confidence', 'trust'],
+  ['Access', 'ask'],
+  ['Control', 'anger'],
+  ['Money', 'wealth'],
+  ['Good', 'good'],
+  ['Lie', 'lie'],
+  ['Fear', 'fear'],
+  ['Patience', 'patience'],
+  ['Gratitude', 'gratitude'],
+  ['Depression and sadness', 'sad'],
+  ['Watched', 'watchful'],
+  ['Signs', 'signs'],
+  ['Master', 'lord'],
+  ['Rope', 'rope'],
+  ['Heart', 'heart'],
+  ['Blind', 'blind'],
+  ['Dawah', 'invite'],
+  ['Time', 'time'],
 ];
 ---
 
 <div class="max-w-md mx-auto px-4 py-5">
-  <div class="grid grid-cols-2 gap-x-4 gap-y-5">
-    {GEMS.map(([label, emoji, q], i) => (
-      <a href={`${searchBase}?q=${encodeURIComponent(q)}`} class="group min-w-0">
-        <span class={`flex items-center justify-center rounded-[24px] min-h-[128px] text-6xl bg-gradient-to-br ${GRADS[i % GRADS.length]} shadow-lg shadow-black/30 group-hover:scale-[1.02] group-active:scale-95 transition`} role="img" aria-label={label}>{emoji}</span>
-        <span class="mt-1.5 flex min-h-[56px] items-start justify-center text-center text-[19px] font-semibold text-white leading-7 px-1">{label}</span>
+  <div class="grid grid-cols-2 gap-3">
+    {GEMS.map(([label, q]) => (
+      <a href={`${searchBase}?q=${encodeURIComponent(q)}&from=gems`} class="hn-card hn-card-hover hn-card-pad flex flex-col items-center text-center gap-2 min-h-[132px] justify-center">
+        <span class="w-11 h-11 grid place-items-center rounded-full" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="star" size={22} /></span>
+        <span class="font-bold text-[16px] leading-6">{label}</span>
+        <span class="text-xs font-semibold" style="color:var(--hn-muted)">Tap to read verses</span>
       </a>
     ))}
   </div>

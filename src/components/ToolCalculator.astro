@@ -4,6 +4,7 @@
  * Schema (fields/steps) comes from src/lib/finance/tools.js;
  * math runs in the browser via /finance/calc.js (public, static). */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AppHeader from './AppHeader.astro';
 import Icon from './Icon.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { CATS, toolsByCat, getToolBySlug } from '../lib/finance/tools.js';
@@ -56,6 +57,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title={tool.title} description={tool.desc} keywords={tool.keywords} locale={locale} canonicalPath={toolPath} type="article" faq={tool.faq || []} crumbs={crumbs}>
+  <AppHeader locale={locale} title={shortName} backHref={catPath} />
   <div data-toolroot>
     <!-- HERO -->
     <section>
