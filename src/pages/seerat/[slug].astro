@@ -1,0 +1,10 @@
+---
+import SeerahDetail from '../../components/SeerahDetail.astro';
+import { SEERAH, seerahBySlug } from '../../data/seerah';
+const locale = 'en';
+export async function getStaticPaths() {
+  return SEERAH.map((s) => ({ params: { slug: s.slug }, props: { seerahSlug: s.slug } }));
+}
+const chapter = seerahBySlug((Astro.props as any).seerahSlug);
+---
+<SeerahDetail chapter={chapter} locale={locale} />

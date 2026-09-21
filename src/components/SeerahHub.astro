@@ -1,0 +1,110 @@
+---
+/* Seerat hub: 16 chronological chapters (Makkah era + Madinah era) -> per-chapter SEO detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import WaqiahArt from './WaqiahArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { SEERAH, seerahByEra } from '../data/seerah';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Seerat un Nabi ﷺ — Complete Biography in 16 Chapters (Urdu & English)`;
+const description = `Full seerah of Prophet Muhammad ﷺ in 16 chapters — birth, Hira, Makkah dawah, Hijrah, Badr, Uhud, conquest of Makkah, farewell Hajj — with references, lessons and FAQs. Each chapter has its own page.`;
+const keywords = 'seerat un nabi, seerah of prophet muhammad, seerat in urdu, prophet muhammad biography, serat e mustafa, seerah full story, hazoor ki seerat, mecca madina seerah';
+const faq = [
+  { q: 'How many chapters are in this seerah?', a: '16 chronological chapters: 8 from the Makkah era (birth to Aqabah pledges) and 8 from the Madinah era (Hijrah to passing). Open any chapter for the full story with events, lessons and references.' },
+  { q: 'Does every chapter have its own page?', a: 'Yes — each of the 16 chapters has a separate SEO page with summary, key events in order, lessons, the full narrative, references and FAQs.' },
+  { q: 'What sources is this seerah based on?', a: 'The received seerah tradition (Ibn Hisham/Ibn Ishaq), Sahih al-Bukhari, Sahih Muslim and the Sunan collections. Each chapter names its references without invented details.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Seerat', path: '/seerat/' },
+];
+const makkah = seerahByEra('Makkah');
+const madinah = seerahByEra('Madinah');
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/seerat/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">16 chapters</span>
+        <span class="hn-badge">Makkah + Madinah eras</span>
+        <span class="hn-badge">Full story for adults</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Seerat un Nabi ﷺ</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">The complete biography of Prophet Muhammad ﷺ — from the Year of the Elephant to the Farewell Hajj — told chapter by chapter with events, lessons and references. Tap any chapter for its own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search seerah — e.g. badr, hijrah, miraj…" aria-label="Search seerah" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-6 max-w-3xl">
+      <input id="seerahfilter" class="hn-input" placeholder="Filter 16 chapters — e.g. badr, uhud, taif, wahi…" aria-label="Filter seerah chapters" />
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Era 1 — Makkah" title="Birth to the Pledges (Ch. 1–8)" sub="Lineage, childhood, revelation, persecution, Taif, Miraj and Aqabah." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {makkah.map((s) => (
+          <a href={L(`/seerat/${s.slug}/`)} data-search={`${s.num} ${s.title} ${s.summary} ${(s.aliases || []).join(' ')}`.toLowerCase()} class="seerahrow hn-card hn-card-hover overflow-hidden block">
+            <span class="block overflow-hidden"><WaqiahArt motif={s.motif} arabic={s.arabic} prophet={`Ch. ${s.num}`} accent={s.accent} /></span>
+            <span class="block hn-card-pad">
+              <span class="hn-badge hn-badge-primary">Chapter {s.num}</span>
+              <span class="font-extrabold block text-[17px] leading-7 mt-2">{s.title}</span>
+              <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{s.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Era 2 — Madinah" title="Hijrah to the Passing (Ch. 9–16)" sub="The state, Badr, Uhud, the conquest, farewell Hajj and legacy." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {madinah.map((s) => (
+          <a href={L(`/seerat/${s.slug}/`)} data-search={`${s.num} ${s.title} ${s.summary} ${(s.aliases || []).join(' ')}`.toLowerCase()} class="seerahrow hn-card hn-card-hover overflow-hidden block">
+            <span class="block overflow-hidden"><WaqiahArt motif={s.motif} arabic={s.arabic} prophet={`Ch. ${s.num}`} accent={s.accent} /></span>
+            <span class="block hn-card-pad">
+              <span class="hn-badge hn-badge-primary">Chapter {s.num}</span>
+              <span class="font-extrabold block text-[17px] leading-7 mt-2">{s.title}</span>
+              <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{s.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('seerahfilter');
+        const rows = [...document.querySelectorAll('.seerahrow')];
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          rows.forEach((r) => r.classList.toggle('hidden', !!q && !(r.dataset.search || '').includes(q)));
+        });
+      })();
+    </script>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

@@ -6,6 +6,7 @@ import KalimaHub from '../../../components/KalimaHub.astro';
 import MeaningHub from '../../../components/MeaningHub.astro';
 import WaqiahHub from '../../../components/WaqiahHub.astro';
 import HadeesHub from '../../../components/HadeesHub.astro';
+import SeerahHub from '../../../components/SeerahHub.astro';
 import { getMixedLocale } from '../../../lib/articles';
 import { nonDefaultLocales, categories, getDict, localizedPath } from '../../../i18n/utils';
 
@@ -30,6 +31,7 @@ const isMeanings = category === 'meanings';
 const meaningGuides = isMeanings ? list.map(a => ({ title: a.data.title, desc: a.data.description, href: localizedPath(a.data.locale, `/${a.data.category}/${slugOf(a.id)}/`) })) : [];
 const isWaqiat = category === 'waqiat';
 const isHadees = category === 'hadees';
+const isSeerat = category === 'seerat';
 const fallbackCount = list.filter(a => a.data.locale !== locale).length;
 const isQuran = category === 'quran';
 const isSurahs = category === 'surahs';
@@ -59,6 +61,8 @@ const pageKeywords = category === 'quran'
 <WaqiahHub locale={locale} />
 ) : isHadees ? (
 <HadeesHub locale={locale} />
+) : isSeerat ? (
+<SeerahHub locale={locale} />
 ) : (
 <BaseLayout title={title} description={pageDescription} keywords={pageKeywords} locale={locale} canonicalPath={`/${category}/`}>
   <div class="max-w-7xl mx-auto px-4 py-8">

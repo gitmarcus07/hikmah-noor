@@ -17,6 +17,7 @@
     "content:meanings": "node scripts/validate-meanings.mjs",
     "content:waqiat": "node scripts/validate-waqiat.mjs",
     "content:hadees": "node scripts/validate-hadees.mjs",
+    "content:seerat": "node scripts/validate-seerah.mjs",
     "content:guides": "node scripts/validate-guides.mjs",
     "content:links": "node scripts/check-links.mjs",
     "content:surahs": "node scripts/build-surahs.mjs"

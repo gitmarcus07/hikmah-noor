@@ -9,6 +9,7 @@ import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
 import { HADEES } from '../data/hadees';
+import { SEERAH } from '../data/seerah';
 
 /** Common alternate spellings / transliterations people actually type.
  * Keys are surah URL slugs WITHOUT the numeric prefix (e.g. `yaseen`). */
@@ -352,6 +353,31 @@ export function hadeesIndexItems(locale: string): IndexItem[] {
       category: 'hadees',
       url: `${prefix}/hadees/${h.slug}/`,
       tags: [...new Set(['hadees', 'hadith', 'hadees in urdu', `hadees ${h.num}`, h.title.toLowerCase(), h.urdu, h.translation.toLowerCase(), h.source.toLowerCase(), (h.narrator || '').toLowerCase(), h.grade.toLowerCase(), ...(h.aliases || []), ...h.keywords.split(',').map((s) => s.trim().toLowerCase())])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
+/** Seerat hub + individual chapter entries for a locale (one SEO page per chapter). */
+export function seerahIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: 'Seerat un Nabi ﷺ — Complete Biography in 16 Chapters',
+      description: 'Full seerah of Prophet Muhammad ﷺ: birth, Hira, Makkah dawah, Hijrah, Badr, Uhud, conquest of Makkah, farewell Hajj. Each chapter has its own page.',
+      category: 'seerat',
+      url: `${prefix}/seerat/`,
+      tags: ['seerat', 'seerah', 'serat', 'seerat un nabi', 'prophet biography', 'hazoor ki seerat', 'complete seerah'],
+      locale,
+    },
+  ];
+  for (const s of SEERAH) {
+    items.push({
+      title: `${s.title} — Seerat Ch. ${s.num}`,
+      description: `${s.summary} References: ${s.references}.`,
+      category: 'seerat',
+      url: `${prefix}/seerat/${s.slug}/`,
+      tags: [...new Set(['seerat', 'seerah', 'serat', `chapter ${s.num}`, `seerat chapter ${s.num}`, s.era.toLowerCase(), s.title.toLowerCase(), s.summary.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 4).slice(0, 8).join(' '), ...(s.aliases || []), ...s.keywords.split(',').map((x) => x.trim().toLowerCase())])].filter(Boolean),
       locale,
     });
   }
