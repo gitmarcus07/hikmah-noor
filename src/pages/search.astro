@@ -1,21 +1,36 @@
 ---
+/* Search discovery page — grouped by content type, fast, mobile-friendly. */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import Icon from '../components/Icon.astro';
 import { getDict } from '../i18n/utils';
 const locale = 'en';
 const dict = getDict(locale);
 const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wudu', 'livestock'];
 ---
-<BaseLayout title={`Search — Hikmah Noor`} description={`Search Islamic articles on Quran, duas, kalimas in ${locale}.`} locale={locale} canonicalPath="/search/">
-<div class="max-w-3xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-extrabold mb-4 text-white">🔍 {dict.nav.search}</h1>
-  <form method="get" action="/search/" class="flex gap-2" role="search">
-    <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" class="flex-1 min-w-0 bg-night-800 border border-white/10 text-ink-50 placeholder:text-ink-500 rounded-2xl px-4 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
-    <button class="bg-brand-500 hover:bg-brand-400 text-night-900 font-bold rounded-2xl px-6 min-h-[52px]">Go</button>
+<BaseLayout title="Search — Hikmah Noor" description="Search Islamic articles on Quran, duas, kalimas." locale={locale} canonicalPath="/search/" crumbs={[{ name: 'Home', path: '/' }, { name: 'Search', path: '/search/' }]}>
+<div class="hn-read hn-section">
+  <Breadcrumbs locale={locale} items={[{ name: 'Home', path: '/' }, { name: 'Search', path: '/search/' }]} />
+  <h1 class="text-3xl font-extrabold mt-3">Search</h1>
+  <p class="mt-1 text-[15px]" style="color:var(--hn-muted)">Search duas, surahs, topics, tools and guides.</p>
+  <form method="get" action="/search/" class="mt-4" role="search">
+    <div class="hn-searchwrap">
+      <Icon name="search" size={19} />
+      <input id="q" name="q" placeholder={dict.nav.search} autocomplete="off" aria-label="Search" />
+      <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+    </div>
   </form>
   <div class="mt-3 flex flex-wrap gap-2" id="chips">
-    {popular.map(p => <button data-q={p} class="text-sm font-semibold bg-night-800 border border-white/10 text-ink-200 hover:border-brand-400 hover:text-brand-300 rounded-full px-4 py-2 min-h-[40px]">{p}</button>)}
+    {popular.map(p => <button data-q={p} class="hn-badge hn-card-hover" style="padding:0.5rem 1rem;font-size:0.85rem;cursor:pointer">{p}</button>)}
   </div>
-  <p id="count" class="mt-5 text-sm text-ink-500"></p>
+  <div class="mt-4 flex flex-wrap gap-2" id="typefilter" role="group" aria-label="Filter by type">
+    <button data-type="" class="hn-btn hn-btn-primary !min-h-[40px] !py-2 !px-4 text-sm">All</button>
+    <button data-type="duas" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Duas</button>
+    <button data-type="surahs,quran" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Quran</button>
+    <button data-type="kalimas" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Kalimas</button>
+    <button data-type="tools" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Tools</button>
+  </div>
+  <p id="count" class="mt-4 text-sm" style="color:var(--hn-muted)"></p>
   <div id="results" class="mt-3 space-y-3"></div>
 </div>
 <script define:vars={{ locale }}>
@@ -24,12 +39,18 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
     const out = document.getElementById('results');
     const count = document.getElementById('count');
     const chips = document.getElementById('chips');
+    const typeBtns = [...document.querySelectorAll('#typefilter button')];
+    let typeFilter = '';
     let items = [];
     const load = async () => {
       if (items.length) return items;
       try { items = await (await fetch(`/search-index.json`)).json(); }
       catch { items = []; }
       return items;
+    };
+    const inType = (it) => {
+      if (!typeFilter) return true;
+      return typeFilter.split(',').some(t => (it.category || '').toLowerCase().includes(t) || (it.url || '').includes('/' + t + '/') || (it.url || '').includes('/tools/') && t === 'tools');
     };
     const score = (it, q) => {
       const t = (it.title || '').toLowerCase();
@@ -50,29 +71,28 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
     const hi = (text, q) => {
       const i = text.toLowerCase().indexOf(q);
       if (i < 0) return text;
-      return text.slice(0, i) + '<mark class="bg-gold-300 text-night-900 rounded-sm">' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+      return text.slice(0, i) + '<mark>' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
     };
     const render = (ranked, q) => {
       const list = ranked;
       count.textContent = q ? `${ranked.length} result${ranked.length === 1 ? '' : 's'} for “${q}”` : `${items.length} guides — type to filter`;
-      if (list.length) { out.innerHTML = ''; }
-      else {
-        out.innerHTML = `<div class="bg-night-850 border border-white/10 rounded-2xl p-5"><p class="font-bold text-ink-50">No results for “${q.replace(/</g, '&lt;')}”.</p>` +
-          `<p class="text-sm text-ink-500 mt-1">Try: dua, quran, zakat, fitrana, surah yaseen, mahr — or browse:</p>` +
+      if (!list.length) {
+        out.innerHTML = `<div class="hn-card hn-card-pad"><p class="font-bold">No results for “${q.replace(/</g, '&lt;')}”.</p>` +
+          `<p class="text-sm mt-1" style="color:var(--hn-muted)">Try: dua, quran, zakat, fitrana, surah yaseen, mahr — or browse:</p>` +
           `<div class="mt-3 flex flex-wrap gap-2">` +
-          `<a href="/tools/" class="text-sm font-bold bg-brand-500 text-night-900 rounded-full px-4 py-2">🧰 All finance tools</a>` +
-          `<a href="/tools/zakat/zakat-calculator/" class="text-sm font-bold bg-night-800 border border-white/10 text-ink-200 rounded-full px-4 py-2">Zakat calculator</a>` +
-          `<a href="/surahs/" class="text-sm font-bold bg-night-800 border border-white/10 text-ink-200 rounded-full px-4 py-2">114 Surahs</a>` +
-          `<a href="/quran/" class="text-sm font-bold bg-night-800 border border-white/10 text-ink-200 rounded-full px-4 py-2">Quran 30 paras</a></div></div>`;
+          `<a href="/tools/" class="hn-btn hn-btn-primary !min-h-[44px] text-sm">All tools</a>` +
+          `<a href="/surahs/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">114 Surahs</a>` +
+          `<a href="/quran/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Quran 30 paras</a></div></div>`;
         return;
       }
+      out.innerHTML = '';
       for (const { it } of list) {
         const a = document.createElement('a');
         a.href = it.url;
-        a.className = 'block bg-night-850 border border-white/10 rounded-2xl p-4 hover:shadow-md hover:border-brand-500/50';
-        a.innerHTML = `<span class="flex items-center gap-1.5"><span class="text-[11px] font-bold uppercase text-brand-300 bg-brand-500/15 px-2 py-1 rounded-full">${it.category}</span>` +
-          (it.locale && it.locale !== locale ? `<span class="text-[11px] font-extrabold uppercase text-night-900 bg-gold-300 px-2 py-1 rounded-full">EN</span>` : '') +
-          `</span><span class="font-bold block leading-6 mt-2 text-ink-50">${hi(it.title, q)}</span><span class="text-sm text-ink-300">${hi(it.description, q)}</span>`;
+        a.className = 'hn-card hn-card-hover hn-card-pad block';
+        a.innerHTML = `<span class="flex items-center gap-1.5"><span class="hn-badge hn-badge-primary">${it.category}</span>` +
+          (it.locale && it.locale !== locale ? `<span class="hn-badge">EN</span>` : '') +
+          `</span><span class="font-bold block leading-6 mt-2">${hi(it.title, q)}</span><span class="text-sm" style="color:var(--hn-muted)">${hi(it.description, q)}</span>`;
         out.appendChild(a);
       }
     };
@@ -80,7 +100,7 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
     const run = async () => {
       const q = box.value.toLowerCase().trim();
       if (chips) chips.style.display = q ? 'none' : '';
-      const all = await load();
+      const all = (await load()).filter(inType);
       if (!q) {
         render(all.map(it => ({ it, s: 1 })).slice(0, 10), '');
         const url = new URL(window.location.href);
@@ -95,10 +115,13 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
       url.searchParams.set('q', box.value.trim());
       history.replaceState(null, '', url.search);
     };
+    typeBtns.forEach(b => b.addEventListener('click', () => {
+      typeFilter = b.dataset.type || '';
+      run();
+    }));
     box.addEventListener('input', () => { clearTimeout(t); t = setTimeout(run, 150); });
     document.getElementById('chips')?.querySelectorAll('button').forEach(b =>
       b.addEventListener('click', () => { box.value = b.dataset.q; box.focus(); run(); }));
-    // Runtime query — Astro prerenders statically, so ?q= only exists in the browser
     const start = new URLSearchParams(window.location.search).get('q') ?? '';
     box.value = start;
     run();

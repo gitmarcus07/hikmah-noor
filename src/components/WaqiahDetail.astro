@@ -1,14 +1,15 @@
 ---
-/* Waqiah detail page (EN + locale). Narrative + lessons. Auto FAQ + crumbs. */
+/* Waqiah detail — narrative reading page in the unified system. */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
 import WaqiahArt from './WaqiahArt.astro';
-import { getDict, localizedPath } from '../i18n/utils';
+import { localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
 
 interface Props { waqiah: any; locale: string; }
 const { waqiah, locale } = Astro.props;
-const dict = getDict(locale);
-const isFallback = locale !== 'en';
+const L = (p: string) => localizedPath(locale, p);
 const waqiahPath = `/waqiat/${waqiah.slug}/`;
 
 const title = `${waqiah.title} — Story & Lessons`;
@@ -32,115 +33,110 @@ const prevW = sIdx > 0 ? WAQIAT[sIdx - 1] : null;
 const nextW = sIdx >= 0 && sIdx < WAQIAT.length - 1 ? WAQIAT[sIdx + 1] : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={waqiahPath}>
-  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8">
-    <nav class="text-xs text-ink-500 mb-3">
-      <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
-      <a href={localizedPath(locale, '/waqiat/')} class="hover:text-brand-300"> {dict.nav.waqiat}</a> /
-      <span> {waqiah.title}</span>
-    </nav>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="text-[11px] font-extrabold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">📜 {waqiah.prophet}</span>
-      {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">EN</span>}
+  <div class="hn-article hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">{waqiah.prophet}</span>
     </div>
-    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 text-white">{waqiah.title}</h1>
-    <p class="mt-2 text-ink-300 leading-7">{waqiah.summary}</p>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{waqiah.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{waqiah.summary}</p>
     {waqiah.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] text-ink-500 leading-6">Also searched as: {waqiah.aliases.map((a: string, i: number) => (
-        <span>{i > 0 && ' • '}<em class="not-italic font-semibold text-ink-300">{a}</em></span>
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {waqiah.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
-    {isFallback && <p class="mt-4 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>}
 
-    <div class="rounded-3xl overflow-hidden my-6 shadow-xl shadow-black/30 border border-white/10">
+    <div class="hn-card overflow-hidden my-6">
       <WaqiahArt motif={waqiah.motif} arabic={waqiah.arabic} prophet={waqiah.prophet} accent={waqiah.accent} />
     </div>
 
-    <div class="bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/30 relative overflow-hidden">
-      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
-      <div class="relative">
-        <div class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300 mb-3">Emblematic verse</div>
-        <p class="arabic-block leading-[2.2]" lang="ar" dir="rtl">{waqiah.arabic}</p>
-        <p class="mt-4 text-ink-200 italic leading-7 text-[15px]">{waqiah.translit}</p>
-      </div>
+    <div class="hn-reading-card">
+      <p class="hn-block-label">Emblematic verse</p>
+      <p class="arabic-block" lang="ar" dir="rtl">{waqiah.arabic}</p>
+      {waqiah.translit && (
+        <>
+          <hr class="hn-divider" />
+          <p class="hn-block-label">Transliteration</p>
+          <p class="translit-block">{waqiah.translit}</p>
+        </>
+      )}
     </div>
 
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">📜 The full story</h2>
+    <section class="mt-8" aria-label="The full story">
+      <SectionHeader eyebrow="Story" title="The full story" />
       <div class="space-y-4">
         {(waqiah.narrative || []).map((p: string) => (
-          <p class="bg-night-850 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/20 leading-8 text-[15px] text-ink-200">{p}</p>
+          <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
         ))}
       </div>
-      <p class="mt-3 text-xs text-ink-500">📚 Narrated strictly from the Quran ({waqiah.quranRef}) without invented details.</p>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated strictly from the Quran ({waqiah.quranRef}) without invented details.</p>
     </section>
 
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">🗂️ The story in order</h2>
+    <section class="mt-8" aria-label="The story in order">
+      <SectionHeader eyebrow="Timeline" title="The story in order" />
       <ol class="space-y-3">
         {waqiah.events.map((e: string, i: number) => (
-          <li class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/20 flex gap-3">
-            <span class="w-8 h-8 shrink-0 grid place-items-center rounded-xl bg-brand-500/15 text-brand-300 font-extrabold text-sm">{i + 1}</span>
-            <span class="leading-7 text-[15px] text-ink-200">{e}</span>
+          <li class="hn-card hn-card-pad flex gap-3">
+            <span class="hn-verse-num shrink-0">{i + 1}</span>
+            <span class="leading-7 text-[15px]">{e}</span>
           </li>
         ))}
       </ol>
     </section>
 
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">💡 Lessons</h2>
-      <div class="bg-night-850 border border-gold-300/30 rounded-2xl p-5 shadow-lg shadow-black/20">
-        <ul class="space-y-2.5 leading-7 text-[15px] text-ink-200">
-          {waqiah.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span class="text-gold-300 font-extrabold">✦</span><span>{l}</span></li>)}
+    <section class="mt-8" aria-label="Lessons">
+      <SectionHeader eyebrow="Reflect" title="Lessons" />
+      <div class="hn-card hn-card-pad">
+        <ul class="space-y-2.5 leading-7 text-[15px]">
+          {waqiah.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
         </ul>
       </div>
     </section>
-    <p class="mt-3 text-xs text-ink-500">📚 References: <b>{waqiah.quranRef}</b></p>
-    <p class="mt-2 text-xs text-ink-500">Narrated from the Quran without invented details; consult scholars for rulings.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{waqiah.quranRef}</strong></p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Narrated from the Quran without invented details; consult scholars for rulings.</p>
 
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
       <div class="space-y-3">
         {faq.map((f) => (
-          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
-            <summary class="font-bold cursor-pointer leading-6 text-ink-50">{f.q}</summary>
-            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
           </details>
         ))}
       </div>
     </section>
 
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">📜 More stories</h2>
+    <section class="mt-8" aria-label="More stories">
+      <SectionHeader eyebrow="Stories" title="More stories" href={L('/waqiat/')} linkLabel="All stories" />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
-          <a href={localizedPath(locale, `/waqiat/${r.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl overflow-hidden shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
+          <a href={L(`/waqiat/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
             <WaqiahArt motif={r.motif} arabic={r.arabic} prophet={r.prophet} accent={r.accent} />
-            <span class="block p-4">
-              <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{r.title}</span>
-              <span class="text-[13px] text-ink-300 line-clamp-2">{r.summary}</span>
+            <span class="block hn-card-pad">
+              <span class="font-bold block text-[15px] leading-6">{r.title}</span>
+              <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{r.summary}</span>
             </span>
           </a>
         ))}
       </div>
-      <a href={localizedPath(locale, '/waqiat/')} class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand-300 hover:text-brand-200">All stories →</a>
     </section>
 
     {(prevW || nextW) && (
-      <nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="More stories">
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More stories">
         {prevW ? (
-          <a href={localizedPath(locale, `/waqiat/${prevW.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
-            <span class="text-xs font-bold text-ink-500">← Previous story</span>
-            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{prevW.title}</span>
+          <a href={L(`/waqiat/${prevW.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous story</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevW.title}</span>
           </a>
         ) : <span />}
         {nextW && (
-          <a href={localizedPath(locale, `/waqiat/${nextW.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 text-right shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 transition">
-            <span class="text-xs font-bold text-ink-500">Next story →</span>
-            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{nextW.title}</span>
+          <a href={L(`/waqiat/${nextW.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next story →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextW.title}</span>
           </a>
         )}
       </nav>
     )}
   </div>
 </BaseLayout>
-<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

@@ -33,16 +33,16 @@ const ALWAYS_SHOW = ['mahr-planner', 'nafaqah-planner'];
 const headline = HEADLINES[tool.slug] || 'Your result';
 
 const LEVEL_STYLE: Record<string, string> = {
-  'Obligatory (pillar)': 'bg-brand-300 text-night-900',
-  'Obligatory (pillar) — method varies': 'bg-brand-300 text-night-900',
-  'Obligatory (per fasting person)': 'bg-brand-300 text-night-900',
-  'Obligatory (pillar) — reference': 'bg-brand-300 text-night-900',
-  'Conditional obligation': 'bg-gold-300 text-night-900',
-  'Family right (no fixed amount)': 'bg-sky-300 text-night-900',
-  'Planning tool (no fixed %)': 'bg-sky-300 text-night-900',
-  'School-specific': 'bg-violet-300 text-night-900',
-  'Historical state levy': 'bg-white/10 text-ink-200 border border-white/10',
-  'Educational guide': 'bg-white/10 text-ink-200 border border-white/10',
+  'Obligatory (pillar)': 'hn-badge-primary',
+  'Obligatory (pillar) — method varies': 'hn-badge-primary',
+  'Obligatory (per fasting person)': 'hn-badge-primary',
+  'Obligatory (pillar) — reference': 'hn-badge-primary',
+  'Conditional obligation': 'hn-badge-gold',
+  'Family right (no fixed amount)': 'hn-badge-gold',
+  'Planning tool (no fixed %)': 'hn-badge-gold',
+  'School-specific': 'hn-badge-gold',
+  'Historical state levy': '',
+  'Educational guide': '',
 };
 
 const CURS = [['INR','INR ₹'],['USD','USD $'],['GBP','GBP £'],['EUR','EUR €'],['AED','AED'],['SAR','SAR ﷼'],['PKR','PKR ₨'],['BDT','BDT ৳'],['CAD','CAD'],['AUD','AUD']];
@@ -58,22 +58,19 @@ const crumbs = [
 <BaseLayout title={tool.title} description={tool.desc} keywords={tool.keywords} locale={locale} canonicalPath={toolPath} type="article" faq={tool.faq || []} crumbs={crumbs}>
   <div data-toolroot>
     <!-- HERO -->
-    <section class="relative overflow-hidden bg-night-900 text-white">
-      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
-      <div class="relative max-w-3xl mx-auto px-4 pt-6 pb-7 md:pt-8 md:pb-9">
-        <nav class="text-xs text-ink-500 mb-4">
-          <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
-          <a href={localizedPath(locale, '/tools/')} class="hover:text-brand-300"> Tools</a> /
-          <a href={localizedPath(locale, catPath)} class="hover:text-brand-300"> {cat?.title}</a>
+    <section>
+      <div class="max-w-3xl mx-auto px-4 pt-6 pb-7 md:pt-8 md:pb-9">
+        <nav class="hn-crumbs mb-4">
+          <a href={localizedPath(locale, '/')}>{dict.nav.home}</a><span aria-hidden="true">›</span>
+          <a href={localizedPath(locale, '/tools/')}>Tools</a><span aria-hidden="true">›</span>
+          <a href={localizedPath(locale, catPath)}>{cat?.title}</a>
         </nav>
         <div class="flex flex-wrap items-center gap-2">
-          <span class={`text-[11px] font-extrabold uppercase tracking-wide px-2.5 py-1 rounded-full ${LEVEL_STYLE[tool.level] || 'bg-white/10 text-ink-200 border border-white/10'}`}>{tool.level}</span>
-          {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">EN</span>}
-          <span class="text-[11px] font-bold uppercase tracking-wide text-ink-500">Free • No signup • With evidence</span>
+          <span class={`hn-badge ${LEVEL_STYLE[tool.level] || ''}`}>{tool.level}</span>
+          <span class="hn-badge">Free • No signup • With evidence</span>
         </div>
-        <h1 class="text-3xl md:text-[2.6rem] md:leading-[1.15] font-extrabold leading-tight mt-3 text-white">{shortName}</h1>
-        <p class="mt-3 text-ink-300 leading-7 text-[15px] md:text-base max-w-2xl">{tool.intro}</p>
-        {isFallback && <p class="mt-4 text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>}
+        <h1 class="text-3xl md:text-[2.6rem] md:leading-[1.15] font-extrabold leading-tight mt-3">{shortName}</h1>
+        <p class="mt-3 leading-7 text-[15px] md:text-base max-w-2xl" style="color:var(--hn-muted)">{tool.intro}</p>
       </div>
     </section>
 
@@ -97,7 +94,7 @@ const crumbs = [
                   <span data-pill={si} class="text-xs font-bold rounded-full px-3.5 py-2 border min-h-[36px] inline-flex items-center gap-1.5">{si + 1}. {s.title}</span>
                 ))}
               </div>
-              <div class="h-2 bg-white/10 rounded-full overflow-hidden mt-3"><div id="stepBar" class="h-full bg-gradient-to-r from-brand-500 to-gold-300 rounded-full transition-all" style="width:10%"></div></div>
+              <div class="h-2 rounded-full overflow-hidden mt-3" style="background:var(--hn-border)"><div id="stepBar" class="h-full rounded-full transition-all" style="width:10%;background:var(--hn-primary)"></div></div>
             </div>
           </div>
         )}

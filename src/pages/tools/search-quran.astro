@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SearchQuran from '../../components/SearchQuran.astro';
-import AppTabBar from '../../components/AppTabBar.astro';
 
 const locale = 'en';
 const crumbs = [
@@ -12,5 +11,4 @@ const crumbs = [
 ---
 <BaseLayout title="Search Quran — Translation & Ayaat" description="Search the Quran by translation or Arabic text — Urdu, English and Hindi. Tap any result to open it in the reader." locale={locale} canonicalPath="/tools/search-quran/" crumbs={crumbs} noindex={true} hideFooter>
   <SearchQuran locale={locale} />
-  <AppTabBar locale={locale} active="explore" />
 </BaseLayout>

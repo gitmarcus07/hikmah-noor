@@ -1,0 +1,82 @@
+---
+/* Reusable reading block: Arabic (focus) + transliteration + meaning + reference.
+ * Only renders sections when data exists. Includes copy/share actions (progressive). */
+import Icon from '../Icon.astro';
+
+interface Props {
+  arabic?: string;
+  translit?: string;
+  translation?: string;
+  reference?: string;
+  id?: string;
+}
+const { arabic, translit, translation, reference, id = 'reading' } = Astro.props;
+const shareText = [arabic, translation].filter(Boolean).join('\n\n');
+---
+<div class="hn-reading-card" id={id}>
+  {arabic && (
+    <div>
+      <p class="hn-block-label">Arabic</p>
+      <p class="arabic-block" lang="ar" dir="rtl">{arabic}</p>
+    </div>
+  )}
+  {translit && (
+    <div>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">Transliteration</p>
+      <p class="translit-block">{translit}</p>
+    </div>
+  )}
+  {translation && (
+    <div>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">Meaning</p>
+      <p class="meaning-block">{translation}</p>
+    </div>
+  )}
+  {reference && (
+    <div>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">Reference</p>
+      <p class="text-sm font-semibold">{reference}</p>
+    </div>
+  )}
+  <hr class="hn-divider" />
+  <div class="flex flex-wrap gap-2" data-reading-actions>
+    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-copy={shareText} aria-label="Copy text">
+      <Icon name="copy" size={17} /> Copy
+    </button>
+    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-share={shareText} aria-label="Share">
+      <Icon name="share" size={17} /> Share
+    </button>
+  </div>
+</div>
+<script>
+  (() => {
+    document.querySelectorAll('[data-reading-actions]').forEach((wrap) => {
+      const copyBtn = wrap.querySelector('[data-copy]');
+      const shareBtn = wrap.querySelector('[data-share]');
+      copyBtn?.addEventListener('click', async () => {
+        const text = copyBtn.getAttribute('data-copy') ?? '';
+        try {
+          await navigator.clipboard.writeText(text);
+          const orig = copyBtn.innerHTML;
+          copyBtn.innerHTML = 'Copied';
+          setTimeout(() => { copyBtn.innerHTML = orig; }, 1600);
+        } catch {}
+      });
+      shareBtn?.addEventListener('click', async () => {
+        const text = shareBtn.getAttribute('data-share') ?? '';
+        try {
+          if (navigator.share) await navigator.share({ text });
+          else {
+            await navigator.clipboard.writeText(text);
+            const orig = shareBtn.innerHTML;
+            shareBtn.innerHTML = 'Copied';
+            setTimeout(() => { shareBtn.innerHTML = orig; }, 1600);
+          }
+        } catch {}
+      });
+    });
+  })();
+</script>

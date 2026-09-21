@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import ReadSession from '../../../components/ReadSession.astro';
-import AppTabBar from '../../../components/AppTabBar.astro';
 import parasMeta from '../../../data/paras-meta.json';
 import surahsMeta from '../../../data/surahs-meta.json';
 
@@ -49,5 +48,4 @@ const crumbs = [
   hideFooter
 >
   <ReadSession locale={locale} surah={surah} juzTotals={juzTotals} juzOfSurah={juzOfSurah} />
-  <AppTabBar locale={locale} active="reading" />
 </BaseLayout>

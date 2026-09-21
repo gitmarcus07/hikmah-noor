@@ -11,7 +11,6 @@ interface Props {
   locale: string;
 }
 import { localizedPath } from '../i18n/utils';
-import MemberOnly from './MemberOnly.astro';
 const { para, sections, prev, next, locale } = Astro.props;
 const pad = (n: number) => String(n).padStart(3, '0');
 const audioBase = 'https://everyayah.com/data/Alafasy_128kbps/';
@@ -19,73 +18,69 @@ const audioOf = (s: number, v: number) => `${audioBase}${pad(s)}${pad(v)}.mp3`;
 const totalVerses = sections.reduce((a, s) => a + s.verses.length, 0);
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 ---
-<nav class="text-xs text-ink-500 mb-3">
-  <a href={localizedPath(locale, '/')} class="hover:text-brand-300">Home</a> /
-  <a href={localizedPath(locale, '/quran/')} class="hover:text-brand-300">Quran</a> /
-  <span class="text-ink-300">Para {para.num} ({para.name})</span>
+<nav class="hn-crumbs mb-4" aria-label="Breadcrumb">
+  <a href={localizedPath(locale, '/')}>Home</a><span aria-hidden="true">›</span>
+  <a href={localizedPath(locale, '/quran/')}>Quran</a><span aria-hidden="true">›</span>
+  <span aria-current="page">Para {para.num} ({para.name})</span>
 </nav>
 
-<div class="relative overflow-hidden bg-night-850 border border-white/10 text-white rounded-3xl p-5 md:p-6 text-center mb-5 shadow-xl shadow-black/30">
-  <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.3), transparent 45%), radial-gradient(circle at 5% 95%, rgba(212,175,55,.12), transparent 40%);"></div>
-  <div class="relative">
-  <span class="inline-block text-xs font-bold bg-white/10 border border-white/15 text-ink-200 rounded-full px-3 py-1">Para {para.num} of 30 • {totalVerses} verses • {para.range}</span>
-  <p class="font-arabic text-3xl md:text-4xl mt-3 text-white" lang="ar" dir="rtl">{para.arabicName}</p>
-  <h1 class="text-xl md:text-2xl font-extrabold mt-2 text-white">Quran Para {para.num} ({para.name})</h1>
-  <p class="text-ink-300 text-sm mt-1">Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio</p>
-  </div>
+<div class="hn-card hn-card-pad text-center mb-5">
+  <span class="hn-badge hn-badge-primary">Para {para.num} of 30 • {totalVerses} verses • {para.range}</span>
+  <p class="font-arabic text-3xl md:text-4xl mt-3" lang="ar" dir="rtl">{para.arabicName}</p>
+  <h1 class="text-xl md:text-2xl font-extrabold mt-2">Quran Para {para.num} ({para.name})</h1>
+  <p class="text-sm mt-1" style="color:var(--hn-muted)">Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio</p>
 </div>
 
-<div class="sticky top-14 z-30 bg-night-850/95 backdrop-blur border border-white/10 rounded-full px-3 py-2 mb-5 flex flex-wrap items-center gap-2 shadow-lg shadow-black/30" id="readerbar">
-  <div class="flex rounded-xl overflow-hidden border border-white/10 text-sm font-bold" role="group" aria-label="Translation language">
-    <button data-langbtn="ur" class="px-3.5 py-2.5 min-h-[44px] bg-brand-500 text-night-900">اردو</button>
-    <button data-langbtn="en" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">English</button>
-    <button data-langbtn="hi" class="px-3.5 py-2.5 min-h-[44px] bg-night-800 text-ink-200 hover:bg-white/10">हिन्दी</button>
+<div class="hn-card px-3 py-2 mb-5 flex flex-wrap items-center gap-2 sticky top-[3.75rem] z-30" id="readerbar">
+  <div class="flex rounded-[10px] overflow-hidden text-sm font-bold" style="border:1px solid var(--hn-border)" role="group" aria-label="Translation language">
+    <button data-langbtn="ur" class="px-3.5 py-2.5 min-h-[44px]" style="background:var(--hn-primary);color:#fff">اردو</button>
+    <button data-langbtn="en" class="px-3.5 py-2.5 min-h-[44px]" style="color:var(--hn-muted)">English</button>
+    <button data-langbtn="hi" class="px-3.5 py-2.5 min-h-[44px]" style="color:var(--hn-muted)">हिन्दी</button>
   </div>
-  <button id="trbtn" class="px-3.5 py-2.5 min-h-[44px] text-sm font-bold rounded-xl border border-white/10 bg-night-800 text-ink-200 hover:bg-white/10" aria-pressed="false">Aa Transliteration</button>
-  <label class="flex items-center gap-1.5 text-sm font-bold border border-white/10 rounded-xl px-2.5 min-h-[44px] bg-night-800 text-ink-200" title="Play translation audio after each verse">
-    <span aria-hidden="true">🌐</span>
-    <select id="trmode" class="bg-transparent outline-none font-bold text-sm max-w-[160px] text-ink-200" aria-label="Translation audio language">
-      <option value="off" class="bg-night-850">No translation audio</option>
-      <option value="ur" class="bg-night-850">+ اردو audio</option>
-      <option value="en" class="bg-night-850">+ English audio</option>
-      <option value="hi" class="bg-night-850">+ हिन्दी voice</option>
+  <button id="trbtn" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2 !px-3.5 text-sm" aria-pressed="false">Transliteration</button>
+  <label class="hn-btn hn-btn-secondary !min-h-[44px] !py-2 !px-3 text-sm" title="Play translation audio after each verse">
+    <select id="trmode" class="bg-transparent outline-none font-bold text-sm max-w-[170px]" aria-label="Translation audio language">
+      <option value="off">No translation audio</option>
+      <option value="ur">+ اردو audio</option>
+      <option value="en">+ English audio</option>
+      <option value="hi">+ हिन्दी voice</option>
     </select>
   </label>
   <div class="ms-auto flex gap-2">
-    <button id="playall" class="px-4 py-2.5 min-h-[44px] text-sm font-bold rounded-xl bg-brand-500 text-night-900 hover:bg-brand-400">▶ Play para</button>
-    <button id="stopall" class="px-4 py-2.5 min-h-[44px] text-sm font-bold rounded-xl border border-white/10 bg-night-800 text-ink-200 hover:bg-white/10 hidden">⏹ Stop</button>
+    <button id="playall" class="hn-btn hn-btn-primary !min-h-[44px] !py-2 !px-4 text-sm">Play para</button>
+    <button id="stopall" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2 !px-4 text-sm hidden">Stop</button>
   </div>
 </div>
 
 <div id="verses" data-tr="ur" data-showtr="0" class="space-y-8">
   {sections.map(({ surah, verses }) => (
     <section>
-      <div class="flex items-center gap-3 py-3 border-b border-white/10 px-1">
-        <span class="w-9 h-9 shrink-0 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 font-extrabold text-sm">{surah.num}</span>
+      <div class="flex items-center gap-3 py-3 px-1" style="border-bottom:1px solid var(--hn-border)">
+        <span class="hn-verse-num">{surah.num}</span>
         <div class="min-w-0">
-          <a href={localizedPath(locale, `/surahs/${surah.slug}/`)} class="font-bold leading-6 text-ink-50 hover:text-brand-300">Surah {surah.name} <span class="text-ink-500 font-normal">• {surah.englishName}</span></a>
-          <div class="text-xs text-ink-500">Verses {verses[0]?.v}–{verses[verses.length - 1]?.v} of {surah.verseCount} in this para</div>
+          <a href={localizedPath(locale, `/surahs/${surah.slug}/`)} class="font-bold leading-6">Surah {surah.name} <span class="font-normal" style="color:var(--hn-muted)">• {surah.englishName}</span></a>
+          <div class="text-xs" style="color:var(--hn-muted)">Verses {verses[0]?.v}–{verses[verses.length - 1]?.v} of {surah.verseCount} in this para</div>
         </div>
-        <span class="font-arabic text-2xl ms-auto text-brand-300" lang="ar">{surah.arabicName}</span>
+        <span class="font-arabic text-2xl ms-auto" style="color:var(--hn-primary)" lang="ar">{surah.arabicName}</span>
       </div>
       {surah.num !== 1 && surah.num !== 9 && verses[0]?.v === 1 && (
-        <p class="font-arabic text-xl md:text-2xl text-center text-ink-50 py-4 px-4" lang="ar" dir="rtl">{BISMILLAH}</p>
+        <p class="font-arabic text-xl md:text-2xl text-center py-4 px-4" lang="ar" dir="rtl">{BISMILLAH}</p>
       )}
-      <div class="divide-y divide-white/10">
+      <div>
         {verses.map((verse) => (
-          <article id={`s${surah.num}v${verse.v}`} data-surah={surah.num} data-verse={verse.v} class="verse py-5 px-1 md:px-2 scroll-mt-32">
+          <article id={`s${surah.num}v${verse.v}`} data-surah={surah.num} data-verse={verse.v} class="verse hn-verse">
             <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs font-bold text-ink-500">{surah.num}:{verse.v}</span>
-              <span class="w-8 h-8 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 text-sm font-extrabold">{verse.v}</span>
-              <button class="vplay w-9 h-9 grid place-items-center rounded-full bg-brand-500 text-night-900 hover:bg-brand-400" data-s={surah.num} data-v={verse.v} data-src={audioOf(surah.num, verse.v)} aria-label={`Play Surah ${surah.num} verse ${verse.v}`}>
+              <span class="text-xs font-bold" style="color:var(--hn-muted)">{surah.num}:{verse.v}</span>
+              <span class="hn-verse-num">{verse.v}</span>
+              <button class="vplay hn-icon-btn !w-10 !h-10 !rounded-full" data-s={surah.num} data-v={verse.v} data-src={audioOf(surah.num, verse.v)} aria-label={`Play Surah ${surah.num} verse ${verse.v}`}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               </button>
             </div>
-            <p class="font-arabic text-[26px] md:text-[32px] leading-[2.1] text-right text-ink-50" lang="ar" dir="rtl">{verse.ar} <span class="text-gold-300 text-[0.8em]">﴿{verse.v}﴾</span></p>
-            <p class="m-tr italic text-ink-500 leading-7 mt-2 hidden" data-trtext>{verse.tr}</p>
-            <p class="m-ur leading-8 mt-2 text-ink-200" lang="ur">{verse.ur}</p>
-            <p class="m-en leading-7 mt-2 text-ink-300 hidden">{verse.en}</p>
-            <p class="m-hi leading-8 mt-2 text-ink-300 hidden" lang="hi">{verse.hi}</p>
+            <p class="hn-verse-ar" lang="ar" dir="rtl">{verse.ar} <span style="color:var(--hn-gold);font-size:0.8em">﴿{verse.v}﴾</span></p>
+            <p class="m-tr translit-block mt-2 hidden" data-trtext>{verse.tr}</p>
+            <p class="m-ur leading-8 mt-2" lang="ur">{verse.ur}</p>
+            <p class="m-en leading-7 mt-2 hidden" style="color:var(--hn-muted)">{verse.en}</p>
+            <p class="m-hi leading-8 mt-2 hidden" style="color:var(--hn-muted)" lang="hi">{verse.hi}</p>
           </article>
         ))}
       </div>
@@ -102,26 +97,24 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
 </p>
 
 <style>
-  .tr-on { background: rgba(245,201,76,.15); border-radius: 0.5rem; padding-inline: 0.25rem; }
-  .verse.ring-2 { --tw-ring-color: var(--color-brand-500); }
+  .tr-on { background: var(--hn-gold-soft); border-radius: 0.5rem; padding-inline: 0.25rem; }
+  .verse.ring-2 { outline: 2px solid var(--hn-primary); border-radius: 12px; }
 </style>
 
-<div class="grid gap-3 mt-6">
+<div class="grid gap-3 mt-6 sm:grid-cols-2">
   {prev ? (
-    <a href={localizedPath(locale, `/quran/${prev.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition">← <span class="text-xs text-ink-500">Previous</span><span class="font-bold block text-ink-50">Para {prev.num} ({prev.name})</span></a>
+    <a href={localizedPath(locale, `/quran/${prev.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">← <span class="text-xs font-bold" style="color:var(--hn-muted)">Previous</span><span class="font-bold block">Para {prev.num} ({prev.name})</span></a>
   ) : <span />}
   {next ? (
-    <a href={localizedPath(locale, `/quran/${next.slug}/`)} class="bg-night-850 border border-white/10 rounded-2xl p-4 hover:border-brand-500/50 hover:bg-white/5 transition text-right"><span class="text-xs text-ink-500">Next</span> →<span class="font-bold block text-ink-50">Para {next.num} ({next.name})</span></a>
+    <a href={localizedPath(locale, `/quran/${next.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right"><span class="text-xs font-bold" style="color:var(--hn-muted)">Next</span> →<span class="font-bold block">Para {next.num} ({next.name})</span></a>
   ) : <span />}
 </div>
 
-<MemberOnly>
-<a href={localizedPath(locale, '/tools/read/')} class="mt-4 flex items-center gap-3 bg-brand-500/10 hover:bg-brand-500/15 border border-brand-500/40 rounded-2xl px-4 py-3.5 min-h-[52px] transition">
-  <span class="text-xl" aria-hidden="true">🌱</span>
-  <span class="text-sm font-bold text-ink-50">Track this para — timer, hasanat & streak, free</span>
-  <span class="ms-auto text-brand-300 font-extrabold">→</span>
+<a href={localizedPath(locale, '/tools/read/')} class="mt-4 flex items-center gap-3 bg-qg-soft hover:bg-[#DCEDE4] border border-qg-green/30 rounded-2xl px-4 py-3.5 min-h-[52px] transition">
+  <span class="text-xl" aria-hidden="true">📖</span>
+  <span class="text-sm font-bold text-qg-ink">Read with audio and translation →</span>
+  <span class="ms-auto text-qg-green font-extrabold">→</span>
 </a>
-</MemberOnly>
 
 <script>
   (() => {

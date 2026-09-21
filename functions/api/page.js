@@ -2,7 +2,7 @@
 // Public endpoint. Page ranges come from mushaf_pages (migration 0005);
 // verse text from verses_fts. Powers the Mushaf reader (offline-friendly,
 // one small request per page turn).
-import { clientIp, json, rateLimit } from './lib/auth.js';
+import { clientIp, json, rateLimit } from './lib/http.js';
 
 export async function onRequestGet(context) {
   const { env, request } = context;

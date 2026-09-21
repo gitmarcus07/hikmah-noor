@@ -1,8 +1,7 @@
 ---
 import '../styles/global.css';
-import { isRTL, localeNames, localeFlags, locales, getDict, localizedPath } from '../i18n/utils';
+import { isRTL, localeNames, locales, getDict, localizedPath } from '../i18n/utils';
 import Icon from '../components/Icon.astro';
-import ConfirmModal from '../components/ConfirmModal.astro';
 
 interface Props {
   title: string;
@@ -17,46 +16,16 @@ interface Props {
   faq?: { q: string; a: string }[];
   crumbs?: { name: string; path: string }[];
   hideFooter?: boolean;
-  /** 'light' renders the QuranGuide magazine chrome (guest landing only). */
+  /** Accepted for backward compat — theme is now global via toggle. */
   theme?: 'dark' | 'light';
 }
 
-const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false, theme = 'dark' } = Astro.props;
+const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
 const canonical = `${site}${localizedPath(locale, canonicalPath || '/')}`;
 const fontCss = 'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap';
-const profileUrl = localizedPath(locale, '/profile/');
-const light = theme === 'light';
-// Light (magazine) chrome classes — dark defaults stay untouched.
-const bodyCls = light
-  ? 'bg-qg-bg text-qg-ink font-sans min-h-screen flex flex-col overflow-x-clip'
-  : 'bg-night-950 text-ink-50 font-sans min-h-screen flex flex-col overflow-x-clip';
-const hdrCls = light
-  ? 'sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-qg-line shadow-[0_2px_10px_rgba(0,0,0,0.03)]'
-  : 'sticky top-0 z-50 bg-night-900/95 backdrop-blur border-b border-white/10 shadow-lg shadow-black/30';
-const logoTx = light ? 'text-qg-green' : 'text-white';
-const navTx = light ? 'text-qg-nav hover:text-qg-green' : 'text-ink-300 hover:text-brand-300';
-const navToolsTx = light ? 'text-qg-green' : 'text-brand-300';
-const iconBtn = light
-  ? 'text-qg-nav hover:bg-qg-soft'
-  : 'text-ink-300 hover:bg-white/10';
-const loginChip = light
-  ? 'bg-white hover:bg-qg-soft border border-qg-line text-qg-green'
-  : 'bg-white/5 hover:bg-white/10 border border-white/15 text-ink-50';
-const langPill = light
-  ? 'bg-qg-deep hover:bg-[#084337] text-white'
-  : 'bg-brand-500 hover:bg-brand-400 text-night-900';
-const dropPanel = light
-  ? 'bg-white text-qg-ink shadow-xl border border-qg-line'
-  : 'bg-night-850 text-ink-50 shadow-xl border border-white/10';
-const dropHover = light ? 'hover:bg-[#F4F8F6]' : 'hover:bg-white/10';
-const dropActive = light ? 'bg-qg-soft font-bold' : 'bg-white/10 font-bold';
-const mobPanel = light ? 'bg-white border-qg-line' : 'bg-night-850 border-white/10';
-const mobTile = light ? 'bg-qg-soft text-qg-green border-qg-line' : 'bg-brand-500/15 text-brand-300 border-white/10';
-const mobTx = light ? 'text-qg-ink' : 'text-ink-50';
-const mobSub = light ? 'text-qg-muted' : 'text-ink-500';
 
 const articleLd = type === 'article' ? {
   '@context': 'https://schema.org',
@@ -80,12 +49,22 @@ const crumbLd = crumbs.length ? {
   '@type': 'BreadcrumbList',
   itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: `${site}${localizedPath(locale, c.path)}` })),
 } : null;
+
+const L = (p: string) => localizedPath(locale, p);
+const moreLinks = [
+  { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
+  { label: 'Paras', href: L('/quran/'), icon: 'quran' },
+  { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
+  { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
+  { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
+  { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
+] as const;
 ---
 <!doctype html>
-<html lang={locale} dir={dir}>
+<html lang={locale} dir={dir} data-theme="light">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{title} | Hikmah Noor</title>
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex" />}
@@ -103,112 +82,138 @@ const crumbLd = crumbs.length ? {
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="theme-color" content="#100e1c" />
+  <meta name="theme-color" content="#FAF8F2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
+  <script is:inline>
+    (() => {
+      try {
+        const saved = localStorage.getItem('hn-theme');
+        const theme = saved === 'dark' || saved === 'light'
+          ? saved
+          : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      } catch { document.documentElement.dataset.theme = 'light'; }
+    })();
+  </script>
   {articleLd && <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />}
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
 </head>
-<body class={bodyCls}>
-  <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:p-2 focus:bg-brand-500 focus:text-night-900">Skip to content</a>
+<body class="min-h-screen flex flex-col overflow-x-clip" style="background:var(--hn-bg);color:var(--hn-ink)">
+  <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-2 focus:rounded-lg" style="background:var(--hn-primary);color:#fff">Skip to content</a>
 
-  <header class={hdrCls}>
-    <div class="relative max-w-7xl mx-auto px-3 sm:px-4 h-14 flex items-center gap-1.5 sm:gap-2">
-      <a href={localizedPath(locale, '/')} class={`flex items-center gap-2 font-extrabold text-[17px] shrink-0 min-w-0 ${logoTx}`} aria-label="Hikmah Noor home">
+  {/* ============ HEADER ============ */}
+  <header class="sticky top-0 z-50 border-b" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border)">
+    <div class="hn-container flex items-center gap-1.5 sm:gap-2" style="height:3.75rem">
+      <a href={L('/')} class="flex items-center gap-2 font-extrabold text-[17px] shrink-0 min-w-0" style="color:var(--hn-ink)" aria-label="Hikmah Noor home">
         <img src="/favicon.svg" alt="" width="28" height="28" class="w-7 h-7 shrink-0" />
         <span class="truncate">Hikmah Noor</span>
       </a>
-      <nav class={`hidden lg:flex items-center gap-4 text-sm font-medium ms-6 ${light ? 'text-qg-nav' : 'text-ink-300'}`} aria-label="Primary">
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/')}><Icon name="home" size={17} />{dict.nav.home}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/surahs/')}><Icon name="surahs" size={17} />{dict.nav.surahs}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/quran/')}><Icon name="quran" size={17} />{dict.nav.quran}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/duas/')}><Icon name="duas" size={17} />{dict.nav.duas}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/kalimas/')}><Icon name="kalimas" size={17} />{dict.nav.kalimas}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/meanings/')}><Icon name="meanings" size={17} />{dict.nav.meanings}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/waqiat/')}><Icon name="waqiat" size={17} />{dict.nav.waqiat}</a>
-        <a class={`inline-flex items-center gap-1.5 font-semibold ${navToolsTx}`} href={localizedPath(locale, '/tools/')}><Icon name="tools" size={17} />{dict.nav.tools}</a>
-        <a class={`inline-flex items-center gap-1.5 ${navTx}`} href={localizedPath(locale, '/about/')}><Icon name="about" size={17} />{dict.nav.about}</a>
+      <nav class="hidden lg:flex items-center gap-5 text-[14.5px] font-semibold ms-6" aria-label="Primary" style="color:var(--hn-muted)">
+        <a class="hover:opacity-100 transition" style="color:var(--hn-muted)" href={L('/quran/')}>Quran</a>
+        <a class="hover:opacity-100 transition" style="color:var(--hn-muted)" href={L('/duas/')}>Duas</a>
+        <a class="hover:opacity-100 transition" style="color:var(--hn-muted)" href={L('/duas/morning-evening/')}>Adhkar</a>
+        <a class="hover:opacity-100 transition" style="color:var(--hn-muted)" href={L('/meanings/')}>Learn</a>
+        <a class="hover:opacity-100 transition font-bold" style="color:var(--hn-primary)" href={L('/tools/')}>{dict.nav.tools}</a>
+        <div class="relative" id="moreWrap">
+          <button id="moreBtn" class="inline-flex items-center gap-1 transition hover:opacity-100" style="color:var(--hn-muted)" aria-haspopup="true" aria-expanded="false" aria-controls="moreMenu">
+            More <span id="moreChevron" class="text-[11px] opacity-70 inline-block transition-transform">▾</span>
+          </button>
+          <div id="moreMenu" class="hidden absolute start-0 top-full pt-2 z-50">
+            <div class="hn-card w-60 py-1.5 overflow-hidden" style="box-shadow:var(--hn-shadow-lg)">
+              {moreLinks.map(m => (
+                <a href={m.href} class="flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] font-medium transition hover:opacity-100" style="color:var(--hn-ink)" data-more-link>
+                  <Icon name={m.icon as any} size={18} />
+                  {m.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
       </nav>
-      <div class="ms-auto flex items-center gap-1 sm:gap-2">
-        <a data-nav-search href={localizedPath(locale, '/search/')} class={`w-9 h-9 hidden min-[380px]:grid place-items-center rounded-full shrink-0 ${iconBtn}`} aria-label="Search"><Icon name="search" size={20} /></a>
-        {/* auth: login button (guest) / avatar chip (member) — toggled by nav script below */}
-        <a data-nav-login href={localizedPath(locale, '/profile/')} class={`hidden sm:inline-flex items-center gap-1.5 border font-bold rounded-full px-4 py-2 text-sm min-h-[36px] shrink-0 ${loginChip}`}>👤 {dict.app.auth.login}</a>
-        <a data-nav-profile href={localizedPath(locale, '/profile/')} class={`hidden items-center gap-2 border rounded-full ps-1 pe-3 py-1 text-sm font-bold shrink-0 ${light ? 'bg-white hover:bg-qg-soft border-qg-green/40 text-qg-ink' : 'bg-white/5 hover:bg-white/10 border-brand-500/40 text-ink-50'}`} aria-label="My profile">
-          <span data-nav-avatar class={`w-7 h-7 grid place-items-center rounded-full overflow-hidden ${light ? 'bg-qg-soft text-qg-green' : 'bg-brand-500/20 text-base'}`}>👤</span>
-          <span data-nav-name class="max-w-[80px] truncate hidden min-[440px]:block">Profile</span>
-        </a>
+      <div class="ms-auto flex items-center gap-1.5">
+        <a href={L('/search/')} class="hn-icon-btn !w-10 !h-10 !border-0" aria-label="Search"><Icon name="search" size={20} /></a>
+        <button id="themeBtn" class="hn-icon-btn !w-10 !h-10 !border-0" aria-label="Toggle dark mode" aria-pressed="false">
+          <span id="themeIconMoon"><Icon name="moon" size={20} /></span>
+          <span id="themeIconSun" class="hidden"><Icon name="sun" size={20} /></span>
+        </button>
         <div class="relative" id="langWrap">
-          <button id="langBtn" class={`flex items-center gap-1.5 font-bold rounded-full ps-2.5 pe-2 py-1.5 text-sm shadow shrink-0 ${langPill}`} aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
-            <Icon name="globe" size={17} />
+          <button id="langBtn" class="hn-btn hn-btn-primary !min-h-[40px] !py-2 !px-3.5 text-sm !rounded-full" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" aria-label="Language">
+            <Icon name="globe" size={16} />
             <span class="uppercase">{locale}</span>
             <span class="hidden md:inline font-semibold opacity-80">{localeNames[locale as keyof typeof localeNames]}</span>
-            <span id="langChevron" class="text-xs opacity-70 transition-transform duration-150 inline-block">▾</span>
           </button>
           <div id="langMenu" class="hidden absolute end-0 top-full pt-2 z-50">
-            <div class={`w-64 rounded-2xl overflow-hidden py-1.5 ${dropPanel}`}>
+            <div class="hn-card w-64 py-1.5 overflow-hidden" style="box-shadow:var(--hn-shadow-lg)">
               {locales.map(l => (
-                <a href={localizedPath(l, canonicalPath || '/')} class={`flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] ${dropHover} ${l===locale?dropActive:''}`}>
-                  <span class={`w-9 h-9 shrink-0 grid place-items-center rounded-xl text-xs font-extrabold ${light ? 'bg-qg-soft text-qg-green' : 'bg-brand-500/15 text-brand-300'}`}>{l.toUpperCase()}</span>
-                  <span>{l === 'hi' ? 'हिन्दी' : l === 'en' ? 'English' : l === 'ur' ? 'اردو' : 'العربية'} <span class={`text-sm ${light ? 'text-qg-muted' : 'text-ink-500'}`}>({localeNames[l]})</span></span>
-                  {l===locale && <span class={`ms-auto ${light ? 'text-qg-green' : 'text-brand-300'}`}><Icon name="check" size={18} /></span>}
+                <a href={localizedPath(l, canonicalPath || '/')} class="flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] font-medium" style={l === locale ? 'background:var(--hn-primary-soft);font-weight:800' : ''}>
+                  <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px] text-xs font-extrabold" style="background:var(--hn-primary-soft);color:var(--hn-primary)">{l.toUpperCase()}</span>
+                  <span>{l === 'hi' ? 'हिन्दी' : l === 'en' ? 'English' : l === 'ur' ? 'اردو' : 'العربية'}</span>
+                  {l === locale && <span class="ms-auto" style="color:var(--hn-primary)"><Icon name="check" size={18} /></span>}
                 </a>
               ))}
             </div>
           </div>
         </div>
         <div class="relative lg:hidden" id="menuWrap">
-          <button id="menuBtn" class={`w-9 h-9 grid place-items-center rounded-full shrink-0 ${iconBtn}`} aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
-            <span id="menuIcoOpen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>
-            <span id="menuIcoClose" class="hidden"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+          <button id="menuBtn" class="hn-icon-btn !w-10 !h-10 !border-0" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menu">
+            <span id="menuIcoOpen"><Icon name="menu" size={22} /></span>
+            <span id="menuIcoClose" class="hidden"><Icon name="close" size={22} /></span>
           </button>
         </div>
       </div>
+      {/* Mobile dropdown (tablet) */}
       <div id="mobileMenu" class="hidden lg:hidden absolute inset-x-3 top-full z-50">
-        <nav class={`rounded-3xl shadow-xl border overflow-hidden ${mobPanel}`} aria-label="Mobile">
-          <p class={`px-4 pt-3.5 pb-1 text-[11px] font-extrabold uppercase tracking-widest ${mobSub}`}>Browse</p>
-          <div class="p-2">
-            <a href={localizedPath(locale, '/profile/')} data-nav-mobile class={`flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] border ${light ? 'bg-qg-soft border-qg-line hover:bg-[#DCEDE4]' : 'bg-brand-500/10 border-brand-500/30 hover:bg-brand-500/20 active:bg-brand-500/25'}`}>
-              <span data-nav-mobile-avatar class={`w-10 h-10 shrink-0 grid place-items-center rounded-xl border text-xl overflow-hidden ${mobTile}`}>👤</span>
-              <span class="min-w-0"><span data-nav-mobile-name class={`block text-[16px] font-semibold ${mobTx}`}>Login / Profile</span><span class={`block text-xs ${mobSub}`}>Account & details →</span></span>
-              <span class={`ms-auto ${mobSub}`}><Icon name="chevron" size={18} /></span>
+        <nav class="hn-card overflow-hidden p-2" style="box-shadow:var(--hn-shadow-lg)" aria-label="Mobile">
+          {[
+            { label: 'Quran', href: L('/quran/'), icon: 'quran' },
+            { label: 'Duas', href: L('/duas/'), icon: 'duas' },
+            { label: 'Adhkar', href: L('/duas/morning-evening/'), icon: 'shield' },
+            { label: 'Learn', href: L('/meanings/'), icon: 'book' },
+            { label: dict.nav.tools, href: L('/tools/'), icon: 'tools' },
+            { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
+            { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
+            { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
+            { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
+          ].map(m => (
+            <a href={m.href} class="flex items-center gap-3 px-2.5 py-2 rounded-[10px] min-h-[52px] font-semibold" style="color:var(--hn-ink)" data-more-link>
+              <span class="w-10 h-10 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={m.icon as any} size={20} /></span>
+              <span class="text-[16px]">{m.label}</span>
             </a>
-            {([
-              ['home', dict.nav.home, localizedPath(locale, '/')],
-              ['surahs', dict.nav.surahs, localizedPath(locale, '/surahs/')],
-              ['quran', dict.nav.quran, localizedPath(locale, '/quran/')],
-              ['duas', dict.nav.duas, localizedPath(locale, '/duas/')],
-              ['kalimas', dict.nav.kalimas, localizedPath(locale, '/kalimas/')],
-              ['meanings', dict.nav.meanings, localizedPath(locale, '/meanings/')],
-              ['waqiat', dict.nav.waqiat, localizedPath(locale, '/waqiat/')],
-              ['tools', dict.nav.tools, localizedPath(locale, '/tools/')],
-              ['about', dict.nav.about, localizedPath(locale, '/about/')],
-            ] as const).map(([icon, label, href]) => (
-              <a href={href} class={`flex items-center gap-3 px-2.5 py-2 rounded-2xl min-h-[52px] ${dropHover} ${light ? 'active:bg-qg-soft' : 'active:bg-white/15'}`}>
-                <span class={`w-10 h-10 shrink-0 grid place-items-center rounded-xl border ${mobTile}`}><Icon name={icon} size={20} /></span>
-                <span class={`text-[16px] font-semibold ${mobTx}`}>{label}</span>
-                <span class={`ms-auto ${mobSub}`}><Icon name="chevron" size={18} /></span>
-              </a>
-            ))}
-          </div>
-          <div class={`border-t px-4 py-3 flex items-center gap-2 ${light ? 'border-qg-line' : 'border-white/10'}`}>
-            <span class={`text-xs font-bold uppercase tracking-wide ${mobSub}`}>Languages</span>
-            <span class="ms-auto flex gap-1.5">
-              {locales.map(l => (
-                <a href={localizedPath(l, canonicalPath || '/')} class={`w-9 h-9 grid place-items-center rounded-full text-xs font-extrabold border ${l===locale?(light?'bg-qg-deep text-white border-qg-deep':'bg-brand-500 text-night-900 border-brand-500'):(light?'bg-qg-soft text-qg-green border-qg-line':'bg-white/5 text-brand-300 border-white/15')}`} aria-label={localeNames[l]}>{l.toUpperCase()}</a>
-              ))}
-            </span>
-          </div>
+          ))}
         </nav>
       </div>
     </div>
   </header>
-  <script define:vars={{ profileUrl }}>
+
+  <script is:inline>
     (() => {
+      const root = document.documentElement;
+      const themeBtn = document.getElementById('themeBtn');
+      const moon = document.getElementById('themeIconMoon');
+      const sun = document.getElementById('themeIconSun');
+      const sync = () => {
+        const dark = root.dataset.theme === 'dark';
+        moon?.classList.toggle('hidden', dark);
+        sun?.classList.toggle('hidden', !dark);
+        themeBtn?.setAttribute('aria-pressed', String(dark));
+        const meta = document.querySelector('meta[name="theme-color"]');
+        meta?.setAttribute('content', dark ? '#101613' : '#FAF8F2');
+      };
+      sync();
+      themeBtn?.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('hn-theme', next); } catch {}
+        sync();
+      });
       const langBtn = document.getElementById('langBtn');
       const langMenu = document.getElementById('langMenu');
-      const langChevron = document.getElementById('langChevron');
+      const moreBtn = document.getElementById('moreBtn');
+      const moreMenu = document.getElementById('moreMenu');
+      const moreChevron = document.getElementById('moreChevron');
       const menuBtn = document.getElementById('menuBtn');
       const mobileMenu = document.getElementById('mobileMenu');
       const icoOpen = document.getElementById('menuIcoOpen');
@@ -217,7 +222,12 @@ const crumbLd = crumbs.length ? {
         if (!langMenu || !langBtn) return;
         langMenu.classList.toggle('hidden', !open);
         langBtn.setAttribute('aria-expanded', String(open));
-        langChevron?.classList.toggle('rotate-180', open);
+      };
+      const setMore = (open) => {
+        if (!moreMenu || !moreBtn) return;
+        moreMenu.classList.toggle('hidden', !open);
+        moreBtn.setAttribute('aria-expanded', String(open));
+        moreChevron?.classList.toggle('rotate-180', open);
       };
       const setMenu = (open) => {
         if (!mobileMenu || !menuBtn) return;
@@ -226,95 +236,19 @@ const crumbLd = crumbs.length ? {
         icoOpen?.classList.toggle('hidden', open);
         icoClose?.classList.toggle('hidden', !open);
       };
-      langBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const willOpen = langMenu?.classList.contains('hidden');
-        setMenu(false);
-        setLang(!!willOpen);
-      });
-      menuBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const willOpen = mobileMenu?.classList.contains('hidden');
-        setLang(false);
-        setMenu(!!willOpen);
-      });
+      langBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = langMenu?.classList.contains('hidden'); setMenu(false); setMore(false); setLang(!!w); });
+      moreBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = moreMenu?.classList.contains('hidden'); setLang(false); setMenu(false); setMore(!!w); });
+      menuBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = mobileMenu?.classList.contains('hidden'); setLang(false); setMore(false); setMenu(!!w); });
       document.addEventListener('click', (e) => {
         if (!document.getElementById('langWrap')?.contains(e.target)) setLang(false);
+        if (!document.getElementById('moreWrap')?.contains(e.target)) setMore(false);
         const menu = document.getElementById('mobileMenu');
         const wrap = document.getElementById('menuWrap');
         if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !wrap?.contains(e.target)) setMenu(false);
       });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { setLang(false); setMenu(false); }
-      });
-      mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
-      window.addEventListener('resize', () => {
-        if (window.innerWidth >= 1024) setMenu(false);
-      });
-
-      // ---- site-wide auth chip: guest → Login, member → avatar + name ----
-      // Faces resolve via habit.js (custom photo → SVG avatar → initial).
-      let HN = null, lastUser = undefined;
-      import('/habits/habit.js?v=5').then((m) => {
-        HN = m;
-        if (lastUser !== undefined) paintNav(lastUser);
-      }).catch(() => {});
-      const faceFallback = (user) => {
-        const first = (user.name || 'Profile').split(' ')[0];
-        return first.charAt(0).toUpperCase() || 'R';
-      };
-      const setFace = (el, user) => {
-        if (!el) return;
-        try {
-          if (HN?.faceFor) {
-            const html = HN.faceFor(user);
-            if (String(html).trim().startsWith('<')) { el.innerHTML = html; return; }
-            el.innerHTML = '';
-            el.textContent = html;
-            return;
-          }
-        } catch { /* fallback below */ }
-        el.innerHTML = '';
-        el.textContent = faceFallback(user);
-      };
-      const paintNav = (user) => {
-        lastUser = user || null;
-        // Members on phones get app-only chrome (see global.css .hn-member).
-        document.body.classList.toggle('hn-member', !!user);
-        const login = document.querySelector('[data-nav-login]');
-        const chip = document.querySelector('[data-nav-profile]');
-        const mName = document.querySelector('[data-nav-mobile-name]');
-        const mAv = document.querySelector('[data-nav-mobile-avatar]');
-        if (!user) {
-          login?.classList.remove('hidden');
-          login?.classList.add('sm:inline-flex');
-          chip?.classList.add('hidden');
-          chip?.classList.remove('inline-flex');
-          if (mName) mName.textContent = 'Login / Profile';
-          if (mAv) mAv.textContent = '👤';
-          return;
-        }
-        login?.classList.add('hidden');
-        login?.classList.remove('sm:inline-flex');
-        chip?.classList.remove('hidden');
-        chip?.classList.add('inline-flex');
-        const first = (user.name || 'Profile').split(' ')[0];
-        setFace(document.querySelector('[data-nav-avatar]'), user);
-        const nm = document.querySelector('[data-nav-name]');
-        if (nm) nm.textContent = first;
-        if (mName) mName.textContent = user.name || user.email || 'My profile';
-        setFace(document.querySelector('[data-nav-mobile-avatar]'), user);
-      };
-      window.hnUpdateNav = paintNav;
-      // Open the page-level login modal when present; else go to /profile/.
-      document.querySelector('[data-nav-login]')?.addEventListener('click', (e) => {
-        if (window.hnAuthModal) { e.preventDefault(); window.hnAuthModal.open('login'); }
-      });
-      document.addEventListener('hn:auth', (e) => { if (e.detail?.user) paintNav(e.detail.user); });
-      fetch('/api/auth/session', { credentials: 'same-origin' })
-        .then((r) => r.ok ? r.json() : { user: null })
-        .then((d) => paintNav(d.user || null))
-        .catch(() => paintNav(null));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setLang(false); setMore(false); setMenu(false); } });
+      document.querySelectorAll('[data-more-link]').forEach(a => a.addEventListener('click', () => { setMenu(false); setMore(false); }));
+      window.addEventListener('resize', () => { if (window.innerWidth >= 1024) setMenu(false); });
     })();
   </script>
 
@@ -322,95 +256,66 @@ const crumbLd = crumbs.length ? {
     <slot />
   </main>
 
-  {!hideFooter && (light ? (
-  <footer class="bg-white text-qg-nav mt-12 border-t border-qg-line">
-    <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
-      <div class="md:col-span-2">
-        <div class="font-extrabold text-xl mb-2 text-qg-green">☪ Hikmah Noor</div>
-        <p class="text-sm leading-6 text-qg-nav">{dict.footer.about}</p>
-        <p class="text-xs mt-3 text-qg-muted">{dict.footer.disclaimer}</p>
+  {/* ============ MOBILE BOTTOM NAV ============ */}
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-50 border-t" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border);padding-bottom:env(safe-area-inset-bottom)" aria-label="Quick">
+    <div class="grid grid-cols-5 h-[64px]">
+      {[
+        { label: dict.nav.home ?? 'Home', href: L('/'), icon: 'home' },
+        { label: 'Quran', href: L('/quran/'), icon: 'quran' },
+        { label: 'Duas', href: L('/duas/'), icon: 'duas' },
+        { label: 'Search', href: L('/search/'), icon: 'search' },
+        { label: 'More', href: L('/explore/'), icon: 'menu' },
+      ].map(m => (
+        <a href={m.href} class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold min-h-[56px]" style="color:var(--hn-muted)">
+          <Icon name={m.icon as any} size={21} />
+          {m.label}
+        </a>
+      ))}
+    </div>
+  </nav>
+
+  {!hideFooter && (
+  <footer class="border-t mt-12" style="background:var(--hn-card);border-color:var(--hn-border)">
+    <div class="hn-container py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <div class="lg:col-span-1">
+        <div class="font-extrabold text-lg" style="color:var(--hn-ink)">Hikmah Noor</div>
+        <p class="text-sm leading-6 mt-2" style="color:var(--hn-muted)">{dict.footer.about}</p>
+        <p class="text-xs mt-3" style="color:var(--hn-muted)">{dict.footer.disclaimer}</p>
       </div>
       <div>
-        <div class="font-bold mb-3 text-qg-green">{dict.footer.pages}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/about/')}>About Us</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/profile/')}>My Profile</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/leaderboard/')}>🏆 Leaderboard</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/contact/')}>Contact</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/privacy/')}>Privacy</a></li>
+        <div class="font-bold mb-3 text-sm uppercase tracking-wide" style="color:var(--hn-ink)">Explore</div>
+        <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
+          <li><a class="hover:underline" href={L('/quran/')}>Quran</a></li>
+          <li><a class="hover:underline" href={L('/duas/')}>Duas</a></li>
+          <li><a class="hover:underline" href={L('/duas/morning-evening/')}>Adhkar</a></li>
+          <li><a class="hover:underline" href={L('/kalimas/')}>Kalimas</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-bold mb-3 text-qg-green">{dict.footer.tools}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/')}>All Tools</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/zakat/zakat-calculator/')}>Zakat Calculator</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/tools/ramadan-countdown/')}>Ramadan Countdown</a></li>
+        <div class="font-bold mb-3 text-sm uppercase tracking-wide" style="color:var(--hn-ink)">Resources</div>
+        <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
+          <li><a class="hover:underline" href={L('/meanings/')}>Guides</a></li>
+          <li><a class="hover:underline" href={L('/tools/')}>Tools</a></li>
+          <li><a class="hover:underline" href={L('/search/')}>Search</a></li>
         </ul>
       </div>
       <div>
-        <div class="font-bold mb-3 text-qg-green">{dict.footer.cats}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/surahs/')}>Surahs</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/duas/')}>Duas</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/kalimas/')}>Kalimas</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/meanings/')}>Meanings</a></li>
-          <li><a class="hover:text-qg-green" href={localizedPath(locale, '/waqiat/')}>Waqiat</a></li>
+        <div class="font-bold mb-3 text-sm uppercase tracking-wide" style="color:var(--hn-ink)">Site</div>
+        <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
+          <li><a class="hover:underline" href={L('/about/')}>About</a></li>
+          <li><a class="hover:underline" href={L('/contact/')}>Contact</a></li>
+          <li><a class="hover:underline" href={L('/privacy/')}>Privacy</a></li>
+          <li><a class="hover:underline" href={L('/terms/')}>Terms</a></li>
         </ul>
       </div>
     </div>
-    <div class="border-t border-qg-line">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row gap-2 items-center justify-between text-xs text-qg-muted">
+    <div class="border-t" style="border-color:var(--hn-border)">
+      <div class="hn-container py-4 flex flex-col sm:flex-row gap-2 items-center justify-between text-xs" style="color:var(--hn-muted)">
         <span>© 2026 Hikmah Noor • {dict.footer.rights}</span>
-        <span class="flex gap-3">{locales.map(l => <a class="hover:text-qg-green" href={localizedPath(l, '/')}>{localeFlags[l]} {localeNames[l]}</a>)}</span>
+        <span class="flex gap-3">{locales.map(l => <a class="hover:underline" href={localizedPath(l, '/')}>{localeNames[l]}</a>)}</span>
       </div>
     </div>
   </footer>
-  ) : (
-  <footer class="bg-[#0b0a15] text-ink-300 mt-12 border-t border-white/10">
-    <div class="max-w-7xl mx-auto px-4 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-5">
-      <div class="md:col-span-2">
-        <div class="font-extrabold text-xl mb-2 text-white">☪ Hikmah Noor</div>
-        <p class="text-sm text-ink-300 leading-6">{dict.footer.about}</p>
-        <p class="text-xs mt-3 text-ink-500">{dict.footer.disclaimer}</p>
-      </div>
-      <div>
-        <div class="font-bold mb-3 text-gold-300">{dict.footer.pages}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/about/')}>About Us</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/profile/')}>My Profile</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/leaderboard/')}>🏆 Leaderboard</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/contact/')}>Contact</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/privacy/')}>Privacy</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="font-bold mb-3 text-gold-300">{dict.footer.tools}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/tools/')}>All Tools</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/tools/zakat/zakat-calculator/')}>Zakat Calculator</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/tools/ramadan-countdown/')}>Ramadan Countdown</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="font-bold mb-3 text-gold-300">{dict.footer.cats}</div>
-        <ul class="space-y-2 text-sm">
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/surahs/')}>Surahs</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/duas/')}>Duas</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/kalimas/')}>Kalimas</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/meanings/')}>Meanings</a></li>
-          <li><a class="hover:text-gold-300" href={localizedPath(locale, '/waqiat/')}>Waqiat</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="border-t border-white/10">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row gap-2 items-center justify-between text-xs text-ink-500">
-        <span>© 2026 Hikmah Noor • {dict.footer.rights}</span>
-        <span class="flex gap-3">{locales.map(l => <a class="hover:text-gold-300" href={localizedPath(l, '/')}>{localeFlags[l]} {localeNames[l]}</a>)}</span>
-      </div>
-    </div>
-  </footer>))}
-  {light && <style>{':root{color-scheme:light}'}</style>}
-  <ConfirmModal />
+  )}
 </body>
 </html>

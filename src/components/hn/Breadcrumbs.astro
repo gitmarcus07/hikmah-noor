@@ -1,0 +1,27 @@
+---
+/* Consistent breadcrumbs with semantic markup. Mobile-safe (truncates). */
+import { localizedPath } from '../../i18n/utils';
+
+interface Crumb { name: string; path: string; }
+interface Props { locale: string; items: Crumb[]; }
+const { locale, items } = Astro.props;
+---
+{items.length > 0 && (
+<nav aria-label="Breadcrumb" class="min-w-0">
+  <ol class="hn-crumbs">
+    {items.map((c, i) => {
+      const last = i === items.length - 1;
+      return (
+        <li class="flex items-center gap-1.5 min-w-0">
+          {i > 0 && <span aria-hidden="true" class="opacity-50">›</span>}
+          {last ? (
+            <span aria-current="page" class="truncate max-w-[12rem] sm:max-w-none">{c.name}</span>
+          ) : (
+            <a href={localizedPath(locale, c.path)} class="shrink-0">{c.name}</a>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+)}

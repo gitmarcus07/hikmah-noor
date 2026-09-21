@@ -1,11 +1,9 @@
 ---
-/* Guest landing — QuranGuide-style light magazine (hero, trending,
- * latest + sidebar, duas, waqiat, tools, kalimas). No habit tracking.
- * Fully dict-driven (en/hi/ur/ar) via dict.mag.
- */
+/* Hikmah Noor homepage — compact discovery hero + curated library.
+ * Fully dict-driven (en/hi/ur/ar) via dict.mag + dict.home. */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SiteArt from './SiteArt.astro';
-import { artFor } from '../lib/art';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
 import { localizedPath } from '../i18n/utils';
 
 interface Props {
@@ -15,9 +13,9 @@ interface Props {
   catGroups: Record<string, any[]>;
   fallbackCount?: number;
 }
-const { locale, dict, latest, catGroups, fallbackCount = 0 } = Astro.props;
+const { locale, dict, latest, catGroups } = Astro.props;
 const m = dict.mag ?? {};
-const h = dict.home ?? {};
+const L = (p: string) => localizedPath(locale, p);
 
 function slugOf(id: string) { return id.split('/').pop()!.replace(/\.mdx?$/, ''); }
 function artHref(a: any) {
@@ -31,292 +29,150 @@ function fmtDate(d: any) {
     return new Date(d).toLocaleDateString(tag, { year: 'numeric', month: 'short', day: 'numeric' });
   } catch { return ''; }
 }
-// Short category badges per locale (search keywords stay English in the index).
-const CAT: Record<string, string> = locale === 'hi'
-  ? { duas: 'दुआ', kalimas: 'कलमा', meanings: 'मतलब', waqiat: 'वाक़िया', surahs: 'सूरह', quran: 'कुरआन' }
-  : locale === 'ur'
-    ? { duas: 'دعا', kalimas: 'کلمہ', meanings: 'مطلب', waqiat: 'واقعہ', surahs: 'سورۃ', quran: 'قرآن' }
-    : locale === 'ar'
-      ? { duas: 'دعاء', kalimas: 'كلمة', meanings: 'معنى', waqiat: 'قصة', surahs: 'سورة', quran: 'القرآن' }
-      : { duas: 'Dua', kalimas: 'Kalima', meanings: 'Meaning', waqiat: 'Story', surahs: 'Surah', quran: 'Quran' };
-const catBadge = (c: string) => CAT[c] ?? c;
 
-const searchUrl = localizedPath(locale, '/search/');
-const readUrl = localizedPath(locale, '/tools/read/');
-const surahsUrl = localizedPath(locale, '/surahs/');
-const quranUrl = localizedPath(locale, '/quran/');
-const duasUrl = localizedPath(locale, '/duas/');
-const waqiatUrl = localizedPath(locale, '/waqiat/');
-const kalimasUrl = localizedPath(locale, '/kalimas/');
-const zakatUrl = localizedPath(locale, '/tools/zakat-calculator/');
-const ramadanUrl = localizedPath(locale, '/tools/ramadan-countdown/');
+const searchUrl = L('/search/');
+const quranUrl = L('/quran/');
+const surahsUrl = L('/surahs/');
+const duasUrl = L('/duas/');
+const adhkarUrl = L('/duas/morning-evening/');
+const kalimasUrl = L('/kalimas/');
+const meaningsUrl = L('/meanings/');
+const toolsUrl = L('/tools/');
+const zakatUrl = L('/tools/zakat/zakat-calculator/');
+const ramadanUrl = L('/tools/ramadan-countdown/');
 
-const trending = (latest ?? []).slice(0, 4);
-const latestThree = (latest ?? []).slice(0, 3);
+const shortcuts = [
+  { label: 'Morning Dua', href: L('/duas/morning-evening/morning-remembrance/') },
+  { label: 'Ayatul Kursi', href: L('/duas/salah-prayer/ayatul-kursi-salah/') },
+  { label: 'Dua for Anxiety', href: L('/duas/hardship-rizq/anxiety-grief/') },
+  { label: 'Laylatul Qadr', href: L('/duas/worship-knowledge/laylatul-qadr/') },
+];
+
+const library = [
+  { icon: 'quran', title: 'Quran', desc: 'Read all 114 surahs with translation', href: quranUrl },
+  { icon: 'duas', title: 'Duas', desc: 'Authentic supplications for everyday life', href: duasUrl },
+  { icon: 'surahs', title: 'Surahs', desc: 'Browse surahs by number and name', href: surahsUrl },
+  { icon: 'shield', title: 'Adhkar', desc: 'Morning and evening remembrances', href: adhkarUrl },
+  { icon: 'kalimas', title: 'Kalimas', desc: 'The six kalimas with meaning', href: kalimasUrl },
+  { icon: 'book', title: 'Paras', desc: 'The Quran in 30 parts (Juz)', href: quranUrl },
+  { icon: 'star', title: 'Names of Allah', desc: 'Meanings and explanations', href: meaningsUrl },
+  { icon: 'meanings', title: 'Guides', desc: 'Simple Islamic learning articles', href: meaningsUrl },
+] as const;
+
+const tools = [
+  { icon: 'tools', name: m.zakatT ?? 'Zakat Calculator', desc: m.zakatD ?? 'Zakat on cash and gold', href: zakatUrl },
+  { icon: 'moon', name: m.ramadanT ?? 'Ramadan Countdown', desc: m.ramadanD ?? 'Days left to Ramadan', href: ramadanUrl },
+  { icon: 'quran', name: m.quranIndexT ?? 'Quran Index', desc: m.quranIndexD ?? 'All surahs with translation', href: quranUrl },
+  { icon: 'duas', name: m.duaCollT ?? 'Dua Collection', desc: m.duaCollD ?? 'Masnoon duas with translation', href: duasUrl },
+] as const;
+
 const duas = (catGroups.duas ?? []).slice(0, 4);
-const waqiat = (catGroups.waqiat ?? []).slice(0, 2);
-const popular = (latest ?? []).slice(0, 3);
-
-const KAL_AR = ['كَلِمَةُ الطَّيِّبَة', 'كَلِمَةُ الشَّهَادَة', 'كَلِمَةُ التَّمْجِيد', 'كَلِمَةُ التَّوْحِيد', 'كَلِمَةُ الِاسْتِغْفَار'];
-const KAL_PAT = [
-  ['first', '1', 'pehla', 'tayyab', 'tayyib'],
-  ['second', '2', 'dusra', 'doosra', 'shahad'],
-  ['third', '3', 'teesra', 'tamjeed'],
-  ['fourth', '4', 'chautha', 'tawheed'],
-  ['fifth', '5', 'astaghfar'],
-];
-const kalimaPool = catGroups.kalimas ?? [];
-const kalimaHref = (i: number) => {
-  const hit = kalimaPool.find((a: any) => KAL_PAT[i].some((p) => slugOf(a.id).toLowerCase().includes(p)));
-  const a = hit ?? kalimaPool[i];
-  return a ? artHref(a) : kalimasUrl;
-};
-const kalimaNames: string[] = Array.isArray(m.kalimaNames) ? m.kalimaNames : [];
-
-const TOOLS = [
-  { icon: '🧮', name: m.zakatT ?? 'Zakat', desc: m.zakatD ?? '', href: zakatUrl },
-  { icon: '🌙', name: m.ramadanT ?? 'Ramadan', desc: m.ramadanD ?? '', href: ramadanUrl },
-  { icon: '📖', name: m.quranIndexT ?? 'Quran', desc: m.quranIndexD ?? '', href: quranUrl },
-  { icon: '🤲', name: m.duaCollT ?? 'Duas', desc: m.duaCollD ?? '', href: duasUrl },
-];
-const QUICK = [
-  [quranUrl, m.quranIndexT ?? 'Quran'], [kalimasUrl, m.fiveKalimas ?? 'Kalimas'],
-  [surahsUrl, m.allSurahs ?? 'Surahs'], [duasUrl, m.allDuas ?? 'Duas'],
-  [zakatUrl, m.zakatT ?? 'Zakat'], [ramadanUrl, m.ramadanT ?? 'Ramadan'],
-];
+const recent = (latest ?? []).slice(0, 3);
 ---
-<BaseLayout title={dict.home.heroTitle} description={dict.home.heroSub} locale={locale} canonicalPath="/" faq={dict.home.faq} type="website" theme="light">
-  <div class="max-w-[1280px] mx-auto px-4 sm:px-5">
-    {/* 1. HERO */}
-    <section class="py-8 sm:py-12" aria-label="Home">
-      <div class="grid gap-8 md:grid-cols-2 md:items-center">
-        <div class="min-w-0">
-          <p class="inline-flex items-center gap-2 text-[13px] font-semibold text-qg-green bg-qg-soft border border-qg-line rounded-full px-4 py-1.5">📖 {m.welcome ?? ''}</p>
-          <h1 class="text-[32px] leading-[1.2] sm:text-5xl font-extrabold text-qg-ink mt-4 break-words">{m.heroA ?? ''} <span class="text-qg-green">{m.heroB ?? ''}</span> {m.heroC ?? ''}</h1>
-          <p class="mt-2 text-sm font-bold tracking-wide text-qg-muted">Arabic • Hindi • English • Urdu</p>
-          <p class="mt-3 text-qg-nav text-[15px] md:text-base leading-7 max-w-xl">{m.heroSub ?? ''}</p>
-          <form action={searchUrl} method="get" class="mt-5 max-w-xl" role="search">
-            <div class="flex items-center gap-2 bg-white border border-qg-line rounded-full ps-5 pe-2 py-2 shadow-[0_2px_10px_rgba(0,0,0,0.04)] focus-within:border-qg-green transition">
-              <span class="text-qg-muted text-xl" aria-hidden="true">🔍</span>
-              <input type="search" name="q" autocomplete="off" placeholder={m.searchPh ?? ''} maxlength="100" aria-label={m.searchW ?? 'Search'}
-                class="w-full bg-transparent py-2.5 text-qg-ink placeholder:text-qg-muted outline-none text-[16px] min-w-0" />
-              <button type="submit" class="shrink-0 bg-qg-deep hover:bg-[#084337] text-white font-bold rounded-full px-6 py-2.5 min-h-[44px] transition">{m.searchBtn ?? ''}</button>
-            </div>
-          </form>
-          <div class="mt-4 flex flex-col sm:flex-row gap-3">
-            <a href={quranUrl} class="inline-flex items-center justify-center gap-2 bg-qg-deep hover:bg-[#084337] text-white font-bold rounded-full px-7 py-3 min-h-[52px] shadow transition">{m.readQuran ?? ''}</a>
-            <a href={surahsUrl} class="inline-flex items-center justify-center gap-2 bg-white hover:bg-qg-soft text-qg-green border-2 border-qg-green font-bold rounded-full px-7 py-3 min-h-[52px] transition">{m.allSurahs ?? ''}</a>
+<BaseLayout title={dict.home.heroTitle} description={dict.home.heroSub} locale={locale} canonicalPath="/" faq={dict.home.faq} type="website">
+  <div class="hn-discover">
+    {/* ===== Compact hero ===== */}
+    <section class="hn-section hn-pattern" aria-label="Hikmah Noor" style="border-radius:16px">
+      <div class="max-w-2xl mx-auto text-center px-1">
+        <h1 class="text-[28px] leading-tight sm:text-4xl font-extrabold tracking-tight">Hikmah Noor</h1>
+        <p class="mt-1 font-bold" style="color:var(--hn-primary)">Islamic Knowledge, Made Simple</p>
+        <p class="mt-3 text-[15px] sm:text-base leading-7" style="color:var(--hn-muted)">
+          {m.heroSub ?? 'Explore the Quran, duas, adhkar, kalimas and trusted Islamic resources — with Arabic text, translation and sources.'}
+        </p>
+        <form action={searchUrl} method="get" class="mt-5" role="search">
+          <div class="hn-searchwrap">
+            <Icon name="search" size={20} />
+            <input type="search" name="q" autocomplete="off" maxlength="100" aria-label="Search"
+              placeholder={m.searchPh ?? 'Search duas, surahs, topics...'} />
+            <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">{m.searchBtn ?? 'Search'}</button>
           </div>
-        </div>
-        <div class="relative flex justify-center md:justify-end">
-          <div class="relative w-full max-w-[420px] bg-white border border-qg-line rounded-[28px] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-            <SiteArt name="hero-quran" title="Holy Quran" />
-            <span class="absolute top-4 end-6 text-qg-gold text-xl" aria-hidden="true">✦</span>
-            <span class="absolute bottom-8 start-8 text-qg-gold/70 text-lg" aria-hidden="true">✦</span>
-            <span class="absolute top-1/2 end-4 text-qg-gold/50" aria-hidden="true">✦</span>
-          </div>
+        </form>
+        <div class="mt-3 flex flex-wrap justify-center gap-2">
+          {shortcuts.map(s => (
+            <a href={s.href} class="hn-badge hn-card-hover" style="padding:0.45rem 0.9rem;font-size:0.83rem">{s.label}</a>
+          ))}
         </div>
       </div>
     </section>
 
-    {/* 2. TRENDING */}
-    {trending.length > 0 && (
-      <section class="py-6" aria-label={m.popularTopics ?? ''}>
-        <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">🔥 {m.trending ?? ''}</p>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.popularTopics ?? ''}</h2>
-        <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {trending.map((a: any) => (
-            <a href={artHref(a)} class="group bg-white border border-qg-line rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-0.5 transition flex flex-col">
-              <span class="block h-40 overflow-hidden bg-qg-soft"><SiteArt name={artFor(a.data.image, a.data.category)} title={a.data.title} /></span>
-              <span class="p-3.5 flex flex-col gap-1.5 flex-1">
-                <span class="self-start text-[11px] font-bold text-qg-green bg-qg-soft px-2 py-0.5 rounded-full">{catBadge(a.data.category)}</span>
-                <span class="font-bold text-qg-ink text-[15px] leading-6 group-hover:text-qg-green line-clamp-3">{a.data.title}</span>
-                <span class="mt-auto pt-1 flex items-center justify-between text-xs text-qg-muted"><span>{fmtDate(a.data.pubDate)}</span><span aria-hidden="true">→</span></span>
-              </span>
+    {/* ===== Explore library ===== */}
+    <section class="hn-section" style="padding-top:0.5rem" aria-label="Explore">
+      <SectionHeader eyebrow="Library" title="Explore" sub="Start with a collection — every page includes sources and translation." href={toolsUrl} linkLabel={m.viewAll ?? 'View all'} />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {library.map(c => (
+          <a href={c.href} class="hn-card hn-card-hover hn-card-pad flex gap-3 items-start">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.icon as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="font-extrabold block leading-6">{c.title}</span>
+              <span class="text-[13.5px] leading-5 block mt-0.5" style="color:var(--hn-muted)">{c.desc}</span>
+              <span class="text-[13px] font-bold mt-1.5 inline-flex items-center gap-1" style="color:var(--hn-primary)">Explore <Icon name="arrow" size={14} /></span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {/* ===== Popular duas ===== */}
+    {duas.length > 0 && (
+      <section class="hn-section" style="padding-top:0" aria-label={m.dailyDuas ?? 'Popular duas'}>
+        <SectionHeader eyebrow="Duas" title={m.dailyDuas ?? 'Popular duas'} href={duasUrl} linkLabel={m.allDuas ?? 'All duas'} />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {duas.map((a: any) => (
+            <a href={artHref(a)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold text-[15px] leading-6 block">{a.data.title}</span>
+              <span class="mt-0.5 text-[13.5px] leading-5 line-clamp-2 block" style="color:var(--hn-muted)">{a.data.description ?? ''}</span>
+              <span class="mt-2 text-xs font-semibold" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
             </a>
           ))}
         </div>
       </section>
     )}
 
-    <div class="grid gap-8 lg:grid-cols-[1fr_320px] items-start">
-      <div class="min-w-0">
-        {/* 3. LATEST */}
-        {latestThree.length > 0 && (
-          <section class="py-6" aria-label={m.latestArticles ?? ''}>
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">⚡ {m.latest ?? ''}</p>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.latestArticles ?? ''}</h2>
-              </div>
-              <a href={quranUrl} class="shrink-0 text-sm font-bold text-qg-green hover:underline">{m.viewAll ?? ''}</a>
-            </div>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {latestThree.map((a: any) => (
-                <a href={artHref(a)} class="group bg-white border border-qg-line rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-lg hover:-translate-y-0.5 transition flex flex-col">
-                  <span class="block h-36 overflow-hidden bg-qg-soft"><SiteArt name={artFor(a.data.image, a.data.category)} title={a.data.title} /></span>
-                  <span class="p-3.5 flex flex-col gap-1.5 flex-1">
-                    <span class="self-start text-[11px] font-bold text-qg-green bg-qg-soft px-2 py-0.5 rounded-full">{catBadge(a.data.category)}</span>
-                    <span class="font-bold text-qg-ink text-[15px] leading-6 group-hover:text-qg-green line-clamp-3">{a.data.title}</span>
-                    <span class="mt-auto pt-1 flex items-center justify-between text-xs text-qg-muted"><span>{fmtDate(a.data.pubDate)}</span><span aria-hidden="true">→</span></span>
-                  </span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* 4. DUAS */}
-        {duas.length > 0 && (
-          <section class="py-6" aria-label={m.dailyDuas ?? ''}>
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">📜 {m.duas ?? ''}</p>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.dailyDuas ?? ''}</h2>
-              </div>
-              <a href={duasUrl} class="shrink-0 text-sm font-bold text-qg-green hover:underline">{m.allDuas ?? ''}</a>
-            </div>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-              {duas.map((a: any) => (
-                <a href={artHref(a)} class="group flex gap-3 bg-white border border-qg-line rounded-2xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-lg transition">
-                  <span class="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-qg-soft"><SiteArt name={artFor(a.data.image, a.data.category)} title={a.data.title} /></span>
-                  <span class="min-w-0 flex flex-col">
-                    <span class="font-bold text-qg-ink text-[15px] leading-6 group-hover:text-qg-green line-clamp-2">{a.data.title}</span>
-                    <span class="mt-0.5 text-[13px] text-qg-muted leading-5 line-clamp-2">{a.data.description ?? ''}</span>
-                    <span class="mt-auto pt-1 text-xs text-qg-muted">{fmtDate(a.data.pubDate)}</span>
-                  </span>
-                </a>
-              ))}
-            </div>
-            <div class="mt-4 text-center">
-              <a href={duasUrl} class="inline-flex items-center justify-center gap-2 border-2 border-qg-green text-qg-green hover:bg-qg-soft font-bold rounded-full px-7 py-2.5 min-h-[48px] transition">{m.viewMoreDuas ?? ''}</a>
-            </div>
-          </section>
-        )}
-
-        {/* 5. WAQIAT */}
-        {waqiat.length > 0 && (
-          <section class="py-6" aria-label={m.waqiatStories ?? ''}>
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">📖 {m.waqiat ?? ''}</p>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.waqiatStories ?? ''}</h2>
-              </div>
-              <a href={waqiatUrl} class="shrink-0 text-sm font-bold text-qg-green hover:underline">{m.allWaqiat ?? ''}</a>
-            </div>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-              {waqiat.map((a: any) => (
-                <a href={artHref(a)} class="group flex gap-3 bg-white border border-qg-line rounded-2xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-lg transition">
-                  <span class="w-[72px] h-[72px] shrink-0 rounded-xl overflow-hidden bg-qg-soft"><SiteArt name={artFor(a.data.image, a.data.category)} title={a.data.title} /></span>
-                  <span class="min-w-0 flex flex-col">
-                    <span class="font-bold text-qg-ink text-[15px] leading-6 group-hover:text-qg-green line-clamp-2">{a.data.title}</span>
-                    <span class="mt-auto pt-1 text-xs text-qg-muted">{fmtDate(a.data.pubDate)}</span>
-                  </span>
-                </a>
-              ))}
-            </div>
-            <div class="mt-4 text-center">
-              <a href={waqiatUrl} class="inline-flex items-center justify-center gap-2 border-2 border-qg-green text-qg-green hover:bg-qg-soft font-bold rounded-full px-7 py-2.5 min-h-[48px] transition">{m.viewMoreWaqiat ?? ''}</a>
-            </div>
-          </section>
-        )}
-
-        {/* 6. TOOLS */}
-        <section class="py-6" aria-label={m.usefulTools ?? ''}>
-          <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">🧰 {m.tools ?? ''}</p>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.usefulTools ?? ''}</h2>
-          <div class="mt-4 grid gap-3 sm:grid-cols-2">
-            {TOOLS.map((t) => (
-              <a href={t.href} class="group flex items-center gap-3 bg-white border border-qg-line rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-lg hover:border-qg-green/40 transition">
-                <span class="w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-qg-soft text-qg-green text-2xl" aria-hidden="true">{t.icon}</span>
-                <span class="min-w-0 flex-1">
-                  <span class="block font-extrabold text-qg-ink group-hover:text-qg-green">{t.name}</span>
-                  <span class="block text-[13px] text-qg-muted">{t.desc}</span>
+    {/* ===== Quran + Tools ===== */}
+    <section class="hn-section" style="padding-top:0" aria-label="Quran and tools">
+      <div class="grid gap-3 lg:grid-cols-2">
+        <div class="hn-card hn-card-pad">
+          <p class="hn-eyebrow">Quran</p>
+          <h2 class="text-xl font-extrabold mt-1">Continue your reading</h2>
+          <p class="text-[14.5px] mt-1" style="color:var(--hn-muted)">All 114 surahs and 30 paras with Urdu, English and Hindi meaning — plus audio.</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href={surahsUrl} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">All 114 surahs</a>
+            <a href={quranUrl} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">30 paras</a>
+          </div>
+          <p class="font-arabic text-xl mt-4 leading-[2]" lang="ar" dir="rtl">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
+          <p class="text-[13.5px] mt-1" style="color:var(--hn-muted)">“{m.ayahTr ?? 'Our Lord, give us good in this world and good in the Hereafter.'}” — {m.ayahRef ?? 'Quran 2:201'}</p>
+        </div>
+        <div>
+          <SectionHeader eyebrow="Tools" title={m.usefulTools ?? 'Islamic tools'} href={toolsUrl} linkLabel="All tools" />
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            {tools.map(t => (
+              <a href={t.href} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3">
+                <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={t.icon as any} size={22} /></span>
+                <span class="min-w-0">
+                  <span class="block font-extrabold text-[15px]">{t.name}</span>
+                  <span class="block text-[13px]" style="color:var(--hn-muted)">{t.desc}</span>
                 </span>
-                <span class="text-qg-green font-extrabold" aria-hidden="true">→</span>
-              </a>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* SIDEBAR */}
-      <aside class="space-y-5 lg:pt-6">
-        <div class="bg-white border border-qg-line rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-          <h3 class="font-extrabold text-qg-ink flex items-center gap-2">🔍 {m.searchW ?? ''}</h3>
-          <form action={searchUrl} method="get" class="mt-2 flex items-center gap-2" role="search">
-            <input type="search" name="q" autocomplete="off" placeholder={m.searchPh ?? ''} aria-label={m.searchW ?? 'Search'}
-              class="w-full min-w-0 bg-qg-bg border border-qg-line rounded-full px-4 py-2.5 text-qg-ink placeholder:text-qg-muted outline-none focus:border-qg-green text-[15px]" />
-            <button type="submit" aria-label={m.searchW ?? 'Search'} class="shrink-0 w-11 h-11 grid place-items-center rounded-full bg-qg-deep hover:bg-[#084337] text-white transition">→</button>
-          </form>
-        </div>
-
-        <div class="rounded-2xl p-5 text-white shadow bg-gradient-to-br from-qg-deep to-[#084337]">
-          <p class="inline-block text-[11px] font-extrabold uppercase tracking-widest bg-white/20 rounded-full px-3 py-1">{m.ayahBadge ?? ''}</p>
-          <p class="font-arabic text-[22px] leading-[2] mt-3" lang="ar" dir="rtl">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
-          <p class="mt-2 text-[14px] leading-6 text-white/90">"{m.ayahTr ?? ''}"</p>
-          <p class="mt-2 text-[13px] font-bold text-white/80">{m.ayahRef ?? ''}</p>
-        </div>
-
-        {popular.length > 0 && (
-          <div class="bg-white border border-qg-line rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-            <h3 class="font-extrabold text-qg-ink">🔥 {m.popularArticles ?? ''}</h3>
-            <div class="mt-3 space-y-3">
-              {popular.map((a: any) => (
-                <a href={artHref(a)} class="group flex items-center gap-3">
-                  <span class="w-[54px] h-[54px] shrink-0 rounded-xl overflow-hidden bg-qg-soft"><SiteArt name={artFor(a.data.image, a.data.category)} title={a.data.title} /></span>
-                  <span class="min-w-0">
-                    <span class="block font-bold text-qg-ink text-[14px] leading-5 group-hover:text-qg-green line-clamp-2">{a.data.title}</span>
-                    <span class="block text-xs text-qg-muted mt-0.5">{fmtDate(a.data.pubDate)}</span>
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div class="bg-white border border-qg-line rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-          <h3 class="font-extrabold text-qg-ink">{m.quickLinks ?? ''}</h3>
-          <div class="mt-3 flex flex-wrap gap-2">
-            {QUICK.map(([href, label]) => (
-              <a href={href} class="text-[13px] font-bold text-qg-green bg-qg-soft hover:bg-[#DCEDE4] border border-qg-line rounded-full px-3.5 py-1.5 transition">{label}</a>
-            ))}
-          </div>
-        </div>
-
-        <div class="bg-white border border-qg-line rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-          <h3 class="font-extrabold text-qg-ink">{m.fiveKalimas ?? ''}</h3>
-          <div class="mt-3 space-y-1.5">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <a href={kalimaHref(i)} class="group flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-qg-soft transition">
-                <span class="w-9 h-9 shrink-0 grid place-items-center rounded-full bg-qg-deep text-white text-[13px] font-extrabold">0{i + 1}</span>
-                <span class="text-[14px] font-bold text-qg-ink group-hover:text-qg-green truncate">{kalimaNames[i] ?? `Kalima ${i + 1}`}</span>
-                <span class="ms-auto text-qg-muted" aria-hidden="true">→</span>
               </a>
             ))}
           </div>
         </div>
-      </aside>
-    </div>
-
-    {/* 7. KALIMA CARDS */}
-    <section class="py-8" aria-label={m.fiveKalimas ?? ''}>
-      <p class="inline-flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-widest text-white bg-qg-deep rounded-full px-3.5 py-1.5">🤲 {m.fiveKalimas ?? ''}</p>
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-qg-ink mt-2">{m.fiveKalimas ?? ''}</h2>
-      <p class="mt-1 text-qg-muted text-[15px]">{m.kalimaSub ?? ''}</p>
-      <div class="mt-4 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <a href={kalimaHref(i)} class="group bg-gradient-to-br from-qg-deep to-[#084337] rounded-2xl p-5 text-center text-white shadow hover:shadow-lg hover:-translate-y-0.5 transition min-h-[190px] flex flex-col items-center justify-center gap-2">
-            <span class="text-qg-gold font-extrabold">0{i + 1} →</span>
-            <span class="font-arabic text-[26px] leading-[1.9]" lang="ar" dir="rtl">{KAL_AR[i]}</span>
-            <span class="font-bold text-[14px]">{kalimaNames[i] ?? ''}</span>
-          </a>
-        ))}
       </div>
     </section>
+
+    {/* ===== Recently added ===== */}
+    {recent.length > 0 && (
+      <section class="hn-section" style="padding-top:0" aria-label={m.latestArticles ?? 'Recently added'}>
+        <SectionHeader eyebrow="Fresh" title={m.latestArticles ?? 'Recently added'} href={quranUrl} linkLabel={m.viewAll ?? 'View all'} />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {recent.map((a: any) => (
+            <a href={artHref(a)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="hn-badge">{a.data.category}</span>
+              <span class="font-bold text-[15px] leading-6 mt-2 block line-clamp-2">{a.data.title}</span>
+              <span class="mt-1 text-xs font-semibold" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
   </div>
-  <style>
-    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  </style>
 </BaseLayout>

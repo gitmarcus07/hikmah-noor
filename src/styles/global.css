@@ -1,101 +1,339 @@
 @import "tailwindcss";
 
+/* ============================================================
+   HIKMAH NOOR — UNIFIED DESIGN SYSTEM
+   Quiet Islamic Library + Modern Reading Platform
+   70% warm ivory/white · 20% emerald · 5% charcoal · 5% gold
+   ============================================================ */
+
+:root {
+  /* Light theme (default) */
+  --hn-bg: #FAF8F2;
+  --hn-bg-soft: #F3F0E6;
+  --hn-card: #FFFFFF;
+  --hn-ink: #17201B;
+  --hn-muted: #68736D;
+  --hn-border: #E7E3D8;
+  --hn-primary: #0F5132;
+  --hn-primary-deep: #093B25;
+  --hn-primary-soft: #E9F3EC;
+  --hn-gold: #B8944A;
+  --hn-gold-soft: #F5EDD8;
+  --hn-header: rgba(250, 248, 242, 0.94);
+  --hn-shadow: 0 1px 2px rgba(23, 32, 27, 0.05), 0 2px 8px rgba(23, 32, 27, 0.05);
+  --hn-shadow-lg: 0 2px 4px rgba(23, 32, 27, 0.06), 0 8px 24px rgba(23, 32, 27, 0.07);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --hn-bg: #101613;
+  --hn-bg-soft: #151D18;
+  --hn-card: #17201B;
+  --hn-ink: #F3F1E8;
+  --hn-muted: #A9B1AA;
+  --hn-border: #26332C;
+  --hn-primary: #3D8B68;
+  --hn-primary-deep: #5AA87F;
+  --hn-primary-soft: #1C2B23;
+  --hn-gold: #C7A968;
+  --hn-gold-soft: #2A2517;
+  --hn-header: rgba(16, 22, 19, 0.94);
+  --hn-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --hn-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
 @theme {
-  --font-sans: Inter, "Noto Sans Devanagari", "Noto Sans Arabic", system-ui, sans-serif;
+  --font-sans: Inter, "Noto Sans Devanagari", "Noto Sans Arabic", system-ui, -apple-system, sans-serif;
   --font-arabic: "Amiri Quran", "Noto Naskh Arabic", serif;
   --font-urdu: "Noto Nastaliq Urdu", "Noto Naskh Arabic", serif;
 
-  /* Quranly-style night surfaces */
-  --color-night-950: #100e1c;
-  --color-night-900: #14121f;
-  --color-night-850: #1a1729;
-  --color-night-800: #221e38;
+  /* Unified Hikmah Noor tokens (theme-aware via CSS vars) */
+  --color-hn-bg: var(--hn-bg);
+  --color-hn-soft: var(--hn-bg-soft);
+  --color-hn-card: var(--hn-card);
+  --color-hn-ink: var(--hn-ink);
+  --color-hn-muted: var(--hn-muted);
+  --color-hn-border: var(--hn-border);
+  --color-hn-primary: var(--hn-primary);
+  --color-hn-deep: var(--hn-primary-deep);
+  --color-hn-psoft: var(--hn-primary-soft);
+  --color-hn-gold: var(--hn-gold);
+  --color-hn-gsoft: var(--hn-gold-soft);
 
-  /* Brand violet */
-  --color-brand-200: #c9bfff;
-  --color-brand-300: #b7a6ff;
-  --color-brand-400: #9a8cff;
-  --color-brand-500: #8b7cf6;
-  --color-brand-600: #6d5ef0;
-
-  /* Readable ink on dark */
-  --color-ink-50: #f2eeff;
-  --color-ink-200: #e2dcf7;
-  --color-ink-300: #c3bce0;
-  --color-ink-500: #9a94c2;
-
-  /* Gold accents (kept from previous art) */
-  --color-gold-300: #f5c94c;
-  --color-gold-400: #d4af37;
-
-  /* QuranGuide light magazine theme (guest landing) */
-  --color-qg-bg: #FBFCFA;
-  --color-qg-card: #ffffff;
-  --color-qg-ink: #17352F;
-  --color-qg-nav: #23433C;
-  --color-qg-muted: #60736C;
-  --color-qg-green: #075B4C;
-  --color-qg-deep: #0B5A4A;
-  --color-qg-gold: #D8A62A;
-  --color-qg-line: #E6ECE8;
-  --color-qg-soft: #E9F4EF;
+  /* Legacy token remap → new system (keeps old pages visually unified) */
+  --color-night-950: var(--hn-bg);
+  --color-night-900: var(--hn-card);
+  --color-night-850: var(--hn-card);
+  --color-night-800: var(--hn-bg-soft);
+  --color-brand-200: var(--hn-primary);
+  --color-brand-300: var(--hn-primary);
+  --color-brand-400: var(--hn-primary);
+  --color-brand-500: var(--hn-primary);
+  --color-brand-600: var(--hn-primary-deep);
+  --color-ink-50: var(--hn-ink);
+  --color-ink-200: var(--hn-ink);
+  --color-ink-300: var(--hn-muted);
+  --color-ink-500: var(--hn-muted);
+  --color-gold-300: var(--hn-gold);
+  --color-gold-400: var(--hn-gold);
+  --color-qg-bg: var(--hn-bg);
+  --color-qg-card: var(--hn-card);
+  --color-qg-ink: var(--hn-ink);
+  --color-qg-nav: var(--hn-muted);
+  --color-qg-muted: var(--hn-muted);
+  --color-qg-green: var(--hn-primary);
+  --color-qg-deep: var(--hn-primary);
+  --color-qg-gold: var(--hn-gold);
+  --color-qg-line: var(--hn-border);
+  --color-qg-soft: var(--hn-primary-soft);
 }
 
-:root { color-scheme: dark; }
-
+/* ---------- Base ---------- */
 html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
 body {
   -webkit-tap-highlight-color: transparent;
-  background-color: var(--color-night-950);
-  color: var(--color-ink-50);
+  background-color: var(--hn-bg);
+  color: var(--hn-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.65;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-::selection { background: var(--color-brand-500); color: #14121f; }
+::selection { background: var(--hn-primary); color: #fff; }
+[data-theme="dark"] ::selection { background: var(--hn-primary); color: #101613; }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand-300);
+  outline: 2px solid var(--hn-primary);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 mark {
-  background: var(--color-gold-300);
-  color: #1a1729;
+  background: var(--hn-gold-soft);
+  color: var(--hn-ink);
   border-radius: 4px;
   padding-inline: 2px;
+  border: 1px solid var(--hn-gold);
 }
 
+img, table { max-width: 100%; }
+table { display: block; overflow-x: auto; }
+
+/* ---------- Typography ---------- */
 .font-arabic { font-family: var(--font-arabic); }
 .font-urdu { font-family: var(--font-urdu); }
 
 .arabic-block {
   font-family: var(--font-arabic);
-  font-size: 1.75rem;
-  line-height: 2.4;
+  font-size: 1.9rem;
+  line-height: 2.3;
   direction: rtl;
   text-align: right;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+@media (min-width: 768px) {
+  .arabic-block { font-size: 2.1rem; }
+}
+[data-theme="dark"] .arabic-block { color: var(--hn-ink); }
+
+.translit-block {
+  font-style: italic;
+  line-height: 1.9;
+  font-size: 1rem;
+  color: var(--hn-muted);
+}
+.meaning-block {
+  line-height: 1.9;
+  font-size: 1.02rem;
+  color: var(--hn-ink);
 }
 
-.prose-islamic h2 { @apply text-2xl font-bold mt-8 mb-3 text-ink-50; }
-.prose-islamic h3 { @apply text-xl font-semibold mt-6 mb-2 text-ink-200; }
-.prose-islamic p { @apply leading-7 text-ink-300 mb-4; }
-.prose-islamic ul { @apply list-disc ps-6 mb-4 text-ink-300; }
-.prose-islamic blockquote { @apply border-s-4 border-brand-400 bg-white/5 p-4 rounded-xl my-4 text-ink-200; }
-.prose-islamic a { @apply text-gold-300 underline underline-offset-2; }
+.prose-islamic h2 { font-size: 1.4rem; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--hn-ink); line-height: 1.4; }
+.prose-islamic h3 { font-size: 1.15rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--hn-ink); }
+.prose-islamic p { line-height: 1.9; color: var(--hn-ink); opacity: 0.92; margin-bottom: 1rem; }
+.prose-islamic ul { list-style: disc; padding-inline-start: 1.5rem; margin-bottom: 1rem; line-height: 1.9; }
+.prose-islamic blockquote { border-inline-start: 3px solid var(--hn-primary); background: var(--hn-primary-soft); padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1rem 0; }
+.prose-islamic a { color: var(--hn-primary); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
 
-/* dark scrollbars */
-* { scrollbar-color: #3b3560 #100e1c; }
-*::-webkit-scrollbar { width: 10px; height: 10px; }
-*::-webkit-scrollbar-thumb { background: #3b3560; border-radius: 8px; }
-*::-webkit-scrollbar-track { background: #100e1c; }
+/* ---------- Layout containers ---------- */
+.hn-container { width: 100%; max-width: 76rem; margin-inline: auto; padding-inline: 1rem; }
+@media (min-width: 640px) { .hn-container { padding-inline: 1.25rem; } }
+.hn-discover { max-width: 76rem; margin-inline: auto; padding-inline: 1rem; }
+@media (min-width: 640px) { .hn-discover { padding-inline: 1.25rem; } }
+.hn-read { max-width: 44rem; margin-inline: auto; padding-inline: 1rem; }
+.hn-article { max-width: 48rem; margin-inline: auto; padding-inline: 1rem; }
+.hn-section { padding-block: 1.75rem; }
+@media (min-width: 768px) { .hn-section { padding-block: 2.5rem; } }
 
-/* mobile: prevent horizontal overflow from long Arabic */
-img, table { max-width: 100%; }
-table { display: block; overflow-x: auto; }
+/* ---------- Cards (ONE system) ---------- */
+.hn-card {
+  background: var(--hn-card);
+  border: 1px solid var(--hn-border);
+  border-radius: 12px;
+  box-shadow: var(--hn-shadow);
+}
+.hn-card-hover { transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; }
+.hn-card-hover:hover { border-color: var(--hn-primary); box-shadow: var(--hn-shadow-lg); transform: translateY(-1px); }
+.hn-card-pad { padding: 1.1rem; }
+@media (min-width: 768px) { .hn-card-pad { padding: 1.4rem; } }
 
-/* members on phones get app chrome only: no hamburger, no search, no header avatar */
-@media (max-width: 1023.98px) {
-  body.hn-member #menuWrap { display: none; }
-  body.hn-member [data-nav-search] { display: none; }
-  body.hn-member [data-nav-profile] { display: none; }
+.hn-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--hn-primary);
+}
+.hn-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.72rem; font-weight: 700;
+  border: 1px solid var(--hn-border);
+  background: var(--hn-bg-soft);
+  color: var(--hn-muted);
+  border-radius: 999px; padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+}
+.hn-badge-gold {
+  background: var(--hn-gold-soft);
+  border-color: var(--hn-gold);
+  color: var(--hn-gold);
+}
+.hn-badge-primary {
+  background: var(--hn-primary-soft);
+  border-color: var(--hn-primary);
+  color: var(--hn-primary);
+}
+
+/* ---------- Buttons (ONE system) ---------- */
+.hn-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 700; font-size: 0.95rem; line-height: 1;
+  border-radius: 10px; padding: 0.8rem 1.4rem; min-height: 48px;
+  border: 1px solid transparent; cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+.hn-btn-primary { background: var(--hn-primary); color: #fff; }
+.hn-btn-primary:hover { background: var(--hn-primary-deep); }
+[data-theme="dark"] .hn-btn-primary { color: #101613; font-weight: 800; }
+.hn-btn-secondary { background: var(--hn-card); border-color: var(--hn-border); color: var(--hn-ink); }
+.hn-btn-secondary:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+.hn-btn-ghost { background: transparent; color: var(--hn-primary); padding: 0.6rem 0.9rem; min-height: 44px; }
+.hn-btn-ghost:hover { background: var(--hn-primary-soft); }
+.hn-icon-btn {
+  width: 2.75rem; height: 2.75rem; display: inline-grid; place-items: center;
+  border-radius: 10px; border: 1px solid var(--hn-border);
+  background: var(--hn-card); color: var(--hn-ink);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.hn-icon-btn:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+
+/* ---------- Forms ---------- */
+.hn-input {
+  width: 100%; background: var(--hn-card); color: var(--hn-ink);
+  border: 1px solid var(--hn-border); border-radius: 10px;
+  padding: 0.85rem 1.1rem; font-size: 1rem; min-height: 52px; outline: none;
+}
+.hn-input::placeholder { color: var(--hn-muted); }
+.hn-input:focus { border-color: var(--hn-primary); box-shadow: 0 0 0 3px var(--hn-primary-soft); }
+.hn-searchwrap {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--hn-card); border: 1px solid var(--hn-border);
+  border-radius: 12px; padding: 0.35rem 0.35rem 0.35rem 1rem;
+  box-shadow: var(--hn-shadow);
+}
+.hn-searchwrap:focus-within { border-color: var(--hn-primary); }
+.hn-searchwrap input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; font-size: 1rem; color: var(--hn-ink); padding: 0.65rem 0; }
+.hn-searchwrap input::placeholder { color: var(--hn-muted); }
+
+/* ---------- Reading primitives ---------- */
+.hn-reading-card {
+  background: var(--hn-card); border: 1px solid var(--hn-border);
+  border-radius: 16px; padding: 1.5rem; box-shadow: var(--hn-shadow);
+}
+@media (min-width: 768px) { .hn-reading-card { padding: 2rem; } }
+.hn-block-label {
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--hn-muted); margin-bottom: 0.6rem;
+}
+.hn-divider { border: 0; border-top: 1px solid var(--hn-border); margin: 1.25rem 0; }
+
+/* ---------- Breadcrumbs ---------- */
+.hn-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; font-size: 0.82rem; color: var(--hn-muted); }
+.hn-crumbs a { color: var(--hn-muted); text-decoration: none; }
+.hn-crumbs a:hover { color: var(--hn-primary); text-decoration: underline; }
+.hn-crumbs [aria-current="page"] { color: var(--hn-ink); font-weight: 600; }
+
+/* ---------- Quran verses ---------- */
+.hn-verse { padding: 1.25rem 0.25rem; border-bottom: 1px solid var(--hn-border); scroll-margin-top: 8rem; }
+.hn-verse:last-child { border-bottom: 0; }
+.hn-verse-ar { font-family: var(--font-arabic); font-size: 1.65rem; line-height: 2.2; text-align: right; direction: rtl; }
+@media (min-width: 768px) { .hn-verse-ar { font-size: 1.9rem; } }
+.hn-verse-num {
+  display: inline-grid; place-items: center;
+  min-width: 2rem; height: 2rem; padding-inline: 0.4rem;
+  border-radius: 999px; font-size: 0.8rem; font-weight: 800;
+  background: var(--hn-primary-soft); color: var(--hn-primary);
+  border: 1px solid var(--hn-border);
+}
+
+/* ---------- FAQ ---------- */
+.hn-faq { background: var(--hn-card); border: 1px solid var(--hn-border); border-radius: 12px; padding: 1rem 1.15rem; }
+.hn-faq summary { font-weight: 700; cursor: pointer; line-height: 1.6; color: var(--hn-ink); }
+.hn-faq p { margin-top: 0.5rem; color: var(--hn-muted); line-height: 1.8; font-size: 0.95rem; }
+
+/* ---------- Subtle pattern (very restrained) ---------- */
+.hn-pattern { position: relative; }
+.hn-pattern::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M36 6l7 17 17 7-17 7-7 17-7-17-17-7 17-7z' fill='none' stroke='%230F5132' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+[data-theme="dark"] .hn-pattern::before { opacity: 0.06; }
+
+/* Remove decorative glow overlays from legacy templates (purely decorative,
+   always aria-hidden) — the new system communicates through content. */
+div[aria-hidden="true"][style*="radial-gradient"] { display: none !important; }
+
+/* ---------- Legacy compat: unify unmigrated templates ---------- */
+/* Tailwind v4 generates legacy utilities from the remapped @theme tokens above,
+   so old pages automatically follow the new palette. These extra rules fix the
+   few explicit-white / explicit-overlay utilities for light-mode readability. */
+[data-theme="light"] .text-white { color: var(--hn-ink) !important; }
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/85 { color: var(--hn-muted) !important; }
+[data-theme="light"] .bg-gold-300.text-night-900,
+[data-theme="light"] .bg-gold-300 .text-night-900 { color: #17201B !important; }
+[data-theme="light"] .bg-white\/10,
+[data-theme="light"] .bg-white\/5 { background-color: rgba(15, 81, 50, 0.07) !important; }
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/15 { border-color: var(--hn-border) !important; }
+[data-theme="light"] .divide-white\/10 > * { border-color: var(--hn-border) !important; }
+[data-theme="light"] .hover\:bg-white\/10:hover,
+[data-theme="light"] .hover\:bg-white\/5:hover { background-color: var(--hn-primary-soft) !important; }
+[data-theme="light"] .bg-night-900\/95,
+[data-theme="light"] .bg-night-850\/95 { background-color: var(--hn-header) !important; }
+
+/* ---------- Legacy compat: kill clutter on old templates ---------- */
+/* Remove heavy gradients/glows from migrated chrome while keeping layout */
+.bg-gradient-to-br, .bg-gradient-to-r, .bg-gradient-to-b { background-image: none !important; }
+
+/* Line clamp helpers */
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Dark scrollbars only in dark mode */
+[data-theme="dark"] * { scrollbar-color: #2c3a31 #101613; }
+[data-theme="dark"] *::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-theme="dark"] *::-webkit-scrollbar-thumb { background: #2c3a31; border-radius: 8px; }
+[data-theme="dark"] *::-webkit-scrollbar-track { background: #101613; }
+
+/* Bottom nav offset */
+@media (max-width: 767px) {
+  body { padding-bottom: 72px; }
 }

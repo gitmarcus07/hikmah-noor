@@ -1,10 +1,7 @@
 ---
-/* Gamified reading session — Quranly screens 28–31.
- * Verse-by-verse: timer, audio, fav/bookmark/share,
- * "I'm Done" credits, goal bar, Juz progress, +hasanat.
- * Login compulsory: guests get the auth gate.
+/* Public reading session — verse-by-verse with audio, translation and
+ * share. No accounts: arrows move between verses, audio plays, that is all.
  */
-import AuthModal from './AuthModal.astro';
 import { localizedPath, getDict } from '../i18n/utils';
 
 interface Props {
@@ -15,86 +12,38 @@ interface Props {
 }
 const { locale, surah, juzTotals, juzOfSurah } = Astro.props;
 const t = getDict(locale).app;
-const progressUrl = localizedPath(locale, '/tools/my-progress/');
 const pad = (n: number) => String(n).padStart(3, '0');
-const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong reader', 'Khatm walker', 'Light upon light'];
 ---
 <div class="max-w-2xl mx-auto px-4 py-6" data-session data-surah={surah.num} data-versecount={surah.verseCount} data-juz={juzOfSurah ?? ''}>
-  {/* top pill: hasanat | verses | time */}
   <div class="flex items-center gap-2">
-    <a href={localizedPath(locale, '/tools/read/')} class="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-white/15 text-ink-200 hover:bg-white/10" aria-label="Back">←</a>
-    <div class="flex-1 flex items-center justify-center gap-2 text-sm font-extrabold bg-night-850 border border-white/10 rounded-full px-4 py-2.5 min-h-[44px]">
-      <span>💗 <b data-s-hasanat>0</b></span><span class="text-ink-500">|</span>
-      <span>📄 <b data-s-verses>0</b></span><span class="text-ink-500">|</span>
-      <span>⏱️ <b data-s-time>00:00</b></span>
+    <a href={localizedPath(locale, '/tools/read/')} class="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-qg-line text-qg-green bg-white hover:bg-qg-soft" aria-label="Back">←</a>
+    <div class="flex-1 text-center min-w-0">
+      <h1 class="font-extrabold text-lg leading-6 text-qg-ink" data-s-title></h1>
+      <p class="text-sm text-qg-muted" data-s-pos></p>
     </div>
-    <a href={progressUrl} class="w-11 h-11 shrink-0 grid place-items-center rounded-full border border-white/15 text-ink-200 hover:bg-white/10" aria-label="Settings">⚙️</a>
+    <span class="w-11 shrink-0" aria-hidden="true"></span>
   </div>
-
-  {/* level + timer */}
-  <div class="mt-3 bg-gradient-to-br from-brand-500/40 to-brand-600/20 border border-brand-500/40 rounded-3xl p-4 flex items-center gap-3">
-    <span class="text-[11px] font-extrabold bg-white/10 rounded-full px-2.5 py-1" data-s-level>Lvl 01</span>
-    <div class="min-w-0">
-      <p class="font-extrabold text-lg leading-6" data-s-levelname>Break the egg</p>
-      <p class="text-xs text-ink-300">{t.read.lifetime}: <b data-s-lifetime>0</b> <span data-s-lifetimeu>{t.read.versesSuffix}</span></p>
-    </div>
-    <span class="ms-auto font-extrabold text-3xl tabular-nums tracking-widest" data-s-clock>00:00</span>
-  </div>
-
-  {/* goal bar */}
-  <div class="mt-3 bg-emerald-400/90 text-night-900 rounded-2xl px-5 py-3 font-extrabold hidden items-center gap-2" data-s-goalbar>
-    <span>{t.read.goal}</span><span data-s-goalplus class="text-xs bg-white/30 rounded-full px-2 py-0.5"></span>
-    <span class="ms-auto">✓</span>
-  </div>
-  <p class="mt-2 text-center text-sm font-bold text-ink-200"><span data-s-juzlabel></span> <span data-s-left></span></p>
-  <div class="h-2 bg-white/10 rounded-full overflow-hidden mt-2"><div data-s-juzbar class="h-full bg-brand-500 rounded-full transition-all" style="width:0%"></div></div>
 
   {/* verse card */}
-  <article class="mt-4 bg-white text-night-900 rounded-3xl p-5 shadow-xl">
+  <article class="mt-4 bg-white text-[#17352F] rounded-3xl p-5 shadow-xl border border-qg-line">
     <div class="flex items-center gap-2">
-      <button data-s-play class="w-11 h-11 grid place-items-center rounded-full bg-brand-500/15 text-brand-600 font-extrabold hover:bg-brand-500 hover:text-white transition" aria-label="Play verse">▶</button>
-      <button data-s-repeat class="w-11 h-11 grid place-items-center rounded-full bg-brand-500/15 text-brand-600 font-extrabold hover:bg-brand-500 hover:text-white transition" aria-label="Repeat" aria-pressed="false">🔁</button>
-      <div class="flex-1 text-center min-w-0">
-        <h1 class="font-extrabold text-lg leading-6" data-s-title></h1>
-        <p class="text-sm text-slate-500" data-s-pos></p>
-      </div>
-      <button data-s-fav class="text-2xl hover:scale-110 transition" aria-label="Love this verse">♡</button>
-      <button data-s-bookmark class="text-2xl hover:scale-110 transition" aria-label="Bookmark">🔖</button>
+      <button data-s-play class="w-11 h-11 grid place-items-center rounded-full bg-qg-soft text-qg-green font-extrabold hover:bg-qg-deep hover:text-white transition" aria-label="Play verse">▶</button>
+      <button data-s-repeat class="w-11 h-11 grid place-items-center rounded-full bg-qg-soft text-qg-green font-extrabold hover:bg-qg-deep hover:text-white transition" aria-label="Repeat" aria-pressed="false" style="opacity:0.55">🔁</button>
+      <div class="flex-1"></div>
+      <button data-s-share class="w-10 h-10 grid place-items-center rounded-full bg-qg-soft text-qg-green font-bold" aria-label="Share">↗</button>
     </div>
-    <p data-s-ar class="font-arabic text-center leading-[2.2] mt-4" lang="ar" dir="rtl"></p>
-    <div class="flex items-center justify-between mt-3">
-      <button data-s-share class="w-10 h-10 grid place-items-center rounded-full bg-brand-500/15 text-brand-600 font-bold" aria-label="Share">↗</button>
-      <span class="text-xs font-bold text-slate-400" data-s-likes></span>
+    <p data-s-ar class="font-arabic text-center leading-[2.2] mt-4" style="font-size:2rem" lang="ar" dir="rtl"></p>
+    <p data-s-tr class="mt-4 text-xl md:text-2xl leading-9 text-[#17352F] font-medium"></p>
+    <div class="flex items-center justify-between mt-4">
+      <button data-s-prev class="w-14 h-14 shrink-0 grid place-items-center rounded-2xl border-2 border-qg-green/50 text-qg-green text-2xl hover:bg-qg-soft" aria-label="Previous">←</button>
+      <p class="text-center text-sm font-bold text-qg-muted"><span data-s-juzlabel></span> <span data-s-left></span></p>
+      <button data-s-next class="w-14 h-14 shrink-0 grid place-items-center rounded-2xl bg-qg-deep text-white text-2xl font-extrabold hover:bg-[#084337]" aria-label="Next">→</button>
     </div>
+    <div class="h-2 bg-qg-line rounded-full overflow-hidden mt-3"><div data-s-juzbar class="h-full bg-qg-deep rounded-full transition-all" style="width:0%"></div></div>
   </article>
-  <p data-s-tr class="mt-4 text-xl md:text-2xl leading-9 text-ink-50 font-medium"></p>
-
-  {/* controls */}
-  <div class="mt-5 flex items-center gap-3">
-    <button data-s-prev class="w-14 h-14 shrink-0 grid place-items-center rounded-2xl border-2 border-brand-500/60 text-brand-300 text-2xl hover:bg-white/5" aria-label="Previous">←</button>
-    <button data-s-done class="flex-1 bg-emerald-400 hover:bg-emerald-300 text-night-900 font-extrabold rounded-2xl py-4 min-h-[56px] text-lg">{t.read.done}</button>
-    <div class="relative shrink-0">
-      <span data-s-plus class="absolute -top-7 right-1 text-sm font-extrabold text-ink-200"></span>
-      <button data-s-next class="w-14 h-14 grid place-items-center rounded-2xl bg-white text-night-900 text-2xl font-extrabold hover:bg-ink-200" aria-label="Next">→</button>
-    </div>
-  </div>
-  <p class="mt-3 text-center text-xs text-ink-500">{t.read.note}</p>
-
-  {/* auth gate */}
-  <div data-s-gate class="hidden fixed inset-0 z-[70]">
-    <div class="absolute inset-0 bg-black/70"></div>
-    <div class="absolute inset-x-4 top-[20%] mx-auto max-w-sm bg-night-850 border border-white/10 rounded-3xl p-6 text-center">
-      <div class="text-4xl">🔒</div>
-      <h2 class="text-xl font-extrabold text-white mt-2">{t.read.gateT}</h2>
-      <p class="mt-1 text-sm text-ink-300">{t.read.gateD}</p>
-      <button data-s-login class="mt-4 w-full bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-2xl px-5 py-3.5 min-h-[52px]">{t.read.gateBtn}</button>
-    </div>
-  </div>
 </div>
 
-<AuthModal locale={locale} />
-
-<script define:vars={{ surah, juzTotals, pad3: pad(surah.num), progressUrl, tApp: t }}>
+<script define:vars={{ surah, juzTotals, pad3: pad(surah.num), tApp: t }}>
   (() => {
     const root = document.querySelector('[data-session]');
     if (!root || root.dataset.wired) return;
@@ -104,13 +53,8 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
     const verses = surah.verses || [];
     const params = new URLSearchParams(window.location.search);
     let idx = Math.max(0, Math.min(verses.length - 1, (parseInt(params.get('verse') || '1', 10) - 1) || 0));
-    const doneStack = [];
-    let seconds = 0, timer = null, repeat = false;
-    let prefs = { daily_goal: 1, translation: 'ur', reciter: 'Alafasy_128kbps', reciter_speed: 1 };
-    let todayVerses = 0, lifetime = 0, H = null, audio = null;
-
-    const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-    const trOf = (v) => prefs.translation === 'en' ? v.en : prefs.translation === 'hi' ? v.hi : v.ur;
+    const trKey = document.documentElement.lang === 'en' ? 'en' : document.documentElement.lang === 'hi' ? 'hi' : 'ur';
+    let repeat = false, audio = null;
 
     const paintVerse = () => {
       const v = verses[idx];
@@ -119,12 +63,8 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
       $('[data-s-pos]').textContent = `${v.v}/${surah.verseCount}`;
       const ar = $('[data-s-ar]');
       ar.textContent = v.ar;
-      ar.style.fontSize = `${prefs.font_size_script || 2}rem`;
       const tr = $('[data-s-tr]');
-      tr.textContent = trOf(v);
-      tr.style.fontSize = `${prefs.font_size_translation || 1.1}rem`;
-      const next = verses[idx + 1];
-      $('[data-s-plus]').textContent = next ? `+${H ? H.countArabicLetters(next.ar) * 10 : ''}` : '';
+      tr.textContent = trKey === 'en' ? v.en : trKey === 'hi' ? v.hi : v.ur;
       const url = new URL(window.location.href);
       url.searchParams.set('verse', v.v);
       history.replaceState(null, '', url.search);
@@ -133,64 +73,24 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
     const paintJuz = () => {
       const jt = (juzTotals || []).find((j) => j.num === +(root.dataset.juz || 0));
       if (jt) {
-        const readBefore = verses.slice(0, idx).length;
-        const left = Math.max(0, jt.verses - readBefore - doneStack.length);
+        const left = Math.max(0, jt.verses - idx - 1);
         $('[data-s-juzlabel]').textContent = `${tApp.dash.juz} ${jt.num}: ${jt.verses} ${tApp.dash.verses}`;
         $('[data-s-left]').textContent = `• ${left} ${tApp.read.left}`;
-        $('[data-s-juzbar]').style.width = `${Math.round(((doneStack.length + (verses.length - jt.verses > 0 ? 0 : 0)) / jt.verses) * 100)}%`;
+        $('[data-s-juzbar]').style.width = `${Math.round(((idx + 1) / jt.verses) * 100)}%`;
       } else {
         $('[data-s-juzlabel]').textContent = `Surah ${surah.name} • ${surah.verseCount} ${tApp.dash.verses}`;
         $('[data-s-left]').textContent = `• ${verses.length - idx - 1} ${tApp.read.left}`;
-        $('[data-s-juzbar]').style.width = `${Math.round((doneStack.length / verses.length) * 100)}%`;
+        $('[data-s-juzbar]').style.width = `${Math.round(((idx + 1) / verses.length) * 100)}%`;
       }
-    };
-
-    const paintGoal = () => {
-      const total = todayVerses + doneStack.length;
-      const gb = $('[data-s-goalbar]');
-      const plus = $('[data-s-goalplus]');
-      if (total >= (prefs.daily_goal || 1)) {
-        gb?.classList.remove('hidden'); gb?.classList.add('flex');
-        if (plus) plus.textContent = total > prefs.daily_goal ? `+${total - prefs.daily_goal}` : '';
-      }
-    };
-
-    const tick = () => {
-      seconds += 1;
-      $('[data-s-time]').textContent = mmss(seconds);
-      $('[data-s-clock]').textContent = mmss(seconds);
     };
 
     const playCurrent = () => {
       const v = verses[idx];
       if (!v) return;
       if (!audio) audio = new Audio();
-      audio.playbackRate = prefs.reciter_speed || 1;
       audio.loop = repeat;
-      audio.src = `https://everyayah.com/data/${prefs.reciter || 'Alafasy_128kbps'}/${pad3}${String(v.v).padStart(3, '0')}.mp3`;
+      audio.src = `https://everyayah.com/data/Alafasy_128kbps/${pad3}${String(v.v).padStart(3, '0')}.mp3`;
       audio.play().catch(() => {});
-    };
-
-    const credit = async () => {
-      const v = verses[idx];
-      if (!v || doneStack.includes(idx)) return;
-      doneStack.push(idx);
-      const h = H.estimateHasanat(v.ar);
-      $('[data-s-hasanat]').textContent = (+($('[data-s-hasanat]').textContent || 0)) + h;
-      $('[data-s-verses]').textContent = doneStack.length;
-      try {
-        const r = await H.Me.logEvent({ surah: S, verse: v.v, verses: 1, seconds: 0, hasanat: h, pages: H.estimatePages(1) });
-        if (r.today) {
-          $('[data-s-hasanat]').textContent = r.today.hasanat;
-          todayVerses = r.today.verses - doneStack.length;
-        }
-      } catch {}
-      paintGoal(); paintJuz();
-    };
-
-    const flushTime = async () => {
-      if (!doneStack.length || seconds <= 0) return;
-      try { await H.Me.logEvent({ surah: S, verse: verses[idx]?.v || 1, verses: 0, seconds, hasanat: 0, pages: 0 }); } catch {}
     };
 
     $('[data-s-play]')?.addEventListener('click', playCurrent);
@@ -199,25 +99,8 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
       e.currentTarget.setAttribute('aria-pressed', String(repeat));
       e.currentTarget.style.opacity = repeat ? '1' : '0.55';
     });
-    // "I'm Done" credits the verse then exits reading (the → arrow
-    // alone moves forward). Back to the previous screen, Home as fallback.
-    $('[data-s-done]')?.addEventListener('click', async () => {
-      await credit();
-      try { if (window.history.length > 1) window.history.back(); else window.location.href = progressUrl; }
-      catch { window.location.href = progressUrl; }
-    });
     $('[data-s-next]')?.addEventListener('click', () => { if (idx < verses.length - 1) { idx += 1; paintVerse(); paintJuz(); } });
     $('[data-s-prev]')?.addEventListener('click', () => { if (idx > 0) { idx -= 1; paintVerse(); paintJuz(); } });
-    $('[data-s-fav]')?.addEventListener('click', async (e) => {
-      const v = verses[idx];
-      e.currentTarget.textContent = '♥';
-      try { await H.Me.addBookmark('verse', `${S}:${v.v}`); } catch {}
-    });
-    $('[data-s-bookmark]')?.addEventListener('click', async (e) => {
-      const v = verses[idx];
-      e.currentTarget.textContent = '📑';
-      try { await H.Me.addBookmark('verse', `${S}:${v.v}`); } catch {}
-    });
     $('[data-s-share]')?.addEventListener('click', async () => {
       const v = verses[idx];
       const text = `${v.ar}\n— Surah ${surah.name} ${S}:${v.v} (Hikmah Noor)`;
@@ -227,31 +110,6 @@ const LEVEL_NAMES = ['Break the egg', 'First light', 'Steady steps', 'Strong rea
       } catch {}
     });
 
-    window.addEventListener('beforeunload', () => { flushTime(); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) flushTime(); });
-
-    (async () => {
-      H = await import('/habits/habit.js?v=5');
-      $('[data-s-login]')?.addEventListener('click', () => window.hnAuthModal?.open());
-      document.addEventListener('hn:auth', () => window.location.reload());
-      const { user } = await H.Auth.session().catch(() => ({ user: null }));
-      if (!user) { $('[data-s-gate]')?.classList.remove('hidden'); return; }
-      const [p, st, life] = await Promise.all([
-        H.Me.prefs().catch(() => ({ prefs: {} })),
-        H.Me.stats('today').catch(() => ({ stats: { verses: 0 } })),
-        H.Me.stats('all').catch(() => ({ stats: { verses: 0 } })),
-      ]);
-      prefs = { ...prefs, ...(p.prefs || {}) };
-      todayVerses = st.stats?.verses || 0;
-      lifetime = life.stats?.verses || 0;
-      const lvl = Math.floor(lifetime / 100) + 1;
-      const names = ['Break the egg', 'First light', 'Steady steps', 'Strong reader', 'Khatm walker', 'Light upon light'];
-      $('[data-s-level]').textContent = `Lvl ${String(Math.min(lvl, 99)).padStart(2, '0')}`;
-      $('[data-s-levelname]').textContent = names[Math.min(lvl - 1, names.length - 1)];
-      $('[data-s-lifetime]').textContent = lifetime;
-      $('[data-s-verses]').textContent = '0';
-      paintVerse(); paintJuz(); paintGoal();
-      timer = setInterval(tick, 1000);
-    })();
+    paintVerse(); paintJuz();
   })();
 </script>

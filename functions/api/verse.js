@@ -1,6 +1,6 @@
 // GET /api/verse?surah=&verse=&lang=en — single verse text (Arabic + translation).
 // Public endpoint over verses_fts (migration 0005). Powers saved-verse lists.
-import { clientIp, json, rateLimit } from './lib/auth.js';
+import { clientIp, json, rateLimit } from './lib/http.js';
 
 const LANGS = new Set(['en', 'ur', 'hi', 'ar']);
 

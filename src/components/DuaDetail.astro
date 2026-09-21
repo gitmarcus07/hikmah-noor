@@ -1,14 +1,16 @@
 ---
-/* Dua detail page (EN + locale). Auto FAQ + crumbs + schemas from dua data. */
+/* Dua detail — the reusable reading template for SEO landing pages. */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Icon from './Icon.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ReadingCard from './hn/ReadingCard.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat, DUA_ORIGIN_LABEL } from '../data/duas';
 
 interface Props { dua: any; cat: any; locale: string; }
 const { dua, cat, locale } = Astro.props;
 const dict = getDict(locale);
-const isFallback = locale !== 'en';
+const L = (p: string) => localizedPath(locale, p);
 const duaPath = `/duas/${dua.cat}/${dua.slug}/`;
 const catPath = `/duas/${dua.cat}/`;
 const originLabel = dua.origin ? (DUA_ORIGIN_LABEL as any)[dua.origin] : null;
@@ -39,93 +41,83 @@ const prevDua = sIdx > 0 ? siblings[sIdx - 1] : null;
 const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={duaPath}>
-  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8">
-    <nav class="text-xs text-ink-500 mb-3">
-      <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
-      <a href={localizedPath(locale, '/duas/')} class="hover:text-brand-300"> {dict.nav.duas}</a> /
-      <a href={localizedPath(locale, catPath)} class="hover:text-brand-300"> {cat.title}</a>
-    </nav>
-    <div class="flex flex-wrap items-center gap-2">
-      <span class="text-[11px] font-extrabold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">🤲 Dua</span>
-      <span class="text-[11px] font-bold uppercase tracking-wide text-ink-500">{cat.title}</span>
-      {originLabel && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">{originLabel}</span>}
-      {gradeLabel && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-brand-500 px-2.5 py-1 rounded-full">{gradeLabel}</span>}
-      {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-wide text-night-900 bg-gold-300 px-2.5 py-1 rounded-full">EN</span>}
+  <div class="hn-read hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 3)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Dua</span>
+      <span class="hn-badge">{cat.title}</span>
+      {originLabel && <span class="hn-badge hn-badge-gold">{originLabel}</span>}
+      {gradeLabel && <span class="hn-badge">{gradeLabel}</span>}
     </div>
-    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 text-white">{dua.title}</h1>
-    <p class="mt-2 text-ink-300 leading-7"><b>Use:</b> {dua.use}</p>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{dua.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{dua.use}</p>
     {aliasList.length > 0 && (
-      <p class="mt-2 text-[13px] text-ink-500 leading-6">Also searched as: {aliasList.map((a, i) => (
-        <span>{i > 0 && ' • '}<em class="not-italic font-semibold text-ink-300">{a}</em></span>
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {aliasList.map((a, i) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
-    {isFallback && <p class="mt-4 text-sm font-semibold text-gold-300 bg-gold-300/10 border border-gold-300/30 rounded-2xl px-4 py-3">English guide — translation coming soon.</p>}
 
-    <div class="bg-night-850 border border-white/10 text-white rounded-3xl p-6 md:p-8 my-6 shadow-xl relative overflow-hidden">
-      <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
-      <div class="relative">
-        <div class="text-[11px] font-extrabold uppercase tracking-[0.18em] text-gold-300 mb-3">Arabic</div>
-        <p class="arabic-block leading-[2.2]" lang="ar" dir="rtl">{dua.arabic}</p>
-      </div>
+    <div class="mt-5">
+      <ReadingCard arabic={dua.arabic} translit={dua.translit} translation={dua.translation} reference={dua.source} />
     </div>
 
-    <div class="grid gap-3 md:grid-cols-2">
-      <div class="bg-night-850 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/30">
-        <div class="text-[11px] font-extrabold uppercase tracking-widest text-brand-300 mb-2">Transliteration</div>
-        <p class="italic leading-7 text-[15px] text-ink-200">{dua.translit}</p>
+    {(dua.when || dua.virtue) && (
+      <div class="grid gap-3 sm:grid-cols-2 mt-3">
+        {dua.when && (
+          <div class="hn-card hn-card-pad">
+            <p class="hn-block-label">When to recite</p>
+            <p class="text-[15px] font-semibold leading-6">{dua.when}{dua.repeat ? ` • ${dua.repeat}` : ''}</p>
+          </div>
+        )}
+        {dua.virtue && (
+          <div class="hn-card hn-card-pad">
+            <p class="hn-block-label">Virtue</p>
+            <p class="text-[15px] leading-6" style="color:var(--hn-muted)">{dua.virtue}</p>
+          </div>
+        )}
       </div>
-      <div class="bg-night-850 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/30">
-        <div class="text-[11px] font-extrabold uppercase tracking-widest text-brand-300 mb-2">English Meaning</div>
-        <p class="leading-7 text-[15px] text-ink-200">{dua.translation}</p>
-      </div>
-    </div>
+    )}
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Source: <strong style="color:var(--hn-ink)">{dua.source}</strong>{narratorLabel && <span> • Narrated by <strong style="color:var(--hn-ink)">{narratorLabel}</strong></span>}{gradeLabel && <span> • Grade: <strong style="color:var(--hn-ink)">{gradeLabel}</strong></span>}</p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Verify wording with a teacher; rulings differ — consult scholars.</p>
 
-    <div class="grid gap-3 sm:grid-cols-2 mt-3">
-      <div class="bg-brand-500/10 border border-brand-500/30 rounded-2xl p-4"><div class="text-xs font-extrabold uppercase tracking-wide text-brand-300 mb-1">⏰ When</div><p class="text-sm leading-6 font-semibold text-ink-200">{dua.when} • {dua.repeat}</p></div>
-      <div class="bg-gold-300/10 border border-gold-300/30 rounded-2xl p-4"><div class="text-xs font-extrabold uppercase tracking-wide text-gold-300 mb-1">✨ Virtue</div><p class="text-sm leading-6 text-ink-200">{dua.virtue}</p></div>
-    </div>
-    <p class="mt-3 text-xs text-ink-500">📚 Source: <b>{dua.source}</b>{narratorLabel && <span> • Narrated by <b>{narratorLabel}</b></span>}{gradeLabel && <span> • Grade: <b>{gradeLabel}</b></span>}</p>
-    <p class="mt-2 text-xs text-ink-500">Verify wording with a teacher; rulings differ — consult scholars.</p>
-
-    <section class="mt-8">
-      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
       <div class="space-y-3">
         {faq.map((f) => (
-          <details class="bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30">
-            <summary class="font-bold cursor-pointer leading-6 text-ink-50">{f.q}</summary>
-            <p class="mt-2 text-ink-300 leading-7 text-[15px]">{f.a}</p>
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
           </details>
         ))}
       </div>
     </section>
 
     {related.length > 0 && (
-      <section class="mt-8">
-        <h2 class="text-xl font-extrabold mb-3 text-white">🤲 More {cat.title} duas</h2>
+      <section class="mt-8" aria-label="Related duas">
+        <SectionHeader eyebrow="Related" title={`More ${cat.title} duas`} href={L(catPath)} linkLabel={`All ${cat.title} duas`} />
         <div class="grid gap-3 sm:grid-cols-2">
           {related.map((r) => (
-            <a href={localizedPath(locale, `/duas/${r.cat}/${r.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-              <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{r.title}</span>
-              <span class="text-[13px] text-ink-500">{r.use}</span>
+            <a href={L(`/duas/${r.cat}/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{r.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">{r.use}</span>
             </a>
           ))}
         </div>
-        <a href={localizedPath(locale, catPath)} class="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-brand-300 hover:text-brand-200">All {cat.title} duas →</a>
       </section>
     )}
 
     {(prevDua || nextDua) && (
-      <nav class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="More duas">
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More duas">
         {prevDua ? (
-          <a href={localizedPath(locale, `/duas/${prevDua.cat}/${prevDua.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-            <span class="text-xs font-bold text-ink-500">← Previous dua</span>
-            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{prevDua.title}</span>
+          <a href={L(`/duas/${prevDua.cat}/${prevDua.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous dua</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevDua.title}</span>
           </a>
         ) : <span />}
         {nextDua && (
-          <a href={localizedPath(locale, `/duas/${nextDua.cat}/${nextDua.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 text-right shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-            <span class="text-xs font-bold text-ink-500">Next dua →</span>
-            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{nextDua.title}</span>
+          <a href={L(`/duas/${nextDua.cat}/${nextDua.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next dua →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextDua.title}</span>
           </a>
         )}
       </nav>

@@ -1,55 +1,44 @@
 ---
+/* Explore — quick access to Quran tools, in the unified system. */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import AppHeader from '../components/AppHeader.astro';
-import AppTabBar from '../components/AppTabBar.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import Icon from '../components/Icon.astro';
 import { localizedPath, getDict } from '../i18n/utils';
 
 const locale = 'en';
 const t = getDict(locale).app;
+const L = (p: string) => localizedPath(locale, p);
 const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'Explore', path: '/explore/' },
 ];
 
 const CARDS = [
-  {
-    title: t.explore.searchT, sub: t.explore.searchD,
-    href: localizedPath(locale, '/tools/search-quran/'),
-    bg: 'bg-gradient-to-br from-[#c4a5f5] via-[#a985ee] to-[#8b6ff0]',
-    titleCls: 'text-white', subCls: 'text-white/85', icon: '🔍',
-  },
-  {
-    title: t.explore.gemsT, sub: t.explore.gemsD,
-    href: localizedPath(locale, '/tools/gems/'),
-    bg: 'bg-gradient-to-br from-[#b79df7] via-[#9d7ff2] to-[#7c5cf0]',
-    titleCls: 'text-white', subCls: 'text-white/85', icon: '💎',
-  },
-  {
-    title: t.explore.mushafT, sub: t.explore.mushafD,
-    href: localizedPath(locale, '/tools/mushaf/'),
-    bg: 'bg-gradient-to-br from-[#a7f3d0] via-[#6ee7b7] to-[#34d399]',
-    titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '📖',
-  },
-  {
-    title: t.explore.chT, sub: t.explore.chD,
-    href: localizedPath(locale, '/tools/challenges/'),
-    bg: 'bg-gradient-to-br from-[#fed7aa] via-[#fdba74] to-[#fb923c]',
-    titleCls: 'text-night-900', subCls: 'text-night-900/70', icon: '⛰️',
-  },
+  { title: t.explore.searchT, sub: t.explore.searchD, href: L('/tools/search-quran/'), icon: 'search' },
+  { title: t.explore.gemsT, sub: t.explore.gemsD, href: L('/tools/gems/'), icon: 'star' },
+  { title: t.explore.mushafT, sub: t.explore.mushafD, href: L('/tools/mushaf/'), icon: 'book' },
+  { title: 'Quran', sub: 'Read all 114 surahs and 30 paras', href: L('/quran/'), icon: 'quran' },
+  { title: 'Duas', sub: 'Supplications for everyday life', href: L('/duas/'), icon: 'duas' },
+  { title: 'Tools', sub: 'Calculators with evidence', href: L('/tools/'), icon: 'tools' },
 ];
 ---
-<BaseLayout title="Explore — Search Quran, Gems, Mushaf & Challenges" description="Explore the Quran: search translations and ayaat, discover Quranic gems, read the classic Mushaf, and take Quran challenges." keywords="explore quran, search quran, quranic gems, mushaf, quran challenges" locale={locale} canonicalPath="/explore/" crumbs={crumbs} hideFooter>
-  <AppHeader locale={locale} title={t.tabs.explore} />
-  <div class="max-w-md mx-auto px-4 py-5 space-y-3.5">
-    {CARDS.map((c) => (
-      <a href={c.href} class={`group relative overflow-hidden flex items-center gap-3 rounded-[28px] p-5 min-h-[112px] shadow-xl shadow-black/30 hover:scale-[1.01] active:scale-[0.99] transition ${c.bg}`}>
-        <span class="min-w-0 flex-1">
-          <span class={`block text-[26px] leading-8 font-extrabold ${c.titleCls}`}>{c.title}</span>
-          <span class={`block mt-0.5 text-[15px] font-medium ${c.subCls}`}>{c.sub}</span>
-        </span>
-        <span class="shrink-0 text-[64px] leading-none opacity-90 drop-shadow-lg group-hover:scale-110 transition" aria-hidden="true">{c.icon}</span>
-      </a>
-    ))}
+<BaseLayout title="Explore — Search Quran, Gems, Mushaf & Challenges" description="Explore the Quran: search translations and ayaat, discover Quranic gems, read the classic Mushaf, and take Quran challenges." keywords="explore quran, search quran, quranic gems, mushaf, quran challenges" locale={locale} canonicalPath="/explore/" crumbs={crumbs}>
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3">
+      <SectionHeader eyebrow="Explore" title="Explore the library" sub="Jump straight into reading, searching and tools." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CARDS.map((c) => (
+          <a href={c.href} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.icon as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.title}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.sub}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
   </div>
-  <AppTabBar locale={locale} active="explore" />
 </BaseLayout>

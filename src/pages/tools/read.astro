@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import AuthModal from '../../components/AuthModal.astro';
 import AppHeader from '../../components/AppHeader.astro';
-import AppTabBar from '../../components/AppTabBar.astro';
 import { localizedPath, getDict } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 import parasMeta from '../../data/paras-meta.json';
@@ -10,13 +8,11 @@ import parasMeta from '../../data/paras-meta.json';
 const locale = 'en';
 const t = getDict(locale).app;
 const readBase = localizedPath(locale, '/tools/read/');
-const favsUrl = localizedPath(locale, '/tools/favourites/');
-const marksUrl = localizedPath(locale, '/tools/bookmarks/');
 const surahData = (surahsMeta as any[]).map((s) => [s.num, s.name, s.englishName, s.verseCount]);
 const juzData = (parasMeta as any[]).map((p: any) => [p.num, p.start.surah, p.start.verse]);
 const faq = [
-  { q: 'Do I need to login to read?', a: 'No — every surah is free to read with translation and audio. A free login only syncs your place and bookmarks across devices.' },
-  { q: 'Where do I continue from?', a: 'Pick your surah and verse below — the buttons start filled with where you left off. Login syncs it to all your devices.' },
+  { q: 'Is reading free?', a: 'Yes — every surah is free to read with translation, transliteration and audio. No account needed.' },
+  { q: 'Where do I continue from?', a: 'Pick your surah and verse below — the buttons remember your last spot on this device.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -27,61 +23,41 @@ const crumbs = [
 <BaseLayout title="Read Quran Online — All Surahs with Translation, Transliteration & Audio" description="Read all 114 surahs in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation. Free to read, no signup needed." keywords="read quran online, surah with translation, quran transliteration, quran audio, read surah" locale={locale} canonicalPath="/tools/read/" faq={faq} crumbs={crumbs} hideFooter>
   <AppHeader locale={locale} title={t.tabs.reading} />
   <div class="max-w-md mx-auto px-4 py-5" data-reading>
-    <p class="text-center text-[17px] font-bold text-white leading-7">Choose a surah below — read in Arabic with translation, transliteration and audio.</p>
+    <p class="text-center text-[17px] font-bold text-qg-ink leading-7">Choose a surah below — read in Arabic with translation, transliteration and audio.</p>
 
     {/* surah selector */}
-    <button data-r-surahbtn class="mt-4 w-full flex items-center gap-3 text-start bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-3xl p-5 min-h-[76px] transition">
+    <button data-r-surahbtn class="mt-4 w-full flex items-center gap-3 text-start bg-white hover:bg-qg-soft active:scale-[0.99] border border-qg-line shadow-sm rounded-3xl p-5 min-h-[76px] transition">
       <span class="min-w-0 flex-1">
-        <span data-r-surahtitle class="block text-[22px] font-extrabold text-white truncate">Al-Faatiha</span>
-        <span data-r-surahsub class="block text-[15px] text-ink-500">The Opening | 7 Verses</span>
+        <span data-r-surahtitle class="block text-[22px] font-extrabold text-qg-ink truncate">Al-Faatiha</span>
+        <span data-r-surahsub class="block text-[15px] text-qg-muted">The Opening | 7 Verses</span>
       </span>
-      <span class="text-ink-300 text-3xl leading-none" aria-hidden="true">›</span>
+      <span class="text-qg-nav text-3xl leading-none" aria-hidden="true">›</span>
     </button>
 
     {/* verse selector */}
-    <button data-r-versebtn class="mt-3 w-full flex items-center gap-3 text-start bg-white/5 hover:bg-white/10 active:scale-[0.99] border border-white/10 rounded-3xl p-5 min-h-[76px] transition">
+    <button data-r-versebtn class="mt-3 w-full flex items-center gap-3 text-start bg-white hover:bg-qg-soft active:scale-[0.99] border border-qg-line shadow-sm rounded-3xl p-5 min-h-[76px] transition">
       <span class="min-w-0 flex-1">
-        <span class="block text-[22px] font-extrabold text-white">Start from Verse</span>
-        <span data-r-versesub class="block text-[15px] text-ink-500">1 Verse</span>
+        <span class="block text-[22px] font-extrabold text-qg-ink">Start from Verse</span>
+        <span data-r-versesub class="block text-[15px] text-qg-muted">1 Verse</span>
       </span>
-      <span class="text-ink-300 text-3xl leading-none" aria-hidden="true">›</span>
+      <span class="text-qg-nav text-3xl leading-none" aria-hidden="true">›</span>
     </button>
 
     {/* start */}
-    <a data-r-start href={`${readBase}1/?verse=1`} class="mt-3 flex items-center justify-center rounded-full border-2 border-white/70 hover:border-white hover:bg-white/5 active:scale-[0.99] text-white text-lg font-bold px-6 py-3.5 min-h-[56px] transition">Start Reading Quran</a>
-
-    {/* favourites + bookmarks */}
-    <div class="mt-4 grid grid-cols-2 gap-3">
-      <a href={favsUrl} class="rounded-3xl border-2 border-rose-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
-        <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-rose-600 text-4xl shadow-lg shadow-rose-950/50" aria-hidden="true">🤍</span>
-        <span class="mt-2 block text-[17px] text-ink-200">Favourites</span>
-        <span data-r-favcount class="block text-2xl font-extrabold text-white">0</span>
-      </a>
-      <a href={marksUrl} class="rounded-3xl border-2 border-violet-400/60 bg-white/[0.03] hover:bg-white/[0.06] active:scale-[0.99] p-5 text-center transition">
-        <span class="mx-auto grid place-items-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400 to-violet-600 text-4xl shadow-lg shadow-violet-950/50" aria-hidden="true">🔖</span>
-        <span class="mt-2 block text-[17px] text-ink-200">Bookmarks</span>
-        <span data-r-markcount class="block text-2xl font-extrabold text-white">0</span>
-      </a>
-    </div>
-
-    {/* guest nudge */}
-    <div data-r-login class="mt-4 bg-night-850 border border-white/10 rounded-3xl p-5 text-center">
-      <p class="font-bold text-ink-200">Login to save your reading progress</p>
-      <button data-r-open class="mt-3 bg-brand-500 hover:bg-brand-400 text-night-900 font-extrabold rounded-full px-6 py-3 min-h-[52px]">Login / Sign up →</button>
-    </div>
+    <a data-r-start href={`${readBase}1/?verse=1`} class="mt-3 flex items-center justify-center rounded-full border-2 border-qg-green hover:bg-qg-soft active:scale-[0.99] text-qg-green text-lg font-bold px-6 py-3.5 min-h-[56px] transition">Start Reading Quran</a>
 
     {/* all surahs */}
-    <h2 class="mt-8 text-xl font-extrabold text-white">All Surahs</h2>
-    <input data-r-filter placeholder="Search surah — name or number…" class="mt-3 w-full bg-night-800 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+    <h2 class="mt-8 text-xl font-extrabold text-qg-ink">All Surahs</h2>
+    <input data-r-filter placeholder="Search surah — name or number…" class="mt-3 w-full bg-white border border-qg-line shadow-sm rounded-2xl px-5 py-3.5 min-h-[52px] text-qg-ink placeholder:text-qg-muted outline-none focus:ring-2 focus:ring-qg-green/40 focus:border-qg-green" />
     <div class="mt-3 space-y-2">
       {(surahsMeta as any[]).map((s) => (
-        <a href={localizedPath(locale, `/tools/read/${s.num}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="rrow group bg-night-850 border border-white/10 rounded-2xl px-4 py-3 min-h-[60px] flex items-center gap-3 hover:border-brand-500/50 transition">
-          <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-brand-500 text-night-900 font-extrabold text-sm">{s.num}</span>
+        <a href={localizedPath(locale, `/tools/read/${s.num}/`)} data-search={`${s.num} ${s.name} ${s.englishName}`} class="rrow group bg-white border border-qg-line shadow-sm rounded-2xl px-4 py-3 min-h-[60px] flex items-center gap-3 hover:border-qg-green/50 transition">
+          <span class="w-9 h-9 shrink-0 grid place-items-center rounded-xl bg-qg-deep text-white font-extrabold text-sm">{s.num}</span>
           <span class="min-w-0 flex-1">
-            <span class="font-bold block leading-6 text-ink-50 group-hover:text-brand-300 truncate">Surah {s.name}</span>
-            <span class="text-xs text-ink-500">{s.englishName} • {s.verseCount} verses</span>
+            <span class="font-bold block leading-6 text-qg-ink group-hover:text-qg-green truncate">Surah {s.name}</span>
+            <span class="text-xs text-qg-muted">{s.englishName} • {s.verseCount} verses</span>
           </span>
-          <span class="text-ink-500 text-2xl leading-none" aria-hidden="true">›</span>
+          <span class="text-qg-muted text-2xl leading-none" aria-hidden="true">›</span>
         </a>
       ))}
     </div>
@@ -90,11 +66,11 @@ const crumbs = [
   {/* surah bottom sheet — Juz / Chapter picker */}
   <div data-r-surahsheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Surah">
     <div class="absolute inset-0 bg-black/70" data-r-close></div>
-    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-900 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
-      <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-white border border-qg-line rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+      <div class="mx-auto w-10 h-1 rounded-full bg-qg-line mb-3" aria-hidden="true"></div>
       <div class="grid grid-cols-2 gap-0 rounded-full p-0" role="tablist" aria-label="Juz or Chapter">
-        <button data-r-tab-juz role="tab" aria-selected="false" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-white">Juz</button>
-        <button data-r-tab-chapter role="tab" aria-selected="true" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-brand-500/40 text-brand-200">Chapter</button>
+        <button data-r-tab-juz role="tab" aria-selected="false" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-qg-ink">Juz</button>
+        <button data-r-tab-chapter role="tab" aria-selected="true" class="rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-qg-deep/10 text-qg-deep">Chapter</button>
       </div>
       <div data-r-chapterlist class="mt-3 overflow-y-auto space-y-2.5 pe-1"></div>
       <div data-r-juzlist class="hidden mt-3 overflow-y-auto space-y-2.5 pe-1"></div>
@@ -104,19 +80,17 @@ const crumbs = [
   {/* verse bottom sheet — Select Verse with search */}
   <div data-r-versesheet class="hidden fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Choose Verse">
     <div class="absolute inset-0 bg-black/70" data-r-close></div>
-    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-night-900 border border-white/10 rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
-      <div class="mx-auto w-10 h-1 rounded-full bg-white/20 mb-3" aria-hidden="true"></div>
-      <p class="text-center font-extrabold text-[19px] text-white">Select Verse</p>
+    <div class="absolute inset-x-0 bottom-0 mx-auto max-w-md bg-white border border-qg-line rounded-t-[28px] p-4 max-h-[80dvh] flex flex-col" style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));">
+      <div class="mx-auto w-10 h-1 rounded-full bg-qg-line mb-3" aria-hidden="true"></div>
+      <p class="text-center font-extrabold text-[19px] text-qg-ink">Select Verse</p>
       <div class="mt-3 relative">
-        <span class="absolute start-4 top-1/2 -translate-y-1/2 text-ink-500 text-xl" aria-hidden="true">⌕</span>
-        <input data-r-versefilter placeholder="Search" inputmode="numeric" class="w-full bg-transparent border border-white/25 rounded-full ps-11 pe-4 py-3 min-h-[52px] text-ink-50 placeholder:text-ink-500 outline-none focus:ring-2 ring-brand-400" />
+        <span class="absolute start-4 top-1/2 -translate-y-1/2 text-qg-muted text-xl" aria-hidden="true">⌕</span>
+        <input data-r-versefilter placeholder="Search" inputmode="numeric" class="w-full bg-transparent border border-qg-line rounded-full ps-11 pe-4 py-3 min-h-[52px] text-qg-ink placeholder:text-qg-muted outline-none focus:ring-2 focus:ring-qg-green/40 focus:border-qg-green" />
       </div>
       <div data-r-verselist class="mt-3 overflow-y-auto grid grid-cols-5 gap-2 pe-1"></div>
     </div>
   </div>
 
-  <AuthModal locale={locale} />
-  <AppTabBar locale={locale} active="reading" />
   <script define:vars={{ readBase, surahData, juzData }}>
     (() => {
       const root = document.querySelector('[data-reading]');
@@ -124,7 +98,7 @@ const crumbs = [
       root.dataset.wired = '1';
       const $ = (s) => root.querySelector(s);
       const sheet$ = (s) => document.querySelector(s);
-      let H = null, surah = 1, verse = 1, surahTab = 'chapter', verseQuery = '';
+      let surah = 1, verse = 1, surahTab = 'chapter', verseQuery = '';
 
       const meta = (n) => {
         const m = surahData[n - 1];
@@ -157,8 +131,8 @@ const crumbs = [
       const paintSurahTabs = () => {
         const tj = sheet$('[data-r-tab-juz]');
         const tc = sheet$('[data-r-tab-chapter]');
-        const on = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-brand-500/40 text-brand-200';
-        const off = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-white';
+        const on = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] bg-qg-deep/10 text-qg-deep';
+        const off = 'rounded-full px-4 py-2.5 text-[19px] font-extrabold transition min-h-[48px] text-qg-ink';
         if (tj) { tj.className = surahTab === 'juz' ? on : off; tj.setAttribute('aria-selected', String(surahTab === 'juz')); }
         if (tc) { tc.className = surahTab === 'chapter' ? on : off; tc.setAttribute('aria-selected', String(surahTab === 'chapter')); }
         const cl = sheet$('[data-r-chapterlist]');
@@ -173,13 +147,13 @@ const crumbs = [
         box.innerHTML = surahData.map((m) => {
           const active = m[0] === surah;
           return `
-          <button data-pick-surah="${m[0]}" class="w-full flex items-center gap-3 text-start rounded-2xl px-5 py-3.5 min-h-[72px] transition ${active ? 'bg-brand-500/40 border-2 border-brand-400' : 'bg-white/[0.04] border-2 border-transparent hover:border-white/15'}">
+          <button data-pick-surah="${m[0]}" class="w-full flex items-center gap-3 text-start rounded-2xl px-5 py-3.5 min-h-[72px] transition ${active ? 'bg-qg-deep/10 border-2 border-qg-green' : 'bg-qg-bg border-2 border-transparent hover:border-qg-line'}">
             <span class="min-w-0 flex-1">
-              <span class="block font-extrabold text-[19px] leading-6 ${active ? 'text-brand-200' : 'text-white'}">${m[0]}. ${m[1]}</span>
-              <span class="block text-[15px] ${active ? 'text-brand-200/80' : 'text-ink-500'}">${m[2]}</span>
+              <span class="block font-extrabold text-[19px] leading-6 ${active ? 'text-qg-deep' : 'text-qg-ink'}">${m[0]}. ${m[1]}</span>
+              <span class="block text-[15px] ${active ? 'text-qg-deep/80' : 'text-qg-muted'}">${m[2]}</span>
             </span>
-            <span class="shrink-0 text-[15px] font-medium ${active ? 'text-brand-200/90' : 'text-ink-500'}">${m[3]} Verses</span>
-            <span class="shrink-0 ${active ? 'text-brand-200' : 'text-brand-400'}" aria-hidden="true">${DL_ICON}</span>
+            <span class="shrink-0 text-[15px] font-medium ${active ? 'text-qg-deep/90' : 'text-qg-muted'}">${m[3]} Verses</span>
+            <span class="shrink-0 ${active ? 'text-qg-deep' : 'text-qg-green'}" aria-hidden="true">${DL_ICON}</span>
           </button>`;
         }).join('');
         box.querySelectorAll('[data-pick-surah]').forEach((b) => b.addEventListener('click', () => {
@@ -195,8 +169,8 @@ const crumbs = [
         const box = sheet$('[data-r-juzlist]');
         if (!box) return;
         box.innerHTML = juzData.map((j) => `
-          <button data-pick-juz="${j[0]}" class="w-full text-start rounded-2xl px-5 py-4 min-h-[60px] transition bg-white/[0.04] border-2 border-transparent hover:border-white/15">
-            <span class="block font-extrabold text-[19px] text-white">Juz ${j[0]}</span>
+          <button data-pick-juz="${j[0]}" class="w-full text-start rounded-2xl px-5 py-4 min-h-[60px] transition bg-qg-bg border-2 border-transparent hover:border-qg-line">
+            <span class="block font-extrabold text-[19px] text-qg-ink">Juz ${j[0]}</span>
           </button>`).join('');
         box.querySelectorAll('[data-pick-juz]').forEach((b) => b.addEventListener('click', () => {
           const j = juzData.find((x) => x[0] === Number(b.dataset.pickJuz));
@@ -216,8 +190,8 @@ const crumbs = [
         for (let v = 1; v <= m.count; v++) nums.push(v);
         if (query) nums = nums.filter((v) => String(v).includes(query));
         box.innerHTML = nums.length ? nums.map((v) => `
-          <button data-pick-verse="${v}" class="min-h-[52px] rounded-2xl font-extrabold text-[19px] transition ${v === verse ? 'bg-brand-500/60 text-brand-100 border-2 border-brand-300' : 'bg-white/[0.04] text-white border-2 border-transparent hover:border-white/15'}">${v}</button>`
-        ).join('') : `<p class="col-span-5 text-center text-sm text-ink-500 py-6">No verse matches “${query}”.</p>`;
+          <button data-pick-verse="${v}" class="min-h-[52px] rounded-2xl font-extrabold text-[19px] transition ${v === verse ? 'bg-qg-deep text-white border-2 border-qg-deep' : 'bg-qg-bg text-qg-ink border-2 border-transparent hover:border-qg-line'}">${v}</button>`
+        ).join('') : `<p class="col-span-5 text-center text-sm text-qg-muted py-6">No verse matches “${query}”.</p>`;
         box.querySelectorAll('[data-pick-verse]').forEach((b) => b.addEventListener('click', () => {
           verse = Number(b.dataset.pickVerse);
           paintSelection();
@@ -246,31 +220,10 @@ const crumbs = [
         const q = e.target.value.toLowerCase().trim();
         root.querySelectorAll('.rrow').forEach((r) => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
       });
-      root.querySelector('[data-r-open]')?.addEventListener('click', () => window.hnAuthModal?.open());
-      document.addEventListener('hn:auth', () => window.location.reload());
 
       paintSelection();
-      (async () => {
-        try { H = await import('/habits/habit.js?v=5'); } catch { return; }
-        let user = null;
-        try { user = (await H.Auth.session()).user; } catch {}
-        if (!user) return;
-        root.querySelector('[data-r-login]')?.classList.add('hidden');
-        try {
-          const { resume } = await H.Me.resume().catch(() => ({ resume: null }));
-          if (resume?.surah) {
-            surah = Math.min(114, Math.max(1, resume.surah));
-            verse = Math.max(1, resume.verse || 1);
-            paintSelection();
-          }
-        } catch {}
-        try {
-          const { bookmarks } = await H.Me.bookmarks().catch(() => ({ bookmarks: [] }));
-          const list = bookmarks || [];
-          if ($('[data-r-favcount]')) $('[data-r-favcount]').textContent = list.filter((b) => b.kind === 'verse').length;
-          if ($('[data-r-markcount]')) $('[data-r-markcount]').textContent = list.length;
-        } catch {}
-      })();
+      renderChapterList();
+      renderJuzList();
     })();
   </script>
 </BaseLayout>

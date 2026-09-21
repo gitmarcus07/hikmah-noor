@@ -1,7 +1,7 @@
 // GET /api/quran-search?q=&lang=en|ur|hi|ar&limit=12 — full-text verse search.
 // Public endpoint over the verses_fts table (migration 0005). Searches all
 // text columns at once (FTS5, ranked); LIKE fallback if FTS is unavailable.
-import { clientIp, json, rateLimit } from './lib/auth.js';
+import { clientIp, json, rateLimit } from './lib/http.js';
 
 const LANGS = new Set(['en', 'ur', 'hi', 'ar']);
 

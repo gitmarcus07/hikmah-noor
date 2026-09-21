@@ -1,0 +1,21 @@
+---
+/* Curated section heading — one style everywhere. */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  sub?: string;
+  href?: string;
+  linkLabel?: string;
+}
+const { eyebrow, title, sub, href, linkLabel } = Astro.props;
+---
+<div class="flex items-end justify-between gap-3 mb-4">
+  <div class="min-w-0">
+    {eyebrow && <p class="hn-eyebrow mb-1">{eyebrow}</p>}
+    <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">{title}</h2>
+    {sub && <p class="mt-1 text-[15px] leading-6" style="color:var(--hn-muted)">{sub}</p>}
+  </div>
+  {href && (
+    <a href={href} class="hn-btn-ghost hn-btn shrink-0 text-sm">{linkLabel ?? 'View all →'}</a>
+  )}
+</div>

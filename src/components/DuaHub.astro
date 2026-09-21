@@ -1,6 +1,8 @@
 ---
 /* Duas hub: all categories -> category -> dua. Plus article guides. */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { DUA_CATS, duasByCat, DUAS } from '../data/duas';
@@ -8,7 +10,7 @@ import { DUA_CATS, duasByCat, DUAS } from '../data/duas';
 interface Props { locale: string; guides: { title: string; desc: string; href: string }[]; popularSlugs?: string[]; }
 const { locale, guides, popularSlugs = [] } = Astro.props;
 const dict = getDict(locale);
-const isFallback = locale !== 'en';
+const L = (p: string) => localizedPath(locale, p);
 const counts = DUA_CATS.map((c) => ({ ...c, n: duasByCat(c.slug).length }));
 const popular = popularSlugs.length
   ? popularSlugs.map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean)
@@ -31,136 +33,132 @@ const crumbs = [
 ];
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/duas/">
-  <section class="relative overflow-hidden bg-night-900 text-white">
-    <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
-    <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">
-      <nav class="text-xs text-ink-500 mb-4"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span>{dict.nav.duas}</span></nav>
-      <div class="flex flex-wrap gap-2 mb-3">
-        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-gold-300 text-night-900 rounded-full px-3 py-1.5">{DUAS.length} duas</span>
-        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">{DUA_CATS.length} categories</span>
-        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">📖 {nQuran} Quranic</span>
-        <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">📜 {nHadith}+ Prophetic</span>
-        {isFallback && <span class="text-[11px] font-extrabold uppercase tracking-widest bg-white/10 border border-white/15 text-white rounded-full px-3 py-1.5">EN</span>}
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{DUAS.length} duas</span>
+        <span class="hn-badge">{DUA_CATS.length} categories</span>
+        <span class="hn-badge">{nQuran} Quranic</span>
+        <span class="hn-badge">{nHadith}+ Prophetic</span>
       </div>
-      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">All Duas 🤲</h1>
-      <p class="mt-3 text-ink-300 leading-7 max-w-2xl md:text-lg">Pick a category, find the dua for your moment, open its page for Arabic, transliteration, meaning, narrator, authenticity grade and source.</p>
-      <form action={localizedPath(locale, '/search/')} method="get" class="mt-5 flex gap-2 max-w-xl" role="search">
-        <input name="q" placeholder="Search duas — e.g. travel, parents, Laylatul Qadr…" class="flex-1 min-w-0 bg-night-800 text-ink-50 border border-white/10 rounded-2xl px-5 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
-        <button class="bg-gold-300 hover:bg-amber-200 text-night-900 font-extrabold rounded-2xl px-6 min-h-[52px]">Go</button>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">All Duas</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Pick a category, find the dua for your moment, open its page for Arabic, transliteration, meaning, narrator, authenticity grade and source.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" placeholder="Search duas — e.g. travel, parents, Laylatul Qadr…" aria-label="Search duas" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
       </form>
     </div>
-  </section>
 
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <h2 class="text-xl md:text-2xl font-extrabold mb-4 text-white">🗂️ Browse by category</h2>
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {counts.map((c) => (
-        <a href={localizedPath(locale, `/duas/${c.slug}/`)} class="group bg-night-850 border border-white/10 rounded-3xl p-5 flex gap-4 items-center shadow-lg shadow-black/30 hover:shadow-xl hover:border-brand-500/50 hover:bg-white/5 hover:-translate-y-1 transition">
-          <span class="w-12 h-12 shrink-0 grid place-items-center rounded-2xl bg-brand-500/15 text-brand-300"><Icon name={c.icon || 'duas'} size={24} /></span>
-          <span class="min-w-0">
-            <span class="font-extrabold block leading-6 text-ink-50 group-hover:text-brand-300">{c.title} <span class="text-xs font-extrabold text-ink-500">({c.n})</span></span>
-            <span class="text-[13px] text-ink-500 leading-5 block mt-0.5 line-clamp-2">{c.desc}</span>
-          </span>
-          <span class="ms-auto shrink-0 text-ink-500 group-hover:text-brand-300 group-hover:translate-x-0.5 transition"><Icon name="chevron" size={20} /></span>
-        </a>
-      ))}
+    <div class="mt-8">
+      <SectionHeader eyebrow="Categories" title="Browse by category" />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {counts.map((c) => (
+          <a href={L(`/duas/${c.slug}/`)} class="hn-card hn-card-hover hn-card-pad flex gap-3.5 items-center">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.icon as any || 'duas'} size={22} /></span>
+            <span class="min-w-0 flex-1">
+              <span class="font-extrabold block leading-6">{c.title} <span class="text-xs font-bold" style="color:var(--hn-muted)">({c.n})</span></span>
+              <span class="text-[13px] leading-5 block mt-0.5 line-clamp-2" style="color:var(--hn-muted)">{c.desc}</span>
+            </span>
+            <Icon name="arrow" size={18} />
+          </a>
+        ))}
+      </div>
     </div>
 
-    <h2 class="text-xl md:text-2xl font-extrabold mt-9 mb-4 text-white">⭐ Most-searched duas</h2>
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {popular.map((d: any) => (
-        <a href={localizedPath(locale, `/duas/${d.cat}/${d.slug}/`)} class="group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-          <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{d.title}</span>
-          <span class="text-[13px] text-ink-500">For: {d.use}</span>
-        </a>
-      ))}
+    <div class="mt-8">
+      <SectionHeader eyebrow="Popular" title="Most-searched duas" />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {popular.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">For: {d.use}</span>
+          </a>
+        ))}
+      </div>
     </div>
 
     {guides.length > 0 && (
-      <>
-        <h2 class="text-xl md:text-2xl font-extrabold mt-9 mb-4 text-white">📚 In-depth dua guides</h2>
+      <div class="mt-8">
+        <SectionHeader eyebrow="Guides" title="In-depth dua guides" />
         <div class="grid gap-3 sm:grid-cols-2">
           {guides.map((g) => (
-            <a href={g.href} class="group bg-night-850 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-              <span class="font-extrabold block leading-6 text-ink-50 group-hover:text-brand-300">{g.title}</span>
-              <span class="text-sm text-ink-500 leading-6 block mt-1 line-clamp-2">{g.desc}</span>
+            <a href={g.href} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-extrabold block leading-6">{g.title}</span>
+              <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.desc}</span>
             </a>
           ))}
         </div>
-      </>
+      </div>
     )}
 
-    <h2 class="text-xl md:text-2xl font-extrabold mt-9 mb-2 text-white">🔎 All duas — search & filter</h2>
-    <p class="text-sm text-ink-500 mb-4">Type to filter by title or purpose. Filter by source or tap a category.</p>
-    <div class="flex flex-col sm:flex-row gap-2 mb-3">
-      <input id="duafilter" placeholder="Filter duas — e.g. rain, debt, parents, Jannah…" class="flex-1 min-w-0 bg-night-800 border border-white/10 text-ink-50 rounded-2xl px-5 py-3.5 min-h-[52px] outline-none focus:ring-2 ring-brand-400" />
-      <select id="duacat" class="bg-night-800 border border-white/10 text-ink-50 rounded-2xl px-4 py-3.5 min-h-[52px] font-semibold text-[15px] outline-none focus:ring-2 ring-brand-400">
-        <option value="">All categories</option>
-        {DUA_CATS.map((c) => <option value={c.slug}>{c.title}</option>)}
-      </select>
-    </div>
-    <div class="flex flex-wrap gap-2 mb-5" id="duaorigin">
-      <button data-origin="" class="dua-origin-btn text-sm font-bold bg-brand-500 text-night-900 rounded-full px-4 py-2 min-h-[40px]">All sources</button>
-      <button data-origin="quran" class="dua-origin-btn text-sm font-bold bg-night-800 text-ink-200 border border-white/10 hover:border-brand-500/50 rounded-full px-4 py-2 min-h-[40px]">📖 Quranic</button>
-      <button data-origin="hadith" class="dua-origin-btn text-sm font-bold bg-night-800 text-ink-200 border border-white/10 hover:border-brand-500/50 rounded-full px-4 py-2 min-h-[40px]">📜 Prophetic</button>
-      <button data-origin="sahaba" class="dua-origin-btn text-sm font-bold bg-night-800 text-ink-200 border border-white/10 hover:border-brand-500/50 rounded-full px-4 py-2 min-h-[40px]">Companion</button>
-      <button data-origin="scholarly" class="dua-origin-btn text-sm font-bold bg-night-800 text-ink-200 border border-white/10 hover:border-brand-500/50 rounded-full px-4 py-2 min-h-[40px]">Scholarly</button>
-    </div>
-    <p id="duacount" class="text-sm text-ink-500 mb-3">{DUAS.length} duas</p>
-    <div id="duagrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {DUAS.map((d: any) => {
-        const cat = DUA_CATS.find((c) => c.slug === d.cat);
-        return (
-          <a href={localizedPath(locale, `/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use} ${cat?.title ?? ''} ${((d as any).aliases || []).join(' ')}`.toLowerCase()} data-cat={d.cat} data-origin={originOf(d)} class="duarow group bg-night-850 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/30 hover:shadow-lg hover:border-brand-500/50 hover:bg-white/5 transition">
-            <span class="font-bold block text-[15px] leading-6 text-ink-50 group-hover:text-brand-300">{d.title}</span>
-            <span class="text-[13px] text-ink-500">For: {d.use}</span>
-            <span class="mt-2 flex flex-wrap gap-1.5">
-              <span class="text-[11px] font-bold text-brand-300 bg-brand-500/15 px-2 py-0.5 rounded-full">{cat?.title ?? d.cat}</span>
-              {d.grade && <span class="text-[11px] font-bold text-ink-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">{d.grade}</span>}
-            </span>
-          </a>
-        );
-      })}
-    </div>
-    <script>
-      (() => {
-        const input = document.getElementById('duafilter');
-        const catSel = document.getElementById('duacat');
-        const count = document.getElementById('duacount');
-        const rows = [...document.querySelectorAll('.duarow')];
-        const btns = [...document.querySelectorAll('.dua-origin-btn')];
-        let origin = '';
-        const apply = () => {
-          const q = (input.value || '').toLowerCase().trim();
-          const cat = catSel.value || '';
-          let n = 0;
-          rows.forEach((r) => {
-            const okQ = !q || (r.dataset.search || '').includes(q);
-            const okC = !cat || r.dataset.cat === cat;
-            const okO = !origin || r.dataset.origin === origin;
-            const show = okQ && okC && okO;
-            r.classList.toggle('hidden', !show);
-            if (show) n++;
-          });
-          if (count) count.textContent = `${n} dua${n === 1 ? '' : 's'}`;
-        };
-        input?.addEventListener('input', apply);
-        catSel?.addEventListener('change', apply);
-        btns.forEach((b) =>
-          b.addEventListener('click', () => {
-            origin = b.dataset.origin || '';
-            btns.forEach((x) => {
-              const active = x === b;
-              x.classList.toggle('bg-brand-500', active);
-              x.classList.toggle('text-night-900', active);
-              x.classList.toggle('bg-night-800', !active);
-              x.classList.toggle('text-ink-200', !active);
+    <div class="mt-8">
+      <SectionHeader eyebrow="All" title="All duas — search & filter" sub="Type to filter by title or purpose. Filter by source or category." />
+      <div class="flex flex-col sm:flex-row gap-2 mb-3">
+        <input id="duafilter" placeholder="Filter duas — e.g. rain, debt, parents, Jannah…" class="hn-input flex-1" aria-label="Filter duas" />
+        <select id="duacat" class="hn-input sm:max-w-[240px]" aria-label="Category">
+          <option value="">All categories</option>
+          {DUA_CATS.map((c) => <option value={c.slug}>{c.title}</option>)}
+        </select>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4" id="duaorigin">
+        <button data-origin="" class="dua-origin-btn hn-btn hn-btn-primary !min-h-[40px] !py-2 !px-4 text-sm">All sources</button>
+        <button data-origin="quran" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Quranic</button>
+        <button data-origin="hadith" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Prophetic</button>
+        <button data-origin="sahaba" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Companion</button>
+        <button data-origin="scholarly" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Scholarly</button>
+      </div>
+      <p id="duacount" class="text-sm mb-3" style="color:var(--hn-muted)">{DUAS.length} duas</p>
+      <div id="duagrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {DUAS.map((d: any) => {
+          const cat = DUA_CATS.find((c) => c.slug === d.cat);
+          return (
+            <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use} ${cat?.title ?? ''} ${((d as any).aliases || []).join(' ')}`.toLowerCase()} data-cat={d.cat} data-origin={originOf(d)} class="duarow hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">For: {d.use}</span>
+              <span class="mt-2 flex flex-wrap gap-1.5">
+                <span class="hn-badge hn-badge-primary">{cat?.title ?? d.cat}</span>
+                {d.grade && <span class="hn-badge">{d.grade}</span>}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+      <script is:inline>
+        (() => {
+          const input = document.getElementById('duafilter');
+          const catSel = document.getElementById('duacat');
+          const count = document.getElementById('duacount');
+          const rows = [...document.querySelectorAll('.duarow')];
+          const btns = [...document.querySelectorAll('.dua-origin-btn')];
+          let origin = '';
+          const apply = () => {
+            const q = (input.value || '').toLowerCase().trim();
+            const cat = catSel.value || '';
+            let n = 0;
+            rows.forEach((r) => {
+              const okQ = !q || (r.dataset.search || '').includes(q);
+              const okC = !cat || r.dataset.cat === cat;
+              const okO = !origin || r.dataset.origin === origin;
+              const show = okQ && okC && okO;
+              r.classList.toggle('hidden', !show);
+              if (show) n++;
             });
-            apply();
-          })
-        );
-      })();
-    </script>
+            if (count) count.textContent = `${n} dua${n === 1 ? '' : 's'}`;
+          };
+          input?.addEventListener('input', apply);
+          catSel?.addEventListener('change', apply);
+          btns.forEach((b) =>
+            b.addEventListener('click', () => {
+              origin = b.dataset.origin || '';
+              apply();
+            })
+          );
+        })();
+      </script>
+    </div>
   </div>
 </BaseLayout>
-<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>
