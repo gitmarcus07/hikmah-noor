@@ -1,8 +1,8 @@
-import { getCollection } from 'astro:content';
+﻿import { getCollection } from 'astro:content';
 import { nonDefaultLocales } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 import parasMeta from '../../data/paras-meta.json';
-import { toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems, waqiahIndexItems, tagSurah } from '../../lib/search';
+import { toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems, waqiahIndexItems, guideIndexItems, tagSurah } from '../../lib/search';
 
 export async function getStaticPaths() {
   return nonDefaultLocales.map(locale => ({ params: { locale } }));
@@ -21,7 +21,7 @@ export async function GET({ params }: any) {
   const list = [...native, ...fill];
   const surahItems = (surahsMeta as any[]).map(s => tagSurah({
     title: `Surah ${s.name} (${s.englishName})`,
-    description: `Surah ${s.num} — ${s.verseCount} verses, ${s.revelation === 'Mecca' ? 'Makki' : 'Madani'}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
+    description: `Surah ${s.num} â€” ${s.verseCount} verses, ${s.revelation === 'Mecca' ? 'Makki' : 'Madani'}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
     category: 'surahs',
     url: `/${locale}/surahs/${s.slug}/`,
     tags: ['quran', 'surah', 'juz', 'para', s.name.toLowerCase(), s.englishName.toLowerCase(), String(s.num)],
@@ -29,13 +29,13 @@ export async function GET({ params }: any) {
   }));
   const paraItems = (parasMeta as any[]).map(p => ({
     title: `Quran Para ${p.num} (${p.name})`,
-    description: `Para ${p.num} (${p.name}) — ${p.range}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
+    description: `Para ${p.num} (${p.name}) â€” ${p.range}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
     category: 'quran',
     url: `/${locale}/quran/${p.slug}/`,
     tags: ['quran', 'para', 'parah', 'juz', `para ${p.num}`, `juz ${p.num}`, p.name.toLowerCase(), String(p.num)],
     locale,
   }));
-  const items = [...toolIndexItems(locale), ...duaIndexItems(locale), ...kalimaIndexItems(locale), ...meaningIndexItems(locale), ...waqiahIndexItems(locale), ...paraItems, ...surahItems, ...list.map(e => ({
+  const items = [...toolIndexItems(locale), ...duaIndexItems(locale), ...kalimaIndexItems(locale), ...meaningIndexItems(locale), ...waqiahIndexItems(locale), ...guideIndexItems(locale), ...paraItems, ...surahItems, ...list.map(e => ({
     title: e.data.title,
     description: e.data.description,
     category: e.data.category,

@@ -1,0 +1,11 @@
+﻿---
+import GuideCategory from '../../components/GuideCategory.astro';
+import { GUIDE_CATS, guidesByCat } from '../../data/guides';
+
+export async function getStaticPaths() {
+  return GUIDE_CATS.map((c) => ({ params: { cat: c.slug }, props: { cat: c } }));
+}
+const { cat } = Astro.props;
+const locale = 'en';
+---
+<GuideCategory cat={cat} guides={guidesByCat(cat.slug)} locale={locale} />

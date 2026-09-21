@@ -1,0 +1,76 @@
+﻿---
+/* Guide category landing: intro + count + topics + FAQ. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { localizedPath } from '../i18n/utils';
+import { GUIDE_CATS } from '../data/guides';
+
+interface Props { cat: any; guides: any[]; locale: string; }
+const { cat, guides, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const catPath = '/learn/' + cat.slug + '/';
+
+const title = cat.title + ' Guides - ' + guides.map((g: any) => g.title).slice(0, 3).join(', ') + ' and More';
+let description = guides.length + ' step-by-step ' + cat.title.toLowerCase() + ' guides: ' + guides.map((g: any) => g.title).join(', ') + ' - with steps, evidence and FAQs.';
+if (description.length > 160) description = description.slice(0, 157) + '...';
+const keywords = cat.title.toLowerCase() + ' guides, ' + guides.map((g: any) => g.title.toLowerCase()).join(', ');
+const faq = [
+  { q: 'Which ' + cat.title.toLowerCase() + ' topics are covered?', a: guides.map((g: any) => g.title).join('; ') + '. Open any guide for steps, evidence and FAQs.' },
+  { q: 'Are these guides authentic?', a: 'Every guide names its Quran or hadith basis without invented details. Learn personal rulings from a qualified teacher.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Learn', path: '/learn/' },
+  { name: cat.title, path: catPath },
+];
+const siblings = GUIDE_CATS.filter((c) => c.slug !== cat.slug);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={catPath}>
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 flex items-start gap-3.5 max-w-3xl">
+      <span class="w-12 h-12 shrink-0 grid place-items-center rounded-[12px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={cat.icon as any || 'book'} size={26} /></span>
+      <div class="min-w-0">
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{cat.title} Guides</h1>
+        <p class="mt-2 leading-7" style="color:var(--hn-muted)">{cat.desc}</p>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <span class="hn-badge hn-badge-primary">{guides.length} guides</span>
+          <span class="hn-badge">Steps + evidence + FAQs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 grid gap-3 md:grid-cols-2">
+      {guides.map((g: any) => (
+        <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block text-[16px] leading-6">{g.title}</span>
+          <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          <span class="text-[13px] font-bold mt-1.5 inline-flex items-center gap-1" style="color:var(--hn-primary)">Read guide <Icon name="arrow" size={14} /></span>
+        </a>
+      ))}
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="All guide categories">
+      <SectionHeader eyebrow="More" title="All guide categories" href={L('/learn/')} linkLabel="All guides" />
+      <div class="flex flex-wrap gap-2">
+        {siblings.map((s) => (
+          <a href={L('/learn/' + s.slug + '/')} class="hn-badge hn-card-hover" style="padding:0.55rem 1rem;font-size:0.85rem">{s.title}</a>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,139 @@
+﻿---
+/* Guide topic page - one SEO page per topic with steps, evidence, FAQs. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ReadingCard from './hn/ReadingCard.astro';
+import { localizedPath } from '../i18n/utils';
+import { guidesByCat, GUIDES } from '../data/guides';
+import { getDua, duaCat } from '../data/duas';
+
+interface Props { guide: any; cat: any; locale: string; }
+const { guide, cat, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const guidePath = '/learn/' + guide.cat + '/' + guide.slug + '/';
+const catPath = '/learn/' + guide.cat + '/';
+
+/* Closely related dua pages for internal linking (verified slugs). */
+const RELATED_DUAS: Record<string, string[]> = {
+  'how-to-pray-namaz': ['sana-opening', 'dua-qunoot', 'after-salam'],
+  'wudu-ablution': ['before-wudu', 'after-wudu'],
+  'ghusl-bath': ['before-wudu', 'after-wudu'],
+  'tayammum-dry-ablution': ['before-wudu'],
+  'adhan-iqamah': ['after-salam'],
+  'janaza-prayer': ['for-the-deceased', 'burial-bismillah-millah'],
+  'roza-fasting': ['breaking-fast', 'laylatul-qadr'],
+  'zakat-essentials': [],
+  'hajj-umrah-basics': ['talbiyah', 'arafah-dua', 'tawaf-corner'],
+  'nikah-marriage': ['wedding-dua', 'righteous-family'],
+  'aqeeqah-newborn': ['ruqyah-children', 'righteous-children-salihin'],
+};
+const duaLinks = (RELATED_DUAS[guide.slug] || [])
+  .map((s) => {
+    const hit = (['morning-evening','salah-prayer','travel-journey','food-drink','home-family','sleep-rest','health-protection','forgiveness','hardship-rizq','purity-cleanliness','worship-knowledge','hajj-umrah','daily-life','ramadan-fasting','prophets-duas','marriage','children','death-funeral','hereafter','protection','rabbana-duas'] as string[])
+      .map((c) => getDua(c, s)).find(Boolean);
+    return hit;
+  })
+  .filter(Boolean)
+  .slice(0, 3);
+
+const title = guide.title + ' - Step by Step with Evidence';
+let description = guide.intro;
+if (description.length > 160) description = description.slice(0, 157) + '...';
+const keywords = guide.title.toLowerCase() + ', ' + (guide.aliases || []).join(', ');
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Learn', path: '/learn/' },
+  { name: cat.title, path: catPath },
+  { name: guide.title, path: guidePath },
+];
+const related = guidesByCat(guide.cat).filter((g) => g.slug !== guide.slug);
+const moreGuides = [...related, ...GUIDES.filter((g) => g.cat !== guide.cat)].slice(0, 4);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={guide.faq} crumbs={crumbs} canonicalPath={guidePath}>
+  <div class="hn-article hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 3)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Guide</span>
+      <span class="hn-badge">{cat.title}</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{guide.title}</h1>
+    <p class="mt-2 text-[16px] leading-8" style="color:var(--hn-muted)">{guide.intro}</p>
+    {(guide.aliases || []).length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {(guide.aliases || []).map((a: string, i: number) => (
+        <span>{i > 0 && ' | '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    {guide.steps && guide.steps.length > 0 && (
+      <section class="mt-6" aria-label="Steps">
+        <SectionHeader eyebrow="How to" title="Steps in order" />
+        <ol class="space-y-3">
+          {guide.steps.map((s: string, i: number) => (
+            <li class="hn-card hn-card-pad flex gap-3">
+              <span class="hn-verse-num shrink-0">{i + 1}</span>
+              <span class="leading-7 text-[15px]">{s}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+
+    {(guide.sections || []).map((sec: any) => (
+      <section class="mt-6" aria-label={sec.h}>
+        <h2 class="text-xl font-extrabold mb-3">{sec.h}</h2>
+        {(sec.ps || []).map((p: string) => (
+          <p class="hn-card hn-card-pad leading-8 text-[15px] mb-3">{p}</p>
+        ))}
+      </section>
+    ))}
+
+    <div class="hn-card hn-card-pad mt-6">
+      <p class="hn-block-label">Basis</p>
+      <p class="text-[15px] font-semibold leading-6">{guide.ref}</p>
+      <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Learn personal details from a qualified teacher; minor school differences exist.</p>
+    </div>
+
+    {guide.faq && guide.faq.length > 0 && (
+      <section class="mt-8" aria-label="Frequently asked questions">
+        <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+        <div class="space-y-3">
+          {guide.faq.map((f: any) => (
+            <details class="hn-faq">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {duaLinks.length > 0 && (
+      <section class="mt-8" aria-label="Related duas">
+        <SectionHeader eyebrow="Duas" title="Related duas" href={L('/duas/')} linkLabel="All duas" />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {duaLinks.map((d: any) => (
+            <a href={L('/duas/' + d.cat + '/' + d.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {moreGuides.length > 0 && (
+      <section class="mt-8" aria-label="More guides">
+        <SectionHeader eyebrow="Learn" title="More guides" href={L('/learn/')} linkLabel="All guides" />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {moreGuides.map((g: any) => (
+            <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{g.title}</span>
+              <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

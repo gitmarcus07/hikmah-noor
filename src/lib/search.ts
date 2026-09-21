@@ -331,3 +331,39 @@ export function waqiahIndexItems(locale: string): IndexItem[] {
   }
   return items;
 }
+import { GUIDES, GUIDE_CATS } from '../data/guides';
+
+export function guideIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [
+    {
+      title: 'Islamic Guides - How to Pray, Wudu, Fasting, Zakat, Hajj and More',
+      description: 'Step-by-step Islamic guides: how to pray namaz, wudu, ghusl, fasting, zakat, Hajj, nikah and janaza - with steps, evidence and FAQs.',
+      category: 'learn',
+      url: prefix + '/learn/',
+      tags: ['learn', 'guides', 'how to', 'namaz', 'wudu', 'islamic guides'],
+      locale,
+    },
+  ];
+  for (const c of GUIDE_CATS) {
+    items.push({
+      title: c.title + ' Guides',
+      description: c.desc,
+      category: 'learn',
+      url: prefix + '/learn/' + c.slug + '/',
+      tags: ['learn', 'guides', c.title.toLowerCase(), c.slug.replace(/-/g, ' ')],
+      locale,
+    });
+  }
+  for (const g of GUIDES) {
+    items.push({
+      title: g.title,
+      description: g.intro,
+      category: 'learn',
+      url: prefix + '/learn/' + g.cat + '/' + g.slug + '/',
+      tags: ['learn', 'guide', 'how to', g.title.toLowerCase(), ...(g.aliases || [])],
+      locale,
+    });
+  }
+  return items;
+}
