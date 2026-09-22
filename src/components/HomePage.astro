@@ -147,8 +147,30 @@ const recent = (latest ?? []).slice(0, 3);
             <a href={surahsUrl} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">All 114 surahs</a>
             <a href={quranUrl} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">30 paras</a>
           </div>
-          <p class="font-arabic text-xl mt-4 leading-[2]" lang="ar" dir="rtl">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
-          <p class="text-[13.5px] mt-1" style="color:var(--hn-muted)">“{m.ayahTr ?? 'Our Lord, give us good in this world and good in the Hereafter.'}” — {m.ayahRef ?? 'Quran 2:201'}</p>
+          <p class="font-arabic text-xl mt-4 leading-[2]" lang="ar" dir="rtl" data-aotd-ar>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
+          <p class="text-[13.5px] mt-1" style="color:var(--hn-muted)" data-aotd-wrap><span data-aotd-en>“{m.ayahTr ?? 'Our Lord, give us good in this world and good in the Hereafter.'}” — {m.ayahRef ?? 'Quran 2:201'}</span></p>
+          <script is:inline define:vars={{ readBase: L('/tools/read/') }}>
+            (() => {
+              const en = document.querySelector('[data-aotd-en]');
+              if (!en || en.dataset.wired) return;
+              en.dataset.wired = '1';
+              fetch('/habits/ayahs.json').then((r) => r.json()).then((list) => {
+                if (!list || !list.length) return;
+                const a = list[Math.floor(Date.now() / 864e5) % list.length];
+                const ar = document.querySelector('[data-aotd-ar]');
+                if (ar && a.ar) ar.textContent = a.ar;
+                en.innerHTML = '';
+                const q = document.createElement('span');
+                q.textContent = '\u201C' + (a.en || '') + '\u201D \u2014 ';
+                const link = document.createElement('a');
+                link.href = `${String(readBase).replace(/\/$/, '')}/${a.surah}/?verse=${a.verse}`;
+                link.textContent = `Quran ${a.surah}:${a.verse}${a.surahName ? ` (${a.surahName})` : ''} \u2192`;
+                link.style.fontWeight = '800';
+                link.style.color = 'var(--hn-primary)';
+                en.append(q, link);
+              }).catch(() => {});
+            })();
+          </script>
         </div>
         <div>
           <SectionHeader eyebrow="Tools" title={m.usefulTools ?? 'Islamic tools'} href={toolsUrl} linkLabel="All tools" />

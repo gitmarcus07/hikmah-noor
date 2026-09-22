@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict, localizedPath } from '../../i18n/utils';
+
+const locale = 'en';
+const dict = getDict(locale);
+const faq = [
+  { q: 'What is tasbih?', a: 'The remembrance of Allah with phrases like SubhanAllah (glory be to Allah), Alhamdulillah (praise be to Allah) and Allahu Akbar (Allah is Greatest) — often counted 33 times after prayers or 100 times morning and evening.' },
+  { q: 'Do I need wudu to use this counter?', a: 'No. Dhikr can be done in any state, while walking, working or resting. Facing the qibla and understanding the meanings increase the reward.' },
+  { q: 'Is my count saved?', a: 'Yes — session counts and today’s totals are saved on this device only (hn.tasbih.v1 in your browser). Clearing browser data resets them. Nothing is sent to servers.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Tasbih Counter', path: '/tools/tasbih/' },
+];
+---
+<BaseLayout title="Tasbih Counter Online — Dhikr with Daily Totals" description="Free online tasbih counter: tap to count SubhanAllah, Alhamdulillah, Allahu Akbar and more with 33/100/1000 goals and daily totals saved on your device." keywords="tasbih counter, dhikr counter online, tasbeeh counter, subhanallah counter, digital tasbih" locale={locale} canonicalPath="/tools/tasbih/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Tasbih Counter" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-tasbih>
+    <p class="text-center text-[15px] font-bold" style="color:var(--hn-muted)">Pick a dhikr, set a goal, tap the circle.</p>
+
+    <div class="mt-4 grid grid-cols-2 gap-2" data-t-phrases></div>
+
+    <div class="mt-3 flex gap-2" role="group" aria-label="Goal">
+      {[33, 100, 1000].map((g, i) => (
+        <button data-t-goal={g} class={`flex-1 rounded-2xl px-3 py-3 min-h-[52px] font-extrabold text-[16px] border-2 transition ${i === 1 ? 'hn-btn hn-btn-primary !border-transparent' : 'hn-card'}`}>{g}</button>
+      ))}
+    </div>
+
+    <button data-t-tap class="mt-4 w-full rounded-full border-2 mx-auto block transition active:scale-[0.97]" style="width:220px;height:220px;border-color:var(--hn-primary);background:var(--hn-primary-soft)" aria-label="Tap to count">
+      <span class="block font-extrabold" style="font-size:56px;color:var(--hn-ink)" data-t-count>0</span>
+      <span class="block text-sm font-bold" style="color:var(--hn-muted)"><span data-t-goal-label>100</span> goal</span>
+    </button>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <div class="h-2.5 rounded-full overflow-hidden" style="background:var(--hn-border)"><div data-t-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      <div class="mt-3 flex items-center justify-between text-sm font-bold" style="color:var(--hn-muted)">
+        <span>Today: <span data-t-today style="color:var(--hn-ink)">0</span></span>
+        <span data-t-phrase-name></span>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button data-t-reset class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm">Reset counter</button>
+        <a href={localizedPath(locale, '/duas/morning-evening/')} class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm text-center">Morning duas</a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-tasbih]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.tasbih.v1';
+      const PHRASES = [
+        { name: 'SubhanAllah', ar: 'سُبْحَانَ اللَّهِ' },
+        { name: 'Alhamdulillah', ar: 'الْحَمْدُ لِلَّهِ' },
+        { name: 'Allahu Akbar', ar: 'اللَّهُ أَكْبَرُ' },
+        { name: 'La ilaha illallah', ar: 'لَا إِلَهَ إِلَّا اللَّهُ' },
+        { name: 'Astaghfirullah', ar: 'أَسْتَغْفِرُ اللَّهَ' },
+        { name: 'SubhanAllahi wa bihamdihi', ar: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ' },
+      ];
+      const todayUTC = () => new Date().toISOString().slice(0, 10);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      let phrase = 0, goal = 100, count = 0;
+      const $ = (s) => root.querySelector(s);
+      const day = () => {
+        const s = load();
+        if (s.day !== todayUTC()) { s.day = todayUTC(); s.per = {}; save(s); }
+        return s;
+      };
+      const paint = () => {
+        $('[data-t-count]').textContent = count;
+        $('[data-t-goal-label]').textContent = goal;
+        const pct = goal > 0 ? Math.min(100, Math.round((count / goal) * 100)) : 0;
+        $('[data-t-bar]').style.width = pct + '%';
+        $('[data-t-phrase-name]').textContent = PHRASES[phrase].name;
+        const s = day();
+        const todayTotal = Object.values(s.per || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+        $('[data-t-today]').textContent = todayTotal;
+        root.querySelectorAll('[data-t-phrases] button').forEach((b, i) => {
+          const on = i === phrase;
+          b.classList.toggle('hn-btn-primary', on);
+          b.setAttribute('aria-pressed', String(on));
+        });
+        root.querySelectorAll('[data-t-goal]').forEach((b) => {
+          const on = Number(b.dataset.tGoal) === goal;
+          b.classList.toggle('hn-btn-primary', on);
+          b.classList.toggle('hn-card', !on);
+        });
+      };
+      const box = $('[data-t-phrases]');
+      box.innerHTML = PHRASES.map((p, i) => `
+        <button data-t-phrase="${i}" aria-pressed="${i === phrase}" class="hn-card hn-card-pad text-start transition">
+          <span class="block font-extrabold text-[15px] leading-6">${p.name}</span>
+          <span class="font-arabic block text-lg leading-8" lang="ar" dir="rtl">${p.ar}</span>
+        </button>`).join('');
+      box.querySelectorAll('[data-t-phrase]').forEach((b) => b.addEventListener('click', () => {
+        phrase = Number(b.dataset.tPhrase); count = 0; paint();
+      }));
+      root.querySelectorAll('[data-t-goal]').forEach((b) => b.addEventListener('click', () => {
+        goal = Number(b.dataset.tGoal); count = 0; paint();
+      }));
+      $('[data-t-tap]').addEventListener('click', () => {
+        count += 1;
+        const s = day();
+        s.per = s.per || {};
+        const k = PHRASES[phrase].name;
+        s.per[k] = (Number(s.per[k]) || 0) + 1;
+        save(s);
+        if (goal > 0 && count % goal === 0 && navigator.vibrate) { try { navigator.vibrate(40); } catch {} }
+        paint();
+      });
+      $('[data-t-reset]').addEventListener('click', () => { count = 0; paint(); });
+      paint();
+    })();
+  </script>
+</BaseLayout>

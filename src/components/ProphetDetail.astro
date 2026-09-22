@@ -5,6 +5,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ProphetArt from './ProphetArt.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 import { localizedPath } from '../i18n/utils';
 import { PROPHETS, prevProphet, nextProphet } from '../data/prophets';
 
@@ -50,6 +51,7 @@ const nextP = nextProphet(prophet.order);
       <span class="hn-badge hn-badge-primary">Prophet {prophet.order} of 25</span>
       <span class="hn-badge">{prophet.era}</span>
       <span class="hn-badge hn-badge-gold">{prophet.name}</span>
+      <span class="ms-auto"><BookmarkButton kind="prophet" bmRef={prophetPath} title={prophet.title} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{prophet.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{prophet.summary}</p>

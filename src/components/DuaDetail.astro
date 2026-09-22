@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat, DUA_ORIGIN_LABEL } from '../data/duas';
 
@@ -48,6 +49,7 @@ const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : n
       <span class="hn-badge">{cat.title}</span>
       {originLabel && <span class="hn-badge hn-badge-gold">{originLabel}</span>}
       {gradeLabel && <span class="hn-badge">{gradeLabel}</span>}
+      <span class="ms-auto"><BookmarkButton kind="dua" bmRef={duaPath} title={dua.title} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{dua.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{dua.use}</p>

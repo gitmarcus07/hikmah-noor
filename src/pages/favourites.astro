@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AppHeader from '../components/AppHeader.astro';
+import BookmarkScript from '../components/hn/BookmarkScript.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Favourites', path: '/favourites/' },
+];
+---
+<BaseLayout title="My Favourites — Saved Duas, Stories, Prophets & Verses" description="Your saved duas, prophet stories, prophets and verses on this device. Tap the heart on any page to save it here." locale={locale} canonicalPath="/favourites/" crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="Favourites" backHref="/" />
+  <div class="max-w-2xl mx-auto px-4 py-5">
+    <p class="text-center text-[15px] font-bold" style="color:var(--hn-muted)" data-fav-count></p>
+    <div data-fav-list class="mt-3 space-y-5"></div>
+    <div data-fav-empty class="hidden hn-card hn-card-pad text-center">
+      <p class="font-extrabold text-[17px]">Nothing saved yet</p>
+      <p class="mt-1 text-[14px] leading-6" style="color:var(--hn-muted)">Tap the ♡ on any dua, story, prophet or verse and it will appear here — saved on this device only.</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-2">
+        <a href="/duas/" class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Browse duas</a>
+        <a href="/prophets/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Browse prophets</a>
+      </div>
+    </div>
+  </div>
+  <BookmarkScript />
+  <script is:inline define:vars={{ locale }}>
+    (() => {
+      const KEY = 'hn.bookmarks.v1';
+      const KIND = { dua: 'Duas', waqiah: 'Stories', prophet: 'Prophets', verse: 'Verses', hadees: 'Hadees', seerah: 'Seerah', kalima: 'Kalimas', meaning: 'Meanings' };
+      const L = (p) => (locale === 'en' ? p : `/${locale}${p}`);
+      const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } };
+      const hrefOf = (b) => {
+        if (b.kind === 'verse') {
+          const parts = String(b.ref || '').split(':');
+          return L(`/tools/read/${parts[0] || 1}/?verse=${parts[1] || 1}`);
+        }
+        return L(b.ref || '/');
+      };
+      const render = () => {
+        const items = load();
+        const box = document.querySelector('[data-fav-list]');
+        const empty = document.querySelector('[data-fav-empty]');
+        const count = document.querySelector('[data-fav-count]');
+        if (count) count.textContent = items.length ? `${items.length} saved on this device` : '';
+        if (!items.length) {
+          if (box) box.innerHTML = '';
+          if (empty) empty.classList.remove('hidden');
+          return;
+        }
+        if (empty) empty.classList.add('hidden');
+        const groups = {};
+        items.slice().reverse().forEach((b) => { if (b && b.ref) (groups[b.kind] || (groups[b.kind] = [])).push(b); });
+        if (box) {
+          box.innerHTML = Object.keys(groups).map((k) => `
+            <section>
+              <h2 class="font-extrabold text-[17px] mb-2">${esc(KIND[k] || k)} (${groups[k].length})</h2>
+              <div class="space-y-2">
+                ${groups[k].map((b) => `
+                  <div class="hn-card hn-card-pad flex items-center gap-3">
+                    <a href="${esc(hrefOf(b))}" class="min-w-0 flex-1 font-bold text-[15px] leading-6 truncate">${esc(b.title || b.ref)}</a>
+                    <button type="button" data-bm data-bm-kind="${esc(k)}" data-bm-ref="${esc(b.ref)}" data-bm-title="${esc(b.title || '')}" aria-label="Remove" aria-pressed="true" style="font-size:20px;line-height:1;color:var(--hn-primary)">♥</button>
+                  </div>`).join('')}
+              </div>
+            </section>`).join('');
+        }
+        if (window.__hnBmPaint) window.__hnBmPaint();
+      };
+      document.addEventListener('hn:bm', render);
+      render();
+    })();
+  </script>
+</BaseLayout>

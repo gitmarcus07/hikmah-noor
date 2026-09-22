@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import WaqiahArt from './WaqiahArt.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 import { localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
 
@@ -37,6 +38,7 @@ const nextW = sIdx >= 0 && sIdx < WAQIAT.length - 1 ? WAQIAT[sIdx + 1] : null;
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{waqiah.prophet}</span>
+      <span class="ms-auto"><BookmarkButton kind="waqiah" bmRef={waqiahPath} title={waqiah.title} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{waqiah.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{waqiah.summary}</p>

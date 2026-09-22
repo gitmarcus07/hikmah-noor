@@ -1,0 +1,42 @@
+<script is:inline>
+  (() => {
+    if (window.__hnBmWired) return;
+    window.__hnBmWired = 1;
+    const KEY = 'hn.bookmarks.v1';
+    const load = () => {
+      try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+      catch { return []; }
+    };
+    const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+    const paint = () => {
+      let list = load();
+      if (!Array.isArray(list)) list = [];
+      document.querySelectorAll('[data-bm]').forEach((b) => {
+        const on = list.some((x) => x && x.kind === b.getAttribute('data-bm-kind') && x.ref === b.getAttribute('data-bm-ref'));
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.textContent = on ? '♥' : '♡';
+        b.style.color = on ? 'var(--hn-primary)' : '';
+      });
+    };
+    window.__hnBmPaint = paint;
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      const b = t && t.closest ? t.closest('[data-bm]') : null;
+      if (!b) return;
+      e.preventDefault();
+      const kind = b.getAttribute('data-bm-kind');
+      const ref = b.getAttribute('data-bm-ref');
+      const title = b.getAttribute('data-bm-title') || ref;
+      let list = load();
+      if (!Array.isArray(list)) list = [];
+      const i = list.findIndex((x) => x && x.kind === kind && x.ref === ref);
+      if (i >= 0) list.splice(i, 1);
+      else list.push({ kind, ref, title, addedAt: new Date().toISOString() });
+      save(list);
+      paint();
+      document.dispatchEvent(new CustomEvent('hn:bm'));
+    });
+    paint();
+    document.addEventListener('DOMContentLoaded', paint);
+  })();
+</script>

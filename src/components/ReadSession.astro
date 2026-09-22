@@ -3,6 +3,7 @@
  * share. No accounts: arrows move between verses, audio plays, that is all.
  */
 import { localizedPath, getDict } from '../i18n/utils';
+import BookmarkScript from './hn/BookmarkScript.astro';
 
 interface Props {
   locale: string;
@@ -31,7 +32,9 @@ const pad = (n: number) => String(n).padStart(3, '0');
       <button data-s-repeat class="w-11 h-11 grid place-items-center rounded-full bg-qg-soft text-qg-green font-extrabold hover:bg-qg-deep hover:text-white transition" aria-label="Repeat" aria-pressed="false" style="opacity:0.55">🔁</button>
       <div class="flex-1"></div>
       <button data-s-share class="w-10 h-10 grid place-items-center rounded-full bg-qg-soft text-qg-green font-bold" aria-label="Share">↗</button>
+      <button data-s-bm data-bm data-bm-kind="verse" data-bm-ref="1:1" data-bm-title="" class="w-10 h-10 grid place-items-center rounded-full bg-qg-soft text-qg-green font-bold" style="font-size:18px" aria-label="Bookmark" aria-pressed="false">♡</button>
     </div>
+    <BookmarkScript />
     <p data-s-ar class="font-arabic text-center leading-[2.2] mt-4" style="font-size:2rem" lang="ar" dir="rtl"></p>
     <p data-s-tr class="mt-4 text-xl md:text-2xl leading-9 text-[#17352F] font-medium"></p>
     <div class="flex items-center justify-between mt-4">
@@ -68,6 +71,12 @@ const pad = (n: number) => String(n).padStart(3, '0');
       const url = new URL(window.location.href);
       url.searchParams.set('verse', v.v);
       history.replaceState(null, '', url.search);
+      const bm = $('[data-s-bm]');
+      if (bm) {
+        bm.setAttribute('data-bm-ref', `${S}:${v.v}`);
+        bm.setAttribute('data-bm-title', `Surah ${surah.name} ${S}:${v.v}`);
+      }
+      if (window.__hnBmPaint) window.__hnBmPaint();
     };
 
     const paintJuz = () => {
