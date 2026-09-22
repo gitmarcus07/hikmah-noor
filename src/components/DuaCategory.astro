@@ -6,9 +6,11 @@ import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import { localizedPath } from '../i18n/utils';
 import { DUA_CATS } from '../data/duas';
+import { localizeList } from '../lib/duas-i18n';
 
 interface Props { cat: any; duas: any[]; locale: string; }
-const { cat, duas, locale } = Astro.props;
+const { cat, duas: duasRaw, locale } = Astro.props;
+const duas = localizeList(duasRaw, locale);
 const L = (p: string) => localizedPath(locale, p);
 const catPath = `/duas/${cat.slug}/`;
 

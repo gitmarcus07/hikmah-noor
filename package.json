@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "content:duas": "node scripts/validate-duas.mjs",
+    "content:duas:ur": "node scripts/validate-duas-ur.mjs",
     "content:duas:backfill": "node scripts/backfill-duas.mjs",
     "content:duas:aliases": "node scripts/backfill-aliases.mjs",
     "content:kalimas": "node scripts/validate-kalimas.mjs",

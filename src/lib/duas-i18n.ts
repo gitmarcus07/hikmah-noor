@@ -1,0 +1,54 @@
+/* Hikmah Noor — dua localization overlays (Urdu first).
+ * Per-locale modules map dua slug -> translated content fields.
+ * Arabic, transliteration, source, grade and repeat stay English (universal);
+ * title/use/translation/virtue/when are translated. Missing slugs fall back
+ * to English automatically. Urdu-script aliases ride along into search tags.
+ */
+import { DUAS_UR_1 } from '../data/i18n/duas-ur-1';
+import { DUAS_UR_2 } from '../data/i18n/duas-ur-2';
+import { DUAS_UR_3 } from '../data/i18n/duas-ur-3';
+import { DUAS_UR_4 } from '../data/i18n/duas-ur-4';
+
+export interface DuaOverlay {
+  title?: string;
+  use?: string;
+  translation?: string;
+  virtue?: string;
+  when?: string;
+  aliasesUr?: string[];
+}
+
+const OVERLAYS: Record<string, Record<string, DuaOverlay>> = { ur: {} };
+for (const part of [DUAS_UR_1, DUAS_UR_2, DUAS_UR_3, DUAS_UR_4]) Object.assign(OVERLAYS.ur, part);
+
+/** Overlay locales currently shipped. */
+export function duaLocales(): string[] {
+  return Object.keys(OVERLAYS);
+}
+
+function defined<T extends object>(o: T): Partial<T> {
+  const out: Partial<T> = {};
+  for (const [k, v] of Object.entries(o)) if (v !== undefined && v !== null && v !== '') (out as any)[k] = v;
+  return out;
+}
+
+/** Single dua with locale overlay applied (keys/slugs/routes unchanged). */
+export function localizeDua(dua: any, locale: string): any {
+  const ov = (OVERLAYS as any)[locale]?.[dua?.slug];
+  if (!ov) return dua;
+  const { aliasesUr, ...rest } = ov as DuaOverlay;
+  return { ...dua, ...defined(rest), aliases: [...((dua as any).aliases || []), ...(aliasesUr || [])] };
+}
+
+/** Localize a list (hub grids, related, siblings). EN returns as-is. */
+export function localizeList(list: any[], locale: string): any[] {
+  if (!(OVERLAYS as any)[locale]) return list;
+  return (list || []).map((d) => localizeDua(d, locale));
+}
+
+/** Translated-slug coverage, e.g. { ur: 258 }. */
+export function overlayCoverage(): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [loc, map] of Object.entries(OVERLAYS)) out[loc] = Object.keys(map).length;
+  return out;
+}

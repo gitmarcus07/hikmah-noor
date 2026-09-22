@@ -8,9 +8,11 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat, DUA_ORIGIN_LABEL } from '../data/duas';
+import { localizeDua, localizeList } from '../lib/duas-i18n';
 
 interface Props { dua: any; cat: any; locale: string; }
-const { dua, cat, locale } = Astro.props;
+const { cat, locale } = Astro.props;
+const dua = localizeDua((Astro.props as any).dua, locale);
 const dict = getDict(locale);
 const L = (p: string) => localizedPath(locale, p);
 const duaPath = `/duas/${dua.cat}/${dua.slug}/`;
@@ -36,8 +38,8 @@ const crumbs = [
   { name: cat.title, path: catPath },
   { name: dua.title, path: duaPath },
 ];
-const related = duasByCat(dua.cat).filter((d) => d.slug !== dua.slug).slice(0, 4);
-const siblings = duasByCat(dua.cat);
+const related = localizeList(duasByCat(dua.cat).filter((d) => d.slug !== dua.slug).slice(0, 4), locale);
+const siblings = localizeList(duasByCat(dua.cat), locale);
 const sIdx = siblings.findIndex((d) => d.slug === dua.slug);
 const prevDua = sIdx > 0 ? siblings[sIdx - 1] : null;
 const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : null;

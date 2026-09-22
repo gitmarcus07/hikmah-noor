@@ -6,21 +6,23 @@ import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { DUA_CATS, duasByCat, DUAS } from '../data/duas';
+import { localizeList } from '../lib/duas-i18n';
 
 interface Props { locale: string; guides: { title: string; desc: string; href: string }[]; popularSlugs?: string[]; }
 const { locale, guides, popularSlugs = [] } = Astro.props;
 const dict = getDict(locale);
 const L = (p: string) => localizedPath(locale, p);
 const counts = DUA_CATS.map((c) => ({ ...c, n: duasByCat(c.slug).length }));
+const DL = localizeList(DUAS, locale);
 const popular = popularSlugs.length
-  ? popularSlugs.map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean)
-  : DUAS.slice(0, 8);
+  ? popularSlugs.map((s) => DL.find((d) => d.slug === s)).filter(Boolean)
+  : DL.slice(0, 8);
 const originOf = (d: any): string => d.origin ?? (String(d.source || '').startsWith('Quran') ? 'quran' : 'hadith');
-const nQuran = DUAS.filter((d: any) => originOf(d) === 'quran').length;
-const nHadith = DUAS.filter((d: any) => originOf(d) === 'hadith').length;
+const nQuran = DL.filter((d: any) => originOf(d) === 'quran').length;
+const nHadith = DL.filter((d: any) => originOf(d) === 'hadith').length;
 
-const title = `All Duas in Arabic with Transliteration, Meaning & Sources (${DUAS.length}+ duas)`;
-const description = `All ${DUAS.length} authentic duas by category — morning, salah, Ramadan, Hajj, prophets’ duas, marriage, children, death, hereafter and more. Arabic, transliteration, meaning, narrator and authenticity grade.`;
+const title = `All Duas in Arabic with Transliteration, Meaning & Sources (${DL.length}+ duas)`;
+const description = `All ${DL.length} authentic duas by category — morning, salah, Ramadan, Hajj, prophets’ duas, marriage, children, death, hereafter and more. Arabic, transliteration, meaning, narrator and authenticity grade.`;
 const keywords = 'all duas, dua in arabic, masnoon duas, transliteration, meaning, rabbana duas, morning evening duas, duas for protection, prophets duas, ramadan duas, funeral dua';
 const faq = [
   { q: 'How are the duas organized?', a: 'By life moment and source: morning & evening, salah, Ramadan, travel, food, home, marriage, children, sleep, health, forgiveness, hardship & rizq, purity, worship & knowledge, Hajj, prophets’ duas, death & funeral, hereafter and daily life. Every dua page names its source, narrator (when known) and authenticity grade.' },
@@ -37,7 +39,7 @@ const crumbs = [
     <Breadcrumbs locale={locale} items={crumbs} />
     <div class="mt-3 max-w-2xl">
       <div class="flex flex-wrap gap-2">
-        <span class="hn-badge hn-badge-primary">{DUAS.length} duas</span>
+        <span class="hn-badge hn-badge-primary">{DL.length} duas</span>
         <span class="hn-badge">{DUA_CATS.length} categories</span>
         <span class="hn-badge">{nQuran} Quranic</span>
         <span class="hn-badge">{nHadith}+ Prophetic</span>
@@ -111,9 +113,9 @@ const crumbs = [
         <button data-origin="sahaba" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Companion</button>
         <button data-origin="scholarly" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Scholarly</button>
       </div>
-      <p id="duacount" class="text-sm mb-3" style="color:var(--hn-muted)">{DUAS.length} duas</p>
+      <p id="duacount" class="text-sm mb-3" style="color:var(--hn-muted)">{DL.length} duas</p>
       <div id="duagrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {DUAS.map((d: any) => {
+        {DL.map((d: any) => {
           const cat = DUA_CATS.find((c) => c.slug === d.cat);
           return (
             <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use} ${cat?.title ?? ''} ${((d as any).aliases || []).join(' ')}`.toLowerCase()} data-cat={d.cat} data-origin={originOf(d)} class="duarow hn-card hn-card-hover hn-card-pad block">

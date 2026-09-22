@@ -5,6 +5,7 @@
  */
 import { TOOLS, CATS } from './finance/tools.js';
 import { DUAS, DUA_CATS } from '../data/duas';
+import { localizeDua } from './duas-i18n';
 import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
@@ -262,7 +263,8 @@ export function duaIndexItems(locale: string): IndexItem[] {
       locale,
     });
   }
-  for (const d of DUAS) {
+  for (const d0 of DUAS) {
+    const d: any = locale === 'ur' ? localizeDua(d0, locale) : d0;
     const cat = DUA_CATS.find((c) => c.slug === d.cat);
     const origin = (d as any).origin ?? (String(d.source).startsWith('Quran') ? 'quran' : 'hadith');
     items.push({
