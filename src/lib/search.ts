@@ -9,6 +9,7 @@ import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
 import { PROPHETS } from '../data/prophets';
+import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
 import { HADEES } from '../data/hadees';
 import { SEERAH } from '../data/seerah';
 
@@ -146,6 +147,7 @@ const TOOL_SYNONYMS: Record<string, string[]> = {
   'kaffarah-oath': ['oath', 'qasam', 'kasam', 'vow'],
   'kaffarah-fasting': ['kaffarah', 'kaffara', 'broke fast', 'roza tor'],
   'hajj-fidyah': ['hajj', 'haj', 'umrah', 'hady', 'damm', 'ihram'],
+  'mirath-calculator': ['mirath', 'meeras', 'warasat', 'wirasat', 'virasat', 'tarka', 'tirkah', 'inheritance', 'property distribution', 'succession'],
   'mahr-planner': ['mahr', 'mehr', 'dowry', 'haq mehr'],
   'nafaqah-planner': ['nafaqah', 'nafaqa', 'maintenance', 'kharcha', 'household'],
   'khums': ['khums', 'khumus', 'one fifth'],
@@ -370,6 +372,32 @@ export function prophetIndexItems(locale: string): IndexItem[] {
       category: 'prophets',
       url: `${prefix}/prophets/${p.slug}/`,
       tags: [...new Set(['prophet', 'prophets', 'nabi', 'qissa', 'story', `prophet ${p.order}`, p.title.toLowerCase(), p.name.toLowerCase(), p.era.toLowerCase(), ...(p.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
+/** Quiz hub + individual quiz entries for a locale. */
+export function quizIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: 'Islamic Quizzes — Test Your Knowledge',
+      description: 'Free Islamic quizzes with instant answers: prophets in order, Seerah of Muhammad ﷺ, and Quran surahs & facts. Score 8+ to pass.',
+      category: 'quiz',
+      url: `${prefix}/quiz/`,
+      tags: ['quiz', 'quizzes', 'islamic quiz', 'test', 'sawal jawab', 'mcq'],
+      locale,
+    },
+  ];
+  for (const q of QUIZZES) {
+    const cat = QUIZ_CATS.find((c) => c.slug === q.cat);
+    items.push({
+      title: `${q.title} — Test Yourself`,
+      description: `${q.desc} 10 questions with instant answers and sources.`,
+      category: 'quiz',
+      url: `${prefix}/quiz/${q.slug}/`,
+      tags: [...new Set(['quiz', 'test', q.title.toLowerCase(), (cat?.title || '').toLowerCase(), ...q.keywords.split(',').map((s) => s.trim().toLowerCase()), ...(q.aliases || [])])].filter(Boolean),
       locale,
     });
   }

@@ -1,0 +1,11 @@
+---
+import QuizDetail from '../../components/QuizDetail.astro';
+import { QUIZZES, quizBySlug } from '../../data/quizzes';
+
+const locale = 'en';
+export async function getStaticPaths() {
+  return QUIZZES.map((q) => ({ params: { slug: q.slug }, props: { quizSlug: q.slug } }));
+}
+const quiz = quizBySlug((Astro.props as any).quizSlug);
+---
+<QuizDetail quiz={quiz} locale={locale} />

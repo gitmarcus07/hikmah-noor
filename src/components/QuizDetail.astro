@@ -1,0 +1,201 @@
+---
+/* Quiz detail — SEO landing + interactive player (no login, best score on device). */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ShareButtons from './hn/ShareButtons.astro';
+import { localizedPath } from '../i18n/utils';
+import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
+
+interface Props { quiz: any; locale: string; }
+const { quiz, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const quizPath = `/quiz/${quiz.slug}/`;
+const cat = QUIZ_CATS.find((c: any) => c.slug === quiz.cat);
+
+const title = `${quiz.title} — Test Yourself`;
+let description = `${quiz.desc} 10 questions with instant answers and sources.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${quiz.keywords}${quiz.aliases?.length ? `, ${quiz.aliases.join(', ')}` : ''}`;
+
+const faq = [
+  ...quiz.questions.slice(0, 3).map((q: any) => ({
+    q: q.q,
+    a: `Answer: ${q.options[q.answer]}. ${q.why}`,
+  })),
+  { q: 'How is this quiz scored?', a: '10 questions, 4 options each — 8 or more out of 10 passes. Your best score is saved on this device.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Quiz', path: '/quiz/' },
+  { name: quiz.title, path: quizPath },
+];
+const others = QUIZZES.filter((q) => q.slug !== quiz.slug);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={quizPath}>
+  <div class="hn-article hn-section" data-quizroot data-quiz-slug={quiz.slug} data-quiz-title={quiz.title}>
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Quiz</span>
+      <span class="hn-badge">{cat?.title ?? 'General'}</span>
+      <span class="hn-badge">{quiz.questions.length} questions</span>
+      <span class="ms-auto"><ShareButtons title={quiz.title} path={quizPath} locale={locale} /></span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{quiz.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{quiz.desc}</p>
+    {quiz.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {quiz.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    <div class="mt-6 hn-card hn-card-pad max-w-2xl" data-q-start>
+      <p class="hn-block-label">Ready?</p>
+      <p class="font-extrabold text-[19px] leading-7 mt-1">10 questions · instant answers · 8 to pass</p>
+      <p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">Best score saves on this device<span data-q-best></span>.</p>
+      <button data-q-go class="hn-btn hn-btn-primary w-full !min-h-[52px] mt-4">Start quiz →</button>
+    </div>
+
+    <div class="mt-6 max-w-2xl hidden" data-q-play>
+      <div class="flex items-center justify-between text-sm font-bold" style="color:var(--hn-muted)">
+        <span data-q-count>Question 1 of 10</span>
+        <span>Score: <span data-q-score style="color:var(--hn-ink)">0</span></span>
+      </div>
+      <div class="h-2 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div data-q-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      <p class="font-extrabold text-[19px] leading-8 mt-4" data-q-text></p>
+      <div class="mt-3 space-y-2" data-q-opts></div>
+      <div class="hidden mt-3 hn-card hn-card-pad" data-q-why>
+        <p class="font-extrabold text-[15px]" data-q-verdict></p>
+        <p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)" data-q-explain></p>
+        <button data-q-next class="hn-btn hn-btn-primary w-full !min-h-[52px] mt-3">Next →</button>
+      </div>
+    </div>
+
+    <div class="mt-6 max-w-2xl hidden hn-card hn-card-pad text-center" data-q-done>
+      <p class="hn-block-label">Your score</p>
+      <p class="font-extrabold" style="font-size:52px;line-height:1.2" data-q-final>0/10</p>
+      <p class="font-extrabold text-[17px] mt-1" data-q-grade></p>
+      <p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)" data-q-best-line></p>
+      <div class="mt-4 flex flex-col gap-2">
+        <a data-q-wa href="#" target="_blank" rel="noopener" class="hn-btn hn-btn-primary w-full !min-h-[52px]">Share score on WhatsApp ↗</a>
+        <button data-q-retry class="hn-btn hn-btn-secondary w-full !min-h-[52px]">Try again</button>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-2xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    {others.length > 0 && (
+      <section class="mt-8 max-w-2xl" aria-label="More quizzes">
+        <SectionHeader eyebrow="Quizzes" title="More quizzes" href={L('/quiz/')} linkLabel="All quizzes" />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {others.map((r) => (
+            <a href={L(`/quiz/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{r.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">{r.questions.length} questions · {r.desc}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+
+  <script is:inline define:vars={{ questions: quiz.questions, total: quiz.questions.length }}>
+    (() => {
+      const root = document.querySelector('[data-quizroot]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const slug = root.dataset.quizSlug;
+      const quizTitle = root.dataset.quizTitle || 'Islamic Quiz';
+      const BKEY = 'hn.quiz.v1';
+      const loadBest = () => { try { return (JSON.parse(localStorage.getItem(BKEY) || '{}') || {})[slug] || 0; } catch { return 0; } };
+      const saveBest = (s) => {
+        try {
+          const all = JSON.parse(localStorage.getItem(BKEY) || '{}') || {};
+          if (s > (all[slug] || 0)) { all[slug] = s; localStorage.setItem(BKEY, JSON.stringify(all)); return true; }
+        } catch {}
+        return false;
+      };
+      let idx = 0, score = 0, order = [];
+      const paintBest = () => {
+        const b = loadBest();
+        const el = $('[data-q-best]');
+        if (el) el.textContent = b > 0 ? ` (best: ${b}/${total})` : '';
+      };
+      const shuffled = (n) => {
+        const a = [...Array(n).keys()];
+        for (let i = a.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+      };
+      const renderQ = () => {
+        const q = questions[idx];
+        order = shuffled(q.options.length);
+        $('[data-q-count]').textContent = `Question ${idx + 1} of ${total}`;
+        $('[data-q-score]').textContent = score;
+        $('[data-q-bar]').style.width = `${Math.round((idx / total) * 100)}%`;
+        $('[data-q-text]').textContent = q.q;
+        $('[data-q-why]').classList.add('hidden');
+        $('[data-q-opts]').innerHTML = order.map((oi) => `
+          <button data-q-pick="${oi}" class="w-full text-start hn-card hn-card-hover hn-card-pad font-bold text-[15px] leading-6 transition">${q.options[oi]}</button>`).join('');
+        $('[data-q-opts]').querySelectorAll('[data-q-pick]').forEach((b) => b.addEventListener('click', () => answer(Number(b.dataset.qPick), b)));
+      };
+      const answer = (oi, btn) => {
+        const q = questions[idx];
+        const ok = oi === q.answer;
+        if (ok) score += 1;
+        $('[data-q-score]').textContent = score;
+        $('[data-q-opts]').querySelectorAll('[data-q-pick]').forEach((b) => {
+          const mine = Number(b.dataset.qPick) === q.answer;
+          b.disabled = true;
+          b.style.borderColor = mine ? '#16a34a' : (b === btn ? '#dc2626' : '');
+          b.style.background = mine ? 'rgba(22,163,74,.12)' : (b === btn ? 'rgba(220,38,38,.08)' : '');
+        });
+        $('[data-q-verdict]').textContent = ok ? '✓ Correct' : `✗ The answer is: ${q.options[q.answer]}`;
+        $('[data-q-verdict]').style.color = ok ? '#16a34a' : '#dc2626';
+        $('[data-q-explain]').textContent = q.why;
+        $('[data-q-next]').textContent = idx + 1 >= total ? 'See my score →' : 'Next →';
+        $('[data-q-why]').classList.remove('hidden');
+      };
+      const finish = () => {
+        $('[data-q-play]').classList.add('hidden');
+        $('[data-q-done]').classList.remove('hidden');
+        $('[data-q-final]').textContent = `${score}/${total}`;
+        $('[data-q-grade]').textContent = score >= 8 ? 'MashaAllah — passed! 🌙' : score >= 5 ? 'Good effort — revise and retry' : 'Keep learning — try the stories first';
+        const isBest = saveBest(score);
+        const b = loadBest();
+        $('[data-q-best-line]').textContent = isBest ? `New personal best! Best: ${b}/${total}` : (b > 0 ? `Best on this device: ${b}/${total}` : '');
+        const wa = $('[data-q-wa]');
+        if (wa) wa.href = `https://wa.me/?text=${encodeURIComponent(`I scored ${score}/${total} on “${quizTitle}” — can you beat me? ${window.location.href}`)}`;
+      };
+      $('[data-q-go]').addEventListener('click', () => {
+        idx = 0; score = 0;
+        $('[data-q-start]').classList.add('hidden');
+        $('[data-q-done]').classList.add('hidden');
+        $('[data-q-play]').classList.remove('hidden');
+        renderQ();
+      });
+      $('[data-q-next]').addEventListener('click', () => {
+        idx += 1;
+        if (idx >= total) finish();
+        else renderQ();
+      });
+      $('[data-q-retry]').addEventListener('click', () => {
+        idx = 0; score = 0;
+        $('[data-q-done]').classList.add('hidden');
+        $('[data-q-play]').classList.remove('hidden');
+        renderQ();
+      });
+      paintBest();
+    })();
+  </script>
+</BaseLayout>

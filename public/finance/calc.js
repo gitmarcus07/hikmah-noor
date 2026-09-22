@@ -546,10 +546,102 @@ export function calculateKhums(input = {}) {
   return r;
 }
 
+/* ---------------- Mirath (Sunni inheritance, v1: closest heirs) ---------------- */
+export function calculateMirath(input = {}) {
+  const {
+    methodology = 'general', currency = 'INR',
+    estateValue = 0, deductions = 0,
+    husband = 0, wives = 0, father = 0, mother = 0,
+    sons = 0, daughters = 0, siblings2plus = 'no',
+  } = input;
+  const r = base(methodology, [
+    'Sunni distribution for the six closest heir types: spouse, father, mother, sons, daughters. Siblings, grandparents and grandchildren are out of scope for v1.',
+    'Funeral costs, debts and bequests (max one-third) settle before any division — enter the net estate.',
+  ]);
+  const net = Math.max(0, num(estateValue) - num(deductions));
+  const H = num(husband) >= 1 ? 1 : 0;
+  let W = Math.max(0, Math.min(4, Math.floor(num(wives))));
+  const F = num(father) >= 1 ? 1 : 0;
+  const M = num(mother) >= 1 ? 1 : 0;
+  const S = Math.max(0, Math.floor(num(sons)));
+  const D = Math.max(0, Math.floor(num(daughters)));
+  const hasChild = S > 0 || D > 0;
+  const sib2 = siblings2plus === 'yes';
+  r.breakdown = [
+    row('Gross estate', fmt(num(estateValue), currency)),
+    row('Settled first (funeral, debts, bequests)', '− ' + fmt(num(deductions), currency)),
+    row('Net estate for division', fmt(net, currency)),
+  ];
+  if (H && W) {
+    r.warnings.push('Both a husband and wife(s) were entered — an estate has one surviving spouse. The wife entry was ignored; correct the inputs.');
+    W = 0;
+  }
+  if (W > 4) r.warnings.push('More than four wives is not permitted; the count was capped at four.');
+  const fixed = [];
+  if (H) fixed.push({ label: 'Husband', frac: hasChild ? 1 / 4 : 1 / 2, spouse: true });
+  else if (W > 0) fixed.push({ label: W > 1 ? `Wives (${W}, shared equally)` : 'Wife', frac: hasChild ? 1 / 8 : 1 / 4, spouse: true, split: W });
+  if (F && hasChild) fixed.push({ label: 'Father (fixed sixth)', frac: 1 / 6 });
+  if (M) fixed.push({ label: 'Mother', frac: (hasChild || sib2) ? 1 / 6 : 1 / 3 });
+  if (D > 0 && S === 0) fixed.push({ label: D > 1 ? `Daughters (${D}, shared equally)` : 'Daughter', frac: D > 1 ? 2 / 3 : 1 / 2, split: D });
+  const heirs = fixed.length + S + D + (F && !hasChild ? 1 : 0);
+  if (!heirs || net <= 0) {
+    if (!heirs) r.warnings.push('No heirs entered — add the surviving spouse, parents or children.');
+    if (net <= 0) r.warnings.push('Net estate is zero — nothing to divide.');
+    r.evidence = ["Qur'an 4:11-12 — the fixed shares of children, parents and spouses."];
+    r.eligible = false; r.amount = net; r.currency = currency; r.disclaimer = EDU_NOTE;
+    return r;
+  }
+  let sum = fixed.reduce((a, h) => a + h.frac, 0);
+  const resid = [];
+  if (sum > 1 + 1e-9) {
+    const k = 1 / sum; // awl: proportional reduction
+    fixed.forEach((h) => { h.frac *= k; });
+    sum = 1;
+    r.warnings.push('Shares exceeded the estate, so awl (proportional reduction) was applied to every fixed share.');
+  } else if (S > 0) {
+    const unit = (1 - sum) / (2 * S + D);
+    for (let i = 0; i < S; i++) resid.push({ label: S > 1 ? `Son ${i + 1}` : 'Son', frac: 2 * unit });
+    for (let i = 0; i < D; i++) resid.push({ label: D > 1 ? `Daughter ${i + 1}` : 'Daughter', frac: unit });
+  } else if (F && !hasChild) {
+    resid.push({ label: 'Father (residuary)', frac: 1 - sum });
+  } else if (F && hasChild && D > 0) {
+    resid.push({ label: 'Father (fixed sixth + residue)', frac: 1 - sum });
+    const f = fixed.find((h) => h.label.startsWith('Father'));
+    if (f) f.frac = 0; // merged into the combined row
+  }
+  let R = 1 - fixed.reduce((a, h) => a + h.frac, 0) - resid.reduce((a, h) => a + h.frac, 0);
+  if (R > 1e-9 && !resid.length) {
+    const cand = fixed.filter((h) => !h.spouse && h.frac > 0);
+    const cs = cand.reduce((a, h) => a + h.frac, 0);
+    if (cs > 0) {
+      cand.forEach((h) => { h.frac += R * (h.frac / cs); }); // radd to non-spouse sharers
+      r.warnings.push('A surplus remained with no residuary heir, so radd (return) was distributed to the non-spouse sharers proportionally.');
+      R = 0;
+    }
+  }
+  if (R > 1e-9) {
+    resid.push({ label: 'Remainder (needs scholar ruling)', frac: R });
+    r.warnings.push('A remainder exists with no eligible residuary or radd recipient in this v1 (e.g. spouse-only case goes to bayt al-mal per classical ruling) — consult a qualified scholar before distributing it.');
+  }
+  const pct = (f) => (f * 100).toFixed(f < 0.01 ? 2 : 1).replace(/\.0$/, '') + '%';
+  [...fixed.filter((h) => h.frac > 1e-9), ...resid].forEach((h) => {
+    const per = h.split && h.split > 1 ? ` (each ${fmt((h.frac / h.split) * net, currency)})` : '';
+    r.breakdown.push(row(`${h.label} — ${pct(h.frac)}${per}`, fmt(h.frac * net, currency)));
+  });
+  r.warnings.push('Sunni rules only (v1: spouse, parents, sons, daughters). Ja’fari law and distant relatives differ — complex families need a scholar.');
+  r.evidence = [
+    "Qur'an 4:11 — shares of children and parents; sons residuary with daughters at 2:1.",
+    "Qur'an 4:12 — husband (half, or quarter with children) and wife (quarter, or eighth with children).",
+    'Awl (proportional reduction) and radd (return to sharers) follow the classical Sunni manuals.',
+  ];
+  r.eligible = true; r.amount = net; r.currency = currency; r.disclaimer = EDU_NOTE;
+  return r;
+}
+
 export const CALCS = {
   calculateZakat, calculateGoldZakat, calculateSilverZakat, calculateCashZakat,
   calculateBusinessZakat, calculateInvestmentZakat, calculateAgriculturalZakat,
   calculateLivestockZakat, calculateZakatAlFitr, calculateFidyah,
   calculateKaffarahOath, calculateKaffarahFasting, calculateHajjFidyah,
-  calculateMahr, calculateNafaqah, calculateKhums,
+  calculateMahr, calculateNafaqah, calculateKhums, calculateMirath,
 };

@@ -1,6 +1,6 @@
 {
   "siteName": "Hikmah Noor",
-  "tagline": "Authentic Islamic knowledge — Quran, Duas, Kalimas & Seerah",
+  "tagline": "Authentic Islamic knowledge — Quran, Duas, Prophets, prayer times & tools",
   "nav": {
     "home": "Home",
     "surahs": "Surahs",
@@ -17,9 +17,9 @@
     "search": "Search articles..."
   },
   "home": {
-    "heroBadge": "🌱 Daily Quran Habit Tracker",
-    "heroTitle": "Build a Daily Quran Habit — Track Every Verse",
-    "heroSub": "Set a daily verse goal, grow your streak, and earn hasanat for every letter — with timers, reminders, challenges and Juz progress saved to your free account. Plus 114 surahs, duas, kalimas and meanings.",
+    "heroBadge": "🌙 Quran, Duas, Prophets & Islamic Tools",
+    "heroTitle": "Hikmah Noor — Quran, Duas, Prophets & Islamic Tools",
+    "heroSub": "Read the Holy Quran with Urdu, English & Hindi translation, 248 authentic duas, 25 prophet stories, prayer times with Qibla, zakat & mirath calculators, tasbih counter and quizzes — free, no account needed.",
     "heroCta1": "Start My Habit",
     "heroCta2": "Read Quran",
     "latest": "Latest guides",
@@ -37,7 +37,7 @@
     "librarySub": "114 surahs, 30 paras, duas, 6 kalimas, meanings and stories — Arabic with transliteration, translation and audio.",
     "libraryCta": "Browse library",
     "challengesTitle": "🏆 Challenges",
-    "challengesSub": "Join a challenge — every verse you read moves the bar. Login to track.",
+    "challengesSub": "Join a challenge — every verse you read moves the bar. Tracked on this device, no login needed.",
     "chFridayT": "Friday Challenge",
     "chFridayD": "Recite Surah Al-Kahf — 110 verses",
     "chMeaningT": "The Meaning Challenge",
@@ -53,7 +53,7 @@
     "step2T": "2. Read & tap I'm Done",
     "step2D": "Verse-by-verse reading with audio and timer. Each tap credits verses, time and hasanat.",
     "step3T": "3. Grow your streak",
-    "step3D": "Miss one day and grace saves you. Everything syncs to your free account.",
+    "step3D": "Miss one day and grace saves you. Everything stays on this device.",
     "howCta": "Build my plan →",
     "libStripTitle": "Explore the library",
     "countdownBadge": "Live",
@@ -73,8 +73,8 @@
     ],
     "faqTitle": "Frequently asked questions",
     "faq": [
-      { "q": "How does the Quran habit tracker work?", "a": "Set a daily verse goal, read verse by verse with the timer, and tap I'm Done — your verses, time, hasanat and streak save to your free account automatically." },
-      { "q": "Do I need an account to track my reading?", "a": "Yes — a free login with Google or email saves your goal, streak, Juz progress and bookmarks so you can continue where you left off on any device. Everything is free forever." },
+      { "q": "How do I track my Quran reading progress?", "a": "Read any surah verse by verse with audio, then tap I'm Done — your verses, hasanat estimate and streak save on this device automatically. See everything on the My Progress page." },
+      { "q": "Do I need an account?", "a": "No. There are no accounts — goals, streaks, Juz progress, bookmarks and tasbih totals all stay in your browser on this device. Everything is free forever." },
       { "q": "How can I read the Quran with translation?", "a": "Open any of the 114 surahs or 30 paras — every verse shows Arabic text with Urdu, English and Hindi meaning, transliteration and audio." },
       { "q": "Do duas include transliteration?", "a": "Yes. Every dua shows the Arabic text, easy transliteration and translation with its hadith source." },
       { "q": "Is Hikmah Noor free?", "a": "Yes, all guides and tools are free to read and share for learning." }

@@ -1,0 +1,14 @@
+---
+import QuizDetail from '../../../components/QuizDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { QUIZZES, quizBySlug } from '../../../data/quizzes';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const q of QUIZZES) paths.push({ params: { locale, slug: q.slug }, props: { quizSlug: q.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const quiz = quizBySlug((Astro.props as any).quizSlug);
+---
+<QuizDetail quiz={quiz} locale={locale} />

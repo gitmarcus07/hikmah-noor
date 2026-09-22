@@ -1,0 +1,38 @@
+---
+/* Share row: WhatsApp deep link + copy link + native share fallback.
+ * Props take the canonical EN path; locale prefix applied per page locale. */
+import Icon from '../Icon.astro';
+import { localizedPath } from '../../i18n/utils';
+
+interface Props { title: string; path: string; locale: string; }
+const { title, path, locale } = Astro.props;
+const urlPath = localizedPath(locale, path);
+const waHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${urlPath}`)}`;
+---
+<span class="inline-flex items-center gap-1.5" data-share data-share-title={title} data-share-path={urlPath}>
+  <a href={waHref} target="_blank" rel="noopener" aria-label="Share on WhatsApp" class="hn-icon-btn !w-11 !h-11 !border-0" style="font-size:20px;line-height:1">✆</a>
+  <button type="button" data-share-copy aria-label="Copy link" class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="copy" size={19} /></button>
+  <button type="button" data-share-native aria-label="Share" class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="share" size={19} /></button>
+</span>
+<script is:inline>
+  (() => {
+    if (window.__hnShareWired) return;
+    window.__hnShareWired = 1;
+    const full = (p) => `${window.location.origin}${p}`;
+    document.addEventListener('click', async (e) => {
+      const t = e.target;
+      const btn = t && t.closest ? t.closest('[data-share-copy],[data-share-native]') : null;
+      if (!btn) return;
+      const wrap = btn.closest('[data-share]');
+      if (!wrap) return;
+      const text = `${wrap.getAttribute('data-share-title') || ''} ${full(wrap.getAttribute('data-share-path') || '/')}`;
+      try {
+        if (btn.hasAttribute('data-share-native') && navigator.share) { await navigator.share({ text }); return; }
+        await navigator.clipboard.writeText(text);
+        const old = btn.innerHTML;
+        btn.innerHTML = '✓';
+        setTimeout(() => { btn.innerHTML = old; }, 1500);
+      } catch {}
+    });
+  })();
+</script>

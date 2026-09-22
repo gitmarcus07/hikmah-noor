@@ -360,6 +360,27 @@ export const TOOLS = [
       { q: 'Why include it here?', a: 'So readers stop confusing historical taxes with personal obligations — accuracy matters.' },
     ],
   },
+  /* ---------- MIRATH ---------- */
+  {
+    slug: 'mirath-calculator', cat: 'family-finance', kind: 'steps', calc: 'calculateMirath', icon: 'kalimas',
+    level: 'Fixed shares (Sunni law)',
+    title: 'Mirath Calculator — Islamic Inheritance Distribution (Sunni)',
+    desc: 'Divide a net estate among spouse, parents, sons and daughters with Quranic shares, awl and radd handled automatically.',
+    keywords: 'mirath calculator, warasat calculator, virasat hisab, islamic inheritance calculator, property distribution islam, tarka distribution, wirasat',
+    intro: 'Enter the net estate (after funeral costs, debts and bequests) and the surviving closest heirs. Fixed Quranic shares apply first; sons take the residue 2:1 with daughters; awl and radd are handled automatically.',
+    steps: [
+      { title: 'Estate', fields: [CUR, { key: 'estateValue', label: 'Total estate value', type: 'number', def: 0, hint: 'All property, cash and assets at current value.' }, { key: 'deductions', label: 'Settle first: funeral, debts, bequests', type: 'number', def: 0, hint: 'Funeral costs, all debts, then bequests (max one-third) are paid before any division.' }] },
+      { title: 'Spouse & parents', fields: [{ key: 'husband', label: 'Surviving husband?', type: 'radio', options: [{ v: '1', t: 'Yes' }, { v: '0', t: 'No' }], def: '0' }, { key: 'wives', label: 'Surviving wives (number)', type: 'select', options: [{ v: '0', t: 'None' }, { v: '1', t: '1 wife' }, { v: '2', t: '2 wives' }, { v: '3', t: '3 wives' }, { v: '4', t: '4 wives' }], def: '0' }, { key: 'father', label: 'Father alive?', type: 'radio', options: [{ v: '1', t: 'Yes' }, { v: '0', t: 'No' }], def: '0' }, { key: 'mother', label: 'Mother alive?', type: 'radio', options: [{ v: '1', t: 'Yes' }, { v: '0', t: 'No' }], def: '0' }, { key: 'siblings2plus', label: 'Two or more siblings of the deceased?', type: 'radio', options: [{ v: 'no', t: 'No / fewer' }, { v: 'yes', t: 'Yes, 2+' }], def: 'no', hint: 'Matters only for the mother’s share (one-third vs one-sixth).' }] },
+      { title: 'Children', fields: [{ key: 'sons', label: 'Number of sons', type: 'number', def: 0 }, { key: 'daughters', label: 'Number of daughters', type: 'number', def: 0 }] },
+    ],
+    faq: [
+      { q: 'Who gets paid before inheritance?', a: 'In order: funeral expenses, all debts, then bequests up to one-third of the estate. Only the net remainder is divided — enter that remainder above.' },
+      { q: 'What is the wife’s share?', a: 'One-fourth if there are no children, one-eighth if there are children — shared equally among up to four wives.' },
+      { q: 'What is the daughter’s share?', a: 'One daughter alone (no sons) takes one-half; two or more share two-thirds. With sons, daughters share the residue at half a son’s portion each.' },
+      { q: 'Why Sunni only?', a: 'Ja’fari law differs significantly (e.g. no awl/radd in the Sunni sense, different residuary rules). This v1 covers the six closest heir types under Sunni rules; complex families need a scholar.' },
+      { q: 'Is this a fatwa?', a: 'No — an educational estimate. Real cases involve debts, missing heirs, pregnancy, or distant relatives. Consult a qualified scholar before distributing.' },
+    ],
+  },
 ];
 
 export function getTool(cat, slug) {

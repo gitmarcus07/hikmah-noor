@@ -51,6 +51,8 @@ const zakatUrl = L('/tools/zakat/zakat-calculator/');
 const ramadanUrl = L('/tools/ramadan-countdown/');
 const tasbihUrl = L('/tools/tasbih/');
 const prayerUrl = L('/tools/prayer-times/');
+const quizUrl = L('/quiz/');
+const mirathUrl = L('/tools/family-finance/mirath-calculator/');
 
 const shortcuts = [
   { label: 'Morning Dua', href: L('/duas/morning-evening/morning-remembrance/') },
@@ -79,6 +81,8 @@ const tools = [
   { icon: 'moon', name: m.ramadanT ?? 'Ramadan Countdown', desc: m.ramadanD ?? 'Days left to Ramadan', href: ramadanUrl },
   { icon: 'clock', name: 'Tasbih Counter', desc: 'Dhikr with daily totals', href: tasbihUrl },
   { icon: 'sun', name: 'Prayer Times', desc: 'Namaz times, Qibla & Hijri date', href: prayerUrl },
+  { icon: 'book', name: 'Islamic Quiz', desc: '10 questions with answers', href: quizUrl },
+  { icon: 'heart', name: 'Mirath Calculator', desc: 'Inheritance shares (Sunni)', href: mirathUrl },
   { icon: 'quran', name: m.quranIndexT ?? 'Quran Index', desc: m.quranIndexD ?? 'All surahs with translation', href: quranUrl },
   { icon: 'duas', name: m.duaCollT ?? 'Dua Collection', desc: m.duaCollD ?? 'Masnoon duas with translation', href: duasUrl },
 ] as const;
