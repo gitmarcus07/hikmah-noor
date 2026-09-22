@@ -797,6 +797,48 @@ export const GUIDES: Guide[] = [
       { q: 'I keep repeating the sin?', a: 'Keep returning - Allah loves the oft-repentant. Strengthen resolve with company, environment and dua changes.' },
     ],
     aliases: ['tawbah ki namaz', 'repentance prayer', 'gunah ke baad namaz', 'salat al tawbah method', 'maafi ki namaz'] },
+  { slug: 'ashura-muharram-fasting', cat: 'duties', title: 'Ashura & Muharram Fasting - 9th-10th Method and Karbala Distinction',
+    intro: 'The best fasting after Ramadan is Muharram’s: the 10th (Ashura) expiates a year, paired with the 9th - plus what Karbala means and what it doesn’t.',
+    sections: [
+      { h: 'The fasting method', ps: ['Fast the 10th of Muharram (Ashura) - expiation for the past year’s sins (Muslim) - joined with the 9th (or 11th) to differ from previous communities: “if I live till next year I will fast the 9th too” (Muslim). Musa fasted it in thanks for deliverance from Pharaoh; the Prophet ﷺ fasted it and ordered it before Ramadan’s obligation.', 'The new Hijri year opens with Muharram - the Sahaba’s new-year dua (on our dua pages) greets it. Make the month a fasting month generally: “the best of fasting after Ramadan is Allah’s month Muharram” (Muslim).'] },
+      { h: 'Karbala: honour without innovation', ps: ['On Ashura 61H, Husayn (RA) and his family were martyred at Karbala - love for them and grief at injustice are Islamic; self-flagellation, chest-beating, wailing gatherings and cursing the companions are not. Mourning in Islam is three days (a widow’s iddah excepted) - annual theatrical mourning contradicts the sunnah of patience.', 'Honour Husayn by fasting Ashura, studying his stand against tyranny, giving charity, and teaching children courage with restraint - grief that obeys Allah.'] },
+    ],
+    steps: ['Fast the 9th and 10th of Muharram (or 10th and 11th).', 'Greet the Hijri new year with the Sahaba’s dua.', 'Study Karbala factually: courage, tyranny opposed, patience prescribed.', 'Avoid mourning innovations; give charity and fast instead.'],
+    ref: 'Sahih Muslim (Ashura expiation; 9th intention; best fasting after Ramadan); Karbala in mainstream histories',
+    faq: [
+      { q: 'Ashura fasting - 9th-10th or 10th-11th?', a: '9th+10th is the stated intention; 10th+11th also differs from others. Either pair is established.' },
+      { q: 'What does Ashura expiate?', a: 'The past year’s minor sins - major sins need tawbah; pair the fast with repentance.' },
+      { q: 'Matam and mourning processions?', a: 'Self-harm and ritual wailing contradict Islam’s mourning limits. Grieve with dignity: fast, pray, give charity.' },
+    ],
+    aliases: ['ashura fasting', 'muharram roza', '9 10 muharram', 'youm e ashura', 'karbala vs ashura fasting'] },
+  { slug: 'shaban-shab-e-barat', cat: 'duties', title: 'Shaban & Shab-e-Barat (15th Night) - Balanced Authentic Guide',
+    intro: 'Shaban is the Prophet’s most-fasted month outside Ramadan; its 15th night carries discussed-but-hopeful narrations - what to do, what to avoid, graded honestly.',
+    sections: [
+      { h: 'Shaban: the neglected month', ps: ['“A month people neglect between Rajab and Ramadan” (Nasai, graded good) - the Prophet ﷺ fasted most of Shaban, and deeds are raised in it, so he loved his deeds raised while fasting. Use Shaban for qada makeup fasts before Ramadan and for the pre-Ramadan dua (Allahumma barik lana...).', 'Aisha reported she never saw him fast a full month besides Ramadan - so Shaban fasting is abundant but not the entire month. Pair fasting with Quran review and charity as Ramadan’s warm-up.'] },
+      { h: 'The 15th night: hope without invention', ps: ['“Allah looks at His creation on the 15th night of Shaban and forgives all except the mushrik and the quarrelsome” (Ibn Majah/Bayhaqi - graded weak-to-fair, strengthened by multiple chains per some scholars). The balanced position: pray, recite and seek forgiveness that night individually with hope - without congregational “Shab-e-Barat prayers”, mosque illuminations, fireworks, grave-feast rituals or fixed 100-rakah formulas, all baseless.', 'Fast the 15th day as part of the monthly white days (13th-14th-15th, an established sunnah) - not as a standalone “Barat fast” with invented rites. Reconcile with quarreling relatives first: the narration itself excludes the hostile.'] },
+    ],
+    steps: ['Fast abundantly in Shaban; finish all qada makeup fasts.', 'On the 15th night: pray, recite and repent individually with hope.', 'Fast the 13th-14th-15th as white days, not invented rites.', 'Reconcile quarrels first - the hostile are excluded from the night’s forgiveness.'],
+    ref: 'Sunan al-Nasai (neglected month); Sunan Ibn Majah (15th night - grading weak-to-fair, discussed)',
+    faq: [
+      { q: 'Is Shab-e-Barat authentic?', a: 'The 15th-night forgiveness narrations are graded weak-to-fair - enough for hopeful individual worship, not for invented congregational rites.' },
+      { q: 'Special Shab-e-Barat prayer?', a: 'No fixed 100-rakah or congregational formula is established. Pray ordinary tahajjud and nafl with presence.' },
+      { q: 'Fireworks and grave visits on Barat?', a: 'Fireworks are waste and harm; graveyard feasts and illuminations are innovations. Visit graves quietly anytime.' },
+    ],
+    aliases: ['shab e barat', '15 shaban', 'shaban fasting', 'shab e barat nawafil', 'shaban ki fazilat'] },
+  { slug: 'rajab-virtues', cat: 'duties', title: 'Rajab - The Sacred Month: Virtues and What Is Not Established',
+    intro: 'Rajab is one of the four sacred months - honoured since Ibrahim’s time. What the sources establish (reverence, no fighting, Umrah) and the famous claims that don’t.',
+    sections: [
+      { h: 'What Rajab is', ps: ['Four months are sacred: Dhul-Qadah, Dhul-Hijjah, Muharram and Rajab (Quran 9:36) - sins weigh heavier, good deeds shine brighter, fighting was forbidden. Honour Rajab with general worship: fast some days, increase istighfar, prepare for Shaban and Ramadan.', 'The Prophet ﷺ performed Umrah in Dhul-Qadah, never in Rajab (Bukhari/Muslim on Aisha’s correction of Ibn Umar) - Rajab Umrah has no special virtue, though Umrah then is perfectly valid.'] },
+      { h: 'What is not established', ps: ['No specific Rajab fasting (first day, 27th) or “Salat al-Raghaib” (12 rakahs first Friday night) is authentically established - Umar discouraged singling out Rajab for fasting, and Raghaib narrations are graded fabricated by hadith scholars. The Isra and Miraj’s exact date (27th Rajab commonly cited) is not established either - celebrate the event’s lessons (prayer’s gift) without date-specific rites.', 'Rajab dua “Allahumma barik lana fi Rajab...” (on our dua pages) is famous but weak-chained - say it as general dua, and let Rajab be a quiet ramp into Shaban’s abundance.'] },
+    ],
+    steps: ['Honour Rajab generally: extra fasts, istighfar, charity.', 'Skip fixed Rajab rituals (Raghaib prayer, 27th-night rites).', 'Use Rajab to plan Shaban fasting and Ramadan goals.', 'Study the Isra’s lessons (prayer!) without date-specific celebrations.'],
+    ref: 'Quran 9:36 (sacred months); Sahih al-Bukhari and Sahih Muslim (Umrah months); Umar on singling Rajab (reported in classical sources)',
+    faq: [
+      { q: 'Any special Rajab fast?', a: 'No specific Rajab fast is established. Fast generally as in any month; Umar discouraged singling Rajab out.' },
+      { q: 'Is 27th Rajab the Miraj night?', a: 'The date is not established; scholars differ widely. Honour the event’s lessons without date rites.' },
+      { q: 'Salat al-Raghaib on first Friday?', a: 'Its narrations are graded fabricated - do not pray it as a special rite; ordinary nafl is always fine.' },
+    ],
+    aliases: ['rajab ki fazilat', 'rajab fasting', '27 rajab shab e miraj', 'salat al raghaib', 'rajab month islam'] },
 ];
 export function guideCat(slug: string) {
   return GUIDE_CATS.find((c) => c.slug === slug);

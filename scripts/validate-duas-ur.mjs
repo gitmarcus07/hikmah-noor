@@ -23,6 +23,7 @@ const PENDING_UR = new Set([
   'sehri-intention', 'afiyah-pardon-wellbeing', 'mercy-comprehensive-dua',
   'shawwal-intention', 'gathering-expiation-dua', 'qurbani-slaughter-dua',
   'qurbani-intention', 'eat-feed-qurbani-verse', 'dhuha-glorification', 'hajah-need-dua',
+  'hijri-new-year-dua', 'shaban-blessing-dua',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 

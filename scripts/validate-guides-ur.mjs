@@ -27,6 +27,7 @@ const PENDING_UR = new Set([
   'jumuah-complete', 'dua-acceptance-guide', 'surah-yaseen-spotlight',
   'surah-kahf-spotlight', 'surah-mulk-spotlight', 'surah-waqiah-spotlight',
   'dhuha-chasht-prayer', 'salat-al-hajah', 'salat-al-tawbah',
+  'ashura-muharram-fasting', 'shaban-shab-e-barat', 'rajab-virtues',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 if (new Set(ovSlugs).size !== ovSlugs.length) fail('duplicate overlay slugs');
