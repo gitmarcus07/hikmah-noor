@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict, localizedPath } from '../../i18n/utils';
+import { CHALLENGES } from '../../lib/habit/streak.js';
+import surahsMeta from '../../data/surahs-meta.json';
+
+const locale = 'en';
+const faq = [
+  { q: 'How is my streak counted?', a: 'One active day = any day you tap “I’m Done” while reading. Miss a single day and grace saves you; two missed days in a row reset the streak to zero.' },
+  { q: 'Where is my progress saved?', a: 'On this device only (hn.progress.v1 in your browser). Nothing is sent to servers and nothing syncs across devices. Clearing browser data resets it.' },
+  { q: 'What is the hasanat estimate?', a: 'About 10 hasanat per Arabic letter read (a good deed multiplied by ten). Letters are counted from the verses you marked done — an estimate for motivation, not a ruling.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'My Progress', path: '/tools/my-progress/' },
+];
+const surahNames = (surahsMeta as any[]).map((s) => [s.num, s.name]);
+const readBase = localizedPath(locale, '/tools/read/');
+---
+<BaseLayout title="My Progress — Streak, Verses, Hasanat & Challenges" description="Your Quran reading progress on this device: streak with grace day, verses read, hasanat estimate, resume point and challenge progress." locale={locale} canonicalPath="/tools/my-progress/" faq={faq} crumbs={crumbs} noindex={true} hideFooter>
+  <AppHeader locale={locale} title="My Progress" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-progress>
+    <div data-pg-empty class="hidden hn-card hn-card-pad text-center">
+      <p class="font-extrabold text-[17px]">No progress yet</p>
+      <p class="mt-1 text-[14px] leading-6" style="color:var(--hn-muted)">Read any verse and tap “I’m Done” — your streak starts today.</p>
+      <a href={`${readBase}1/?verse=1`} class="hn-btn hn-btn-primary !min-h-[48px] mt-4 w-full">Start reading</a>
+    </div>
+
+    <div data-pg-main>
+      <div class="hn-card hn-card-pad flex items-center gap-4">
+        <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Streak">
+          <circle cx="60" cy="60" r="54" fill="none" stroke-width="10" style="stroke:var(--hn-border)" />
+          <circle data-pg-ring cx="60" cy="60" r="54" fill="none" stroke-width="10" stroke-linecap="round" style="stroke:var(--hn-primary)" stroke-dasharray="339.3" stroke-dashoffset="339.3" transform="rotate(-90 60 60)" />
+          <text data-pg-streak x="60" y="58" text-anchor="middle" font-size="30" font-weight="800" style="fill:var(--hn-ink)">0</text>
+          <text x="60" y="78" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--hn-muted)">day streak</text>
+        </svg>
+        <div class="min-w-0">
+          <p class="font-extrabold text-[17px] leading-6" data-pg-streak-line>Start today</p>
+          <p class="text-[13.5px] mt-1 leading-5" style="color:var(--hn-muted)">One grace day included — miss once, keep going.</p>
+          <p class="text-[13px] mt-1 font-bold" style="color:var(--hn-muted)">Best run: <span data-pg-best style="color:var(--hn-ink)">0</span></p>
+        </div>
+      </div>
+
+      <a data-pg-resume href="#" class="hidden mt-3 hn-card hn-card-hover hn-card-pad flex items-center gap-3">
+        <span class="min-w-0 flex-1">
+          <span class="text-xs font-bold" style="color:var(--hn-muted)">RESUME</span>
+          <span class="font-extrabold block text-[16px] leading-6" data-pg-resume-text></span>
+        </span>
+        <span aria-hidden="true" style="color:var(--hn-primary)">→</span>
+      </a>
+
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <div class="hn-card hn-card-pad text-center"><p class="font-extrabold" style="font-size:28px" data-pg-verses>0</p><p class="text-[13px] font-bold" style="color:var(--hn-muted)">verses read</p></div>
+        <div class="hn-card hn-card-pad text-center"><p class="font-extrabold" style="font-size:28px" data-pg-hasanat>0</p><p class="text-[13px] font-bold" style="color:var(--hn-muted)">hasanat (est.)</p></div>
+        <div class="hn-card hn-card-pad text-center"><p class="font-extrabold" style="font-size:28px" data-pg-pages>0</p><p class="text-[13px] font-bold" style="color:var(--hn-muted)">pages (~)</p></div>
+        <div class="hn-card hn-card-pad text-center"><p class="font-extrabold" style="font-size:28px" data-pg-days>0</p><p class="text-[13px] font-bold" style="color:var(--hn-muted)">active days</p></div>
+      </div>
+
+      <h2 class="font-extrabold text-[19px] mt-6 mb-2">Challenges</h2>
+      <div class="space-y-2" data-pg-challenges></div>
+      <p class="mt-3 text-[13px] leading-5" style="color:var(--hn-muted)">Tracked automatically as you tap “I’m Done”. Saved on this device only.</p>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ challenges: CHALLENGES, surahNames, readBase }}>
+    (() => {
+      const root = document.querySelector('[data-progress]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const todayUTC = () => new Date().toISOString().slice(0, 10);
+      const addDays = (s, n) => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+      const computeStreak = (active, today) => {
+        const set = new Set(active);
+        const end = set.has(today) ? today : addDays(today, -1);
+        if (!set.has(end)) return 0;
+        let n = 0, c = end;
+        while (set.has(c)) { n += 1; c = addDays(c, -1); }
+        return n;
+      };
+      const bestRun = (active) => {
+        const days = [...new Set(active)].sort();
+        let best = 0, run = 0, prev = '';
+        days.forEach((d) => { run = (prev && addDays(prev, 1) === d) ? run + 1 : 1; best = Math.max(best, run); prev = d; });
+        return best;
+      };
+      let p = {};
+      try { p = JSON.parse(localStorage.getItem('hn.progress.v1') || '{}') || {}; } catch {}
+      let ch = {};
+      try { ch = JSON.parse(localStorage.getItem('hn.challenges.v1') || '{}') || {}; } catch {}
+      const active = Array.isArray(p.activeDays) ? p.activeDays : [];
+      const verses = Number(p.versesTotal) || 0;
+      const hasanat = Number(p.hasanatTotal) || 0;
+      const t = todayUTC();
+      const streak = computeStreak(active, t);
+      if (!active.length && !verses) {
+        $('[data-pg-empty]').classList.remove('hidden');
+        $('[data-pg-main]').classList.add('hidden');
+        return;
+      }
+      $('[data-pg-streak]').textContent = streak;
+      $('[data-pg-streak-line]').textContent = streak > 0 ? `${streak}-day streak — keep it alive today` : 'Grace used — read today to restart';
+      $('[data-pg-best]').textContent = bestRun(active);
+      const C = 339.3;
+      $('[data-pg-ring]').style.strokeDashoffset = C * (1 - Math.min(1, streak / 30));
+      $('[data-pg-verses]').textContent = verses.toLocaleString();
+      $('[data-pg-hasanat]').textContent = hasanat.toLocaleString();
+      $('[data-pg-pages]').textContent = Math.round((verses / (6236 / 604)) * 10) / 10;
+      $('[data-pg-days]').textContent = active.length;
+      if (p.lastSpot && p.lastSpot.surah) {
+        const m = (surahNames || [])[p.lastSpot.surah - 1];
+        const name = m ? m[1] : `Surah ${p.lastSpot.surah}`;
+        const r = $('[data-pg-resume]');
+        r.href = `${String(readBase).replace(/\/$/, '')}/${p.lastSpot.surah}/?verse=${p.lastSpot.verse || 1}`;
+        $('[data-pg-resume-text]').textContent = `${name} · Verse ${p.lastSpot.verse || 1}`;
+        r.classList.remove('hidden');
+      }
+      const prog = {
+        'friday-kahf': { n: (ch.kahf && ch.kahf.n) || 0, target: 110, unit: 'verses', note: 'Surah Al-Kahf verses this week' },
+        'meaning-30day': { n: verses, target: 6236, unit: 'verses', note: 'All-time verses read' },
+        'nightly': { run: streak, note: 'Consecutive active days (1 grace day)' },
+        'ramadan-khatm': { n: (ch.khatm || []).length, target: 30, unit: 'juz', note: 'Distinct Juz opened while reading' },
+      };
+      $('[data-pg-challenges]').innerHTML = (challenges || []).map((c) => {
+        const g = prog[c.slug] || { n: 0, target: c.target };
+        const pct = g.target ? Math.min(100, Math.round((g.n / g.target) * 100)) : 0;
+        const line = g.run != null
+          ? `<span class="font-extrabold" style="color:var(--hn-ink)">${g.run}-night run</span>`
+          : `<span class="font-extrabold" style="color:var(--hn-ink)">${Number(g.n).toLocaleString()} / ${Number(g.target).toLocaleString()} ${g.unit || ''}</span>`;
+        const bar = g.target
+          ? `<div class="h-2 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div class="h-full rounded-full" style="width:${pct}%;background:var(--hn-primary)"></div></div>` : '';
+        return `<div class="hn-card hn-card-pad">
+          <p class="font-extrabold text-[15px] leading-6">${c.title}</p>
+          <p class="text-[13px] leading-5" style="color:var(--hn-muted)">${c.subtitle}</p>
+          <p class="text-[13px] mt-1">${line} <span style="color:var(--hn-muted)">· ${g.note || ''}</span></p>
+          ${bar}
+        </div>`;
+      }).join('');
+    })();
+  </script>
+</BaseLayout>

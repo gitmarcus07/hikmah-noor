@@ -45,6 +45,21 @@ const crumbs = [
 
     {/* start */}
     <a data-r-start href={`${readBase}1/?verse=1`} class="mt-3 flex items-center justify-center rounded-full border-2 border-qg-green hover:bg-qg-soft active:scale-[0.99] text-qg-green text-lg font-bold px-6 py-3.5 min-h-[56px] transition">Start Reading Quran</a>
+    <a data-r-resume href="#" class="hidden mt-3 flex items-center justify-center rounded-full bg-qg-deep hover:bg-[#084337] active:scale-[0.99] text-white text-[17px] font-bold px-6 py-3.5 min-h-[56px] transition"></a>
+    <script is:inline define:vars={{ readBase, surahData }}>
+      (() => {
+        const el = document.querySelector('[data-r-resume]');
+        if (!el) return;
+        let last = null;
+        try { last = (JSON.parse(localStorage.getItem('hn.progress.v1') || '{}') || {}).lastSpot; } catch {}
+        if (!last || !last.surah) return;
+        const m = (surahData || [])[last.surah - 1];
+        const name = m ? m[1] : `Surah ${last.surah}`;
+        el.href = `${String(readBase).replace(/\/$/, '')}/${last.surah}/?verse=${last.verse || 1}`;
+        el.textContent = `Continue: ${name} · Verse ${last.verse || 1} →`;
+        el.classList.remove('hidden');
+      })();
+    </script>
 
     {/* all surahs */}
     <h2 class="mt-8 text-xl font-extrabold text-qg-ink">All Surahs</h2>

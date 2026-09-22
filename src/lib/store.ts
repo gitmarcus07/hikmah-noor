@@ -55,6 +55,12 @@ export const KEYS = {
   challenges: 'hn.challenges.v1',
 } as const;
 
+/* hn.challenges.v1 schema (written by ReadSession "I'm Done", read by my-progress):
+ * { kahf?: { week: 'YYYY-MM-DD' (Friday-start), n: number },
+ *   khatm?: number[] (distinct Juz opened) }
+ * Meaning + nightly challenges derive from hn.progress.v1 (versesTotal, activeDays).
+ */
+
 export function emptyProgress(): Progress {
   return { activeDays: [], versesTotal: 0, hasanatTotal: 0, lastSpot: null, perSurah: {} };
 }
