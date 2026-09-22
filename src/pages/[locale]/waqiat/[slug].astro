@@ -1,0 +1,14 @@
+---
+import WaqiahDetail from '../../../components/WaqiahDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { WAQIAT, waqiahBySlug } from '../../../data/waqiat';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const w of WAQIAT) paths.push({ params: { locale, slug: w.slug }, props: { waqiahSlug: w.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const waqiah = waqiahBySlug((Astro.props as any).waqiahSlug);
+---
+<WaqiahDetail waqiah={waqiah} locale={locale} />

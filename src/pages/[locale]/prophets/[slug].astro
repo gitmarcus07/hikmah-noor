@@ -1,0 +1,14 @@
+---
+import ProphetDetail from '../../../components/ProphetDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { PROPHETS, prophetBySlug } from '../../../data/prophets';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const p of PROPHETS) paths.push({ params: { locale, slug: p.slug }, props: { prophetSlug: p.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const prophet = prophetBySlug((Astro.props as any).prophetSlug);
+---
+<ProphetDetail prophet={prophet} locale={locale} />

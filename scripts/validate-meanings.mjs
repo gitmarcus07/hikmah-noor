@@ -22,7 +22,7 @@ starts.forEach((s, i) => {
   const body = txt.slice(s, i + 1 < starts.length ? starts[i + 1] : txt.length);
   for (const f of required) if (!body.includes(f)) fail(`meaning ${slugs[i]} missing ${f}`);
   const motifs = (body.match(/motif: '([^']+)'/) || [])[1];
-  if (!['shield', 'lamp', 'leaf', 'heart', 'star', 'crown', 'gem', 'arch', 'drop', 'scales', 'wheat', 'pen', 'bowl', 'moon'].includes(motifs)) fail(`meaning ${slugs[i]} bad motif: ${motifs}`);
+  if (!['shield', 'lamp', 'leaf', 'heart', 'star', 'crown', 'gem', 'arch', 'drop', 'scales', 'wheat', 'pen', 'bowl', 'moon', 'target', 'stamp', 'barrier', 'chest', 'speech', 'satchel', 'curtain', 'anchor', 'flame', 'pitcher', 'veil', 'link', 'peak', 'world', 'horizon', 'basket', 'palms', 'beads', 'open-book', 'mat', 'crescent', 'inkpot', 'lantern', 'snow', 'bubble-x', 'reed'].includes(motifs)) fail(`meaning ${slugs[i]} bad motif: ${motifs}`);
 });
 
 // No collisions with meanings article slugs (EN + locale share /meanings/:slug/)

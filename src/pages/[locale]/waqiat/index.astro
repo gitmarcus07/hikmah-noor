@@ -1,0 +1,8 @@
+---
+import WaqiahHub from '../../../components/WaqiahHub.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+---
+<WaqiahHub locale={locale} />

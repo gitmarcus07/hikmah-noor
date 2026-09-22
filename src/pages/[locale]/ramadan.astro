@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../../components/hn/SectionHeader.astro';
+import Icon from '../../components/Icon.astro';
+import { nonDefaultLocales, localizedPath } from '../../i18n/utils';
+import { GUIDES } from '../../data/guides';
+import { DUAS } from '../../data/duas';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Ramadan Guide — Fasting Rules, Duas, Taraweeh, Countdown & Sehri Times`;
+const description = `Everything for Ramadan: fasting rules, sehri and iftar duas, Taraweeh method, Laylatul Qadr, countdown, prayer times and zakat calculator — in one place.`;
+const keywords = 'ramadan guide, roza rules, sehri dua, iftar dua, taraweeh method, laylatul qadr dua, ramadan countdown, sehri iftar time, ramadan zakat';
+const faq = [
+  { q: 'How is Ramadan dated each year?', a: 'By moon sighting — Ramadan begins with the crescent sighting and ends with Shawwal’s. Dates vary by country; follow local scholars and moon committees, not apps alone.' },
+  { q: 'When do sehri and iftar happen?', a: 'Sehri ends at Fajr (true dawn) and iftar begins at Maghrib (sunset). Use the prayer-times tool for your city’s exact times.' },
+  { q: 'How do I find Laylatul Qadr?', a: 'In the last ten nights, most hoped on the odd nights — worship with prayer, Quran and the Allahumma innaka afuwwun supplication.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Ramadan', path: '/ramadan/' },
+];
+const guideSlugs = ['roza-fasting', 'taraweeh-guide', 'taraweeh-night-prayer', 'eid-prayer-method', 'zakat-essentials'];
+const guides = guideSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
+const duas = DUAS.filter((d) => d.cat === 'ramadan-fasting').slice(0, 8);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/ramadan/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">Ramadan hub</span>
+        <span class="hn-badge">Guides + Duas + Tools</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Ramadan Guide</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Fasting rules, sehri and iftar duas, Taraweeh method, Laylatul Qadr, countdown and prayer times — everything for the month in one place.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/tools/ramadan-countdown/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Ramadan countdown</a>
+        <a href={L('/tools/prayer-times/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Sehri & iftar times</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Guides" title="Fasting & worship guides" href={L('/learn/')} linkLabel="All guides" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {guides.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Duas" title="Ramadan duas" href={L('/duas/ramadan-fasting/')} linkLabel="All Ramadan duas" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {duas.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Tools" title="Ramadan tools" href={L('/tools/')} linkLabel="All tools" />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { t: 'Ramadan Countdown', d: 'Days left with Hijri date', h: '/tools/ramadan-countdown/', i: 'moon' },
+          { t: 'Prayer Times', d: 'Sehri end & iftar start for your city', h: '/tools/prayer-times/', i: 'sun' },
+          { t: 'Tasbih Counter', d: 'Dhikr with daily totals', h: '/tools/tasbih/', i: 'tools' },
+        ].map((c) => (
+          <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.i as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.t}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.d}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+  <p class="mx-auto max-w-2xl px-4 pb-2 text-sm font-semibold text-qg-green bg-qg-soft border border-qg-line rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

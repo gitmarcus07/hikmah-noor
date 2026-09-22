@@ -1,0 +1,142 @@
+---
+/* History event detail — chronological reading page with own branding.
+ * Prev/next by order; cross-links to Seerat for prophetic-era events. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import HistoryArt from './HistoryArt.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
+import ShareButtons from './hn/ShareButtons.astro';
+import { localizedPath } from '../i18n/utils';
+import { HISTORY, prevHistory, nextHistory } from '../data/history';
+
+interface Props { event: any; locale: string; }
+const { event, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const eventPath = `/history/${event.slug}/`;
+
+const title = `${event.title} — Timeline & Lessons`;
+let description = `${event.title} (${event.year}): ${event.summary}`;
+if (description.length > 160) description = description.slice(0, 157) + '...';
+const keywords = `${event.title.toLowerCase()}, ${event.name.toLowerCase()} islamic history, ${event.year.toLowerCase()}${event.aliases?.length ? `, ${event.aliases.join(', ')}` : ''}`;
+
+const faq = [
+  { q: `What happened at ${event.name}?`, a: event.summary },
+  { q: `When did it happen?`, a: `${event.year}. See the timeline on this page for the event in order.` },
+  { q: `What are the lessons?`, a: event.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: `Where is this sourced from?`, a: `References: ${event.references}. Consult scholars for deeper study.` },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'History', path: '/history/' },
+  { name: event.title, path: eventPath },
+];
+const others = HISTORY.filter((w) => w.slug !== event.slug && w.era === event.era).concat(HISTORY.filter((w) => w.slug !== event.slug && w.era !== event.era)).slice(0, 4);
+const prevP = prevHistory(event.order);
+const nextP = nextHistory(event.order);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={eventPath}>
+  <div class="hn-article hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Event {event.order} of 20</span>
+      <span class="hn-badge">{event.year}</span>
+      <span class="hn-badge hn-badge-gold">{event.era}</span>
+      <span class="ms-auto"><BookmarkButton kind="history" bmRef={eventPath} title={event.title} /></span>
+      <ShareButtons title={event.title} path={eventPath} locale={locale} />
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{event.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{event.summary}</p>
+    {event.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {event.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    <div class="hn-card overflow-hidden my-6">
+      <HistoryArt motif={event.motif} arabic={event.arabic} name={event.name} accent={event.accent} />
+    </div>
+
+    <div class="hn-reading-card">
+      <p class="hn-block-label">Emblematic words</p>
+      <p class="arabic-block" lang="ar" dir="rtl">{event.arabic}</p>
+    </div>
+
+    <section class="mt-8" aria-label="The full story">
+      <SectionHeader eyebrow="Story" title="The full story" />
+      <div class="space-y-4">
+        {(event.narrative || []).map((p: string) => (
+          <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
+        ))}
+      </div>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated from widely transmitted histories without invented details.</p>
+    </section>
+
+    <section class="mt-8" aria-label="The event in order">
+      <SectionHeader eyebrow="Timeline" title="The event in order" />
+      <ol class="space-y-3">
+        {event.events.map((e: string, i: number) => (
+          <li class="hn-card hn-card-pad flex gap-3">
+            <span class="hn-verse-num shrink-0">{i + 1}</span>
+            <span class="leading-7 text-[15px]">{e}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="mt-8" aria-label="Lessons">
+      <SectionHeader eyebrow="Reflect" title="Lessons" />
+      <div class="hn-card hn-card-pad">
+        <ul class="space-y-2.5 leading-7 text-[15px]">
+          {event.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
+        </ul>
+      </div>
+    </section>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{event.references}</strong></p>
+    <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For the prophetic life, read the <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">16-chapter Seerat →</a></p>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="More events">
+      <SectionHeader eyebrow="History" title="More events" href={L('/history/')} linkLabel="All 20 events" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((r) => (
+          <a href={L(`/history/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <HistoryArt motif={r.motif} arabic={r.arabic} name={r.name} accent={r.accent} />
+            <span class="block hn-card-pad">
+              <span class="font-bold block text-[15px] leading-6">{r.order}. {r.title}</span>
+              <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{r.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {(prevP || nextP) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More events">
+        {prevP ? (
+          <a href={L(`/history/${prevP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)}>← Event {prevP.order}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevP.title}</span>
+          </a>
+        ) : <span />}
+        {nextP && (
+          <a href={L(`/history/${nextP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Event {nextP.order} →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextP.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>

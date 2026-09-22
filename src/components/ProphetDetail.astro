@@ -9,9 +9,11 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { localizedPath } from '../i18n/utils';
 import { PROPHETS, prevProphet, nextProphet } from '../data/prophets';
+import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { prophet: any; locale: string; }
-const { prophet, locale } = Astro.props;
+const { locale } = Astro.props;
+const prophet = localizeStory((Astro.props as any).prophet, 'prophets', locale);
 const L = (p: string) => localizedPath(locale, p);
 const prophetPath = `/prophets/${prophet.slug}/`;
 
@@ -41,9 +43,9 @@ const WAQIAT_LINK: Record<string, string> = {
   'dawud-armor-and-psalms': 'dawud-jalut-victory',
 };
 const waqiatSlug = WAQIAT_LINK[prophet.slug] ?? null;
-const others = PROPHETS.filter((w) => w.slug !== prophet.slug && w.era === prophet.era).concat(PROPHETS.filter((w) => w.slug !== prophet.slug && w.era !== prophet.era)).slice(0, 4);
-const prevP = prevProphet(prophet.order);
-const nextP = nextProphet(prophet.order);
+const others = localizeStoryList(PROPHETS.filter((w) => w.slug !== prophet.slug && w.era === prophet.era).concat(PROPHETS.filter((w) => w.slug !== prophet.slug && w.era !== prophet.era)).slice(0, 4), 'prophets', locale);
+const prevP = localizeStory(prevProphet(prophet.order), 'prophets', locale);
+const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={prophetPath}>
   <div class="hn-article hn-section">

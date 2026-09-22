@@ -7,10 +7,13 @@ import ReadingCard from './hn/ReadingCard.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { localizedPath } from '../i18n/utils';
 import { guidesByCat, GUIDES } from '../data/guides';
+import { localizeGuide, localizeGuideList, localizeGuideCat } from '../lib/guides-i18n';
 import { getDua, duaCat } from '../data/duas';
 
 interface Props { guide: any; cat: any; locale: string; }
-const { guide, cat, locale } = Astro.props;
+const { locale } = Astro.props;
+const guide = localizeGuide((Astro.props as any).guide, locale);
+const cat = localizeGuideCat((Astro.props as any).cat, locale);
 const L = (p: string) => localizedPath(locale, p);
 const guidePath = '/learn/' + guide.cat + '/' + guide.slug + '/';
 const catPath = '/learn/' + guide.cat + '/';
@@ -48,8 +51,8 @@ const crumbs = [
   { name: cat.title, path: catPath },
   { name: guide.title, path: guidePath },
 ];
-const related = guidesByCat(guide.cat).filter((g) => g.slug !== guide.slug);
-const moreGuides = [...related, ...GUIDES.filter((g) => g.cat !== guide.cat)].slice(0, 4);
+const relatedRaw = guidesByCat(guide.cat).filter((g) => g.slug !== guide.slug);
+const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.cat !== guide.cat)].slice(0, 4), locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={guide.faq} crumbs={crumbs} canonicalPath={guidePath}>
   <div class="hn-article hn-section">

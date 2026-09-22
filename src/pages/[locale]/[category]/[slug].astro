@@ -20,6 +20,7 @@ import { MEANINGS, meaningBySlug } from '../../../data/meanings';
 import { WAQIAT, waqiahBySlug } from '../../../data/waqiat';
 import { PROPHETS, prophetBySlug } from '../../../data/prophets';
 import { HADEES, hadeesBySlug } from '../../../data/hadees';
+import { NAWAWI, nawawiBySlug } from '../../../data/hadees-nawawi';
 import { SEERAH, seerahBySlug } from '../../../data/seerah';
 import surahsMeta from '../../../data/surahs-meta.json';
 import { paras, getPara, prevPara, nextPara, paraTitle, paraDescription, paraKeywords, paraFaq } from '../../../lib/paras';
@@ -59,6 +60,9 @@ export async function getStaticPaths() {
     for (const h of HADEES) {
       paths.push({ params: { locale, category: 'hadees', slug: h.slug }, props: { hadeesSlug: h.slug } });
     }
+    for (const h of NAWAWI) {
+      paths.push({ params: { locale, category: 'hadees', slug: h.slug }, props: { hadeesSlug: h.slug } });
+    }
     for (const s of SEERAH) {
       paths.push({ params: { locale, category: 'seerat', slug: s.slug }, props: { seerahSlug: s.slug } });
     }
@@ -74,7 +78,7 @@ const kalima = (Astro.props as any).kalimaSlug ? kalimaBySlug((Astro.props as an
 const meaning = (Astro.props as any).meaningSlug ? meaningBySlug((Astro.props as any).meaningSlug) : undefined;
 const waqiah = (Astro.props as any).waqiahSlug ? waqiahBySlug((Astro.props as any).waqiahSlug) : undefined;
 const prophet = (Astro.props as any).prophetSlug ? prophetBySlug((Astro.props as any).prophetSlug) : undefined;
-const hadees = (Astro.props as any).hadeesSlug ? hadeesBySlug((Astro.props as any).hadeesSlug) : undefined;
+const hadees = (Astro.props as any).hadeesSlug ? (hadeesBySlug((Astro.props as any).hadeesSlug) ?? nawawiBySlug((Astro.props as any).hadeesSlug)) : undefined;
 const seerah = (Astro.props as any).seerahSlug ? seerahBySlug((Astro.props as any).seerahSlug) : undefined;
 
 const surahNum = (Astro.props as any).surahNum as number | undefined;

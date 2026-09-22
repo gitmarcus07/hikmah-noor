@@ -7,6 +7,7 @@ import Icon from './Icon.astro';
 import SahabaArt from './SahabaArt.astro';
 import { localizedPath } from '../i18n/utils';
 import { SAHABA, sahabaByEra } from '../data/sahaba';
+import { localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
@@ -24,8 +25,8 @@ const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'Sahaba', path: '/sahaba/' },
 ];
-const makkah = sahabaByEra('Makkah');
-const madinah = sahabaByEra('Madinah');
+const makkah = localizeStoryList(sahabaByEra('Makkah'), 'sahaba', locale);
+const madinah = localizeStoryList(sahabaByEra('Madinah'), 'sahaba', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/sahaba/">
   <div class="hn-discover hn-section">

@@ -1,0 +1,80 @@
+---
+/* History hub: 20 landmark events in chronological order -> per-event SEO detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import HistoryArt from './HistoryArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { HISTORY, historyByEra } from '../data/history';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Islamic History — 20 Landmark Events in Order (${HISTORY.length} events)`;
+const description = `All ${HISTORY.length} landmark events in order — Hijrah, Badr, Hudaybiyyah, Yarmuk, Cordoba, Baghdad, Hattin, Constantinople and more — with timelines, lessons and references. Each event has its own page.`;
+const keywords = 'islamic history, muslim history timeline, hijrah, badr, yarmuk, cordoba, baghdad house of wisdom, salahuddin, constantinople 1453, mughals, tarikh islam';
+const faq = [
+  { q: 'Which events are covered here?', a: '20 landmarks in chronological order: 5 prophetic-era, 5 Rashidun-era, 5 classical (Umayyad to Ayyubid), and 5 later (Mongols to the modern age). Open any event for the full story.' },
+  { q: 'Where do these accounts come from?', a: 'Widely transmitted histories (Ibn Hisham and Tabari traditions) and Sahih collections — named qualitatively. Sensitive episodes like the first fitna and Karbala are told factually and without partisanship; consult scholars for deeper study.' },
+  { q: 'How is this different from Seerat?', a: 'Seerat tells the Prophet’s ﷺ own life in 16 chapters. History continues the story: caliphs, empires, scholarship and revival across fourteen centuries.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'History', path: '/history/' },
+];
+const ERAS = [
+  { era: 'Prophetic', eyebrow: 'Era 1 — Prophetic', title: 'The Foundation', sub: 'Hijrah to the passing — the community is born.' },
+  { era: 'Rashidun', eyebrow: 'Era 2 — Rashidun', title: 'The First Generation', sub: 'Caliphs, compilation and conquests — the deen is secured.' },
+  { era: 'Classical', eyebrow: 'Era 3 — Classical', title: 'Empires & Scholarship', sub: 'Damascus to Jerusalem — dynasties rise, knowledge flowers.' },
+  { era: 'Later', eyebrow: 'Era 4 — Later', title: 'Trial & Renewal', sub: 'Mongols to the modern age — catastrophe survived, revival seeded.' },
+] as const;
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/history/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{HISTORY.length} events</span>
+        <span class="hn-badge">Hijrah to the modern age</span>
+        <span class="hn-badge">Timelines + lessons</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Islamic History — Tarikh</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Fourteen centuries in twenty landmarks — victories, trials, libraries and revivals. Tap any event for its own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search history — e.g. badr, cordoba, 1453…" aria-label="Search history" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For the prophetic life, see the <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">16-chapter Seerat →</a></p>
+    </div>
+
+    {ERAS.map((e) => {
+      const list = historyByEra(e.era);
+      return (
+        <div class="mt-8">
+          <SectionHeader eyebrow={e.eyebrow} title={e.title} sub={e.sub} />
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {list.map((h) => (
+              <a href={L(`/history/${h.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+                <span class="block overflow-hidden"><HistoryArt motif={h.motif} arabic={h.arabic} name={h.name} accent={h.accent} /></span>
+                <span class="block hn-card-pad">
+                  <span class="flex items-center gap-1.5">
+                    <span class="hn-verse-num shrink-0">{h.order}</span>
+                    <span class="hn-badge hn-badge-primary">{h.year}</span>
+                  </span>
+                  <span class="font-extrabold block text-[17px] leading-7 mt-2">{h.title}</span>
+                  <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{h.summary}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

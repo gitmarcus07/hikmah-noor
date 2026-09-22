@@ -7,6 +7,7 @@ import Icon from './Icon.astro';
 import WomenArt from './WomenArt.astro';
 import { localizedPath } from '../i18n/utils';
 import { WOMEN, womenByEra } from '../data/women';
+import { localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
@@ -52,7 +53,7 @@ const eraTitle: Record<string, string> = {
     </div>
 
     {eras.map((era) => {
-      const list = womenByEra(era);
+      const list = localizeStoryList(womenByEra(era), 'women', locale);
       return (
       <div class="mt-8">
         <SectionHeader eyebrow={era} title={eraTitle[era]} />

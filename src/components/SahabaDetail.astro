@@ -9,9 +9,11 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { localizedPath } from '../i18n/utils';
 import { SAHABA, prevSahabi, nextSahabi } from '../data/sahaba';
+import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { sahabi: any; locale: string; }
-const { sahabi, locale } = Astro.props;
+const { locale } = Astro.props;
+const sahabi = localizeStory((Astro.props as any).sahabi, 'sahaba', locale);
 const L = (p: string) => localizedPath(locale, p);
 const sahabiPath = `/sahaba/${sahabi.slug}/`;
 
@@ -30,9 +32,9 @@ const crumbs = [
   { name: 'Sahaba', path: '/sahaba/' },
   { name: sahabi.title, path: sahabiPath },
 ];
-const others = SAHABA.filter((w) => w.slug !== sahabi.slug && w.era === sahabi.era).concat(SAHABA.filter((w) => w.slug !== sahabi.slug && w.era !== sahabi.era)).slice(0, 4);
-const prevP = prevSahabi(sahabi.order);
-const nextP = nextSahabi(sahabi.order);
+const others = localizeStoryList(SAHABA.filter((w) => w.slug !== sahabi.slug && w.era === sahabi.era).concat(SAHABA.filter((w) => w.slug !== sahabi.slug && w.era !== sahabi.era)).slice(0, 4), 'sahaba', locale);
+const prevP = localizeStory(prevSahabi(sahabi.order), 'sahaba', locale);
+const nextP = localizeStory(nextSahabi(sahabi.order), 'sahaba', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={sahabiPath}>
   <div class="hn-article hn-section">

@@ -6,9 +6,12 @@ import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import { localizedPath } from '../i18n/utils';
 import { GUIDE_CATS } from '../data/guides';
+import { localizeGuideList, localizeGuideCat } from '../lib/guides-i18n';
 
 interface Props { cat: any; guides: any[]; locale: string; }
-const { cat, guides, locale } = Astro.props;
+const { locale } = Astro.props;
+const cat = localizeGuideCat((Astro.props as any).cat, locale);
+const guides = localizeGuideList((Astro.props as any).guides, locale);
 const L = (p: string) => localizedPath(locale, p);
 const catPath = '/learn/' + cat.slug + '/';
 
@@ -25,7 +28,7 @@ const crumbs = [
   { name: 'Learn', path: '/learn/' },
   { name: cat.title, path: catPath },
 ];
-const siblings = GUIDE_CATS.filter((c) => c.slug !== cat.slug);
+const siblings = GUIDE_CATS.filter((c) => c.slug !== cat.slug).map((c) => localizeGuideCat(c, locale));
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={catPath}>
   <div class="hn-discover hn-section">

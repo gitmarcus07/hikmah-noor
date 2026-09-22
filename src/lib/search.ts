@@ -6,6 +6,7 @@
 import { TOOLS, CATS } from './finance/tools.js';
 import { DUAS, DUA_CATS } from '../data/duas';
 import { localizeDua } from './duas-i18n';
+import { localizeStory } from './stories-i18n';
 import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
@@ -14,6 +15,7 @@ import { SAHABA } from '../data/sahaba';
 import { WOMEN } from '../data/women';
 import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
 import { HADEES } from '../data/hadees';
+import { NAWAWI } from '../data/hadees-nawawi';
 import { SEERAH } from '../data/seerah';
 
 /** Common alternate spellings / transliterations people actually type.
@@ -344,7 +346,8 @@ export function waqiahIndexItems(locale: string): IndexItem[] {
       locale,
     },
   ];
-  for (const w of WAQIAT) {
+  for (const w0 of WAQIAT) {
+    const w: any = locale === 'ur' ? localizeStory(w0, 'waqiat', locale) : w0;
     items.push({
       title: `${w.title} — Story & Lessons`,
       description: `${w.summary} References: ${w.quranRef}.`,
@@ -369,7 +372,8 @@ export function prophetIndexItems(locale: string): IndexItem[] {
       locale,
     },
   ];
-  for (const p of PROPHETS) {
+  for (const p0 of PROPHETS) {
+    const p: any = locale === 'ur' ? localizeStory(p0, 'prophets', locale) : p0;
     items.push({
       title: `${p.title} — Story & Lessons`,
       description: `${p.summary} References: ${p.quranRef}.`,
@@ -394,7 +398,8 @@ export function womenIndexItems(locale: string): IndexItem[] {
       locale,
     },
   ];
-  for (const w of WOMEN) {
+  for (const w0 of WOMEN) {
+    const w: any = locale === 'ur' ? localizeStory(w0, 'women', locale) : w0;
     items.push({
       title: `${w.title} — Story & Lessons`,
       description: `${w.summary} References: ${w.references}.`,
@@ -445,7 +450,8 @@ export function sahabaIndexItems(locale: string): IndexItem[] {
       locale,
     },
   ];
-  for (const s of SAHABA) {
+  for (const s0 of SAHABA) {
+    const s: any = locale === 'ur' ? localizeStory(s0, 'sahaba', locale) : s0;
     items.push({
       title: `${s.title} — Story & Lessons`,
       description: `${s.summary} References: ${s.references}.`,
@@ -457,20 +463,20 @@ export function sahabaIndexItems(locale: string): IndexItem[] {
   }
   return items;
 }
-/** Hadees hub + individual hadees entries for a locale (one SEO page per hadees). */
+/** Hadees hub + individual hadees entries for a locale (kids 40 + Nawawi 40). */
 export function hadeesIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
   const items: IndexItem[] = [
     {
-      title: '40 Short Hadees for Children — Arabic, Urdu & English',
-      description: 'All 40 short hadees for kids: Arabic, Urdu tarjuma, English meaning, lesson and source. Each hadees has its own page.',
+      title: 'Hadees Library — 40 for Children + 40 of Imam Nawawi',
+      description: 'All 80 hadees: 40 short hadees for kids plus the 40 Hadith of Imam Nawawi — Arabic, Urdu, English, lesson and source. Each hadees has its own page.',
       category: 'hadees',
       url: `${prefix}/hadees/`,
-      tags: ['hadees', 'hadith', 'hadees in urdu', '40 hadees', 'choti hadees', 'bachon ki hadees', 'short hadith'],
+      tags: ['hadees', 'hadith', 'hadees in urdu', '40 hadees', 'nawawi', '40 hadith nawawi', 'choti hadees', 'bachon ki hadees', 'short hadith'],
       locale,
     },
   ];
-  for (const h of HADEES) {
+  for (const h of [...HADEES, ...NAWAWI]) {
     items.push({
       title: `${h.title}`,
       description: `${h.urdu} ${h.translation} Lesson: ${h.lesson} Source: ${h.source}.`,
@@ -508,6 +514,34 @@ export function seerahIndexItems(locale: string): IndexItem[] {
   return items;
 }
 import { GUIDES, GUIDE_CATS } from '../data/guides';
+import { localizeGuide, localizeGuideCat } from './guides-i18n';
+import { HISTORY } from '../data/history';
+
+/** History hub + individual event entries for a locale. */
+export function historyIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [
+    {
+      title: 'Islamic History — 20 Landmark Events in Order',
+      description: 'Hijrah, Badr, Hudaybiyyah, Yarmuk, Cordoba, Baghdad, Hattin, Constantinople and more — timelines, lessons and references.',
+      category: 'history',
+      url: prefix + '/history/',
+      tags: ['history', 'tarikh', 'islamic history', 'muslim history', 'timeline', 'seerah history'],
+      locale,
+    },
+  ];
+  for (const h of HISTORY) {
+    items.push({
+      title: `${h.title} — Timeline & Lessons`,
+      description: `${h.summary} Date: ${h.year}.`,
+      category: 'history',
+      url: `${prefix}/history/${h.slug}/`,
+      tags: [...new Set(['history', 'tarikh', 'event', `event ${h.order}`, h.title.toLowerCase(), h.name.toLowerCase(), h.era.toLowerCase(), h.year.toLowerCase(), ...(h.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
 
 export function guideIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : '/' + locale;
@@ -521,7 +555,8 @@ export function guideIndexItems(locale: string): IndexItem[] {
       locale,
     },
   ];
-  for (const c of GUIDE_CATS) {
+  for (const c0 of GUIDE_CATS) {
+    const c: any = localizeGuideCat(c0, locale);
     items.push({
       title: c.title + ' Guides',
       description: c.desc,
@@ -531,7 +566,8 @@ export function guideIndexItems(locale: string): IndexItem[] {
       locale,
     });
   }
-  for (const g of GUIDES) {
+  for (const g0 of GUIDES) {
+    const g: any = locale === 'ur' ? localizeGuide(g0, locale) : g0;
     items.push({
       title: g.title,
       description: g.intro,

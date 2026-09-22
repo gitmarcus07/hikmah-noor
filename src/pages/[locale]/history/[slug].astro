@@ -1,0 +1,14 @@
+---
+import HistoryDetail from '../../../components/HistoryDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { HISTORY, historyBySlug } from '../../../data/history';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const h of HISTORY) paths.push({ params: { locale, slug: h.slug }, props: { historySlug: h.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const event = historyBySlug((Astro.props as any).historySlug);
+---
+<HistoryDetail event={event} locale={locale} />

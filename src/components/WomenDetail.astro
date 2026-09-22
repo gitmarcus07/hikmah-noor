@@ -8,9 +8,11 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { localizedPath } from '../i18n/utils';
 import { WOMEN, prevWoman, nextWoman } from '../data/women';
+import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { woman: any; locale: string; }
-const { woman, locale } = Astro.props;
+const { locale } = Astro.props;
+const woman = localizeStory((Astro.props as any).woman, 'women', locale);
 const L = (p: string) => localizedPath(locale, p);
 const womanPath = `/women/${woman.slug}/`;
 
@@ -29,9 +31,9 @@ const crumbs = [
   { name: 'Women', path: '/women/' },
   { name: woman.title, path: womanPath },
 ];
-const others = WOMEN.filter((w) => w.slug !== woman.slug && w.era === woman.era).concat(WOMEN.filter((w) => w.slug !== woman.slug && w.era !== woman.era)).slice(0, 4);
-const prevP = prevWoman(woman.order);
-const nextP = nextWoman(woman.order);
+const others = localizeStoryList(WOMEN.filter((w) => w.slug !== woman.slug && w.era === woman.era).concat(WOMEN.filter((w) => w.slug !== woman.slug && w.era !== woman.era)).slice(0, 4), 'women', locale);
+const prevP = localizeStory(prevWoman(woman.order), 'women', locale);
+const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={womanPath}>
   <div class="hn-article hn-section">

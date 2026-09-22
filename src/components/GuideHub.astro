@@ -6,11 +6,12 @@ import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import { localizedPath } from '../i18n/utils';
 import { GUIDE_CATS, guidesByCat, GUIDES } from '../data/guides';
+import { localizeGuideList, localizeGuideCat } from '../lib/guides-i18n';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
 const L = (p: string) => localizedPath(locale, p);
-const counts = GUIDE_CATS.map((c) => ({ ...c, n: guidesByCat(c.slug).length }));
+const counts = GUIDE_CATS.map((c) => ({ ...localizeGuideCat(c, locale), n: guidesByCat(c.slug).length }));
 
 const title = 'Islamic Guides - How to Pray, Wudu, Fasting, Zakat, Hajj and More';
 const description = 'Step-by-step Islamic guides: how to pray namaz, wudu, ghusl, fasting, zakat, Hajj, nikah and janaza - simple, sourced, with FAQs.';
@@ -64,7 +65,7 @@ const crumbs = [
     <div class="mt-8">
       <SectionHeader eyebrow="All topics" title="Every guide" sub="One page per topic - built to answer exactly what you searched." />
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {GUIDES.map((g: any) => (
+        {localizeGuideList(GUIDES, locale).map((g: any) => (
           <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
             <span class="font-bold block text-[15px] leading-6">{g.title}</span>
             <span class="text-[13px] line-clamp-2 mt-0.5" style="color:var(--hn-muted)">{g.intro}</span>

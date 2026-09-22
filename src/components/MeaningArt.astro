@@ -168,6 +168,175 @@ const uid = `${(term ?? motif ?? 'art').toLowerCase().replace(/[^a-z0-9]+/g, '')
         <path d="M64 50 L66.5 56.5 L73 59 L66.5 61.5 L64 68 L61.5 61.5 L55 59 L61.5 56.5 Z" fill={accent} stroke="none" />
       </g>
     )}
+    {motif === 'target' && (
+      <g>
+        <circle cx="45" cy="48" r="28" />
+        <circle cx="45" cy="48" r="16" stroke-width="3" />
+        <circle cx="45" cy="48" r="4" fill={accent} stroke="none" />
+        <path d="M45 48 L70 22" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'stamp' && (
+      <g>
+        <circle cx="45" cy="48" r="26" />
+        <path d="M34 48 L43 57 L58 39" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'barrier' && (
+      <g>
+        <circle cx="45" cy="48" r="28" />
+        <path d="M25 68 L65 28" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'chest' && (
+      <g>
+        <rect x="20" y="38" width="50" height="32" rx="3" />
+        <path d="M20 48 H70" stroke-width="3" />
+        <rect x="40" y="44" width="10" height="10" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'speech' && (
+      <g>
+        <path d="M20 26 H70 V54 H44 L32 68 V54 H20 Z" />
+        <path d="M30 38 H60 M30 46 H52" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'satchel' && (
+      <g>
+        <rect x="26" y="34" width="38" height="32" rx="4" />
+        <path d="M26 44 H64" stroke-width="3" />
+        <path d="M45 44 V54" stroke-width="3" />
+        <path d="M36 34 C36 24 54 24 54 34" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'curtain' && (
+      <g>
+        <path d="M20 14 H70" stroke-width="4" />
+        <path d="M28 14 C28 40 30 60 26 76 M62 14 C62 40 60 60 64 76" />
+        <path d="M45 14 V50" stroke-width="3" opacity="0.6" />
+      </g>
+    )}
+    {motif === 'anchor' && (
+      <g>
+        <circle cx="45" cy="20" r="7" stroke-width="4" />
+        <path d="M45 27 V76 M28 56 C28 68 36 74 45 74 C54 74 62 68 62 56" />
+        <path d="M32 44 H58" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'flame' && (
+      <g>
+        <path d="M45 10 C54 24 62 32 62 48 A17 17 0 1 1 28 48 C28 38 34 32 37 26 C39 32 42 34 42 34 C42 26 43 16 45 10 Z" />
+      </g>
+    )}
+    {motif === 'pitcher' && (
+      <g>
+        <path d="M36 30 H54 V44 C60 50 60 62 52 70 C48 74 42 74 38 70 C30 62 30 50 36 44 Z" />
+        <path d="M54 40 C62 38 64 46 60 52" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'veil' && (
+      <g>
+        <path d="M45 12 C30 12 24 28 26 44 C27 58 30 70 34 78 M45 12 C60 12 66 28 64 44 C63 58 60 70 56 78" />
+      </g>
+    )}
+    {motif === 'link' && (
+      <g>
+        <circle cx="33" cy="48" r="14" />
+        <circle cx="57" cy="48" r="14" />
+      </g>
+    )}
+    {motif === 'peak' && (
+      <g>
+        <polygon points="10,74 34,26 58,74" />
+        <polygon points="46,74 62,44 78,74" stroke-width="4" />
+        <circle cx="66" cy="18" r="5" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'world' && (
+      <g>
+        <circle cx="45" cy="48" r="28" />
+        <ellipse cx="45" cy="48" rx="12" ry="28" stroke-width="3" />
+        <path d="M17 48 H73" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'horizon' && (
+      <g>
+        <circle cx="45" cy="52" r="16" />
+        <path d="M10 62 H80" stroke-width="4" />
+        <path d="M20 72 H70" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'basket' && (
+      <g>
+        <path d="M28 40 H62 L57 72 H33 Z" />
+        <path d="M32 40 C32 26 58 26 58 40" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'palms' && (
+      <g>
+        <path d="M25 38 C30 56 37 66 45 66 C53 66 60 56 65 38" stroke-width="4" />
+        <path d="M33 38 C36 50 40 55 45 55 C50 55 54 50 57 38" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'beads' && (
+      <g>
+        <circle cx="45" cy="22" r="33" stroke-dasharray="1 9" stroke-linecap="round" stroke-width="6" />
+        <rect x="38" y="52" width="14" height="20" rx="3" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'open-book' && (
+      <g>
+        <path d="M45 30 C35 24 25 24 15 28 V66 C25 62 35 62 45 68 C55 62 65 62 75 66 V28 C65 24 55 24 45 30 Z" />
+        <path d="M45 30 V68" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'mat' && (
+      <g>
+        <rect x="25" y="30" width="40" height="44" rx="3" />
+        <path d="M25 42 H65 M25 54 H65" stroke-width="3" />
+        <path d="M38 30 V22 M52 30 V22" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'crescent' && (
+      <g>
+        <path d="M60 12 A30 30 0 1 0 60 72 A24 24 0 1 1 60 12 Z" />
+        <circle cx="64" cy="24" r="3" fill={accent} stroke="none" />
+      </g>
+    )}
+    {motif === 'inkpot' && (
+      <g>
+        <path d="M32 48 H58 L54 76 H36 Z" />
+        <path d="M28 48 H62" stroke-width="4" />
+        <path d="M52 48 L66 18" />
+      </g>
+    )}
+    {motif === 'lantern' && (
+      <g>
+        <circle cx="45" cy="12" r="4" stroke-width="3" />
+        <path d="M45 16 V24 M32 24 H58 L52 66 H38 Z" />
+        <path d="M34 72 H56" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'snow' && (
+      <g>
+        <path d="M45 14 V74 M16 31 L74 65 M74 31 L16 65" stroke-width="4" />
+        <path d="M38 22 L45 30 L52 22 M38 66 L45 58 L52 66" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'bubble-x' && (
+      <g>
+        <path d="M20 24 H70 V52 H44 L32 66 V52 H20 Z" />
+        <path d="M39 38 L51 50 M51 38 L39 50" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'reed' && (
+      <g>
+        <path d="M45 78 C43 60 43 48 45 36" />
+        <path d="M45 52 C36 46 28 46 20 50" stroke-width="3" />
+        <path d="M45 44 C54 38 62 38 70 42" stroke-width="3" />
+        <circle cx="45" cy="28" r="5" stroke-width="3" />
+      </g>
+    )}
   </g>
 
   {/* medallion rings */}

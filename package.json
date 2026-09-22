@@ -21,9 +21,12 @@
     "content:quiz": "node scripts/validate-quiz.mjs",
     "content:sahaba": "node scripts/validate-sahaba.mjs",
     "content:women": "node scripts/validate-women.mjs",
+    "content:stories:ur": "node scripts/validate-stories-ur.mjs",
     "content:hadees": "node scripts/validate-hadees.mjs",
+    "content:nawawi": "node scripts/validate-nawawi.mjs",
     "content:seerat": "node scripts/validate-seerah.mjs",
     "content:guides": "node scripts/validate-guides.mjs",
+    "content:guides:ur": "node scripts/validate-guides-ur.mjs",
     "content:links": "node scripts/check-links.mjs",
     "content:surahs": "node scripts/build-surahs.mjs"
   },

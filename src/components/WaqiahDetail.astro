@@ -8,9 +8,11 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import { localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
+import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { waqiah: any; locale: string; }
-const { waqiah, locale } = Astro.props;
+const { locale } = Astro.props;
+const waqiah = localizeStory((Astro.props as any).waqiah, 'waqiat', locale);
 const L = (p: string) => localizedPath(locale, p);
 const waqiahPath = `/waqiat/${waqiah.slug}/`;
 
@@ -29,10 +31,11 @@ const crumbs = [
   { name: 'Waqiat', path: '/waqiat/' },
   { name: waqiah.title, path: waqiahPath },
 ];
-const others = WAQIAT.filter((w) => w.slug !== waqiah.slug).slice(0, 4);
-const sIdx = WAQIAT.findIndex((w) => w.slug === waqiah.slug);
-const prevW = sIdx > 0 ? WAQIAT[sIdx - 1] : null;
-const nextW = sIdx >= 0 && sIdx < WAQIAT.length - 1 ? WAQIAT[sIdx + 1] : null;
+const WL = localizeStoryList(WAQIAT, 'waqiat', locale);
+const others = WL.filter((w) => w.slug !== waqiah.slug).slice(0, 4);
+const sIdx = WL.findIndex((w) => w.slug === waqiah.slug);
+const prevW = sIdx > 0 ? WL[sIdx - 1] : null;
+const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={waqiahPath}>
   <div class="hn-article hn-section">

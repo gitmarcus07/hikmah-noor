@@ -7,6 +7,7 @@ import Icon from './Icon.astro';
 import WaqiahArt from './WaqiahArt.astro';
 import { localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
+import { localizeStoryList } from '../lib/stories-i18n';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
@@ -45,7 +46,7 @@ const crumbs = [
     <div class="mt-8">
       <SectionHeader eyebrow="Stories" title="Browse all stories" />
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {WAQIAT.map((w) => (
+        {localizeStoryList(WAQIAT, 'waqiat', locale).map((w) => (
           <a href={localizedPath(locale, `/waqiat/${w.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
             <span class="block overflow-hidden"><WaqiahArt motif={w.motif} arabic={w.arabic} prophet={w.prophet} accent={w.accent} /></span>
             <span class="block hn-card-pad">
