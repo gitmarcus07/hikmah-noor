@@ -12,21 +12,22 @@ import { DUAS } from '../data/duas';
 const locale = 'en';
 const L = (p: string) => localizedPath(locale, p);
 
-const title = `Ramadan Guide — Fasting Rules, Duas, Taraweeh, Countdown & Sehri Times`;
-const description = `Everything for Ramadan: fasting rules, sehri and iftar duas, Taraweeh method, Laylatul Qadr, countdown, prayer times and zakat calculator — in one place.`;
-const keywords = 'ramadan guide, roza rules, sehri dua, iftar dua, taraweeh method, laylatul qadr dua, ramadan countdown, sehri iftar time, ramadan zakat';
+const title = `Ramadan Guide — Fasting Rules, Moon Sighting, Itikaf, Laylatul Qadr, Fitrana & Sehri Times`;
+const description = `Everything for Ramadan: moon sighting, fasting rules, itikaf, Laylatul Qadr, last-10-nights plan, Taraweeh, khatm schedule, fitrana, fidyah, countdown and prayer times.`;
+const keywords = 'ramadan guide, roza rules, chand dekhne ka tarika, sehri dua, iftar dua, taraweeh method, itikaf ka tarika, laylatul qadr dua, shab e qadr, fitrana kitna hai, fidyah amount, quran khatm plan, ramadan countdown, sehri iftar time, zakat al fitr';
 const faq = [
-  { q: 'How is Ramadan dated each year?', a: 'By moon sighting — Ramadan begins with the crescent sighting and ends with Shawwal’s. Dates vary by country; follow local scholars and moon committees, not apps alone.' },
+  { q: 'How is Ramadan dated each year?', a: 'By moon sighting — Ramadan begins with the crescent sighting and ends with Shawwal’s. See our moon-sighting guide for the hilal rules. Dates vary by country; follow local scholars and moon committees, not apps alone.' },
   { q: 'When do sehri and iftar happen?', a: 'Sehri ends at Fajr (true dawn) and iftar begins at Maghrib (sunset). Use the prayer-times tool for your city’s exact times.' },
-  { q: 'How do I find Laylatul Qadr?', a: 'In the last ten nights, most hoped on the odd nights — worship with prayer, Quran and the Allahumma innaka afuwwun supplication.' },
+  { q: 'How do I find Laylatul Qadr?', a: 'Worship all of the last ten nights — most hoped on the odd nights — with prayer, Quran and the Allahumma innaka afuwwun supplication. Our last-10-nights plan gives a repeatable nightly template.' },
+  { q: 'How much is fitrana and when is it paid?', a: 'One sa’ (~2.5-3kg) of staple food per person, paid in Ramadan’s last days and before the Eid prayer. See the Zakat al-Fitr guide and calculator.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'Ramadan', path: '/ramadan/' },
 ];
-const guideSlugs = ['roza-fasting', 'taraweeh-guide', 'taraweeh-night-prayer', 'eid-prayer-method', 'zakat-essentials'];
+const guideSlugs = ['roza-fasting', 'moon-sighting-hilal', 'what-breaks-fast', 'taraweeh-night-prayer', 'itikaf-rules', 'laylatul-qadr', 'last-ten-nights-plan', 'quran-khatm-ramadan', 'fidyah-kaffarah-fasts', 'zakat-al-fitr', 'zakat-essentials', 'eid-prayer-method'];
 const guides = guideSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
-const duas = DUAS.filter((d) => d.cat === 'ramadan-fasting').slice(0, 8);
+const duas = DUAS.filter((d) => d.cat === 'ramadan-fasting').slice(0, 12);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/ramadan/">
   <div class="hn-discover hn-section">
@@ -74,6 +75,8 @@ const duas = DUAS.filter((d) => d.cat === 'ramadan-fasting').slice(0, 8);
         {[
           { t: 'Ramadan Countdown', d: 'Days left with Hijri date', h: '/tools/ramadan-countdown/', i: 'moon' },
           { t: 'Prayer Times', d: 'Sehri end & iftar start for your city', h: '/tools/prayer-times/', i: 'sun' },
+          { t: 'Zakat al-Fitr', d: 'Fitrana per-person amount', h: '/tools/zakat/zakat-al-fitr/', i: 'tools' },
+          { t: 'Fidyah Calculator', d: 'Missed fasts: food & cost', h: '/tools/fidyah-kaffarah/fidyah/', i: 'tools' },
           { t: 'Tasbih Counter', d: 'Dhikr with daily totals', h: '/tools/tasbih/', i: 'tools' },
         ].map((c) => (
           <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">

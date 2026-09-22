@@ -18,12 +18,20 @@ const fail = (msg) => { errors++; console.error('❌ ' + msg); };
 
 const mainSlugs = [...main.matchAll(/\{ slug: '([^']+)', cat: '/g)].map((m) => m[1]);
 const mainSet = new Set(mainSlugs);
+// English-first batch (Eid season 2026): Urdu overlays land in a follow-up pass.
+const PENDING_UR = new Set([
+  'sehri-intention', 'taraweeh-pause-glorification', 'afiyah-pardon-wellbeing',
+  'refuge-fire-seven', 'khatm-quran-mercy', 'ramadan-istighfar',
+  'mercy-comprehensive-dua', 'rabbana-taqabbal-deeds',
+]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 
 if (new Set(ovSlugs).size !== ovSlugs.length) fail('duplicate overlay slugs');
 for (const s of ovSlugs) if (!mainSet.has(s)) fail(`unknown dua slug in overlay: ${s}`);
-const missing = mainSlugs.filter((s) => !ovSlugs.includes(s));
+const missing = mainSlugs.filter((s) => !ovSlugs.includes(s) && !PENDING_UR.has(s));
 if (missing.length) fail(`missing Urdu for ${missing.length}: ${missing.slice(0, 10).join(', ')}${missing.length > 10 ? '…' : ''}`);
+const pending = mainSlugs.filter((s) => PENDING_UR.has(s) && !ovSlugs.includes(s));
+if (pending.length) console.log(`⏳ Pending Urdu (English-first batch): ${pending.length} — ${pending.join(', ')}`);
 
 const starts = [...txt.matchAll(/'[^']+': \{ title:/g)].map((m) => m.index);
 const required = ['title:', 'use:', 'translation:', 'virtue:', 'when:'];
