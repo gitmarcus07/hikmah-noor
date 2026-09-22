@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict } from '../../i18n/utils';
+
+const locale = 'en';
+const dict = getDict(locale);
+const faq = [
+  { q: 'How is the Qibla direction found?', a: 'From your coordinates with the great-circle bearing to the Kaaba (21.4225°N, 39.8262°E). Allow location access, or pick your city — then face the needle. Verify once against a known direction.' },
+  { q: 'Why does my Qibla differ slightly from my mosque?', a: 'Old mosques were aligned by estimation; GPS bearings are geometric. Differences under a few degrees are normal — pray with your local congregation.' },
+  { q: 'Does the live compass need calibration?', a: 'Yes — wave your phone in a figure-8 if the needle drifts. Metal objects and cases with magnets disturb phone compasses.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Qibla Finder', path: '/tools/qibla/' },
+];
+const CITIES = [
+  { n: 'Makkah', lat: 21.3891, lng: 39.8579 },
+  { n: 'Madinah', lat: 24.5247, lng: 39.5692 },
+  { n: 'Karachi', lat: 24.8607, lng: 67.0011 },
+  { n: 'Lahore', lat: 31.5204, lng: 74.3587 },
+  { n: 'Delhi', lat: 28.6139, lng: 77.209 },
+  { n: 'Mumbai', lat: 19.076, lng: 72.8777 },
+  { n: 'Dhaka', lat: 23.8103, lng: 90.4125 },
+  { n: 'Jakarta', lat: -6.2088, lng: 106.8456 },
+  { n: 'London', lat: 51.5074, lng: -0.1278 },
+  { n: 'New York', lat: 40.7128, lng: -74.006 },
+  { n: 'Toronto', lat: 43.6532, lng: -79.3832 },
+  { n: 'Dubai', lat: 25.2048, lng: 55.2708 },
+];
+---
+<BaseLayout title="Qibla Finder — Accurate Qibla Direction & Compass" description="Free Qibla finder: get your exact Qibla direction from GPS or city with great-circle bearing to the Kaaba, live compass needle and degrees from North." keywords="qibla finder, qibla direction, qibla compass, qibla locator, kaaba direction, qibla online, qibla for namaz" locale={locale} canonicalPath="/tools/qibla/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Qibla Finder" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-qibla>
+    <div class="hn-card hn-card-pad text-center">
+      <p class="hn-block-label">Qibla direction</p>
+      <div class="relative mx-auto mt-2" style="width:150px;height:150px">
+        <div class="absolute inset-0 rounded-full border-2" style="border-color:var(--hn-border)"></div>
+        <div class="absolute inset-0 grid place-items-center font-extrabold text-xs" style="color:var(--hn-muted)">N</div>
+        <div data-q-needle class="absolute inset-0 transition-transform" style="transition-duration:200ms">
+          <div class="mx-auto" style="width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:60px solid var(--hn-primary);margin-top:10px"></div>
+        </div>
+        <div class="absolute rounded-full" style="width:14px;height:14px;left:68px;top:68px;background:var(--hn-primary)"></div>
+      </div>
+      <p class="font-extrabold text-[24px] mt-2" data-q-deg>—</p>
+      <p class="text-[13px] font-bold" style="color:var(--hn-muted)" data-q-place>Pick a city or use GPS</p>
+      <p class="text-[12.5px] mt-1 font-bold" style="color:var(--hn-muted)" data-q-live></p>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad grid gap-3">
+      <button data-q-gps class="hn-btn hn-btn-primary w-full !min-h-[52px]">Use my location (GPS)</button>
+      <div class="grid grid-cols-3 gap-2">
+        {CITIES.map((c) => (
+          <button data-q-city={c.n} data-q-lat={c.lat} data-q-lng={c.lng} class="hn-card hn-card-pad text-center text-[13px] font-extrabold transition">{c.n}</button>
+        ))}
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="block"><span class="hn-block-label">Latitude</span><input type="number" step="any" data-q-lat class="hn-input mt-1 w-full" placeholder="24.86" /></label>
+        <label class="block"><span class="hn-block-label">Longitude</span><input type="number" step="any" data-q-lng class="hn-input mt-1 w-full" placeholder="67.00" /></label>
+      </div>
+      <button data-q-manual class="hn-btn hn-btn-secondary w-full !min-h-[48px] text-sm">Calculate from coordinates</button>
+      <button data-q-compass class="hn-btn hn-btn-secondary w-full !min-h-[48px] text-sm">Enable live compass</button>
+    </div>
+
+    <p class="mt-3 text-[12.5px] leading-5 text-center" style="color:var(--hn-muted)">Great-circle bearing to the Kaaba (21.4225°N, 39.8262°E) · confirm with your local mosque.</p>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-qibla]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+      const $ = (s) => root.querySelector(s);
+      let bearing = null, heading = null;
+      const qibla = (lat, lng) => {
+        const p1 = lat * D2R, p2 = 21.4225 * D2R, dl = (39.8262 - lng) * D2R;
+        const y = Math.sin(dl);
+        const x = Math.cos(p1) * Math.tan(p2) - Math.sin(p1) * Math.cos(dl);
+        return (Math.atan2(y, x) * R2D + 360) % 360;
+      };
+      const paint = () => {
+        if (bearing === null) return;
+        $('[data-q-deg]').textContent = `${Math.round(bearing)}° from North`;
+        const rot = heading === null ? bearing : bearing - heading;
+        $('[data-q-needle]').style.transform = `rotate(${rot}deg)`;
+        $('[data-q-live]').textContent = heading === null ? 'Static bearing — hold phone flat with top pointing North, needle shows Qibla.' : 'Live compass active — needle points at the Qibla.';
+      };
+      const setLoc = (lat, lng, label) => {
+        bearing = qibla(Number(lat), Number(lng));
+        $('[data-q-place]').textContent = label;
+        paint();
+      };
+      $('[data-q-gps]').addEventListener('click', () => {
+        if (!navigator.geolocation) { $('[data-q-place]').textContent = 'GPS not available — pick a city.'; return; }
+        $('[data-q-place]').textContent = 'Locating…';
+        navigator.geolocation.getCurrentPosition(
+          (p) => setLoc(p.coords.latitude, p.coords.longitude, `${p.coords.latitude.toFixed(2)}°, ${p.coords.longitude.toFixed(2)}°`),
+          () => { $('[data-q-place]').textContent = 'Location blocked — pick a city below.'; },
+          { timeout: 10000 }
+        );
+      });
+      root.querySelectorAll('[data-q-city]').forEach((b) => b.addEventListener('click', () => {
+        root.querySelectorAll('[data-q-city]').forEach((x) => x.classList.remove('hn-btn-primary'));
+        b.classList.add('hn-btn-primary');
+        setLoc(b.dataset.qLat, b.dataset.qLng, b.dataset.qCity);
+      }));
+      $('[data-q-manual]').addEventListener('click', () => {
+        const lat = $('[data-q-lat]').value, lng = $('[data-q-lng]').value;
+        if (lat === '' || lng === '') return;
+        setLoc(lat, lng, `${Number(lat).toFixed(2)}°, ${Number(lng).toFixed(2)}°`);
+      });
+      $('[data-q-compass]').addEventListener('click', async () => {
+        const onHead = (e) => {
+          const h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? 360 - e.alpha : null);
+          if (h !== null && !Number.isNaN(h)) { heading = h; paint(); }
+        };
+        try {
+          if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
+            const r = await DeviceOrientationEvent.requestPermission();
+            if (r !== 'granted') return;
+          }
+          window.addEventListener('deviceorientationabsolute', onHead, true);
+          window.addEventListener('deviceorientation', onHead, true);
+        } catch {}
+      });
+    })();
+  </script>
+</BaseLayout>

@@ -177,7 +177,7 @@ export function toolIndexItems(locale: string): IndexItem[] {
   const items: IndexItem[] = [
     {
       title: 'Islamic Finance Tools — all calculators',
-      description: 'All 20 free tools: zakat, gold, silver, fitr, fidyah, kaffarah, mahr, nafaqah, khums calculators with evidence.',
+      description: `All ${(TOOLS as any[]).length} free tools: zakat, gold, silver, fitr, fidyah, kaffarah, mahr, nafaqah, khums, qurbani calculators with evidence.`,
       category: 'tools',
       url: `${prefix}/tools/`,
       tags: ['tools', 'calculators', 'finance', 'zakat calculator', 'all tools'],
@@ -205,6 +205,38 @@ export function toolIndexItems(locale: string): IndexItem[] {
       category: 'tools',
       url: `${prefix}/tools/prayer-times/`,
       tags: ['prayer times', 'namaz timings', 'salah times', 'fajr', 'dhuhr', 'zuhr', 'asr', 'maghrib', 'isha', 'qibla', 'qibla finder', 'qibla direction', 'hijri date', 'islamic date today', 'sehri time', 'iftar time', 'azan time', 'athan'],
+      locale,
+    },
+    {
+      title: 'Qibla Finder — Accurate Qibla Direction & Compass',
+      description: 'Exact Qibla direction from GPS or city with great-circle bearing to the Kaaba and live compass needle.',
+      category: 'tools',
+      url: `${prefix}/tools/qibla/`,
+      tags: ['qibla', 'qibla finder', 'qibla direction', 'qibla compass', 'qibla locator', 'kaaba direction', 'qibla online', 'qibla for namaz', 'which direction to pray'],
+      locale,
+    },
+    {
+      title: 'Prayer Tracker — Daily Salah Log & Streaks',
+      description: 'Log Fajr, Dhuhr, Asr, Maghrib and Isha daily, build your streak and review the last 7 days. Saved on your device.',
+      category: 'tools',
+      url: `${prefix}/tools/prayer-tracker/`,
+      tags: ['prayer tracker', 'salah tracker', 'namaz tracker', 'prayer streak', 'fard log', 'daily prayer log', 'prayer checklist'],
+      locale,
+    },
+    {
+      title: 'Quran Khatm Planner — Daily Pages & Juz Schedule',
+      description: 'Enter start and target dates to get daily pages, juz portions and per-prayer splits for completing the Quran.',
+      category: 'tools',
+      url: `${prefix}/tools/khatm-planner/`,
+      tags: ['khatm planner', 'quran completion plan', 'daily juz', 'khatm schedule', '30 day quran plan', 'how to finish quran in ramadan', 'quran pages per day'],
+      locale,
+    },
+    {
+      title: 'Hijri Date Converter — Gregorian to Islamic Date',
+      description: 'Convert any Gregorian date to the Hijri date with Umm al-Qura and civil calendars, plus today’s Hijri date.',
+      category: 'tools',
+      url: `${prefix}/tools/hijri-converter/`,
+      tags: ['hijri date', 'islamic date today', 'hijri converter', 'gregorian to hijri', 'islamic calendar', 'chand ki tareekh', 'aaj hijri tareekh'],
       locale,
     },
   ];

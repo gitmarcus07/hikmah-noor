@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict } from '../../i18n/utils';
+
+const locale = 'en';
+const dict = getDict(locale);
+const faq = [
+  { q: 'Is the converted Hijri date exact?', a: 'It uses the tabular Islamic calendar (Umm al-Qura) built into your browser — correct most days, but moon sighting can shift Ramadan and Eid by a day. Follow local announcements for fasting and Eid.' },
+  { q: 'Why do two Hijri dates sometimes differ?', a: 'The Umm al-Qura (Saudi) and civil tabular calendars differ by a day in some months, and actual moon sighting differs by horizon. This converter shows both so you can compare.' },
+  { q: 'How is Ramadan dated?', a: 'By the sighted crescent as announced by your country’s moon committee — see our moon-sighting guide. Converters estimate; committees decide.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Hijri Converter', path: '/tools/hijri-converter/' },
+];
+const MONTHS = ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Ula', 'Jumada al-Akhirah', 'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhul-Qadah', 'Dhul-Hijjah'];
+---
+<BaseLayout title="Hijri Date Converter — Gregorian to Islamic Date Today" description="Free Hijri date converter: convert any Gregorian date to the Islamic (Hijri) date with Umm al-Qura and civil calendars, plus today's Hijri date and month guide." keywords="hijri date today, islamic date today, hijri converter, gregorian to hijri, islamic calendar date, chand ki tareekh" locale={locale} canonicalPath="/tools/hijri-converter/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Hijri Converter" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-hijri>
+    <div class="hn-card hn-card-pad text-center">
+      <p class="hn-block-label">Today’s Hijri date</p>
+      <p class="font-extrabold text-[22px] leading-8" data-h-today>—</p>
+      <p class="text-[13px] font-bold mt-1" style="color:var(--hn-muted)" data-h-today-civil></p>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad grid gap-3">
+      <p class="hn-block-label">Convert a date</p>
+      <label class="block">
+        <span class="hn-block-label">Gregorian date</span>
+        <input type="date" data-h-in class="hn-input mt-1 w-full" />
+      </label>
+      <button data-h-go class="hn-btn hn-btn-primary w-full !min-h-[52px]">Convert to Hijri</button>
+      <div class="rounded-2xl p-4 hidden" style="background:var(--hn-primary-soft)" data-h-out>
+        <p class="font-extrabold text-[20px] leading-8" data-h-uq></p>
+        <p class="text-[14px] font-bold mt-1" style="color:var(--hn-muted)" data-h-civ></p>
+      </div>
+      <p class="text-[12.5px] leading-5" style="color:var(--hn-muted)">Estimates for planning. Ramadan, Shawwal and Dhul-Hijjah follow your moon committee’s sighting — <a href="/learn/duties/moon-sighting-hilal/" class="font-bold" style="color:var(--hn-primary)">moon-sighting guide →</a></p>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad">
+      <p class="hn-block-label">Hijri months in order</p>
+      <ol class="mt-2 grid grid-cols-2 gap-1.5">
+        {MONTHS.map((m, i) => <li class="rounded-xl px-3 py-2.5 text-[14px] font-bold" style="background:var(--hn-primary-soft)"><span style="color:var(--hn-primary)">{i + 1}.</span> {m}</li>)}
+      </ol>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-hijri]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const fmt = (d, cal) => {
+        try {
+          return new Intl.DateTimeFormat('en-SA-u-ca-' + cal, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+        } catch { return '—'; }
+      };
+      const now = new Date();
+      $('[data-h-today]').textContent = fmt(now, 'islamic-umalqura');
+      $('[data-h-today-civil]').textContent = 'Civil tabular: ' + fmt(now, 'islamic-civil');
+      $('[data-h-in]').value = now.toISOString().slice(0, 10);
+      $('[data-h-go]').addEventListener('click', () => {
+        const v = $('[data-h-in]').value;
+        if (!v) return;
+        const d = new Date(v + 'T12:00:00Z');
+        $('[data-h-uq]').textContent = fmt(d, 'islamic-umalqura');
+        $('[data-h-civ]').textContent = 'Civil tabular: ' + fmt(d, 'islamic-civil');
+        $('[data-h-out]').classList.remove('hidden');
+      });
+    })();
+  </script>
+</BaseLayout>

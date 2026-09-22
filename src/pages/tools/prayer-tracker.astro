@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict } from '../../i18n/utils';
+
+const locale = 'en';
+const dict = getDict(locale);
+const faq = [
+  { q: 'How does the prayer tracker work?', a: 'Tap each prayer after praying it. Today’s five are saved on this device, and every all-five day extends your streak. Missed prayers break the streak — make them up as qada and keep going.' },
+  { q: 'Is my prayer log sent anywhere?', a: 'No — everything stays in your browser (hn.prayers.v1). Clearing browser data resets it. Nothing leaves your device.' },
+  { q: 'What counts for the streak?', a: 'All five fard prayers logged for the day: Fajr, Dhuhr, Asr, Maghrib and Isha. Sunnah and nafl are bonus — the streak measures the obligatory five.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Prayer Tracker', path: '/tools/prayer-tracker/' },
+];
+---
+<BaseLayout title="Prayer Tracker — Daily Salah Log & Streaks" description="Free prayer tracker: log Fajr, Dhuhr, Asr, Maghrib and Isha daily, build your streak and review the last 7 days. Saved on your device, no account needed." keywords="prayer tracker, salah tracker, namaz tracker, prayer streak, fard log, daily prayer log" locale={locale} canonicalPath="/tools/prayer-tracker/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Prayer Tracker" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-ptrack>
+    <p class="text-center text-[15px] font-bold" style="color:var(--hn-muted)">Tap each prayer after praying it.</p>
+
+    <div class="mt-4 hn-card hn-card-pad text-center">
+      <p class="hn-block-label">Current streak</p>
+      <p class="font-extrabold" style="font-size:44px;color:var(--hn-ink)"><span data-pt-streak>0</span> <span class="text-lg">days</span></p>
+      <p class="text-[13px] font-bold" style="color:var(--hn-muted)">All five, every day — that is the game.</p>
+    </div>
+
+    <div class="mt-3 grid gap-2" data-pt-prayers></div>
+
+    <div class="mt-3 hn-card hn-card-pad">
+      <p class="hn-block-label">Last 7 days</p>
+      <div class="mt-2 flex gap-1.5" data-pt-week></div>
+      <div class="mt-3 flex gap-2">
+        <button data-pt-reset-day class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm">Clear today</button>
+        <a href="/learn/salah/how-to-pray-namaz/" class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm text-center">Prayer guide</a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-ptrack]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.prayers.v1';
+      const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+      const todayUTC = () => new Date().toISOString().slice(0, 10);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const dayKey = (d) => d.toISOString().slice(0, 10);
+      const $ = (s) => root.querySelector(s);
+      const isDone = (s, k) => !!(s.days && s.days[k] && PRAYERS.every((p) => s.days[k][p]));
+      const streak = (s) => {
+        let n = 0; const d = new Date();
+        if (!isDone(s, dayKey(d))) d.setUTCDate(d.getUTCDate() - 1);
+        while (isDone(s, dayKey(d))) { n += 1; d.setUTCDate(d.getUTCDate() - 1); }
+        return n;
+      };
+      const toggle = (p) => {
+        const s = load(); const k = todayUTC();
+        s.days = s.days || {}; s.days[k] = s.days[k] || {};
+        s.days[k][p] = !s.days[k][p]; save(s); paint();
+      };
+      const paint = () => {
+        const s = load(); const k = todayUTC();
+        const box = $('[data-pt-prayers]');
+        box.innerHTML = PRAYERS.map((p) => {
+          const on = !!(s.days && s.days[k] && s.days[k][p]);
+          return `<button data-pt-p="${p}" aria-pressed="${on}" class="hn-card hn-card-pad flex items-center gap-3 text-start transition ${on ? 'hn-btn-primary' : ''}">
+            <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px] font-extrabold" style="background:var(--hn-primary-soft);color:var(--hn-primary)">${on ? '✓' : PRAYERS.indexOf(p) + 1}</span>
+            <span class="font-extrabold text-[16px]">${p}</span>
+            <span class="ms-auto text-[13px] font-bold" style="color:var(--hn-muted)">${on ? 'Done' : 'Tap when prayed'}</span>
+          </button>`;
+        }).join('');
+        box.querySelectorAll('[data-pt-p]').forEach((b) => b.addEventListener('click', () => toggle(b.dataset.ptP)));
+        $('[data-pt-streak]').textContent = streak(s);
+        const wk = $('[data-pt-week]'); wk.innerHTML = '';
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(); d.setUTCDate(d.getUTCDate() - i);
+          const done = isDone(s, dayKey(d));
+          const dot = document.createElement('div');
+          dot.className = 'flex-1 rounded-xl grid place-items-center font-extrabold text-[12px]';
+          dot.style.cssText = `min-height:44px;background:${done ? 'var(--hn-primary)' : 'var(--hn-border)'};color:${done ? '#fff' : 'var(--hn-muted)'}`;
+          dot.textContent = 'SMTWTFS'[d.getUTCDay()] === 'S' ? 'Su' : 'SMTWTFS'[d.getUTCDay()];
+          dot.title = `${dayKey(d)} — ${done ? 'all five' : 'incomplete'}`;
+          wk.appendChild(dot);
+        }
+      };
+      $('[data-pt-reset-day]').addEventListener('click', () => {
+        const s = load(); if (s.days) delete s.days[todayUTC()]; save(s); paint();
+      });
+      paint();
+    })();
+  </script>
+</BaseLayout>

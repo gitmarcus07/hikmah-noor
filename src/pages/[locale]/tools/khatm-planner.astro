@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales, getDict, localizedPath } from '../../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const dict = getDict(locale);
+const L = (p: string) => localizedPath(locale, p);
+const faq = [
+  { q: 'How many pages is one juz?', a: 'About 20 Madani-mushaf pages. The planner divides your days into equal page portions with a catch-up buffer built in.' },
+  { q: 'What if I fall behind?', a: 'Resume where you stopped — never restart. The planner shows the revised daily portion when you enter pages already read.' },
+  { q: 'Is my plan saved?', a: 'Yes — on this device only (hn.khatm.v1). Nothing is sent to servers.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Khatm Planner', path: '/tools/khatm-planner/' },
+];
+---
+<BaseLayout title="Quran Khatm Planner — Daily Pages & Juz Schedule" description="Free Quran khatm planner: enter start and target dates to get daily pages, juz portions and per-prayer splits for completing the Quran. Saved on your device." keywords="quran khatm planner, khatm schedule, quran completion plan, daily juz calculator, ramadan khatm plan, 30 day quran plan" locale={locale} canonicalPath="/tools/khatm-planner/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Khatm Planner" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-khatm>
+    <p class="text-center text-[15px] font-bold" style="color:var(--hn-muted)">Start date → target date → daily portion.</p>
+
+    <div class="mt-4 hn-card hn-card-pad grid gap-3">
+      <label class="block">
+        <span class="hn-block-label">Start date</span>
+        <input type="date" data-k-start class="hn-input mt-1 w-full" />
+      </label>
+      <label class="block">
+        <span class="hn-block-label">Target completion date</span>
+        <input type="date" data-k-end class="hn-input mt-1 w-full" />
+      </label>
+      <label class="block">
+        <span class="hn-block-label">Pages already read (0–604)</span>
+        <input type="number" data-k-done min="0" max="604" value="0" class="hn-input mt-1 w-full" />
+      </label>
+      <div class="flex gap-2">
+        <button data-k-preset="30" class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm">30-day plan</button>
+        <button data-k-preset="60" class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm">60-day plan</button>
+      </div>
+      <button data-k-go class="hn-btn hn-btn-primary w-full !min-h-[52px]">Build my plan</button>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad hidden" data-k-out>
+      <p class="hn-block-label">Your daily portion</p>
+      <p class="font-extrabold" style="font-size:40px;color:var(--hn-ink)"><span data-k-pages>0</span> <span class="text-base">pages / day</span></p>
+      <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-2xl p-3" style="background:var(--hn-primary-soft)"><p class="font-extrabold text-[20px]" data-k-juz>0</p><p class="text-[12px] font-bold" style="color:var(--hn-muted)">juz / day</p></div>
+        <div class="rounded-2xl p-3" style="background:var(--hn-primary-soft)"><p class="font-extrabold text-[20px]" data-k-prayer>0</p><p class="text-[12px] font-bold" style="color:var(--hn-muted)">pages / prayer</p></div>
+        <div class="rounded-2xl p-3" style="background:var(--hn-primary-soft)"><p class="font-extrabold text-[20px]" data-k-days>0</p><p class="text-[12px] font-bold" style="color:var(--hn-muted)">days total</p></div>
+      </div>
+      <p class="mt-3 text-[13px] leading-6 font-semibold" style="color:var(--hn-muted)" data-k-note></p>
+      <a href={L('/learn/duties/quran-khatm-ramadan/')} class="hn-btn hn-btn-secondary w-full !min-h-[48px] text-sm text-center mt-3">Khatm method guide</a>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-khatm]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.khatm.v1';
+      const $ = (s) => root.querySelector(s);
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const iso = (d) => d.toISOString().slice(0, 10);
+      const go = (presetDays) => {
+        let s, e;
+        const now = new Date();
+        if (presetDays) {
+          s = new Date(now); e = new Date(now); e.setDate(e.getDate() + presetDays - 1);
+          $('[data-k-start]').value = iso(s); $('[data-k-end]').value = iso(e);
+        } else {
+          if (!$('[data-k-start]').value || !$('[data-k-end]').value) return;
+          s = new Date($('[data-k-start]').value + 'T00:00:00');
+          e = new Date($('[data-k-end]').value + 'T00:00:00');
+        }
+        const days = Math.max(1, Math.round((e - s) / 864e5) + 1);
+        const done = Math.min(604, Math.max(0, Number($('[data-k-done]').value) || 0));
+        const left = Math.max(0, 604 - done);
+        const perDay = Math.ceil(left / days);
+        $('[data-k-pages]').textContent = perDay;
+        $('[data-k-juz]').textContent = (perDay / 20).toFixed(1);
+        $('[data-k-prayer]').textContent = Math.ceil(perDay / 5);
+        $('[data-k-days]').textContent = days;
+        $('[data-k-note]').textContent = `${left} pages left over ${days} days. Read ${Math.ceil(perDay / 5)} pages after each of the 5 prayers. Fridays are lighter by design — use them as catch-up.`;
+        $('[data-k-out]').classList.remove('hidden');
+        save({ start: iso(s), end: iso(e), done });
+      };
+      const prev = load();
+      if (prev.start) $('[data-k-start]').value = prev.start;
+      else $('[data-k-start]').value = iso(new Date());
+      if (prev.end) $('[data-k-end]').value = prev.end;
+      if (prev.done) $('[data-k-done]').value = prev.done;
+      $('[data-k-go]').addEventListener('click', () => go(0));
+      root.querySelectorAll('[data-k-preset]').forEach((b) => b.addEventListener('click', () => go(Number(b.dataset.kPreset))));
+      if (prev.start && prev.end) go(0);
+    })();
+  </script>
+</BaseLayout>
