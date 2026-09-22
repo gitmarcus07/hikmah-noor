@@ -27,7 +27,7 @@ const crumbs = [
   <script is:inline define:vars={{ locale }}>
     (() => {
       const KEY = 'hn.bookmarks.v1';
-      const KIND = { dua: 'Duas', waqiah: 'Stories', prophet: 'Prophets', verse: 'Verses', hadees: 'Hadees', seerah: 'Seerah', kalima: 'Kalimas', meaning: 'Meanings' };
+      const KIND = { dua: 'Duas', waqiah: 'Stories', prophet: 'Prophets', sahaba: 'Sahaba', women: 'Women', verse: 'Verses', hadees: 'Hadees', seerah: 'Seerah', kalima: 'Kalimas', meaning: 'Meanings' };
       const L = (p) => (locale === 'en' ? p : `/${locale}${p}`);
       const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } };

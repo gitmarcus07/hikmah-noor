@@ -1,0 +1,79 @@
+---
+/* Women hub: 12 noble figures -> per-figure SEO detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import WomenArt from './WomenArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { WOMEN, womenByEra } from '../data/women';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Women in Islam — Lives of 12 Noble Figures (${WOMEN.length} stories)`;
+const description = `Stories of Khadija, Aisha, Fatima, Maryam, Asiya and more — faith, courage and scholarship. Each figure has its own page with events, lessons and references.`;
+const keywords = 'women in islam, khadija aisha fatima stories, maryam asiya, muslim women scholars, sahabiyat stories, ladies in islam';
+const faq = [
+  { q: 'Who are covered here?', a: '12 figures: Maryam and Asiya before Islam, Khadija and the Makkan generation, and the Madinan household and scholars. Open any figure for the full story.' },
+  { q: 'Where do these stories come from?', a: 'The Quran for Maryam and Asiya, and the received seerah and Sahih collections for the rest — named qualitatively. Virtues and events only; consult scholars for deeper rulings.' },
+  { q: 'Why is Karbala not covered?', a: 'By scope: this hub covers lives through the prophetic era. Later history belongs to other books.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Women', path: '/women/' },
+];
+const eras = ['Before Islam', 'Makkah', 'Madinah'] as const;
+const eraTitle: Record<string, string> = {
+  'Before Islam': 'Before Islam — Chosen Women',
+  'Makkah': 'Makkah — First Believers',
+  'Madinah': 'Madinah — Household & Scholars',
+};
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/women/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{WOMEN.length} figures</span>
+        <span class="hn-badge">Quran + Seerah sourced</span>
+        <span class="hn-badge">Virtues & events</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Women in Islam</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Faith that steadied revelation, courage that converted caliphs, scholarship that taught generations. Tap any figure for her own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search — e.g. khadija, aisha, maryam…" aria-label="Search women" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+    </div>
+
+    {eras.map((era) => {
+      const list = womenByEra(era);
+      return (
+      <div class="mt-8">
+        <SectionHeader eyebrow={era} title={eraTitle[era]} />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((w) => (
+            <a href={L(`/women/${w.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+              <span class="block overflow-hidden"><WomenArt motif={w.motif} arabic={w.arabic} prophet={w.name} accent={w.accent} /></span>
+              <span class="block hn-card-pad">
+                <span class="flex items-center gap-1.5">
+                  <span class="hn-verse-num shrink-0">{w.order}</span>
+                  <span class="hn-badge hn-badge-primary">{w.name}</span>
+                </span>
+                <span class="font-extrabold block text-[17px] leading-7 mt-2">{w.title}</span>
+                <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{w.summary}</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+      );
+    })}
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

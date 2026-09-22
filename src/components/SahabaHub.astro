@@ -1,0 +1,90 @@
+---
+/* Sahaba hub: 24 popular companions -> per-companion SEO detail pages. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import SahabaArt from './SahabaArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { SAHABA, sahabaByEra } from '../data/sahaba';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Sahaba Stories — Lives of the Prophet’s ﷺ Companions (${SAHABA.length} companions)`;
+const description = `All ${SAHABA.length} companion stories — Abu Bakr, Umar, Uthman, Ali, Hamza, Bilal, Khalid and more — with events, lessons and references. Each companion has its own page.`;
+const keywords = 'sahaba stories, companions of prophet, abu bakr umar uthman ali, khulafa rashidun, bilal hamza khalid, sahaba life lessons, sahabi stories';
+const faq = [
+  { q: 'Who are covered here?', a: '24 popular companions in order of prominence: the four caliphs, the ten promised Paradise, and beloved figures like Hamza, Bilal, Salman, Abu Hurairah and Khalid. Open any companion for the full story.' },
+  { q: 'Where do these stories come from?', a: 'The received seerah (Ibn Hisham/Ibn Ishaq tradition) and Sahih collections, named qualitatively. Lessons are drawn plainly; consult scholars for deeper rulings.' },
+  { q: 'How is this different from Seerat?', a: 'Seerat tells the Prophet’s ﷺ own life in 16 chapters. The Sahaba hub tells his companions’ lives — with cross-links both ways.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Sahaba', path: '/sahaba/' },
+];
+const makkah = sahabaByEra('Makkah');
+const madinah = sahabaByEra('Madinah');
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/sahaba/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{SAHABA.length} companions</span>
+        <span class="hn-badge">Makkah + Madinah eras</span>
+        <span class="hn-badge">Seerah-based narratives</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Sahaba — The Companions</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Lives of the men around the Prophet ﷺ — truthfulness, courage, generosity and scholarship. Tap any companion for his own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search companions — e.g. umar, bilal, khalid…" aria-label="Search companions" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For his life, see the <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">16-chapter Seerat →</a></p>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Era 1 — Makkah" title="The First Rank" sub="First believers, cave and shield — the Makkan generation." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {makkah.map((s) => (
+          <a href={L(`/sahaba/${s.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <span class="block overflow-hidden"><SahabaArt motif={s.motif} arabic={s.arabic} prophet={s.name} accent={s.accent} /></span>
+            <span class="block hn-card-pad">
+              <span class="flex items-center gap-1.5">
+                <span class="hn-verse-num shrink-0">{s.order}</span>
+                <span class="hn-badge hn-badge-primary">{s.name}</span>
+              </span>
+              <span class="font-extrabold block text-[17px] leading-7 mt-2">{s.title}</span>
+              <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{s.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Era 2 — Madinah" title="Scholars, Scribes & Commanders" sub="The Madinan generation — preservation, counsel and conquests." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {madinah.map((s) => (
+          <a href={L(`/sahaba/${s.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <span class="block overflow-hidden"><SahabaArt motif={s.motif} arabic={s.arabic} prophet={s.name} accent={s.accent} /></span>
+            <span class="block hn-card-pad">
+              <span class="flex items-center gap-1.5">
+                <span class="hn-verse-num shrink-0">{s.order}</span>
+                <span class="hn-badge hn-badge-primary">{s.name}</span>
+              </span>
+              <span class="font-extrabold block text-[17px] leading-7 mt-2">{s.title}</span>
+              <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{s.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import SahabaDetail from '../../components/SahabaDetail.astro';
+import SiteArt from '../../components/SiteArt.astro';
+import { artFor } from '../../lib/art';
+import { getCollection, render } from 'astro:content';
+import { getDict, localizedPath } from '../../i18n/utils';
+import { SAHABA, sahabiBySlug } from '../../data/sahaba';
+const locale = 'en';
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  const all = await getCollection('articles', ({ data }) => !data.draft && data.locale === 'en' && data.category === 'sahaba');
+  for (const entry of all) {
+    const slug = entry.id.split('/').pop()!.replace(/\.mdx?$/, '');
+    paths.push({ params: { slug }, props: { entry } });
+  }
+  for (const s of SAHABA) paths.push({ params: { slug: s.slug }, props: { sahabiSlug: s.slug } });
+  return paths;
+}
+const { slug } = Astro.params;
+const dict = getDict(locale);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const entry = (Astro.props as any).entry;
+const sahabi = (Astro.props as any).sahabiSlug ? sahabiBySlug((Astro.props as any).sahabiSlug) : undefined;
+const rendered = entry ? await render(entry) : null;
+const Content = rendered?.Content;
+const allSameLocale = await getCollection('articles', ({ data }) => !data.draft && data.locale === 'en');
+const related = entry ? allSameLocale.filter((e) => e.id !== entry.id && e.data.category === entry.data.category).slice(0, 3) : [];
+const popular = allSameLocale.filter((e) => !entry || e.id !== entry.id).sort((a, b) => +b.data.pubDate - +a.data.pubDate).slice(0, 4);
+const pub = entry ? new Date(entry.data.pubDate).toLocaleDateString() : '';
+---
+{sahabi ? (
+<SahabaDetail sahabi={sahabi} locale={locale} />
+) : (
+<BaseLayout title={entry.data.title} description={entry.data.description} locale={locale} keywords={entry.data.keywords} type="article" pubDate={new Date(entry.data.pubDate).toISOString()} faq={entry.data.faq} canonicalPath={`/${entry.data.category}/${slug}/`}>
+  <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+    <article class="min-w-0">
+      <nav class="text-xs text-ink-500 mb-3">
+        <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
+        <a href={localizedPath(locale, `/${entry.data.category}/`)} class="capitalize hover:text-brand-300"> {entry.data.category}</a> /
+        <span> {entry.data.title.slice(0, 40)}...</span>
+      </nav>
+      <span class="text-[11px] font-bold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">{entry.data.category}</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 mb-2 text-white">{entry.data.title}</h1>
+      <p class="text-sm text-ink-500 mb-4">{dict.article.by} <b>{entry.data.author}</b> • {pub}</p>
+      <div class="rounded-2xl border border-white/10 overflow-hidden mb-2"><SiteArt name={artFor(entry.data.image, entry.data.category)} title={entry.data.title} /></div>
+      <div class="bg-night-850 border border-white/10 rounded-2xl p-5 md:p-7 prose-islamic">
+        <Content />
+      </div>
+    </article>
+  </div>
+</BaseLayout>
+)}

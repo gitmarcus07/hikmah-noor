@@ -1,0 +1,157 @@
+---
+/* Women artwork — own branding for the /women/ hub.
+ * Same premium inline-SVG language, distinct plum-night background,
+ * rose-gold accents, per-figure motifs. Dignified, non-figurative. */
+interface Props {
+  motif: string;
+  arabic: string;
+  prophet: string;
+  accent?: string;
+}
+const { motif, arabic, prophet, accent = '#E3B94E' } = Astro.props;
+const label = `Woman of Islam ${prophet}`;
+const uid = `${(prophet ?? motif ?? 'art').toLowerCase().replace(/[^a-z0-9]+/g, '')}-${String(arabic ?? '').length}-${String(prophet ?? '').length}`;
+---
+<svg viewBox="0 0 800 450" class="w-full h-auto block" role="img" aria-label={label} preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id={`wmbg-${uid}`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22102B" />
+      <stop offset="0.55" stop-color="#170A1E" />
+      <stop offset="1" stop-color="#0C0510" />
+    </linearGradient>
+    <radialGradient id={`wmglow-${uid}`} cx="0.5" cy="0.4" r="0.55">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id={`wmvig-${uid}`} cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.6" stop-color="#000000" stop-opacity="0" />
+      <stop offset="1" stop-color="#000000" stop-opacity="0.45" />
+    </radialGradient>
+    <pattern id={`wmpat-${uid}`} width="96" height="96" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
+      <g fill="none" stroke="#D4AF37" stroke-opacity="0.15" stroke-width="1.2">
+        <g transform="translate(48,48)">
+          <rect x="-15" y="-15" width="30" height="30" />
+          <rect x="-15" y="-15" width="30" height="30" transform="rotate(45)" />
+          <circle r="2.2" fill="#D4AF37" fill-opacity="0.5" stroke="none" />
+        </g>
+      </g>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="450" fill={`url(#wmbg-${uid})`} />
+  <rect width="800" height="450" fill={`url(#wmpat-${uid})`} />
+  <rect width="800" height="450" fill={`url(#wmglow-${uid})`} />
+
+  <g fill="none" stroke="#D4AF37" stroke-opacity="0.55" stroke-width="1.6">
+    <g transform="translate(40,40)"><rect x="-9" y="-9" width="18" height="18" /><rect x="-9" y="-9" width="18" height="18" transform="rotate(45)" /></g>
+    <g transform="translate(760,40)"><rect x="-9" y="-9" width="18" height="18" /><rect x="-9" y="-9" width="18" height="18" transform="rotate(45)" /></g>
+    <g transform="translate(40,410)"><rect x="-9" y="-9" width="18" height="18" /><rect x="-9" y="-9" width="18" height="18" transform="rotate(45)" /></g>
+    <g transform="translate(760,410)"><rect x="-9" y="-9" width="18" height="18" /><rect x="-9" y="-9" width="18" height="18" transform="rotate(45)" /></g>
+  </g>
+
+  <g fill="#F7E08B">
+    <circle cx="150" cy="130" r="2.4" opacity="0.6" />
+    <circle cx="650" cy="120" r="2" opacity="0.5" />
+    <circle cx="120" cy="330" r="2" opacity="0.5" />
+    <circle cx="680" cy="340" r="2.4" opacity="0.6" />
+  </g>
+
+  {/* figure motif */}
+  <g transform="translate(350,36)" fill="none" stroke={accent} stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    {motif === 'stream' && (
+      <g>
+        <path d="M8 44 Q20 36 32 44 T56 44 T80 44" />
+        <path d="M8 62 Q20 54 32 62 T56 62 T80 62" stroke-width="4" />
+        <path d="M45 12 C50 22 54 26 54 32 A9 9 0 1 1 36 32 C36 26 40 22 45 12 Z" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'crown' && (
+      <g>
+        <polygon points="22,66 22,32 34,44 45,26 56,44 68,32 68,66" />
+        <path d="M22 72 H68" />
+        <circle cx="22" cy="27" r="3.4" fill={accent} stroke="none" />
+        <circle cx="45" cy="21" r="3.4" fill={accent} stroke="none" />
+        <circle cx="68" cy="27" r="3.4" fill={accent} stroke="none" />
+      </g>
+    )}
+    {motif === 'dawn' && (
+      <g>
+        <path d="M10 62 H80" stroke-width="4" />
+        <path d="M28 62 A17 17 0 0 1 62 62" />
+        <path d="M45 22 V32 M28 30 L34 38 M62 30 L56 38" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'stake' && (
+      <g>
+        <path d="M28 14 V78 M62 14 V78" stroke-width="4" />
+        <path d="M28 40 C40 34 50 34 62 40" stroke-width="3" />
+        <path d="M20 78 H36 M54 78 H70" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'manuscript' && (
+      <g>
+        <path d="M45 30 C35 24 25 24 15 28 V66 C25 62 35 62 45 68 C55 62 65 62 75 66 V28 C65 24 55 24 45 30 Z" />
+        <path d="M45 30 V68" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'vessel' && (
+      <g>
+        <path d="M38 30 H52 V38 C58 44 60 52 56 62 C53 70 49 74 45 74 C41 74 37 70 34 62 C30 52 32 44 38 38 Z" />
+        <path d="M38 44 C28 44 26 52 30 58" stroke-width="3" />
+        <path d="M52 44 C62 44 64 52 60 58" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'lamp' && (
+      <g>
+        <path d="M28 58 C28 46 36 40 45 40 C54 40 62 46 62 58 Z" />
+        <path d="M45 40 C43 32 44 28 45 24" stroke-width="3" />
+        <circle cx="45" cy="18" r="3" fill={accent} stroke="none" />
+        <path d="M22 66 H68" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'cloak' && (
+      <g>
+        <path d="M30 16 C22 40 22 60 28 78 M60 16 C68 40 68 60 62 78" />
+        <path d="M30 16 C38 24 52 24 60 16" stroke-width="4" />
+        <path d="M38 40 C42 52 48 52 52 40" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'tablet' && (
+      <g>
+        <polygon points="30,14 60,14 66,24 66,70 24,70 24,24" />
+        <path d="M34 34 H56 M34 44 H56 M34 54 H48" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'veil' && (
+      <g>
+        <path d="M45 12 C30 12 24 28 26 44 C27 58 30 70 34 78 M45 12 C60 12 66 28 64 44 C63 58 60 70 56 78" />
+        <path d="M45 12 V78" stroke-width="3" opacity="0.6" />
+      </g>
+    )}
+    {motif === 'hands' && (
+      <g>
+        <path d="M20 40 C26 58 36 68 45 68 C54 68 64 58 70 40" stroke-width="4" />
+        <path d="M28 40 C32 52 38 58 45 58 C52 58 58 52 62 40" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'tent' && (
+      <g>
+        <path d="M45 12 L75 74 H15 Z" />
+        <path d="M45 12 V74" stroke-width="3" opacity="0.6" />
+        <path d="M38 74 V62 M52 74 V62" stroke-width="3" />
+      </g>
+    )}
+  </g>
+
+  {/* emblem calligraphy */}
+  <text x="400" y="218" text-anchor="middle" dominant-baseline="central" font-size="30" fill="#F7F3E3" font-family="'Amiri Quran','Noto Naskh Arabic',serif">{arabic}</text>
+  <text x="400" y="292" text-anchor="middle" font-size="24" letter-spacing="8" fill={accent} font-family="Inter,sans-serif" font-weight="800">{prophet.toUpperCase()}</text>
+  <g stroke={accent} stroke-width="1.4" opacity="0.9">
+    <line x1="300" y1="322" x2="388" y2="322" />
+    <line x1="412" y1="322" x2="500" y2="322" />
+    <rect x="394" y="316" width="12" height="12" transform="rotate(45 400 322)" fill={accent} stroke="none" />
+  </g>
+  <text x="400" y="360" text-anchor="middle" font-size="15" letter-spacing="4" fill="#ffffff" fill-opacity="0.7" font-family="Inter,sans-serif" font-weight="600">NOBLE FIGURE</text>
+
+  <rect width="800" height="450" fill={`url(#wmvig-${uid})`} />
+</svg>

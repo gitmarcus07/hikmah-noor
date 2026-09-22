@@ -18,6 +18,8 @@
     "content:waqiat": "node scripts/validate-waqiat.mjs",
     "content:prophets": "node scripts/validate-prophets.mjs",
     "content:quiz": "node scripts/validate-quiz.mjs",
+    "content:sahaba": "node scripts/validate-sahaba.mjs",
+    "content:women": "node scripts/validate-women.mjs",
     "content:hadees": "node scripts/validate-hadees.mjs",
     "content:seerat": "node scripts/validate-seerah.mjs",
     "content:guides": "node scripts/validate-guides.mjs",

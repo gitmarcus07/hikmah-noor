@@ -1,0 +1,11 @@
+---
+import WomenDetail from '../../components/WomenDetail.astro';
+import { WOMEN, womanBySlug } from '../../data/women';
+
+const locale = 'en';
+export async function getStaticPaths() {
+  return WOMEN.map((w) => ({ params: { slug: w.slug }, props: { womanSlug: w.slug } }));
+}
+const woman = womanBySlug((Astro.props as any).womanSlug);
+---
+<WomenDetail woman={woman} locale={locale} />

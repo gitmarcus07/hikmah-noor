@@ -1,0 +1,14 @@
+---
+import SahabaDetail from '../../../components/SahabaDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { SAHABA, sahabiBySlug } from '../../../data/sahaba';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const s of SAHABA) paths.push({ params: { locale, slug: s.slug }, props: { sahabiSlug: s.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const sahabi = sahabiBySlug((Astro.props as any).sahabiSlug);
+---
+<SahabaDetail sahabi={sahabi} locale={locale} />

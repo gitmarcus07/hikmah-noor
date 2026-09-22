@@ -1,0 +1,14 @@
+---
+import WomenDetail from '../../../components/WomenDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { WOMEN, womanBySlug } from '../../../data/women';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const w of WOMEN) paths.push({ params: { locale, slug: w.slug }, props: { womanSlug: w.slug } });
+  return paths;
+}
+const { locale } = Astro.params;
+const woman = womanBySlug((Astro.props as any).womanSlug);
+---
+<WomenDetail woman={woman} locale={locale} />

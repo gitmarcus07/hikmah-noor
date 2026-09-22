@@ -8,7 +8,7 @@ const articles = defineCollection({
     title: z.string(),
     description: z.string(),
     locale: z.enum(['en', 'hi', 'ur', 'ar']),
-    category: z.enum(['surahs', 'duas', 'kalimas', 'meanings', 'waqiat', 'prophets', 'quran']),
+    category: z.enum(['surahs', 'duas', 'kalimas', 'meanings', 'waqiat', 'prophets', 'sahaba', 'women', 'quran']),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     author: z.string().default('Hikmah Noor Editorial'),

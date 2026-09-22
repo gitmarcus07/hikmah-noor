@@ -33,7 +33,7 @@ export function remove(key: string): void {
 }
 
 export interface Bookmark {
-  kind: 'dua' | 'waqiah' | 'prophet' | 'verse' | 'hadees' | 'seerah' | 'kalima' | 'meaning';
+  kind: 'dua' | 'waqiah' | 'prophet' | 'sahaba' | 'women' | 'verse' | 'hadees' | 'seerah' | 'kalima' | 'meaning';
   /** Canonical path, e.g. `/duas/salah-prayer/ayatul-kursi-salah/` or `/prophets/yusuf-dream-to-throne/`. */
   ref: string;
   title: string;

@@ -9,6 +9,8 @@ import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
 import { PROPHETS } from '../data/prophets';
+import { SAHABA } from '../data/sahaba';
+import { WOMEN } from '../data/women';
 import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
 import { HADEES } from '../data/hadees';
 import { SEERAH } from '../data/seerah';
@@ -377,6 +379,31 @@ export function prophetIndexItems(locale: string): IndexItem[] {
   }
   return items;
 }
+/** Women hub + individual figure entries for a locale. */
+export function womenIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: 'Women in Islam — Lives of 12 Noble Figures',
+      description: 'Stories of Khadija, Aisha, Fatima, Maryam, Asiya and more — faith, courage and scholarship. Each figure has its own page.',
+      category: 'women',
+      url: `${prefix}/women/`,
+      tags: ['women', 'women in islam', 'khadija', 'aisha', 'fatima', 'maryam', 'sahabiyat', 'muslim women'],
+      locale,
+    },
+  ];
+  for (const w of WOMEN) {
+    items.push({
+      title: `${w.title} — Story & Lessons`,
+      description: `${w.summary} References: ${w.references}.`,
+      category: 'women',
+      url: `${prefix}/women/${w.slug}/`,
+      tags: [...new Set(['woman', 'women in islam', 'sahabiyat', `figure ${w.order}`, w.title.toLowerCase(), w.name.toLowerCase(), w.era.toLowerCase(), ...(w.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
 /** Quiz hub + individual quiz entries for a locale. */
 export function quizIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
@@ -398,6 +425,31 @@ export function quizIndexItems(locale: string): IndexItem[] {
       category: 'quiz',
       url: `${prefix}/quiz/${q.slug}/`,
       tags: [...new Set(['quiz', 'test', q.title.toLowerCase(), (cat?.title || '').toLowerCase(), ...q.keywords.split(',').map((s) => s.trim().toLowerCase()), ...(q.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
+/** Sahaba hub + individual companion entries for a locale. */
+export function sahabaIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: 'Sahaba Stories — Lives of the Prophet’s ﷺ Companions',
+      description: 'All 24 companion stories: Abu Bakr, Umar, Uthman, Ali, Hamza, Bilal, Khalid and more — events, lessons and references.',
+      category: 'sahaba',
+      url: `${prefix}/sahaba/`,
+      tags: ['sahaba', 'sahabi', 'companions', 'ashra mubashara', 'khulafa rashidun', 'companions of prophet'],
+      locale,
+    },
+  ];
+  for (const s of SAHABA) {
+    items.push({
+      title: `${s.title} — Story & Lessons`,
+      description: `${s.summary} References: ${s.references}.`,
+      category: 'sahaba',
+      url: `${prefix}/sahaba/${s.slug}/`,
+      tags: [...new Set(['sahabi', 'sahaba', 'companion', `companion ${s.order}`, s.title.toLowerCase(), s.name.toLowerCase(), s.era.toLowerCase(), ...(s.aliases || [])])].filter(Boolean),
       locale,
     });
   }

@@ -1,0 +1,148 @@
+---
+/* Sahabi detail — chronological reading page with own branding.
+ * Prev/next by order; cross-links to Seerat chapters. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import SahabaArt from './SahabaArt.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
+import ShareButtons from './hn/ShareButtons.astro';
+import { localizedPath } from '../i18n/utils';
+import { SAHABA, prevSahabi, nextSahabi } from '../data/sahaba';
+
+interface Props { sahabi: any; locale: string; }
+const { sahabi, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const sahabiPath = `/sahaba/${sahabi.slug}/`;
+
+const title = `${sahabi.title} — Story & Lessons`;
+let description = `${sahabi.title}: ${sahabi.summary}`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${sahabi.title.toLowerCase()}, hazrat ${sahabi.name.toLowerCase()} story, sahaba stories${sahabi.aliases?.length ? `, ${sahabi.aliases.join(', ')}` : ''}`;
+
+const faq = [
+  { q: `Who was ${sahabi.name}?`, a: sahabi.summary },
+  { q: `What are the lessons from ${sahabi.name}’s life?`, a: sahabi.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: `Where is this story sourced from?`, a: `References: ${sahabi.references}. Consult scholars for deeper rulings.` },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Sahaba', path: '/sahaba/' },
+  { name: sahabi.title, path: sahabiPath },
+];
+const others = SAHABA.filter((w) => w.slug !== sahabi.slug && w.era === sahabi.era).concat(SAHABA.filter((w) => w.slug !== sahabi.slug && w.era !== sahabi.era)).slice(0, 4);
+const prevP = prevSahabi(sahabi.order);
+const nextP = nextSahabi(sahabi.order);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={sahabiPath}>
+  <div class="hn-article hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Companion {sahabi.order} of 24</span>
+      <span class="hn-badge">{sahabi.era}</span>
+      <span class="hn-badge hn-badge-gold">{sahabi.name}</span>
+      <span class="ms-auto"><BookmarkButton kind="sahaba" bmRef={sahabiPath} title={sahabi.title} /></span>
+      <ShareButtons title={sahabi.title} path={sahabiPath} locale={locale} />
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{sahabi.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{sahabi.summary}</p>
+    {sahabi.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {sahabi.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    <div class="hn-card overflow-hidden my-6">
+      <SahabaArt motif={sahabi.motif} arabic={sahabi.arabic} prophet={sahabi.name} accent={sahabi.accent} />
+    </div>
+
+    <div class="hn-reading-card">
+      <p class="hn-block-label">Emblematic words</p>
+      <p class="arabic-block" lang="ar" dir="rtl">{sahabi.arabic}</p>
+      {sahabi.translit && (
+        <>
+          <hr class="hn-divider" />
+          <p class="hn-block-label">Transliteration</p>
+          <p class="translit-block">{sahabi.translit}</p>
+        </>
+      )}
+    </div>
+
+    <section class="mt-8" aria-label="The full story">
+      <SectionHeader eyebrow="Story" title="The full story" />
+      <div class="space-y-4">
+        {(sahabi.narrative || []).map((p: string) => (
+          <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
+        ))}
+      </div>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated from the seerah and hadith collections without invented details.</p>
+    </section>
+
+    <section class="mt-8" aria-label="The story in order">
+      <SectionHeader eyebrow="Timeline" title="The life in order" />
+      <ol class="space-y-3">
+        {sahabi.events.map((e: string, i: number) => (
+          <li class="hn-card hn-card-pad flex gap-3">
+            <span class="hn-verse-num shrink-0">{i + 1}</span>
+            <span class="leading-7 text-[15px]">{e}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="mt-8" aria-label="Lessons">
+      <SectionHeader eyebrow="Reflect" title="Lessons" />
+      <div class="hn-card hn-card-pad">
+        <ul class="space-y-2.5 leading-7 text-[15px]">
+          {sahabi.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
+        </ul>
+      </div>
+    </section>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{sahabi.references}</strong></p>
+    <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For his life, read the <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">16-chapter Seerat →</a></p>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="More companions">
+      <SectionHeader eyebrow="Sahaba" title="More companions" href={L('/sahaba/')} linkLabel="All 24 companions" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((r) => (
+          <a href={L(`/sahaba/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <SahabaArt motif={r.motif} arabic={r.arabic} prophet={r.name} accent={r.accent} />
+            <span class="block hn-card-pad">
+              <span class="font-bold block text-[15px] leading-6">{r.order}. {r.title}</span>
+              <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{r.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {(prevP || nextP) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More companions">
+        {prevP ? (
+          <a href={L(`/sahaba/${prevP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Companion {prevP.order}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevP.title}</span>
+          </a>
+        ) : <span />}
+        {nextP && (
+          <a href={L(`/sahaba/${nextP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Companion {nextP.order} →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextP.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>
