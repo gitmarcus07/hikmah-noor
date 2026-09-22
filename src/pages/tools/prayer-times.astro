@@ -1,0 +1,284 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict } from '../../i18n/utils';
+
+const locale = 'en';
+const faq = [
+  { q: 'Are these prayer times exact?', a: 'They are astronomical calculations (sun position math) for your location — accurate within a couple of minutes. Always confirm with your local mosque, which may add safety margins (ihtiyat) for Fajr and Maghrib.' },
+  { q: 'Which calculation method should I choose?', a: 'Karachi (University of Islamic Sciences, 18°/18°) suits South Asia; Muslim World League (18°/17°) is the global default; ISNA (15°/15°) suits North America. Hanafi Asr (shadow ×2) is the South Asian standard; Standard (×1) follows Shafi’i, Maliki and Hanbali schools.' },
+  { q: 'How is the Qibla direction found?', a: 'From your coordinates with the great-circle bearing to the Kaaba (21.4225°N, 39.8262°E). The compass uses your device sensor — calibrate by waving your phone in a figure-8, and verify once against a known direction.' },
+  { q: 'Is the Hijri date exact?', a: 'It uses the tabular Islamic (Umm al-Qura) calendar built into your browser — correct most days, but moon sighting can shift it by a day. Follow local announcements for Ramadan and Eid.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Prayer Times', path: '/tools/prayer-times/' },
+];
+---
+<BaseLayout title="Prayer Times Today — Accurate Namaz Timings, Qibla & Hijri Date" description="Today's prayer times for your city: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha with next-prayer countdown, Qibla direction compass and Hijri date. Karachi, MWL and ISNA methods; Hanafi and Standard Asr." keywords="prayer times today, namaz timings, fajr time, dhuhr time, asr time, maghrib time, isha time, qibla direction finder, qibla compass, hijri date today, islamic date today, prayer times karachi, prayer times lahore, prayer times delhi, sehri iftar time" locale={locale} canonicalPath="/tools/prayer-times/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Prayer Times" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-pt>
+    <p class="text-center text-[15px] font-bold" style="color:var(--hn-muted)" data-pt-date>Loading…</p>
+    <p class="text-center text-[13px] font-bold mt-1" style="color:var(--hn-primary)" data-pt-hijri></p>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Location</p>
+      <div class="flex gap-2">
+        <select data-pt-city class="hn-input flex-1" aria-label="City"></select>
+        <button data-pt-gps class="hn-btn hn-btn-secondary !min-h-[48px] !px-4 text-sm shrink-0">📍 GPS</button>
+      </div>
+      <details class="mt-2">
+        <summary class="text-[13px] font-bold cursor-pointer" style="color:var(--hn-primary)">Custom coordinates</summary>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <input data-pt-lat inputmode="decimal" placeholder="Latitude" class="hn-input" aria-label="Latitude" />
+          <input data-pt-lng inputmode="decimal" placeholder="Longitude" class="hn-input" aria-label="Longitude" />
+        </div>
+        <button data-pt-custom class="hn-btn hn-btn-secondary w-full !min-h-[48px] text-sm mt-2">Use these coordinates</button>
+      </details>
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <select data-pt-method class="hn-input" aria-label="Calculation method">
+          <option value="karachi">Karachi (18°/18°)</option>
+          <option value="mwl">Muslim World League (18°/17°)</option>
+          <option value="isna">ISNA N. America (15°/15°)</option>
+        </select>
+        <select data-pt-asr class="hn-input" aria-label="Asr juristic setting">
+          <option value="hanafi">Asr: Hanafi (×2)</option>
+          <option value="standard">Asr: Standard (×1)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mt-3 hn-card overflow-hidden">
+      <div class="hn-card-pad text-center" style="background:var(--hn-primary-soft)">
+        <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Next prayer</p>
+        <p class="font-extrabold text-[26px] leading-8" data-pt-next>—</p>
+        <p class="font-extrabold text-[15px]" style="color:var(--hn-primary)" data-pt-countdown></p>
+      </div>
+      <div data-pt-list></div>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad">
+      <p class="hn-block-label">Qibla direction</p>
+      <div class="flex items-center gap-4">
+        <div class="relative shrink-0" style="width:110px;height:110px">
+          <div class="absolute inset-0 rounded-full border-2" style="border-color:var(--hn-border)"></div>
+          <div class="absolute inset-0 grid place-items-center font-extrabold text-xs" style="color:var(--hn-muted)">N</div>
+          <div data-pt-needle class="absolute inset-0 transition-transform" style="transition-duration:200ms">
+            <div class="mx-auto" style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:44px solid var(--hn-primary);margin-top:8px"></div>
+          </div>
+          <div class="absolute rounded-full" style="width:12px;height:12px;left:49px;top:49px;background:var(--hn-primary)"></div>
+        </div>
+        <div class="min-w-0">
+          <p class="font-extrabold text-[22px]" data-pt-qibla>—</p>
+          <p class="text-[13px] leading-5" style="color:var(--hn-muted)" data-pt-heading>Compass off</p>
+          <button data-pt-compass class="hn-btn hn-btn-secondary !min-h-[44px] text-sm mt-2">Enable compass</button>
+        </div>
+      </div>
+      <p class="mt-2 text-[12.5px] leading-5" style="color:var(--hn-muted)">Face the needle. Calibrate with a figure-8 motion; verify once against a known direction.</p>
+    </div>
+
+    <p class="mt-3 text-[12.5px] leading-5 text-center" style="color:var(--hn-muted)">Calculated on-device · confirm with your local mosque · times exclude ihtiyat margins.</p>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-pt]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+      const METHODS = { karachi: { fajr: 18, isha: 18 }, mwl: { fajr: 18, isha: 17 }, isna: { fajr: 15, isha: 15 } };
+      const CITIES = [
+        ['Karachi, PK', 24.86, 67.01, 'Asia/Karachi'], ['Lahore, PK', 31.55, 74.35, 'Asia/Karachi'],
+        ['Islamabad, PK', 33.68, 73.05, 'Asia/Karachi'], ['Rawalpindi, PK', 33.6, 73.04, 'Asia/Karachi'],
+        ['Faisalabad, PK', 31.42, 73.08, 'Asia/Karachi'], ['Multan, PK', 30.16, 71.52, 'Asia/Karachi'],
+        ['Peshawar, PK', 34.01, 71.58, 'Asia/Karachi'], ['Quetta, PK', 30.18, 66.99, 'Asia/Karachi'],
+        ['Hyderabad (PK)', 25.38, 68.37, 'Asia/Karachi'], ['Sialkot, PK', 32.49, 74.53, 'Asia/Karachi'],
+        ['Delhi, IN', 28.61, 77.21, 'Asia/Kolkata'], ['Mumbai, IN', 19.08, 72.88, 'Asia/Kolkata'],
+        ['Hyderabad (IN)', 17.39, 78.49, 'Asia/Kolkata'], ['Lucknow, IN', 26.85, 80.95, 'Asia/Kolkata'],
+        ['Kolkata, IN', 22.57, 88.36, 'Asia/Kolkata'], ['Chennai, IN', 13.08, 80.27, 'Asia/Kolkata'],
+        ['Bengaluru, IN', 12.97, 77.59, 'Asia/Kolkata'], ['Ahmedabad, IN', 23.02, 72.57, 'Asia/Kolkata'],
+        ['Patna, IN', 25.59, 85.14, 'Asia/Kolkata'], ['Srinagar, IN', 34.08, 74.81, 'Asia/Kolkata'],
+        ['Dhaka, BD', 23.81, 90.41, 'Asia/Dhaka'], ['Chittagong, BD', 22.36, 91.78, 'Asia/Dhaka'],
+        ['Dubai, AE', 25.2, 55.27, 'Asia/Dubai'], ['Abu Dhabi, AE', 24.45, 54.38, 'Asia/Dubai'],
+        ['Riyadh, SA', 24.71, 46.68, 'Asia/Riyadh'], ['Jeddah, SA', 21.49, 39.19, 'Asia/Riyadh'],
+        ['Doha, QA', 25.28, 51.52, 'Asia/Qatar'], ['Kuwait City, KW', 29.38, 47.98, 'Asia/Kuwait'],
+        ['Muscat, OM', 23.61, 58.59, 'Asia/Muscat'],
+        ['London, UK', 51.5, -0.13, 'Europe/London'], ['Birmingham, UK', 52.48, -1.89, 'Europe/London'],
+        ['New York, US', 40.71, -74.0, 'America/New_York'], ['Chicago, US', 41.88, -87.63, 'America/Chicago'],
+        ['Houston, US', 29.76, -95.37, 'America/Chicago'], ['Los Angeles, US', 34.05, -118.24, 'America/Los_Angeles'],
+        ['Toronto, CA', 43.65, -79.38, 'America/Toronto'],
+      ];
+      const SKEY = 'hn.prayer.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(SKEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(SKEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ city: 0, method: 'karachi', asr: 'hanafi', lat: null, lng: null, tz: null, label: '' }, load());
+
+      const citySel = $('[data-pt-city]');
+      citySel.innerHTML = CITIES.map((c, i) => `<option value="${i}">${c[0]}</option>`).join('') + `<option value="gps">📍 My GPS location</option><option value="custom">Custom coordinates…</option>`;
+      const syncSel = () => {
+        citySel.value = st.mode === 'gps' ? 'gps' : st.mode === 'custom' ? 'custom' : String(st.city);
+        $('[data-pt-method]').value = st.method;
+        $('[data-pt-asr]').value = st.asr;
+      };
+
+      const sunPos = (jd) => {
+        const D = jd - 2451545.0;
+        const g = ((357.529 + 0.98560028 * D) % 360) * D2R;
+        const q = (280.459 + 0.98564736 * D) % 360;
+        const L = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * D2R;
+        const e = (23.439 - 0.00000036 * D) * D2R;
+        let RA = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)) * R2D / 15;
+        if (RA < 0) RA += 24;
+        return { dec: Math.asin(Math.sin(e) * Math.sin(L)) * R2D, eqt: q / 15 - RA };
+      };
+      const hourAngle = (ang, lat, dec) => {
+        const c = (Math.sin(ang * D2R) - Math.sin(lat * D2R) * Math.sin(dec * D2R)) / (Math.cos(lat * D2R) * Math.cos(dec * D2R));
+        return Math.acos(Math.min(1, Math.max(-1, c))) * R2D / 15;
+      };
+      const calc = (lat, lng, method, asrF) => {
+        const now = new Date();
+        const jd = now.getTime() / 864e5 + 2440587.5;
+        const { dec, eqt } = sunPos(jd);
+        const T = 12 - lng / 15 - eqt; // transit, UTC hours
+        const m = METHODS[method] || METHODS.karachi;
+        const asrAng = Math.atan(1 / (asrF + Math.tan(Math.abs(lat - dec) * D2R))) * R2D; // sun altitude, positive
+        return [
+          ['Fajr', T - hourAngle(-m.fajr, lat, dec)], ['Sunrise', T - hourAngle(-0.833, lat, dec)],
+          ['Dhuhr', T + 2 / 60], ['Asr', T + hourAngle(asrAng, lat, dec)],
+          ['Maghrib', T + hourAngle(-0.833, lat, dec)], ['Isha', T + hourAngle(-m.isha, lat, dec)],
+        ];
+      };
+      const qibla = (lat, lng) => {
+        const p1 = lat * D2R, p2 = 21.4225 * D2R, dl = (39.8262 - lng) * D2R;
+        const y = Math.sin(dl);
+        const x = Math.cos(p1) * Math.tan(p2) - Math.sin(p1) * Math.cos(dl);
+        return (Math.atan2(y, x) * R2D + 360) % 360;
+      };
+      const fmtT = (hUTC, tz) => {
+        const base = new Date();
+        base.setUTCHours(0, 0, 0, 0);
+        const d = new Date(base.getTime() + hUTC * 36e5);
+        return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(d);
+      };
+      const toMs = (hUTC) => {
+        const base = new Date();
+        base.setUTCHours(0, 0, 0, 0);
+        return base.getTime() + hUTC * 36e5;
+      };
+
+      let times = [], tz = 'UTC', qb = 0, timer = null;
+      const paint = () => {
+        const list = $('[data-pt-list]');
+        list.innerHTML = times.map(([n, h]) => `
+          <div class="flex items-center gap-3 px-4 py-3 min-h-[56px] border-t first:border-t-0" style="border-color:var(--hn-border)" data-pt-row="${n}">
+            <span class="font-extrabold text-[16px] flex-1">${n}</span>
+            <span class="font-extrabold text-[16px]" style="color:var(--hn-primary)">${fmtT(h, tz)}</span>
+          </div>`).join('');
+        $('[data-pt-qibla]').textContent = `${Math.round(qb)}° from North`;
+        tick();
+      };
+      const tick = () => {
+        if (!times.length) return;
+        const nowMs = Date.now();
+        let next = times[0], passed = true;
+        for (const t of times) { if (toMs(t[1]) > nowMs) { next = t; passed = false; break; } }
+        if (passed) next = [times[0][0] + ' (tomorrow)', times[0][1] + 24];
+        $('[data-pt-next]').textContent = `${next[0]} · ${fmtT(next[1] % 24, tz)}`;
+        document.querySelectorAll('[data-pt-row]').forEach((r) => {
+          const on = r.getAttribute('data-pt-row') === next[0].replace(' (tomorrow)', '');
+          r.style.background = on && !passed ? 'var(--hn-primary-soft)' : '';
+        });
+        let ms = toMs(next[1]) - nowMs;
+        if (ms < 0) ms += 864e5;
+        const h = Math.floor(ms / 36e5), m = Math.floor((ms % 36e5) / 6e4), s = Math.floor((ms % 6e4) / 1e3);
+        $('[data-pt-countdown]').textContent = `in ${h}h ${m}m ${s}s`;
+      };
+      const render = () => {
+        let lat, lng;
+        if (st.mode === 'gps' || st.mode === 'custom') {
+          if (st.lat == null) return;
+          lat = st.lat; lng = st.lng;
+          tz = st.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        } else {
+          const c = CITIES[st.city] || CITIES[0];
+          lat = c[1]; lng = c[2]; tz = c[3];
+          st.label = c[0];
+        }
+        times = calc(lat, lng, st.method, st.asr === 'hanafi' ? 2 : 1);
+        qb = qibla(lat, lng);
+        try {
+          $('[data-pt-date]').textContent = new Intl.DateTimeFormat('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(new Date()) + (st.label ? ` · ${st.label}` : '');
+          $('[data-pt-hijri]').textContent = new Intl.DateTimeFormat('en-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(new Date());
+        } catch {}
+        paint();
+        if (timer) clearInterval(timer);
+        timer = setInterval(tick, 1000);
+      };
+
+      citySel.addEventListener('change', () => {
+        const v = citySel.value;
+        if (v === 'gps') {
+          if (!navigator.geolocation) return;
+          navigator.geolocation.getCurrentPosition((pos) => {
+            st.mode = 'gps'; st.lat = pos.coords.latitude; st.lng = pos.coords.longitude;
+            st.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+            st.label = 'GPS location'; save(st); syncSel(); render();
+          }, () => {}, { timeout: 10000 });
+        } else if (v === 'custom') {
+          st.mode = 'custom'; save(st); syncSel();
+        } else {
+          st.mode = 'city'; st.city = Number(v); save(st); syncSel(); render();
+        }
+      });
+      $('[data-pt-custom]').addEventListener('click', () => {
+        const la = parseFloat($('[data-pt-lat]').value), ln = parseFloat($('[data-pt-lng]').value);
+        if (!isFinite(la) || !isFinite(ln) || Math.abs(la) > 90 || Math.abs(ln) > 180) return;
+        st.mode = 'custom'; st.lat = la; st.lng = ln;
+        st.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        st.label = `${la.toFixed(2)}, ${ln.toFixed(2)}`; save(st); syncSel(); render();
+      });
+      $('[data-pt-method]').addEventListener('change', (e) => { st.method = e.target.value; save(st); render(); });
+      $('[data-pt-asr]').addEventListener('change', (e) => { st.asr = e.target.value; save(st); render(); });
+
+      /* compass */
+      const needle = $('[data-pt-needle]');
+      const headEl = $('[data-pt-heading]');
+      const onHead = (deg) => {
+        if (headEl) headEl.textContent = `Facing ${Math.round(((deg % 360) + 360) % 360)}°`;
+        if (needle) needle.style.transform = `rotate(${qb - deg}deg)`;
+      };
+      $('[data-pt-compass]').addEventListener('click', async () => {
+        try {
+          if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
+            const r = await DeviceOrientationEvent.requestPermission();
+            if (r !== 'granted') { if (headEl) headEl.textContent = 'Permission denied'; return; }
+          }
+          window.addEventListener('deviceorientation', (e) => {
+            let deg = null;
+            if (e.webkitCompassHeading != null) deg = e.webkitCompassHeading;
+            else if (e.alpha != null) deg = 360 - e.alpha;
+            if (deg != null) onHead(deg);
+          });
+          if (headEl) headEl.textContent = 'Move your phone…';
+        } catch { if (headEl) headEl.textContent = 'Compass unavailable on this device'; }
+      });
+
+      syncSel();
+      if (st.mode !== 'gps' && st.mode !== 'custom') { st.mode = 'city'; }
+      render();
+    })();
+  </script>
+</BaseLayout>

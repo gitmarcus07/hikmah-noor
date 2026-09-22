@@ -192,6 +192,14 @@ export function toolIndexItems(locale: string): IndexItem[] {
       tags: ['tasbih', 'tasbeeh', 'tasbih counter', 'tasbeeh counter', 'dhikr counter', 'zikr counter', 'digital tasbih', 'counter', 'subhanallah counter', 'dhikr', 'zikr', 'allah hu akbar counter'],
       locale,
     },
+    {
+      title: 'Prayer Times Today — Namaz Timings, Qibla & Hijri Date',
+      description: 'Today’s prayer times for your city: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha with next-prayer countdown, Qibla compass and Hijri date. Karachi, MWL, ISNA methods.',
+      category: 'tools',
+      url: `${prefix}/tools/prayer-times/`,
+      tags: ['prayer times', 'namaz timings', 'salah times', 'fajr', 'dhuhr', 'zuhr', 'asr', 'maghrib', 'isha', 'qibla', 'qibla finder', 'qibla direction', 'hijri date', 'islamic date today', 'sehri time', 'iftar time', 'azan time', 'athan'],
+      locale,
+    },
   ];
   for (const c of CATS as any[]) {
     items.push({
