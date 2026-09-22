@@ -53,19 +53,52 @@ const crumbLd = crumbs.length ? {
 const L = (p: string) => localizedPath(locale, p);
 const moreLinks = [
   { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
-  { label: 'Paras', href: L('/quran/'), icon: 'quran' },
   { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
   { label: 'Names of Allah', href: L('/names-of-allah/'), icon: 'star' },
   { label: 'Names of Muhammad ﷺ', href: L('/names-muhammad/'), icon: 'heart' },
-  { label: 'Guides', href: L('/learn/'), icon: 'book' },
+  { label: 'Seerat', href: L('/seerat/'), icon: 'star' },
   { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
   { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
   { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
   { label: 'History', href: L('/history/'), icon: 'book' },
   { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
   { label: 'Eid & Qurbani', href: L('/eid/'), icon: 'moon' },
+  { label: 'Quiz', href: L('/quiz/'), icon: 'book' },
+  { label: 'Favourites', href: L('/favourites/'), icon: 'heart' },
   { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
   { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
+] as const;
+const mobileGroups = [
+  { label: 'Quran', icon: 'quran', links: [
+    { label: 'Quran', href: L('/quran/') },
+    { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/') },
+    { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/') },
+  ] },
+  { label: 'Worship', icon: 'duas', links: [
+    { label: 'Duas', href: L('/duas/') },
+    { label: 'Adhkar', href: L('/duas/morning-evening/') },
+    { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/') },
+    { label: 'Hadees', href: L('/hadees/') },
+  ] },
+  { label: 'Learn', icon: 'book', links: [
+    { label: 'Learn', href: L('/learn/') },
+    { label: 'Seerat', href: L('/seerat/') },
+    { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/') },
+    { label: 'Sahaba', href: L('/sahaba/') },
+    { label: 'Women', href: L('/women/') },
+    { label: 'History', href: L('/history/') },
+    { label: 'Names of Allah', href: L('/names-of-allah/') },
+  ] },
+  { label: 'Seasonal', icon: 'moon', links: [
+    { label: 'Ramadan', href: L('/ramadan/') },
+    { label: 'Eid & Qurbani', href: L('/eid/') },
+  ] },
+  { label: dict.nav.tools ?? 'Tools', icon: 'tools', links: [
+    { label: dict.nav.tools ?? 'Tools', href: L('/tools/') },
+    { label: 'Quiz', href: L('/quiz/') },
+    { label: 'Favourites', href: L('/favourites/') },
+    { label: dict.nav.about ?? 'About', href: L('/about/') },
+  ] },
 ] as const;
 ---
 <!doctype html>
@@ -159,30 +192,39 @@ const moreLinks = [
       </div>
       {/* Mobile dropdown (tablet) */}
       <div id="mobileMenu" class="hidden lg:hidden absolute inset-x-3 top-full z-50">
-        <nav class="hn-card overflow-hidden p-2" style="box-shadow:var(--hn-shadow-lg)" aria-label="Mobile">
-          {[
-            { label: 'Quran', href: L('/quran/'), icon: 'quran' },
-            { label: 'Duas', href: L('/duas/'), icon: 'duas' },
-            { label: 'Adhkar', href: L('/duas/morning-evening/'), icon: 'shield' },
-            { label: 'Learn', href: L('/learn/'), icon: 'book' },
-            { label: dict.nav.tools, href: L('/tools/'), icon: 'tools' },
-            { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
-            { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
-            { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
-            { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
-            { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
-            { label: 'History', href: L('/history/'), icon: 'book' },
-            { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
-            { label: 'Eid & Qurbani', href: L('/eid/'), icon: 'moon' },
-            { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
-          ].map(m => (
-            <a href={m.href} class="flex items-center gap-3 px-2.5 py-2 rounded-[10px] min-h-[52px] font-semibold" style="color:var(--hn-ink)" data-more-link>
-              <span class="w-10 h-10 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={m.icon as any} size={20} /></span>
-              <span class="text-[16px]">{m.label}</span>
+        <nav class="hn-card overflow-hidden p-2 max-h-[70vh] overflow-y-auto" style="box-shadow:var(--hn-shadow-lg)" aria-label="Mobile">
+          <div class="grid grid-cols-2 gap-2 p-1">
+            <a href={L('/quran/')} class="hn-card hn-card-pad flex items-center gap-2.5 font-bold" style="color:var(--hn-ink)" data-more-link>
+              <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="quran" size={19} /></span>
+              <span class="text-[15px]">Quran</span>
             </a>
+            <a href={L('/duas/')} class="hn-card hn-card-pad flex items-center gap-2.5 font-bold" style="color:var(--hn-ink)" data-more-link>
+              <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="duas" size={19} /></span>
+              <span class="text-[15px]">Duas</span>
+            </a>
+          </div>
+          {mobileGroups.map((g) => (
+            <details class="mobile-nav-group rounded-[10px]">
+              <summary class="flex items-center gap-3 px-2.5 py-2 rounded-[10px] min-h-[52px] font-semibold cursor-pointer list-none">
+                <span class="w-10 h-10 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={g.icon as any} size={20} /></span>
+                <span class="text-[16px]" style="color:var(--hn-ink)">{g.label}</span>
+                <span class="ms-auto nav-chev text-[12px] transition-transform" style="color:var(--hn-muted)" aria-hidden="true">▾</span>
+              </summary>
+              <div class="pb-1 ps-6">
+                {g.links.map((l) => (
+                  <a href={l.href} class="flex items-center px-2.5 py-2 rounded-[10px] min-h-[44px] text-[15px] font-medium" style="color:var(--hn-muted)" data-more-link>{l.label}</a>
+                ))}
+              </div>
+            </details>
           ))}
         </nav>
       </div>
+<style>
+  #mobileMenu details.mobile-nav-group summary::-webkit-details-marker { display: none; }
+  #mobileMenu details.mobile-nav-group summary::marker { content: ''; }
+  #mobileMenu details.mobile-nav-group[open] .nav-chev { transform: rotate(180deg); }
+  #mobileMenu details.mobile-nav-group[open] { background: var(--hn-primary-soft); }
+</style>
     </div>
   </header>
 
@@ -281,6 +323,8 @@ const moreLinks = [
           <li><a class="hover:underline" href={L('/hadees/')}>Hadees</a></li>
           <li><a class="hover:underline" href={L('/seerat/')}>Seerat</a></li>
           <li><a class="hover:underline" href={L('/prophets/')}>Prophets</a></li>
+          <li><a class="hover:underline" href={L('/sahaba/')}>Sahaba</a></li>
+          <li><a class="hover:underline" href={L('/women/')}>Women</a></li>
           <li><a class="hover:underline" href={L('/history/')}>History</a></li>
           <li><a class="hover:underline" href={L('/ramadan/')}>Ramadan</a></li>
           <li><a class="hover:underline" href={L('/eid/')}>Eid & Qurbani</a></li>
@@ -290,9 +334,11 @@ const moreLinks = [
       <div>
         <div class="font-bold mb-3 text-sm uppercase tracking-wide" style="color:var(--hn-ink)">Resources</div>
         <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
-          <li><a class="hover:underline" href={L('/meanings/')}>Guides</a></li>
+          <li><a class="hover:underline" href={L('/meanings/')}>Meanings</a></li>
           <li><a class="hover:underline" href={L('/learn/')}>How-To Guides</a></li>
           <li><a class="hover:underline" href={L('/tools/')}>Tools</a></li>
+          <li><a class="hover:underline" href={L('/quiz/')}>Quiz</a></li>
+          <li><a class="hover:underline" href={L('/names-muhammad/')}>Names of Muhammad ﷺ</a></li>
           <li><a class="hover:underline" href={L('/search/')}>Search</a></li>
         </ul>
       </div>
