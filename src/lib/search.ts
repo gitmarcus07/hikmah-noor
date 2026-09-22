@@ -184,6 +184,14 @@ export function toolIndexItems(locale: string): IndexItem[] {
       tags: ['ramadan', 'countdown', 'ramzan', 'hijri', 'sehri', 'iftari'],
       locale,
     },
+    {
+      title: 'Tasbih Counter Online — Dhikr with Daily Totals',
+      description: 'Free online tasbih counter: SubhanAllah, Alhamdulillah, Allahu Akbar with 33/100/1000 goals and daily totals saved on your device.',
+      category: 'tools',
+      url: `${prefix}/tools/tasbih/`,
+      tags: ['tasbih', 'tasbeeh', 'tasbih counter', 'tasbeeh counter', 'dhikr counter', 'zikr counter', 'digital tasbih', 'counter', 'subhanallah counter', 'dhikr', 'zikr', 'allah hu akbar counter'],
+      locale,
+    },
   ];
   for (const c of CATS as any[]) {
     items.push({
