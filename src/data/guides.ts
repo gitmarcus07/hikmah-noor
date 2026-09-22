@@ -517,6 +517,62 @@ export const GUIDES: Guide[] = [
       { q: 'What if I pay after Eid prayer?', a: 'It misses the fitr reward and counts as general charity - still pay it, and resolve to pay early next year.' },
     ],
     aliases: ['fitrana kitna hai', 'zakat ul fitr amount', 'fitra rules', 'fitrana kab dein', 'sadaqat ul fitr'] },
+  { slug: 'eid-day-sunnahs', cat: 'salah', title: 'Eid Day Sunnahs - Ghusl, Dates, Takbeer and the Eidgah',
+    intro: 'Eid morning has its own sunnahs before the prayer: ghusl, best clothes, odd dates (on Fitr), loud takbeer on the way, and one route out with another back.',
+    sections: [
+      { h: 'The morning routine', ps: ['Take ghusl for Eid (established from Ibn Umar), wear your best clothes and apply perfume - the new-clothes dua is on our dua pages. On Eid al-Fitr eat an odd number of dates before leaving; on Eid al-Adha hold off until after the sacrifice and eat from it first.', 'Delay the Eid prayer slightly past sunrise so the sun fully rises, pray at the Eidgah (open ground) where possible, and go early - there is no adhan or iqamah for Eid.'] },
+      { h: 'Takbeer and the routes', ps: ['Recite the Eid takbeer aloud from the night before (Fitr) or from Arafah dawn (Adha) - the exact wording and days are in our Eid takbeer guide. Walk to the Eidgah if able, take one route there and a different one back, greeting fellow Muslims with “Taqabbal Allahu minna wa minka”.', 'Women, children and even menstruating women were commanded to attend the Eid gathering (the latter witnessing from aside) - arrange family attendance where facilities allow.'] },
+    ],
+    steps: ['Take Eid ghusl, wear your best and apply perfume.', 'Eat odd dates (Fitr) or wait for the sacrifice (Adha).', 'Recite takbeer aloud on the way, going by one route.', 'Pray at the Eidgah, return by another route greeting everyone.'],
+    ref: 'Sahih al-Bukhari and Sahih Muslim (Eid ghusl, dates, takbeer, attendance)',
+    faq: [
+      { q: 'Dates before Eid prayer - Fitr or Adha?', a: 'Odd dates before leaving is the Fitr sunnah; on Adha the Prophet ﷺ ate only after the sacrifice - follow each Eid’s own way.' },
+      { q: 'Is there any nafl at the Eidgah?', a: 'No nafl before or after the Eid prayer at the Eidgah in the Prophet’s practice; pray them at home if you wish.' },
+      { q: 'What if it rains on Eid day?', a: 'The prayer moves indoors to the masjid - the sunnahs of ghusl, dress, dates and takbeer all remain.' },
+    ],
+    aliases: ['eid ki sunnatein', 'eid day sunnahs', 'eid ghusl', 'eid takbeer route', 'eidgah etiquette'] },
+  { slug: 'eid-takbeer-wording', cat: 'salah', title: 'Eid Takbeer - Wording, When It Starts and Ends',
+    intro: 'Allahu akbar, Allahu akbar, la ilaha illallah - the Eid takbeer fills the nights before Eid and (for Adha) the days of Tashriq: exact wording, timings and who says it.',
+    sections: [
+      { h: 'The wording and its days', ps: ['The famous wording from Ibn Masud: Allahu akbar, Allahu akbar, la ilaha illallah, wallahu akbar, Allahu akbar, wa lillahil-hamd - with additional salawat in some narrations. Say it aloud (men) and softly (women) wherever you are: home, market, masjid and road.', 'Eid al-Fitr: from the Shawwal moon sighting until the imam starts the Eid prayer. Eid al-Adha: from Fajr on Arafah day (9th) until Asr on the 13th - after every obligatory prayer (the “restricted” takbeer) plus unrestricted takbeer throughout, per most schools.'] },
+      { h: 'Congregational takbeer', ps: ['Group takbeer in one voice after prayers and at gatherings is the living practice of the companions in Mina; lone recitation is equally established - do not quarrel over synchronised vs individual forms.', 'Teach children the wording before Eid so the streets echo with it; the Eid-takbeer dua page has the Arabic, transliteration and audio reference.'] },
+    ],
+    steps: ['Memorise the Ibn Masud wording with your family before Eid.', 'Fitr: start at the Shawwal moon, stop when Eid prayer begins.', 'Adha: continue after every fard prayer from Arafah dawn to the 13th Asr.', 'Say it aloud on roads and in gatherings - revive the abandoned sunnah.'],
+    ref: 'Sahih al-Bukhari (companion practice); wording reported from Abdullah ibn Masud',
+    faq: [
+      { q: 'What are the exact words of Eid takbeer?', a: 'Allahu akbar Allahu akbar la ilaha illallah, wallahu akbar Allahu akbar wa lillahil-hamd - with salawat additions in some narrations.' },
+      { q: 'Fitr and Adha takbeer - different?', a: 'Yes: Fitr runs from the Shawwal moon to the Eid prayer; Adha runs from Arafah dawn through the 13th Asr after every fard prayer.' },
+      { q: 'Do women and children say it?', a: 'Yes - women softly where audible to none but themselves, children loudly and proudly; everyone joins.' },
+    ],
+    aliases: ['eid takbeer', 'eid ul fitr takbir', 'takbeer tashriq', 'eid takbir wording', 'allahu akbar eid'] },
+  { slug: 'eid-khutbah-rulings', cat: 'salah', title: 'Eid Khutbah & Missed Eid Prayer - Rulings Made Simple',
+    intro: 'The Eid khutbah comes after the prayer (unlike Jumuah), listening is sunnah, and whoever misses the congregation prays two rakahs alone - the complete rulings.',
+    sections: [
+      { h: 'The khutbah after salam', ps: ['The Prophet ﷺ always delivered the Eid khutbah after the prayer - covering gratitude, charity, family ties and (on Adha) sacrifice - and listeners stay seated as in Jumuah, though staying is sunnah rather than obligatory. The khutbah reminds of fitrana (Fitr) and qurbani (Adha) duties while the days are still open.', 'Umar’s practice shows the khutbah is one sitting with a short pause (not two like Jumuah); the imam holds a staff or bow, faces the people, and begins with abundant takbeer.'] },
+      { h: 'Missed it, late, or no congregation', ps: ['Whoever misses the Eid congregation prays two rakahs alone with the extra takbirs - Anas did exactly this with his family. Latecomers join wherever the imam is and complete what they missed, as in any congregational prayer.', 'Stranded travelers, the sick at home and women without facilities pray the same two rakahs; the takbeer, greeting and charity sunnahs all remain available. There is no makeup khutbah.'] },
+    ],
+    steps: ['Stay seated after Eid salam - the khutbah is part of the gathering.', 'Listen for the fitrana/qurbani reminders and act the same day.', 'If you missed the congregation: pray two rakahs with extra takbirs at home.', 'Latecomers join the imam wherever he is and complete the rest.'],
+    ref: 'Sahih al-Bukhari and Sahih Muslim (Eid khutbah after prayer; Anas praying with family)',
+    faq: [
+      { q: 'Is the Eid khutbah before or after prayer?', a: 'After - unlike Jumuah. The Prophet ﷺ, Abu Bakr, Umar and Uthman all delivered it after the prayer.' },
+      { q: 'I missed Eid prayer - what now?', a: 'Pray two rakahs alone with the extra takbirs, as Anas did with his household. No khutbah, no sin.' },
+      { q: 'Must women stay for the khutbah?', a: 'Staying is recommended for all attendees; menstruating women witness the gathering and supplications from aside.' },
+    ],
+    aliases: ['eid khutbah', 'missed eid prayer', 'eid prayer qaza', 'eid namaz reh jaye to', 'eid khutba sunnah'] },
+  { slug: 'shawwal-six-fasts', cat: 'duties', title: '6 Fasts of Shawwal - A Full Year of Reward',
+    intro: 'Whoever fasts Ramadan then six days of Shawwal earns a full year’s reward: consecutive or separate, the qada-first question, and combining intentions - all explained.',
+    sections: [
+      { h: 'The reward and the method', ps: ['The Prophet ﷺ promised: Ramadan plus six of Shawwal equals a year of fasting (Muslim) - because good deeds multiply tenfold (30 + 6 = 36 × 10 = 360). Fast any six days of Shawwal: consecutively from Eid’s second day for momentum, or spread across Mondays and Thursdays for double reward.', 'Eid day itself (1st Shawwal) is haram to fast - begin from the 2nd. Women, travelers and the ill with Ramadan makeup days should weigh the qada-first question below.'] },
+      { h: 'Qada first or Shawwal first', ps: ['The Hanbali school and many scholars require completing Ramadan makeup (qada) first, since the hadith says “fasts Ramadan (fully)” then six. The Hanafi and Shafi’i schools permit Shawwal first where time is short, with makeup before next Ramadan - both positions are mainstream; follow your school.', 'Combining one fast for both Shawwal and Monday is valid (one intention, two rewards); combining Shawwal with qada in a single day is disputed - keep them separate to satisfy all schools where possible.'] },
+    ],
+    steps: ['Do not fast on Eid day itself - begin Shawwal fasts from the 2nd.', 'Decide qada-first vs Shawwal-first per your school and available days.', 'Fast any six days - consecutively or on Mondays and Thursdays.', 'Pair intentions (Shawwal + Monday) but keep qada days separate.'],
+    ref: 'Sahih Muslim (six of Shawwal equals a year); Quran 6:160 (tenfold reward)',
+    faq: [
+      { q: 'Must Shawwal six be consecutive?', a: 'No - any six days of Shawwal count; consecutive is convenient, Mondays/Thursdays earn double.' },
+      { q: 'Qada or Shawwal first?', a: 'Many scholars say finish Ramadan makeup first; Hanafi/Shafi’i allow Shawwal first when days are short. Follow your school.' },
+      { q: 'Can one fast count for both qada and Shawwal?', a: 'Disputed - keep them separate to satisfy all schools; combining Shawwal with Monday/Thursday is fine.' },
+    ],
+    aliases: ['shawwal ke roze', '6 shawwal fasts', 'eid ke baad roze', 'shawwal fasting reward', 'qaza vs shawwal'] },
 ];
 export function guideCat(slug: string) {
   return GUIDE_CATS.find((c) => c.slug === slug);

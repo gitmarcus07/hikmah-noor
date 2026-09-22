@@ -21,6 +21,7 @@ const mainSet = new Set(mainSlugs);
 const PENDING_UR = new Set([
   'moon-sighting-hilal', 'itikaf-rules', 'laylatul-qadr', 'last-ten-nights-plan',
   'what-breaks-fast', 'fidyah-kaffarah-fasts', 'quran-khatm-ramadan', 'zakat-al-fitr',
+  'eid-day-sunnahs', 'eid-takbeer-wording', 'eid-khutbah-rulings', 'shawwal-six-fasts',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 if (new Set(ovSlugs).size !== ovSlugs.length) fail('duplicate overlay slugs');

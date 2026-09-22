@@ -20,9 +20,8 @@ const mainSlugs = [...main.matchAll(/\{ slug: '([^']+)', cat: '/g)].map((m) => m
 const mainSet = new Set(mainSlugs);
 // English-first batch (Eid season 2026): Urdu overlays land in a follow-up pass.
 const PENDING_UR = new Set([
-  'sehri-intention', 'taraweeh-pause-glorification', 'afiyah-pardon-wellbeing',
-  'refuge-fire-seven', 'khatm-quran-mercy', 'ramadan-istighfar',
-  'mercy-comprehensive-dua', 'rabbana-taqabbal-deeds',
+  'sehri-intention', 'afiyah-pardon-wellbeing', 'mercy-comprehensive-dua',
+  'shawwal-intention', 'gathering-expiation-dua',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 
