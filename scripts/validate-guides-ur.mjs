@@ -23,7 +23,10 @@ const PENDING_UR = new Set([
   'what-breaks-fast', 'fidyah-kaffarah-fasts', 'quran-khatm-ramadan', 'zakat-al-fitr',
   'eid-day-sunnahs', 'eid-takbeer-wording', 'eid-khutbah-rulings', 'shawwal-six-fasts',
   'qurbani-rules', 'qurbani-shares-who', 'qurbani-meat-distribution',
-  'tashriq-days-takbeer', 'qurbani-mistakes',
+  'tashriq-days-takbeer', 'qurbani-mistakes', 'istikhara-method', 'witr-method',
+  'jumuah-complete', 'dua-acceptance-guide', 'surah-yaseen-spotlight',
+  'surah-kahf-spotlight', 'surah-mulk-spotlight', 'surah-waqiah-spotlight',
+  'dhuha-chasht-prayer', 'salat-al-hajah', 'salat-al-tawbah',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 if (new Set(ovSlugs).size !== ovSlugs.length) fail('duplicate overlay slugs');
