@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import ProphetDetail from '../../components/ProphetDetail.astro';
+import SiteArt from '../../components/SiteArt.astro';
+import { artFor } from '../../lib/art';
+import { getCollection, render } from 'astro:content';
+import { getDict, localizedPath } from '../../i18n/utils';
+import { PROPHETS, prophetBySlug } from '../../data/prophets';
+const locale = 'en';
+const fixedCategory = 'prophets';
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  const all = await getCollection('articles', ({ data }) => !data.draft && data.locale === 'en' && data.category === 'prophets');
+  for (const entry of all) {
+    const slug = entry.id.split('/').pop()!.replace(/\.mdx?$/, '');
+    paths.push({ params: { slug }, props: { entry } });
+  }
+  for (const p of PROPHETS) paths.push({ params: { slug: p.slug }, props: { prophetSlug: p.slug } });
+  return paths;
+}
+const { slug } = Astro.params;
+const dict = getDict(locale);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const entry = (Astro.props as any).entry;
+const prophet = (Astro.props as any).prophetSlug ? prophetBySlug((Astro.props as any).prophetSlug) : undefined;
+const rendered = entry ? await render(entry) : null;
+const Content = rendered?.Content;
+const allSameLocale = await getCollection('articles', ({ data }) => !data.draft && data.locale === 'en');
+const related = entry ? allSameLocale.filter((e) => e.id !== entry.id && e.data.category === entry.data.category).slice(0, 3) : [];
+const popular = allSameLocale.filter((e) => !entry || e.id !== entry.id).sort((a, b) => +b.data.pubDate - +a.data.pubDate).slice(0, 4);
+const pub = entry ? new Date(entry.data.pubDate).toLocaleDateString() : '';
+---
+{prophet ? (
+<ProphetDetail prophet={prophet} locale={locale} />
+) : (
+<BaseLayout title={entry.data.title} description={entry.data.description} locale={locale} keywords={entry.data.keywords} type="article" pubDate={new Date(entry.data.pubDate).toISOString()} faq={entry.data.faq} canonicalPath={`/${entry.data.category}/${slug}/`}>
+  <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+    <article class="min-w-0">
+      <nav class="text-xs text-ink-500 mb-3">
+        <a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> /
+        <a href={localizedPath(locale, `/${entry.data.category}/`)} class="capitalize hover:text-brand-300"> {entry.data.category}</a> /
+        <span> {entry.data.title.slice(0, 40)}...</span>
+      </nav>
+      <span class="text-[11px] font-bold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">{entry.data.category}</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 mb-2 text-white">{entry.data.title}</h1>
+      <p class="text-sm text-ink-500 mb-4">{dict.article.by} <b>{entry.data.author}</b> • {pub}</p>
+      <div class="rounded-2xl border border-white/10 overflow-hidden mb-2"><SiteArt name={artFor(entry.data.image, entry.data.category)} title={entry.data.title} /></div>
+      {entry.data.arabic && (
+        <div class="bg-night-850 border border-white/10 rounded-2xl p-5 md:p-6 my-5">
+          <div class="text-xs font-bold text-gold-300 mb-2">{dict.article.arabic}</div>
+          <p class="arabic-block" lang="ar" dir="rtl">{entry.data.arabic}</p>
+          {entry.data.transliteration && <p class="mt-4 text-ink-200 italic leading-7 text-[15px]">{entry.data.transliteration}</p>}
+        </div>
+      )}
+      <div class="bg-night-850 border border-white/10 rounded-2xl p-5 md:p-7 prose-islamic">
+        <Content />
+      </div>
+      {entry.data.faq?.length ? (
+        <section class="mt-8">
+          <h2 class="text-xl font-extrabold mb-3 text-white">❓ {dict.article.faq}</h2>
+          <div class="space-y-3">
+            {entry.data.faq.map(f => (
+              <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
+                <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
+                <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      {related.length ? (
+        <section class="mt-10">
+          <h2 class="text-xl font-extrabold mb-4 text-white">📖 {dict.article.related}</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {related.map(r => <ArticleCard locale={locale} category={r.data.category} slug={slugOf(r.id)} title={r.data.title} description={r.data.description} date={r.data.pubDate} />)}
+          </div>
+        </section>
+      ) : null}
+    </article>
+    <aside class="space-y-5 lg:sticky lg:top-24 self-start w-full">
+      <form action={localizedPath(locale, '/search/')} method="get" class="bg-night-850 border border-white/10 rounded-3xl p-3 flex gap-2 shadow-lg shadow-black/30">
+        <input name="q" placeholder={dict.nav.search} class="flex-1 min-w-0 bg-night-800 text-ink-50 placeholder:text-ink-500 rounded-2xl px-4 py-3 min-h-[52px] text-[15px] outline-none focus:ring-2 ring-brand-400" />
+        <button class="bg-brand-500 hover:bg-brand-400 text-night-900 rounded-2xl w-[52px] min-h-[52px] grid place-items-center shrink-0 font-bold" aria-label="Search">🔍</button>
+      </form>
+      <div class="bg-night-850 border border-white/10 rounded-3xl p-5 sm:p-6 shadow-lg shadow-black/30">
+        <h3 class="flex items-center gap-2.5 font-extrabold text-[17px]"><span class="w-9 h-9 grid place-items-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-400 text-white text-lg shadow-sm">🔥</span>{dict.article.popular}<span class="ms-auto text-[11px] font-extrabold bg-brand-500/15 text-brand-300 rounded-full px-2.5 py-1">{popular.length}</span></h3>
+        <ol class="mt-4 divide-y divide-white/10">
+          {popular.map((p, i) => <li class="flex gap-3 py-3 first:pt-0 last:pb-0"><span class="w-7 h-7 shrink-0 grid place-items-center rounded-full bg-brand-500/15 text-brand-300 text-[13px] font-extrabold">{i + 1}</span><a class="font-semibold text-[14px] leading-6 text-ink-200 hover:text-brand-300 line-clamp-2" href={localizedPath(locale, `/${p.data.category}/${slugOf(p.id)}/`)}>{p.data.title}</a></li>)}
+        </ol>
+      </div>
+      <div class="bg-night-850 border border-white/10 rounded-3xl p-5 sm:p-6 shadow-lg shadow-black/30 relative overflow-hidden">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(139,124,246,.25), transparent 45%);"></div>
+        <h3 class="relative flex items-center gap-2.5 font-extrabold text-[17px]"><span class="w-9 h-9 grid place-items-center rounded-xl bg-white/10 border border-white/15 text-gold-300">🗂️</span>{dict.article.categories}</h3>
+        <div class="relative grid grid-cols-2 gap-2 mt-4">
+          {[{ slug: 'surahs', label: dict.nav.surahs, count: '114' }, { slug: 'quran', label: dict.nav.quran, count: '30' }, { slug: 'duas', label: dict.nav.duas, count: '' }, { slug: 'kalimas', label: dict.nav.kalimas, count: '6' }, { slug: 'meanings', label: dict.nav.meanings, count: '' }, { slug: 'prophets', label: 'Prophets', count: '25' }].map((c) => (
+            <a href={localizedPath(locale, `/${c.slug}/`)} class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-brand-500/50 rounded-2xl px-3 py-2.5 min-h-[52px] flex items-center gap-2 transition">
+              <span class="font-bold text-[13px] leading-5 text-ink-200 group-hover:text-brand-300 truncate">{c.label}</span>
+              {c.count && <span class="ms-auto shrink-0 text-[10px] font-extrabold bg-gold-300 group-hover:bg-night-900 group-hover:text-gold-300 text-night-900 rounded-full px-1.5 py-0.5">{c.count}</span>}
+            </a>
+          ))}
+        </div>
+      </div>
+      <a href={localizedPath(locale, '/tools/')} class="group bg-gold-300 hover:bg-amber-200 text-night-900 rounded-3xl p-5 flex items-center gap-3 shadow font-extrabold text-[15px] leading-6">🧰 {dict.nav.tools} →<span class="ms-auto w-9 h-9 grid place-items-center rounded-full bg-night-900 text-gold-300 group-hover:translate-x-1 transition">→</span></a>
+    </aside>
+  </div>
+</BaseLayout>
+)}

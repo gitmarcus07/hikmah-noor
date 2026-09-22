@@ -1,0 +1,158 @@
+---
+/* Prophet detail — chronological reading page with own branding.
+ * Prev/next by order; overlapping waqiat entries cross-link both ways. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ProphetArt from './ProphetArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { PROPHETS, prevProphet, nextProphet } from '../data/prophets';
+
+interface Props { prophet: any; locale: string; }
+const { prophet, locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+const prophetPath = `/prophets/${prophet.slug}/`;
+
+const title = `${prophet.title} — Story & Lessons`;
+let description = `${prophet.title}: ${prophet.summary} References: ${prophet.quranRef}.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${prophet.title.toLowerCase()}, prophet ${prophet.name.toLowerCase()} islam, ${prophet.order} prophet story${prophet.aliases?.length ? `, ${prophet.aliases.join(', ')}` : ''}`;
+
+const faq = [
+  { q: `Who was Prophet ${prophet.name}?`, a: prophet.summary },
+  { q: `What are the lessons from ${prophet.name}’s story?`, a: prophet.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: `Where is this story in the Quran?`, a: `References: ${prophet.quranRef}. Read the verses with translation; consult scholars for deeper rulings.` },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Prophets', path: '/prophets/' },
+  { name: prophet.title, path: prophetPath },
+];
+const WAQIAT_LINK: Record<string, string> = {
+  'yusuf-dream-to-throne': 'yusuf-well-to-throne',
+  'ibrahim-friend-of-allah': 'ibrahim-fire-cool',
+  'musa-pharaoh-and-sea': 'musa-sea-parted',
+  'nuh-nine-centuries-ark': 'nuh-ark-flood',
+  'yunus-people-of-nineveh': 'yunus-whale-darkness',
+  'ayyub-affliction-and-mercy': 'ayyub-patience-restored',
+  'sulayman-wind-and-wisdom': 'sulayman-kingdom-gratitude',
+  'dawud-armor-and-psalms': 'dawud-jalut-victory',
+};
+const waqiatSlug = WAQIAT_LINK[prophet.slug] ?? null;
+const others = PROPHETS.filter((w) => w.slug !== prophet.slug && w.era === prophet.era).concat(PROPHETS.filter((w) => w.slug !== prophet.slug && w.era !== prophet.era)).slice(0, 4);
+const prevP = prevProphet(prophet.order);
+const nextP = nextProphet(prophet.order);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={prophetPath}>
+  <div class="hn-article hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">Prophet {prophet.order} of 25</span>
+      <span class="hn-badge">{prophet.era}</span>
+      <span class="hn-badge hn-badge-gold">{prophet.name}</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{prophet.title}</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">{prophet.summary}</p>
+    {prophet.aliases?.length > 0 && (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {prophet.aliases.map((a: string, i: number) => (
+        <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
+      ))}</p>
+    )}
+
+    <div class="hn-card overflow-hidden my-6">
+      <ProphetArt motif={prophet.motif} arabic={prophet.arabic} prophet={prophet.name} accent={prophet.accent} />
+    </div>
+
+    <div class="hn-reading-card">
+      <p class="hn-block-label">Emblematic verse</p>
+      <p class="arabic-block" lang="ar" dir="rtl">{prophet.arabic}</p>
+      {prophet.translit && (
+        <>
+          <hr class="hn-divider" />
+          <p class="hn-block-label">Transliteration</p>
+          <p class="translit-block">{prophet.translit}</p>
+        </>
+      )}
+    </div>
+
+    <section class="mt-8" aria-label="The full story">
+      <SectionHeader eyebrow="Story" title="The full story" />
+      <div class="space-y-4">
+        {(prophet.narrative || []).map((p: string) => (
+          <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
+        ))}
+      </div>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated strictly from the Quran ({prophet.quranRef}) without invented details.</p>
+    </section>
+
+    <section class="mt-8" aria-label="The story in order">
+      <SectionHeader eyebrow="Timeline" title="The story in order" />
+      <ol class="space-y-3">
+        {prophet.events.map((e: string, i: number) => (
+          <li class="hn-card hn-card-pad flex gap-3">
+            <span class="hn-verse-num shrink-0">{i + 1}</span>
+            <span class="leading-7 text-[15px]">{e}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="mt-8" aria-label="Lessons">
+      <SectionHeader eyebrow="Reflect" title="Lessons" />
+      <div class="hn-card hn-card-pad">
+        <ul class="space-y-2.5 leading-7 text-[15px]">
+          {prophet.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
+        </ul>
+      </div>
+    </section>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{prophet.quranRef}</strong></p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Narrated from the Quran without invented details; consult scholars for rulings.</p>
+    {waqiatSlug && (
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">Want the event-focused telling? <a href={L(`/waqiat/${waqiatSlug}/`)} class="font-bold" style="color:var(--hn-primary)">Read the Waqiat narrative →</a></p>
+    )}
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="More prophets">
+      <SectionHeader eyebrow="Prophets" title="More prophets" href={L('/prophets/')} linkLabel="All 25 prophets" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((r) => (
+          <a href={L(`/prophets/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <ProphetArt motif={r.motif} arabic={r.arabic} prophet={r.name} accent={r.accent} />
+            <span class="block hn-card-pad">
+              <span class="font-bold block text-[15px] leading-6">{r.order}. {r.title}</span>
+              <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{r.summary}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {(prevP || nextP) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More prophets">
+        {prevP ? (
+          <a href={L(`/prophets/${prevP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Prophet {prevP.order}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevP.title}</span>
+          </a>
+        ) : <span />}
+        {nextP && (
+          <a href={L(`/prophets/${nextP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">Prophet {nextP.order} →</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextP.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>

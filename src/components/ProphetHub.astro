@@ -1,0 +1,82 @@
+---
+/* Prophets hub: 25 prophets in chronological order -> per-prophet SEO detail pages.
+ * Own branding (indigo-night art, PROPHET badges, era grouping), parallel to /waqiat/. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import ProphetArt from './ProphetArt.astro';
+import { localizedPath } from '../i18n/utils';
+import { PROPHETS, prophetsByEra } from '../data/prophets';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `The 25 Prophets in Islam — Stories in Order with Lessons (${PROPHETS.length} prophets)`;
+const description = `All ${PROPHETS.length} prophets in order — Adam, Nuh, Ibrahim, Musa, Dawud, Sulayman, Yunus, Isa and Muhammad ﷺ — with events, lessons and Quran references. Each prophet has its own page.`;
+const keywords = '25 prophets in islam, prophets stories in order, qisse ambiya, adam, nuh, ibrahim, musa, dawud, sulayman, yunus, isa, muhammad, anbiya stories';
+const faq = [
+  { q: 'How many prophets are covered?', a: '25 prophets in chronological order, from Adam to Muhammad ﷺ. Open any prophet for the full story with events, lessons and Quran references.' },
+  { q: 'Where do these stories come from?', a: 'Each story cites its Quran passages — no invented details. Lessons are drawn plainly from the verses; consult scholars for deeper rulings.' },
+  { q: 'How is this different from Waqiat?', a: 'Waqiat tells famous event-stories (the Well, the Fire, the Hijrah). The Prophets hub gives every prophet — including Idris, Hud, Shuayb, Dhul-Kifl, Zakariya and others — in one chronological series. The 8 overlapping prophets link both ways.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Prophets', path: '/prophets/' },
+];
+const eras = ['Early', 'Patriarchs', 'Exodus & Kings', 'Late & Final'] as const;
+const eraSub: Record<string, string> = {
+  'Early': 'Adam to Salih — humanity’s first chapters.',
+  'Patriarchs': 'Ibrahim to Yusuf — the family of nations.',
+  'Exodus & Kings': 'Shuayb to Yunus — exodus, kingdom and trials.',
+  'Late & Final': 'Zakariya to Muhammad ﷺ — the closing chain.',
+};
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/prophets/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{PROPHETS.length} prophets</span>
+        <span class="hn-badge">In chronological order</span>
+        <span class="hn-badge">Quran-only narratives</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">The 25 Prophets</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Every prophet from Adam to Muhammad ﷺ — in order, with the story, key events, lessons and Quran references. Tap any prophet for his own page.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search prophets — e.g. yusuf, musa, yunus…" aria-label="Search prophets" />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">Looking for event-stories like the Well or the Hijrah? <a href={L('/waqiat/')} class="font-bold" style="color:var(--hn-primary)">Browse Waqiat →</a></p>
+    </div>
+
+    {eras.map((era) => {
+      const list = prophetsByEra(era);
+      return (
+      <div class="mt-8">
+        <SectionHeader eyebrow={era} title={era === 'Early' ? 'The Beginning (1–5)' : era === 'Patriarchs' ? 'The Patriarchs (6–11)' : era === 'Exodus & Kings' ? 'Exodus & Kings (12–21)' : 'The Closing Chain (22–25)'} sub={eraSub[era]} />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((p) => (
+            <a href={L(`/prophets/${p.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+              <span class="block overflow-hidden"><ProphetArt motif={p.motif} arabic={p.arabic} prophet={p.name} accent={p.accent} /></span>
+              <span class="block hn-card-pad">
+                <span class="flex items-center gap-1.5">
+                  <span class="hn-verse-num shrink-0">{p.order}</span>
+                  <span class="hn-badge hn-badge-primary">{p.name}</span>
+                </span>
+                <span class="font-extrabold block text-[17px] leading-7 mt-2">{p.title}</span>
+                <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{p.summary}</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+      );
+    })}
+  </div>
+</BaseLayout>
+<style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

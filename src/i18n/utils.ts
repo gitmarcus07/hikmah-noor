@@ -20,7 +20,7 @@ export const localeFlags: Record<Locale, string> = {
   ar: '📿',
 };
 
-export const categories = ['surahs', 'duas', 'kalimas', 'meanings', 'waqiat', 'quran', 'hadees', 'seerat'] as const;
+export const categories = ['surahs', 'duas', 'kalimas', 'meanings', 'waqiat', 'prophets', 'quran', 'hadees', 'seerat'] as const;
 export type Category = (typeof categories)[number];
 
 import en from './en.json';

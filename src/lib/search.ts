@@ -8,6 +8,7 @@ import { DUAS, DUA_CATS } from '../data/duas';
 import { KALIMAS } from '../data/kalimas';
 import { MEANINGS } from '../data/meanings';
 import { WAQIAT } from '../data/waqiat';
+import { PROPHETS } from '../data/prophets';
 import { HADEES } from '../data/hadees';
 import { SEERAH } from '../data/seerah';
 
@@ -328,6 +329,31 @@ export function waqiahIndexItems(locale: string): IndexItem[] {
       category: 'waqiat',
       url: `${prefix}/waqiat/${w.slug}/`,
       tags: [...new Set(['waqiah', 'waqiat', 'qissa', 'story', w.title.toLowerCase(), w.prophet.toLowerCase(), ...(w.aliases || [])])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
+/** Prophets hub + individual prophet entries for a locale. */
+export function prophetIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const items: IndexItem[] = [
+    {
+      title: 'The 25 Prophets in Islam — Stories in Order with Lessons',
+      description: 'All 25 prophets in order: Adam, Nuh, Ibrahim, Musa, Dawud, Sulayman, Yunus, Isa and Muhammad ﷺ — events, lessons and Quran references.',
+      category: 'prophets',
+      url: `${prefix}/prophets/`,
+      tags: ['prophets', 'anbiya', 'ambiya', '25 prophets', 'prophet stories in order', 'qisse ambiya', 'stories of prophets'],
+      locale,
+    },
+  ];
+  for (const p of PROPHETS) {
+    items.push({
+      title: `${p.title} — Story & Lessons`,
+      description: `${p.summary} References: ${p.quranRef}.`,
+      category: 'prophets',
+      url: `${prefix}/prophets/${p.slug}/`,
+      tags: [...new Set(['prophet', 'prophets', 'nabi', 'qissa', 'story', `prophet ${p.order}`, p.title.toLowerCase(), p.name.toLowerCase(), p.era.toLowerCase(), ...(p.aliases || [])])].filter(Boolean),
       locale,
     });
   }

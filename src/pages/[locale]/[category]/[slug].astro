@@ -5,6 +5,7 @@ import DuaCategory from '../../../components/DuaCategory.astro';
 import KalimaDetail from '../../../components/KalimaDetail.astro';
 import MeaningDetail from '../../../components/MeaningDetail.astro';
 import WaqiahDetail from '../../../components/WaqiahDetail.astro';
+import ProphetDetail from '../../../components/ProphetDetail.astro';
 import HadeesDetail from '../../../components/HadeesDetail.astro';
 import SeerahDetail from '../../../components/SeerahDetail.astro';
 import SurahReader from '../../../components/SurahReader.astro';
@@ -17,6 +18,7 @@ import { DUA_CATS, duasByCat } from '../../../data/duas';
 import { KALIMAS, kalimaBySlug } from '../../../data/kalimas';
 import { MEANINGS, meaningBySlug } from '../../../data/meanings';
 import { WAQIAT, waqiahBySlug } from '../../../data/waqiat';
+import { PROPHETS, prophetBySlug } from '../../../data/prophets';
 import { HADEES, hadeesBySlug } from '../../../data/hadees';
 import { SEERAH, seerahBySlug } from '../../../data/seerah';
 import surahsMeta from '../../../data/surahs-meta.json';
@@ -51,6 +53,9 @@ export async function getStaticPaths() {
     for (const w of WAQIAT) {
       paths.push({ params: { locale, category: 'waqiat', slug: w.slug }, props: { waqiahSlug: w.slug } });
     }
+    for (const p of PROPHETS) {
+      paths.push({ params: { locale, category: 'prophets', slug: p.slug }, props: { prophetSlug: p.slug } });
+    }
     for (const h of HADEES) {
       paths.push({ params: { locale, category: 'hadees', slug: h.slug }, props: { hadeesSlug: h.slug } });
     }
@@ -68,6 +73,7 @@ const duaCat = (Astro.props as any).duaCat as any | undefined;
 const kalima = (Astro.props as any).kalimaSlug ? kalimaBySlug((Astro.props as any).kalimaSlug) : undefined;
 const meaning = (Astro.props as any).meaningSlug ? meaningBySlug((Astro.props as any).meaningSlug) : undefined;
 const waqiah = (Astro.props as any).waqiahSlug ? waqiahBySlug((Astro.props as any).waqiahSlug) : undefined;
+const prophet = (Astro.props as any).prophetSlug ? prophetBySlug((Astro.props as any).prophetSlug) : undefined;
 const hadees = (Astro.props as any).hadeesSlug ? hadeesBySlug((Astro.props as any).hadeesSlug) : undefined;
 const seerah = (Astro.props as any).seerahSlug ? seerahBySlug((Astro.props as any).seerahSlug) : undefined;
 
@@ -128,6 +134,8 @@ if (paraNum) {
 <MeaningDetail meaning={meaning} locale={locale} />
 ) : waqiah ? (
 <WaqiahDetail waqiah={waqiah} locale={locale} />
+) : prophet ? (
+<ProphetDetail prophet={prophet} locale={locale} />
 ) : hadees ? (
 <HadeesDetail hadees={hadees} locale={locale} />
 ) : seerah ? (

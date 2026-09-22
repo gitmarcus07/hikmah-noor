@@ -164,6 +164,7 @@ const moreLinks = [
             { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
             { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
             { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
+            { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
             { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
           ].map(m => (
             <a href={m.href} class="flex items-center gap-3 px-2.5 py-2 rounded-[10px] min-h-[52px] font-semibold" style="color:var(--hn-ink)" data-more-link>
@@ -270,6 +271,7 @@ const moreLinks = [
           <li><a class="hover:underline" href={L('/kalimas/')}>Kalimas</a></li>
           <li><a class="hover:underline" href={L('/hadees/')}>Hadees</a></li>
           <li><a class="hover:underline" href={L('/seerat/')}>Seerat</a></li>
+          <li><a class="hover:underline" href={L('/prophets/')}>Prophets</a></li>
           <li><a class="hover:underline" href={L('/names-of-allah/')}>99 Names</a></li>
         </ul>
       </div>
