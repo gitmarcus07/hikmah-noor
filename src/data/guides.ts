@@ -167,6 +167,48 @@ export const GUIDES: Guide[] = [
       { q: 'Boy and girl - any difference?', a: 'Two sheep for a boy and one for a girl is the established sunnah; the rest of the rites are identical.' },
     ],
     aliases: ['aqeeqah ka tarika', 'newborn sunnahs', 'bache ki aqeeqah', 'naam rakhna'] },
+  { slug: 'tahajjud-night-prayer', cat: 'salah', title: 'Tahajjud (Night Prayer) - Time, Rakahs and Method',
+    intro: 'Tahajjud is the night prayer after sleeping - the best prayer after the obligatory ones, prayed in the last part of the night when Allah descends to the lowest heaven answering whoever calls.',
+    sections: [
+      { h: 'When and how many', ps: ['Sleep first, then rise in the last third of the night - divide the night between Maghrib and Fajr into thirds; the last third is the hour of answering. Pray two rakahs at a time (2+2), most commonly eight, then close with Witr - the Prophet, peace be upon him, generally prayed eleven in total including Witr.', 'Begin with two short rakahs, recite long and calmly, and end before Fajr begins - even two rakahs consistently outweigh long occasional nights.'] },
+      { h: 'The method', ps: ['Use miswak, make wudu, and open with the night-prayer opening dua (Allahumma laka alhamdu anta qayyimus-samawat) - its Arabic is on our dua pages.', 'After every two rakahs rest briefly; finish with one or three Witr, then make personal dua - the last third is when dua is answered, so ask for everything.'] },
+    ],
+    steps: ['Sleep, then rise in the last third of the night and make wudu.', 'Pray two short opening rakahs, then two-by-two up to eight with calm recitation.', 'Recite the night-prayer opening dua and make long sujood with personal duas.', 'Close with Witr (one or three rakahs with qunut dua).', 'End with istighfar and dua before Fajr - the hour of answering.'],
+    ref: 'Sahih al-Bukhari and Sahih Muslim (night prayer; Allah’s descent in the last third)',
+    faq: [
+      { q: 'Exactly when is the last third of the night?', a: 'From Maghrib to Fajr, divide into three equal parts - the final part (often 2-4am) is the last third. If unsure, the final 90 minutes before Fajr safely fall inside it.' },
+      { q: 'How many rakahs is Tahajjud?', a: 'Two at a time with no fixed maximum; eight plus three Witr follows the Prophet’s common practice, while two rakahs consistently is the minimum beloved deed.' },
+      { q: 'Can I pray Tahajjud without sleeping first?', a: 'Night prayer without sleep is Qiyam al-Layl and fully rewarded; Tahajjud specifically means rising after sleeping - scholars differ on the naming, not the reward.' },
+    ],
+    aliases: ['tahajjud ka tarika', 'tahajjud time', 'tahajjud rakats', 'tahajjud namaz method', 'qiyam ul layl'] },
+  { slug: 'eid-prayer-method', cat: 'salah', title: 'Eid Prayer (Namaz-e-Eid) - Step by Step',
+    intro: 'The Eid prayer - two rakahs in congregation with extra takbirs, followed by the khutbah - is wajib in the Hanafi school and a stressed communal sunnah in others, prayed on Eid al-Fitr and Eid al-Adha mornings.',
+    sections: [
+      { h: 'Before the prayer', ps: ['Take ghusl, wear your best clothes and apply perfume; on Eid al-Fitr eat an odd number of dates before leaving, on Eid al-Adha delay eating until after the sacrifice. Walk one route, return another, reciting the Eid takbirat aloud on the way.', 'The prayer is held in an open ground (Eidgah) or large mosque shortly after sunrise - arrive early, as there is no adhan or iqamah for Eid.'] },
+      { h: 'The method and school differences', ps: ['Two rakahs: after the opening takbir recite Thana, then extra takbirs (seven in the first rakah and five in the second in Hanafi practice, before recitation; Shafi’i and Maliki count twelve total with different placement) - follow your school and imam.', 'Recite Al-Fatiha and a surah (Al-A’la then Al-Ghashiyah is sunnah), complete the rakahs, then sit through the khutbah - listening is part of the rite, unlike Jumuah where it precedes.'] },
+    ],
+    steps: ['Take ghusl, dress well, and eat dates (Fitr) before leaving for the Eidgah.', 'Make intention for Eid prayer and say the opening takbir with the imam.', 'Recite Thana, then say the extra takbirs raising hands each time.', 'Complete two rakahs with Fatiha and a surah in each.', 'Sit through the khutbah after salam, then embrace and congratulate fellow worshippers.'],
+    ref: 'Sahih al-Bukhari and Sahih Muslim (Eid prayer, takbirat and khutbah)',
+    faq: [
+      { q: 'How many extra takbirs in Eid prayer?', a: 'Hanafi: three extra in each rakah (seven counting the opening, five in the second); Shafi’i/Maliki: twelve total with different placement. Pray behind your imam’s school.' },
+      { q: 'Is the Eid khutbah obligatory to hear?', a: 'Staying for it is sunnah and strongly encouraged; leaving early does not invalidate the prayer.' },
+      { q: 'Do women attend Eid prayer?', a: 'The Prophet commanded all women - including menstruating women (to witness goodness from aside) - to attend Eid; facilities and local scholarship decide arrangements.' },
+    ],
+    aliases: ['eid namaz ka tarika', 'eid ul fitr prayer method', 'namaz e eid', 'eid prayer rakats', 'eid ki namaz'] },
+  { slug: 'taraweeh-night-prayer', cat: 'salah', title: 'Taraweeh - Method and the 8-or-20 Question',
+    intro: 'Taraweeh is the Ramadan night prayer in congregation - prayed after Isha in sets with short rests (tarwihah), usually completing a Quran recitation across the month, closing with Witr.',
+    sections: [
+      { h: 'The method', ps: ['Pray two rakahs at a time with calm recitation, resting briefly every four - glorifying Allah in the pause (the Taraweeh dua on our dua pages). Most mosques complete twenty with Witr; pray what your mosque prays and stay till the imam finishes - you are recorded as praying the whole night.', 'Women and travelers may pray at home in the same 2-by-2 pattern; completing the Quran in Taraweeh is recommended, not required.'] },
+      { h: 'Eight or twenty - the honest answer', ps: ['The Prophet prayed eleven at night including Witr (Bukhari/Muslim); Umar gathered the companions behind one imam for twenty plus Witr, and the companions agreed - which is why most mosques and all four schools’ majorities pray twenty.', 'Both numbers are established practice: eight follows the Prophet’s personal night count, twenty follows the companions’ consensus under Umar. Never quarrel over it - pray with your local mosque and follow qualified scholars.'] },
+    ],
+    steps: ['Pray Isha, then join Taraweeh intending Qiyam Ramadan.', 'Pray two rakahs at a time with measured recitation.', 'Rest every four rakahs with glorification and dua.', 'Stay until the imam finishes Witr - the full night is recorded for you.'],
+    ref: 'Sahih al-Bukhari and Sahih Muslim (Qiyam Ramadan; Umar’s congregation in Muwatta Malik)',
+    faq: [
+      { q: 'Is Taraweeh 8 or 20 rakahs?', a: 'The Prophet’s night prayer was eleven including Witr; Umar’s congregation settled on twenty plus Witr with companions’ agreement. Majorities of all four schools pray twenty - follow your mosque without dispute.' },
+      { q: 'Can women pray Taraweeh at home?', a: 'Yes - pray 2-by-2 at home with the same method; congregation is recommended where facilities allow.' },
+      { q: 'What if I join late or miss some rakahs?', a: 'Join wherever the imam is and make up missed rakahs after - or complete Witr with the congregation and pray missed sets later.' },
+    ],
+    aliases: ['taraweeh ka tarika', 'taraweeh 8 or 20', 'tarawih rakats', 'taraweeh at home', 'qiyam ramadan'] },
 ];
 export function guideCat(slug: string) {
   return GUIDE_CATS.find((c) => c.slug === slug);
