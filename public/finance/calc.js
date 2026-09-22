@@ -638,10 +638,41 @@ export function calculateMirath(input = {}) {
   return r;
 }
 
+/* ---------------- Qurbani share splitter ---------------- */
+export function calculateQurbaniSplit(input = {}) {
+  const { methodology = 'general', currency = 'INR', animal = 'cow', totalCost = 0, shares = 7, meatKg = 0 } = input;
+  const r = base(methodology, ['Cow and camel divide into exactly seven equal shares; a sheep or goat covers one person.', 'Every share must carry a worship intention (Qurbani, aqeeqah or hady) — not mere meat purchase.', 'Butcher wages are separate cash, never meat or hide.']);
+  const maxShares = animal === 'sheep' ? 1 : 7;
+  const n = Math.min(maxShares, Math.max(1, Math.floor(num(shares))));
+  const cost = num(totalCost);
+  const perShare = n > 0 ? cost / n : 0;
+  const meat = num(meatKg);
+  const perShareMeat = n > 0 ? meat / n : 0;
+  const animalLabel = animal === 'sheep' ? 'Sheep / goat' : animal === 'cow' ? 'Cow' : 'Camel';
+  r.breakdown = [
+    row('Animal', animalLabel),
+    row('Total price', fmt(cost, currency)),
+    row('Shares', animal === 'sheep' ? '1 (whole animal)' : `${n} of 7`),
+    row('Per-share cost', fmt(perShare, currency)),
+  ];
+  if (meat > 0) {
+    r.breakdown.push(row('Total meat (est.)', `${meat.toFixed(1)} kg`));
+    r.breakdown.push(row('Per-share meat (est.)', `${perShareMeat.toFixed(2)} kg`));
+    r.breakdown.push(row('Per-share thirds (family / relatives / poor)', `${(perShareMeat / 3).toFixed(2)} kg each`));
+  }
+  if (animal !== 'sheep' && Math.floor(num(shares)) !== 7 && Math.floor(num(shares)) > 0) r.warnings.push('Partial groups are fine (fewer than 7 may share), but every share must be equal — divide the price evenly regardless of headcount.');
+  if (animal !== 'sheep' && n < 7) r.warnings.push('Unfilled shares: the remaining portions still require worship intentions — do not sell leftover shares as plain meat.');
+  r.evidence = ['Seven companions shared one camel and one cow at Hudaybiyyah (reported in Sahih Muslim).', 'The Prophet sacrificed two horned rams, saying the slaughter wording over each (Sunan Abu Dawud).'];
+  r.eligible = cost > 0; r.amount = perShare; r.unit = currency;
+  r.currency = currency; r.disclaimer = EDU_NOTE;
+  return r;
+}
+
 export const CALCS = {
   calculateZakat, calculateGoldZakat, calculateSilverZakat, calculateCashZakat,
   calculateBusinessZakat, calculateInvestmentZakat, calculateAgriculturalZakat,
   calculateLivestockZakat, calculateZakatAlFitr, calculateFidyah,
   calculateKaffarahOath, calculateKaffarahFasting, calculateHajjFidyah,
   calculateMahr, calculateNafaqah, calculateKhums, calculateMirath,
+  calculateQurbaniSplit,
 };

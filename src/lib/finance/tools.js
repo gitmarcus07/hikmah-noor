@@ -17,6 +17,7 @@ export const CATS = [
   { slug: 'start-here', title: 'Start Here', desc: 'Understand what you may owe before calculating anything.', icon: 'quran', grad: 'from-emerald-900 to-emerald-700', chip: 'bg-emerald-50 text-emerald-800 border-emerald-100' },
   { slug: 'zakat', title: 'Zakat', desc: 'The obligatory alms — calculators for every asset type.', icon: 'surahs', grad: 'from-emerald-950 via-emerald-900 to-emerald-700', chip: 'bg-emerald-50 text-emerald-800 border-emerald-100' },
   { slug: 'fidyah-kaffarah', title: 'Fidyah & Kaffarah', desc: 'Expiations and compensations for fasts, oaths and Hajj rites.', icon: 'duas', grad: 'from-amber-600 to-amber-500', chip: 'bg-amber-50 text-amber-800 border-amber-200' },
+  { slug: 'qurbani-eid', title: 'Qurbani & Eid', desc: 'Sacrifice shares, costs and the Eid-day order — calculators and checklists.', icon: 'moon', grad: 'from-amber-800 via-amber-700 to-amber-500', chip: 'bg-amber-50 text-amber-800 border-amber-200' },
   { slug: 'family-finance', title: 'Family Finance', desc: 'Mahr and maintenance planning — rights, not taxes.', icon: 'kalimas', grad: 'from-sky-700 to-sky-500', chip: 'bg-sky-50 text-sky-800 border-sky-200' },
   { slug: 'classical-finance', title: 'Classical Finance', desc: 'Khums, Ushr, Jizya and Kharaj — school-specific and historical rulings explained.', icon: 'meanings', grad: 'from-violet-800 to-violet-600', chip: 'bg-violet-50 text-violet-800 border-violet-200' },
 ];
@@ -379,6 +380,44 @@ export const TOOLS = [
       { q: 'What is the daughter’s share?', a: 'One daughter alone (no sons) takes one-half; two or more share two-thirds. With sons, daughters share the residue at half a son’s portion each.' },
       { q: 'Why Sunni only?', a: 'Ja’fari law differs significantly (e.g. no awl/radd in the Sunni sense, different residuary rules). This v1 covers the six closest heir types under Sunni rules; complex families need a scholar.' },
       { q: 'Is this a fatwa?', a: 'No — an educational estimate. Real cases involve debts, missing heirs, pregnancy, or distant relatives. Consult a qualified scholar before distributing.' },
+    ],
+  },
+  /* ---------- QURBANI & EID ---------- */
+  {
+    slug: 'qurbani-splitter', cat: 'qurbani-eid', kind: 'form', calc: 'calculateQurbaniSplit', icon: 'moon',
+    level: 'Planning tool (wajib / stressed sunnah)',
+    title: 'Qurbani Share Splitter — Cow/Camel 7-Way Cost & Meat Shares',
+    desc: 'Split a cow or camel into 7 equal shares: per-share cost, per-share meat and the distribution thirds — or price a full sheep.',
+    keywords: 'qurbani share calculator, cow 7 hissa cost split, qurbani price per share, bakra eid cost splitter, udhiyah share',
+    intro: 'Enter the animal price and how the 7 shares divide. Every share pays equally and every share must be a worship intention (Qurbani, aqeeqah or hady).',
+    fields: [MADH('Obligation level (wajib vs stressed sunnah) and share-combining details differ by school.'), CUR, { key: 'animal', label: 'Animal', type: 'select', options: [{ v: 'sheep', t: 'Sheep / goat (1 person)' }, { v: 'cow', t: 'Cow (up to 7 shares)' }, { v: 'camel', t: 'Camel (up to 7 shares)' }], def: 'cow' }, { key: 'totalCost', label: 'Total animal price', type: 'number', def: 0 }, { key: 'shares', label: 'Number of shares (cow/camel: up to 7)', type: 'number', def: 7 }, { key: 'meatKg', label: 'Estimated meat in kg (optional)', type: 'number', def: 0, hint: 'Net meat after slaughter, for per-share and thirds estimates.' }],
+    faq: [
+      { q: 'How many shares in a cow?', a: 'Exactly seven equal shares. Six or eight splits are invalid — every share must be equal and worship-intended.' },
+      { q: 'Can shares mix Qurbani and aqeeqah?', a: 'Yes in Hanafi and many scholars’ view — each share needs a worship intention, not mere meat purchase.' },
+      { q: 'One sheep for the whole family?', a: 'One sheep covers one person’s obligation, but its reward can be gifted to the household and deceased by intention.' },
+    ],
+  },
+  {
+    slug: 'eid-day-checklist', cat: 'qurbani-eid', kind: 'info', calc: null, icon: 'moon',
+    level: 'Sunnah checklist',
+    title: 'Eid Day Checklist — Fitr & Adha Hour by Hour',
+    desc: 'The Eid-day order: ghusl, dress, dates vs sacrifice-fast, takbeer, Eidgah, prayer, khutbah, visits and Qurbani — ticked off in sequence.',
+    keywords: 'eid day checklist, eid ul fitr routine, eid ul adha order, eid ki tayyari checklist',
+    intro: 'Eid has an order — Fitr and Adha differ at exactly two points (dates before prayer vs eating after sacrifice). Walk the list in sequence.',
+    points: [
+      'Night before (Fitr): pay any remaining fitrana; start the takbeer at the Shawwal moon. (Adha): takbeer running since Arafah dawn.',
+      'Dawn: Fajr in congregation, then Eid ghusl, best clothes, perfume; new-clothes dua.',
+      'Fitr: eat an odd number of dates before leaving. Adha: eat nothing until after the sacrifice.',
+      'Walk to the Eidgah reciting takbeer aloud; go by one route, return by another.',
+      'Pray two rakahs with extra takbirs behind the imam; stay for the khutbah.',
+      'Greet with “Taqabbal Allahu minna wa minka”; visit family, forgive quarrels, include the poor.',
+      'Adha 10th–13th: slaughter after prayer, distribute in thirds fresh, pay butcher in cash, donate the hide.',
+      'Close gatherings with the kaffaratul-majlis dua; keep the takbeer going (Adha: after every fard till the 13th Asr).',
+    ],
+    faq: [
+      { q: 'Fitr vs Adha morning — what differs?', a: 'Two things: Fitr eats dates before prayer; Adha fasts till the sacrifice. Everything else (ghusl, dress, takbeer, Eidgah, routes) is shared.' },
+      { q: 'What if I miss the congregation?', a: 'Pray two rakahs alone with extra takbirs; the rest of the checklist still applies.' },
+      { q: 'When does Adha takbeer stop?', a: 'After Asr on the 13th — the restricted takbeer follows every fard prayer from Arafah dawn.' },
     ],
   },
 ];
