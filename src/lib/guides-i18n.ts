@@ -12,7 +12,15 @@ import { GUIDES_UR_7 } from '../data/i18n/guides-ur-7';
 import { GUIDES_UR_8 } from '../data/i18n/guides-ur-8';
 import { GUIDES_UR_9 } from '../data/i18n/guides-ur-9';
 import { GUIDES_HI_1 } from '../data/i18n/guides-hi-1';
+import { GUIDES_HI_2 } from '../data/i18n/guides-hi-2';
+import { GUIDES_HI_3 } from '../data/i18n/guides-hi-3';
+import { GUIDES_HI_4 } from '../data/i18n/guides-hi-4';
+import { GUIDES_HI_5 } from '../data/i18n/guides-hi-5';
 import { GUIDES_AR_1 } from '../data/i18n/guides-ar-1';
+import { GUIDES_AR_2 } from '../data/i18n/guides-ar-2';
+import { GUIDES_AR_3 } from '../data/i18n/guides-ar-3';
+import { GUIDES_AR_4 } from '../data/i18n/guides-ar-4';
+import { GUIDES_AR_5 } from '../data/i18n/guides-ar-5';
 
 export interface GuideOverlay {
   title?: string;
@@ -24,8 +32,8 @@ export interface GuideOverlay {
 }
 
 const GUIDE_MAP: Record<string, GuideOverlay> = Object.assign({}, GUIDES_UR_1, GUIDES_UR_2, GUIDES_UR_3, GUIDES_UR_4, GUIDES_UR_5, GUIDES_UR_6, GUIDES_UR_7, GUIDES_UR_8, GUIDES_UR_9);
-const GUIDE_MAP_HI: Record<string, GuideOverlay> = Object.assign({}, GUIDES_HI_1);
-const GUIDE_MAP_AR: Record<string, GuideOverlay> = Object.assign({}, GUIDES_AR_1);
+const GUIDE_MAP_HI: Record<string, GuideOverlay> = Object.assign({}, GUIDES_HI_1, GUIDES_HI_2, GUIDES_HI_3, GUIDES_HI_4, GUIDES_HI_5);
+const GUIDE_MAP_AR: Record<string, GuideOverlay> = Object.assign({}, GUIDES_AR_1, GUIDES_AR_2, GUIDES_AR_3, GUIDES_AR_4, GUIDES_AR_5);
 
 function overlayMap(locale: string): Record<string, GuideOverlay> | null {
   if (locale === 'ur') return GUIDE_MAP;

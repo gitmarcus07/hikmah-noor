@@ -12,6 +12,8 @@
     "astro": "astro",
     "content:duas": "node scripts/validate-duas.mjs",
     "content:duas:ur": "node scripts/validate-duas-ur.mjs",
+    "content:duas:hi": "node scripts/validate-duas-hi.mjs",
+    "content:duas:ar": "node scripts/validate-duas-ar.mjs",
     "content:duas:backfill": "node scripts/backfill-duas.mjs",
     "content:duas:aliases": "node scripts/backfill-aliases.mjs",
     "content:kalimas": "node scripts/validate-kalimas.mjs",
@@ -28,6 +30,8 @@
     "content:seerat": "node scripts/validate-seerah.mjs",
     "content:guides": "node scripts/validate-guides.mjs",
     "content:guides:ur": "node scripts/validate-guides-ur.mjs",
+    "content:guides:hi": "node scripts/validate-guides-hi.mjs",
+    "content:guides:ar": "node scripts/validate-guides-ar.mjs",
     "content:links": "node scripts/check-links.mjs",
     "content:surahs": "node scripts/build-surahs.mjs",
     "content:tafsir": "node scripts/validate-tafsir.mjs"
