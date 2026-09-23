@@ -84,4 +84,5 @@ export const GUIDE_CATS_UR: Record<string, { title?: string; desc?: string }> = 
   salah: { title: 'نماز', desc: 'وضو، غسل، اذان اور نماز کا طریقہ — مرحلہ وار۔' },
   duties: { title: 'ارکان پر عمل', desc: 'روزہ، زکاۃ، حج اور نماز جنازہ آسان زبان میں۔' },
   family: { title: 'خاندان اور نئی زندگی', desc: 'نکاح، نومولود اور آخری رسوم۔' },
+  aqeedah: { title: 'عقیدہ', desc: 'ارکان ایمان، توحید، شرک اور یوم آخرت — آسان زبان میں۔' },
 };

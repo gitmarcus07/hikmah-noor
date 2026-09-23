@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
+import SourcesBlock from './hn/SourcesBlock.astro';
 import { localizedPath } from '../i18n/utils';
 import { SEERAH } from '../data/seerah';
 
@@ -83,8 +84,7 @@ const sameEra = SEERAH.filter((s) => s.era === chapter.era && s.slug !== chapter
         ))}
       </div>
     </section>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{chapter.references}</strong></p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Verify details with a teacher; rulings differ — consult scholars.</p>
+    <SourcesBlock locale={locale} source={chapter.references} reviewedDate="2026-01-01" />
 
     <section class="mt-8" aria-label="Frequently asked questions">
       <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />

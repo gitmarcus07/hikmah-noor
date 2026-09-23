@@ -1,0 +1,32 @@
+---
+/* SourcesBlock — unified sources + trust footer for guide/dua/seerah/surah pages. */
+import { localizedPath } from '../../i18n/utils';
+import ReviewedBadge from './ReviewedBadge.astro';
+
+interface Props {
+  locale: string;
+  source: string;
+  narrator?: string | null;
+  grade?: string | null;
+  originLabel?: string | null;
+  reviewedDate?: string;
+  reviewer?: string;
+}
+const { locale, source, narrator, grade, originLabel, reviewedDate, reviewer } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+---
+<div class="hn-card hn-card-pad mt-6" aria-label="Sources and review">
+  <p class="hn-block-label">Sources & review</p>
+  <p class="text-[15px] font-semibold leading-6">{source}</p>
+  <p class="mt-1 text-[13px] leading-6" style="color:var(--hn-muted)">
+    {originLabel && <span>{originLabel} • </span>}
+    {narrator && <span>Narrated by <strong style="color:var(--hn-ink)">{narrator}</strong> • </span>}
+    {grade && <span>Grade: <strong style="color:var(--hn-ink)">{grade}</strong> • </span>}
+    <span>Learn personal details from a qualified teacher; minor school differences exist.</span>
+  </p>
+  <p class="mt-1 text-[13px] leading-6" style="color:var(--hn-muted)">
+    Educational content — not a fatwa. See <a href={L('/methodology/')} class="font-bold underline underline-offset-2" style="color:var(--hn-primary)">methodology</a>
+    {' '}and <a href={L('/disclaimer/')} class="font-bold underline underline-offset-2" style="color:var(--hn-primary)">disclaimer</a>.
+  </p>
+  <ReviewedBadge locale={locale} date={reviewedDate} reviewer={reviewer} />
+</div>

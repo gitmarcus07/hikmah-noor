@@ -20,6 +20,7 @@ const popular = popularSlugs.length
 const originOf = (d: any): string => d.origin ?? (String(d.source || '').startsWith('Quran') ? 'quran' : 'hadith');
 const nQuran = DL.filter((d: any) => originOf(d) === 'quran').length;
 const nHadith = DL.filter((d: any) => originOf(d) === 'hadith').length;
+const hisnList = DL.filter((d: any) => (d as any).hisnNo).sort((a: any, b: any) => (a as any).hisnNo - (b as any).hisnNo);
 
 const title = `All Duas in Arabic with Transliteration, Meaning & Sources (${DL.length}+ duas)`;
 const description = `All ${DL.length} authentic duas by category — morning, salah, Ramadan, Hajj, prophets’ duas, marriage, children, death, hereafter and more. Arabic, transliteration, meaning, narrator and authenticity grade.`;
@@ -83,6 +84,21 @@ const crumbs = [
       </div>
     </div>
 
+    {hisnList.length > 0 && (
+      <div class="mt-8">
+        <SectionHeader eyebrow="Hisn" title="From Hisn al-Muslim" sub="Fortress of the Muslim — numbered by chapter." />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {hisnList.slice(0, 8).map((d: any) => (
+            <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="hn-badge hn-badge-gold">Hisn #{(d as any).hisnNo}</span>
+              <span class="font-bold block text-[15px] leading-6 mt-2">{d.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">For: {d.use}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
     {guides.length > 0 && (
       <div class="mt-8">
         <SectionHeader eyebrow="Guides" title="In-depth dua guides" />
@@ -112,18 +128,20 @@ const crumbs = [
         <button data-origin="hadith" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Prophetic</button>
         <button data-origin="sahaba" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Companion</button>
         <button data-origin="scholarly" class="dua-origin-btn hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm">Scholarly</button>
+        <button id="hisnbtn" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-4 text-sm" aria-pressed="false">Hisn al-Muslim ({hisnList.length})</button>
       </div>
       <p id="duacount" class="text-sm mb-3" style="color:var(--hn-muted)">{DL.length} duas</p>
       <div id="duagrid" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {DL.map((d: any) => {
           const cat = DUA_CATS.find((c) => c.slug === d.cat);
           return (
-            <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use} ${cat?.title ?? ''} ${((d as any).aliases || []).join(' ')}`.toLowerCase()} data-cat={d.cat} data-origin={originOf(d)} class="duarow hn-card hn-card-hover hn-card-pad block">
+            <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use} ${cat?.title ?? ''} ${((d as any).aliases || []).join(' ')}${(d as any).hisnNo ? ` hisn ${(d as any).hisnNo} hisn al muslim` : ''}`.toLowerCase()} data-cat={d.cat} data-origin={originOf(d)} data-hisn={(d as any).hisnNo ? '1' : ''} class="duarow hn-card hn-card-hover hn-card-pad block">
               <span class="font-bold block text-[15px] leading-6">{d.title}</span>
               <span class="text-[13px]" style="color:var(--hn-muted)">For: {d.use}</span>
               <span class="mt-2 flex flex-wrap gap-1.5">
                 <span class="hn-badge hn-badge-primary">{cat?.title ?? d.cat}</span>
                 {d.grade && <span class="hn-badge">{d.grade}</span>}
+                {(d as any).hisnNo && <span class="hn-badge hn-badge-gold">Hisn #{(d as any).hisnNo}</span>}
               </span>
             </a>
           );
@@ -136,7 +154,13 @@ const crumbs = [
           const count = document.getElementById('duacount');
           const rows = [...document.querySelectorAll('.duarow')];
           const btns = [...document.querySelectorAll('.dua-origin-btn')];
+          const hisnBtn = document.getElementById('hisnbtn');
+          const setBtn = (b, on) => {
+            b.classList.toggle('hn-btn-primary', on);
+            b.classList.toggle('hn-btn-secondary', !on);
+          };
           let origin = '';
+          let hisnOnly = false;
           const apply = () => {
             const q = (input.value || '').toLowerCase().trim();
             const cat = catSel.value || '';
@@ -145,7 +169,8 @@ const crumbs = [
               const okQ = !q || (r.dataset.search || '').includes(q);
               const okC = !cat || r.dataset.cat === cat;
               const okO = !origin || r.dataset.origin === origin;
-              const show = okQ && okC && okO;
+              const okH = !hisnOnly || r.dataset.hisn === '1';
+              const show = okQ && okC && okO && okH;
               r.classList.toggle('hidden', !show);
               if (show) n++;
             });
@@ -156,9 +181,16 @@ const crumbs = [
           btns.forEach((b) =>
             b.addEventListener('click', () => {
               origin = b.dataset.origin || '';
+              btns.forEach((x) => setBtn(x, x === b));
               apply();
             })
           );
+          hisnBtn?.addEventListener('click', () => {
+            hisnOnly = !hisnOnly;
+            hisnBtn.setAttribute('aria-pressed', String(hisnOnly));
+            setBtn(hisnBtn, hisnOnly);
+            apply();
+          });
         })();
       </script>
     </div>

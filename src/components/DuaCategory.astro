@@ -51,7 +51,7 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
 
     <div class="mt-4 grid gap-3 md:grid-cols-2" id="catgrid">
       {duas.map((d: any, i: number) => (
-        <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use}`.toLowerCase()} class="catrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
+        <a href={L(`/duas/${d.cat}/${d.slug}/`)} data-search={`${d.title} ${d.use}${(d as any).hisnNo ? ` hisn ${(d as any).hisnNo}` : ''}`.toLowerCase()} class="catrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
           <span class="hn-verse-num shrink-0">{i + 1}</span>
           <span class="min-w-0">
             <span class="font-extrabold block leading-6">{d.title}</span>
@@ -59,6 +59,7 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
             <span class="mt-1.5 flex flex-wrap gap-1.5">
               {d.grade && <span class="hn-badge hn-badge-primary">{d.grade}</span>}
               <span class="hn-badge">{d.source}</span>
+              {(d as any).hisnNo && <span class="hn-badge hn-badge-gold">Hisn #{(d as any).hisnNo}</span>}
             </span>
           </span>
         </a>

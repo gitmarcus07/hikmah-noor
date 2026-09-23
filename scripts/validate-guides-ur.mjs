@@ -11,7 +11,7 @@ const fail = (msg) => { errors++; console.error('X ' + msg); };
 
 const main = await readFile(join(ROOT, 'src', 'data', 'guides.ts'), 'utf8');
 let txt = '';
-for (const f of ['guides-ur-1.ts', 'guides-ur-2.ts', 'guides-ur-3.ts']) {
+for (const f of ['guides-ur-1.ts', 'guides-ur-2.ts', 'guides-ur-3.ts', 'guides-ur-4.ts', 'guides-ur-5.ts', 'guides-ur-6.ts']) {
   txt += '\n' + await readFile(join(ROOT, 'src', 'data', 'i18n', f), 'utf8');
 }
 

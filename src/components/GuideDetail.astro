@@ -5,6 +5,7 @@ import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
 import ShareButtons from './hn/ShareButtons.astro';
+import SourcesBlock from './hn/SourcesBlock.astro';
 import { localizedPath } from '../i18n/utils';
 import { guidesByCat, GUIDES } from '../data/guides';
 import { localizeGuide, localizeGuideList, localizeGuideCat } from '../lib/guides-i18n';
@@ -109,6 +110,14 @@ const RELATED_DUAS: Record<string, string[]> = {
   'baby-names-rules-list': ['righteous-children-salihin', 'ruqyah-children', 'wedding-dua'],
   'dawah-answering-atheism': ['seeking-knowledge', 'musa-clarity-speech', 'steadfast-heart'],
   'umrah-kids-elderly-nusuk': ['talbiyah', 'tawaf-corner', 'starting-journey'],
+  'what-is-aqeedah-basics': ['amantu-billah-doubts', 'steadfast-heart', 'sayyidul-istighfar'],
+  'tawhid-three-categories': ['refuge-hidden-shirk', 'sayyidul-istighfar', 'steadfast-heart'],
+  'belief-angels-books': ['seeking-knowledge', 'steadfast-heart', 'morning-remembrance'],
+  'belief-in-messengers': ['darood-ibrahimi', 'seeking-knowledge', 'steadfast-heart'],
+  'belief-in-qadr-decree': ['hasbunallah', 'amantu-billah-doubts', 'afiyah-pardon-wellbeing'],
+  'bidah-vs-sunnah': ['seeking-knowledge', 'steadfast-heart', 'morning-remembrance'],
+  'tawakkul-trust-balance': ['hasbunallah', 'musa-in-need', 'rizq-blessing'],
+  'names-attributes-course': ['seeking-knowledge', 'steadfast-heart', 'sayyidul-istighfar'],
 };
 const duaLinks = (RELATED_DUAS[guide.slug] || [])
   .map((s) => {
@@ -171,11 +180,7 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
       </section>
     ))}
 
-    <div class="hn-card hn-card-pad mt-6">
-      <p class="hn-block-label">Basis</p>
-      <p class="text-[15px] font-semibold leading-6">{guide.ref}</p>
-      <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Learn personal details from a qualified teacher; minor school differences exist.</p>
-    </div>
+    <SourcesBlock locale={locale} source={guide.ref} reviewedDate="2026-01-01" />
 
     {guide.faq && guide.faq.length > 0 && (
       <section class="mt-8" aria-label="Frequently asked questions">

@@ -1,6 +1,8 @@
 ---
 /* Dedicated Quran reading layout — calm, focused, same design language as Juz. */
 import Icon from './Icon.astro';
+import ReviewedBadge from './hn/ReviewedBadge.astro';
+import { VERSE_TAFSIR } from '../data/tafsir';
 interface Verse { v: number; ar: string; ur: string; en: string; hi: string; tr: string }
 interface SurahMeta { num: number; slug: string; name: string; englishName: string; arabicName: string; revelation: string; verseCount: number }
 interface Props {
@@ -71,6 +73,12 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
       <p class="m-ur leading-8 mt-2" dir={locale === 'en' ? 'rtl' : undefined} lang="ur">{verse.ur}</p>
       <p class="m-en leading-7 mt-2 hidden" style="color:var(--hn-muted)">{verse.en}</p>
       <p class="m-hi leading-8 mt-2 hidden" style="color:var(--hn-muted)" lang="hi">{verse.hi}</p>
+      {VERSE_TAFSIR[surah.num]?.[verse.v] && (
+        <details class="mt-2 text-[14px]">
+          <summary class="font-bold cursor-pointer" style="color:var(--hn-primary)">Tafsir — verse {verse.v}</summary>
+          <p class="mt-1 leading-7" style="color:var(--hn-muted)">{VERSE_TAFSIR[surah.num][verse.v]}</p>
+        </details>
+      )}
     </article>
   ))}
 </div>
@@ -81,7 +89,9 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
   Translation audio: English (Sahih International, Ibrahim Walk) & Urdu (Shamshad Ali Khan) via EveryAyah;
   Hindi uses your device's voice reader and needs internet voices on some phones.
   Spoken translation wording may differ slightly from the displayed text.
+  Educational content — not a fatwa. See <a href={L('/methodology/')} class="font-bold underline underline-offset-2" style="color:var(--hn-primary)">methodology</a>.
 </p>
+<ReviewedBadge locale={locale} date="2026-01-01" />
 
 <div class="grid gap-3 mt-6 sm:grid-cols-2">
   {prev ? (

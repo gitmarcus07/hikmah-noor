@@ -8,6 +8,7 @@ import { DUAS_UR_1 } from '../data/i18n/duas-ur-1';
 import { DUAS_UR_2 } from '../data/i18n/duas-ur-2';
 import { DUAS_UR_3 } from '../data/i18n/duas-ur-3';
 import { DUAS_UR_4 } from '../data/i18n/duas-ur-4';
+import { DUAS_UR_5 } from '../data/i18n/duas-ur-5';
 
 export interface DuaOverlay {
   title?: string;
@@ -19,7 +20,7 @@ export interface DuaOverlay {
 }
 
 const OVERLAYS: Record<string, Record<string, DuaOverlay>> = { ur: {} };
-for (const part of [DUAS_UR_1, DUAS_UR_2, DUAS_UR_3, DUAS_UR_4]) Object.assign(OVERLAYS.ur, part);
+for (const part of [DUAS_UR_1, DUAS_UR_2, DUAS_UR_3, DUAS_UR_4, DUAS_UR_5]) Object.assign(OVERLAYS.ur, part);
 
 /** Overlay locales currently shipped. */
 export function duaLocales(): string[] {

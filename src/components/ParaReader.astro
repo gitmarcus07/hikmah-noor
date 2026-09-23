@@ -11,6 +11,7 @@ interface Props {
   locale: string;
 }
 import { localizedPath } from '../i18n/utils';
+import { VERSE_TAFSIR } from '../data/tafsir';
 const { para, sections, prev, next, locale } = Astro.props;
 const pad = (n: number) => String(n).padStart(3, '0');
 const audioBase = 'https://everyayah.com/data/Alafasy_128kbps/';
@@ -81,6 +82,12 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
             <p class="m-ur leading-8 mt-2" lang="ur">{verse.ur}</p>
             <p class="m-en leading-7 mt-2 hidden" style="color:var(--hn-muted)">{verse.en}</p>
             <p class="m-hi leading-8 mt-2 hidden" style="color:var(--hn-muted)" lang="hi">{verse.hi}</p>
+            {VERSE_TAFSIR[surah.num]?.[verse.v] && (
+              <details class="mt-2 text-[14px]">
+                <summary class="font-bold cursor-pointer" style="color:var(--hn-primary)">Tafsir — {surah.num}:{verse.v}</summary>
+                <p class="mt-1 leading-7" style="color:var(--hn-muted)">{VERSE_TAFSIR[surah.num][verse.v]}</p>
+              </details>
+            )}
           </article>
         ))}
       </div>

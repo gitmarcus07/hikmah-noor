@@ -314,7 +314,7 @@ export function duaIndexItems(locale: string): IndexItem[] {
       description: `${d.use}. Arabic with transliteration, meaning, virtue${(d as any).grade ? `, ${(d as any).grade} grade` : ''}. Source: ${d.source}.`,
       category: 'duas',
       url: `${prefix}/duas/${d.cat}/${d.slug}/`,
-      tags: [...new Set(['dua', 'duas', d.title.toLowerCase(), d.use.toLowerCase(), (cat?.title || '').toLowerCase(), d.cat.replace(/-/g, ' '), d.source.toLowerCase(), origin, ((d as any).grade || '').toLowerCase(), ((d as any).narrator || '').toLowerCase(), ...(((d as any).aliases || []) as string[]), ...d.title.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3)])].filter(Boolean),
+      tags: [...new Set(['dua', 'duas', ...((d as any).hisnNo ? ['hisn al muslim', 'hisn', `hisn ${(d as any).hisnNo}`] : []), d.title.toLowerCase(), d.use.toLowerCase(), (cat?.title || '').toLowerCase(), d.cat.replace(/-/g, ' '), d.source.toLowerCase(), origin, ((d as any).grade || '').toLowerCase(), ((d as any).narrator || '').toLowerCase(), ...(((d as any).aliases || []) as string[]), ...d.title.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3)])].filter(Boolean),
       locale,
     });
   }

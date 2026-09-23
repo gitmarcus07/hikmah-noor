@@ -60,8 +60,10 @@ const moreLinks = [
   { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
   { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
   { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
+  { label: 'Aqeedah', href: L('/aqeedah/'), icon: 'star' },
   { label: 'History', href: L('/history/'), icon: 'book' },
   { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
+  { label: 'Hajj & Umrah', href: L('/hajj/'), icon: 'moon' },
   { label: 'Eid & Qurbani', href: L('/eid/'), icon: 'moon' },
   { label: 'Quiz', href: L('/quiz/'), icon: 'book' },
   { label: 'Favourites', href: L('/favourites/'), icon: 'heart' },
@@ -82,6 +84,7 @@ const mobileGroups = [
   ] },
   { label: 'Learn', icon: 'book', links: [
     { label: 'Learn', href: L('/learn/') },
+    { label: 'Aqeedah', href: L('/aqeedah/') },
     { label: 'Seerat', href: L('/seerat/') },
     { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/') },
     { label: 'Sahaba', href: L('/sahaba/') },
@@ -91,12 +94,14 @@ const mobileGroups = [
   ] },
   { label: 'Seasonal', icon: 'moon', links: [
     { label: 'Ramadan', href: L('/ramadan/') },
+    { label: 'Hajj & Umrah', href: L('/hajj/') },
     { label: 'Eid & Qurbani', href: L('/eid/') },
   ] },
   { label: dict.nav.tools ?? 'Tools', icon: 'tools', links: [
     { label: dict.nav.tools ?? 'Tools', href: L('/tools/') },
     { label: 'Quiz', href: L('/quiz/') },
     { label: 'Favourites', href: L('/favourites/') },
+    { label: 'Methodology', href: L('/methodology/') },
     { label: dict.nav.about ?? 'About', href: L('/about/') },
   ] },
 ] as const;
@@ -327,6 +332,7 @@ const mobileGroups = [
           <li><a class="hover:underline" href={L('/women/')}>Women</a></li>
           <li><a class="hover:underline" href={L('/history/')}>History</a></li>
           <li><a class="hover:underline" href={L('/ramadan/')}>Ramadan</a></li>
+          <li><a class="hover:underline" href={L('/hajj/')}>Hajj & Umrah</a></li>
           <li><a class="hover:underline" href={L('/calendar/')}>Islamic Calendar</a></li>
           <li><a class="hover:underline" href={L('/eid/')}>Eid & Qurbani</a></li>
           <li><a class="hover:underline" href={L('/names-of-allah/')}>99 Names</a></li>
@@ -337,6 +343,7 @@ const mobileGroups = [
         <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
           <li><a class="hover:underline" href={L('/meanings/')}>Meanings</a></li>
           <li><a class="hover:underline" href={L('/learn/')}>How-To Guides</a></li>
+          <li><a class="hover:underline" href={L('/aqeedah/')}>Aqeedah</a></li>
           <li><a class="hover:underline" href={L('/tools/')}>Tools</a></li>
           <li><a class="hover:underline" href={L('/quiz/')}>Quiz</a></li>
           <li><a class="hover:underline" href={L('/names-muhammad/')}>Names of Muhammad ﷺ</a></li>
@@ -347,6 +354,7 @@ const mobileGroups = [
         <div class="font-bold mb-3 text-sm uppercase tracking-wide" style="color:var(--hn-ink)">Site</div>
         <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
           <li><a class="hover:underline" href={L('/about/')}>About</a></li>
+          <li><a class="hover:underline" href={L('/methodology/')}>Methodology</a></li>
           <li><a class="hover:underline" href={L('/contact/')}>Contact</a></li>
           <li><a class="hover:underline" href={L('/privacy/')}>Privacy</a></li>
           <li><a class="hover:underline" href={L('/terms/')}>Terms</a></li>

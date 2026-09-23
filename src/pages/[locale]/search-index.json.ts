@@ -2,6 +2,7 @@
 import { nonDefaultLocales } from '../../i18n/utils';
 import surahsMeta from '../../data/surahs-meta.json';
 import parasMeta from '../../data/paras-meta.json';
+import { TAFSIR } from '../../data/tafsir';
 import { toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems, waqiahIndexItems, prophetIndexItems, sahabaIndexItems, womenIndexItems, quizIndexItems, hadeesIndexItems, seerahIndexItems, guideIndexItems, historyIndexItems, tagSurah } from '../../lib/search';
 
 export async function getStaticPaths() {
@@ -21,10 +22,10 @@ export async function GET({ params }: any) {
   const list = [...native, ...fill];
   const surahItems = (surahsMeta as any[]).map(s => tagSurah({
     title: `Surah ${s.name} (${s.englishName})`,
-    description: `Surah ${s.num} â€” ${s.verseCount} verses, ${s.revelation === 'Mecca' ? 'Makki' : 'Madani'}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
+    description: `Surah ${s.num} — ${s.verseCount} verses, ${s.revelation === 'Mecca' ? 'Makki' : 'Madani'}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.${(TAFSIR as any)[s.num] ? ` ${(TAFSIR as any)[s.num].intro}` : ''}`,
     category: 'surahs',
     url: `/${locale}/surahs/${s.slug}/`,
-    tags: ['quran', 'surah', 'juz', 'para', s.name.toLowerCase(), s.englishName.toLowerCase(), String(s.num)],
+    tags: ['quran', 'surah', 'juz', 'para', 'tafsir', s.name.toLowerCase(), s.englishName.toLowerCase(), String(s.num), ...(((TAFSIR as any)[s.num]?.themes || []) as string[]).map((t: string) => t.toLowerCase())],
     locale,
   }));
   const paraItems = (parasMeta as any[]).map(p => ({

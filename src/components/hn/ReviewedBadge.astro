@@ -1,0 +1,17 @@
+---
+/* ReviewedBadge — small editorial review stamp. Process-first, no named scholars required. */
+import { localizedPath } from '../../i18n/utils';
+
+interface Props {
+  locale: string;
+  date?: string;
+  reviewer?: string;
+}
+const { locale, date = '2026-01-01', reviewer } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+---
+<p class="mt-3 flex flex-wrap items-center gap-2 text-[13px]" style="color:var(--hn-muted)">
+  <span class="hn-badge">Reviewed • {date}</span>
+  {reviewer && <span class="hn-badge hn-badge-gold">By {reviewer}</span>}
+  <a href={L('/methodology/')} class="font-bold underline underline-offset-2" style="color:var(--hn-primary)">Our methodology</a>
+</p>

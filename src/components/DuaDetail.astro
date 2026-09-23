@@ -6,6 +6,7 @@ import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
 import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
+import SourcesBlock from './hn/SourcesBlock.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat, DUA_ORIGIN_LABEL } from '../data/duas';
 import { localizeDua, localizeList } from '../lib/duas-i18n';
@@ -52,6 +53,7 @@ const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : n
       <span class="hn-badge">{cat.title}</span>
       {originLabel && <span class="hn-badge hn-badge-gold">{originLabel}</span>}
       {gradeLabel && <span class="hn-badge">{gradeLabel}</span>}
+      {(dua as any).hisnNo && <span class="hn-badge hn-badge-gold">Hisn #{(dua as any).hisnNo}</span>}
       <span class="ms-auto"><BookmarkButton kind="dua" bmRef={duaPath} title={dua.title} /></span>
       <ShareButtons title={dua.title} path={duaPath} locale={locale} />
     </div>
@@ -83,8 +85,7 @@ const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : n
         )}
       </div>
     )}
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Source: <strong style="color:var(--hn-ink)">{dua.source}</strong>{narratorLabel && <span> • Narrated by <strong style="color:var(--hn-ink)">{narratorLabel}</strong></span>}{gradeLabel && <span> • Grade: <strong style="color:var(--hn-ink)">{gradeLabel}</strong></span>}</p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Verify wording with a teacher; rulings differ — consult scholars.</p>
+    <SourcesBlock locale={locale} source={dua.source} narrator={narratorLabel} grade={gradeLabel} originLabel={originLabel} reviewedDate="2026-01-01" />
 
     <section class="mt-8" aria-label="Frequently asked questions">
       <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />

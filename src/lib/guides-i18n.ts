@@ -5,6 +5,9 @@
 import { GUIDES_UR_1 } from '../data/i18n/guides-ur-1';
 import { GUIDES_UR_2 } from '../data/i18n/guides-ur-2';
 import { GUIDES_UR_3, GUIDE_CATS_UR } from '../data/i18n/guides-ur-3';
+import { GUIDES_UR_4 } from '../data/i18n/guides-ur-4';
+import { GUIDES_UR_5 } from '../data/i18n/guides-ur-5';
+import { GUIDES_UR_6 } from '../data/i18n/guides-ur-6';
 
 export interface GuideOverlay {
   title?: string;
@@ -15,7 +18,7 @@ export interface GuideOverlay {
   aliasesUr?: string[];
 }
 
-const GUIDE_MAP: Record<string, GuideOverlay> = Object.assign({}, GUIDES_UR_1, GUIDES_UR_2, GUIDES_UR_3);
+const GUIDE_MAP: Record<string, GuideOverlay> = Object.assign({}, GUIDES_UR_1, GUIDES_UR_2, GUIDES_UR_3, GUIDES_UR_4, GUIDES_UR_5, GUIDES_UR_6);
 
 export function localizeGuide(item: any, locale: string): any {
   if (locale !== 'ur') return item;

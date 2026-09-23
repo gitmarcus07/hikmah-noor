@@ -50,6 +50,7 @@ const namesMuhammadUrl = L('/names-muhammad/');
 const learnUrl = L('/learn/');
 const historyUrl = L('/history/');
 const ramadanHubUrl = L('/ramadan/');
+const hajjHubUrl = L('/hajj/');
 const eidHubUrl = L('/eid/');
 const toolsUrl = L('/tools/');
 const zakatUrl = L('/tools/zakat/zakat-calculator/');
@@ -82,6 +83,7 @@ const libraryGroups = [
   ] },
   { id: 'learn', chip: 'Learn', title: 'Stories & guides', sub: 'Lives, history and how-tos.', cards: [
     { icon: 'book', title: 'Learn', desc: 'Step-by-step guides: namaz, wudu, fasting', href: learnUrl },
+    { icon: 'star', title: 'Aqeedah', desc: 'Six pillars, Tawhid, Qadr & Last Day', href: L('/aqeedah/') },
     { icon: 'star', title: 'Seerat un Nabi ﷺ', desc: 'Full biography in 16 chapters', href: seeratUrl },
     { icon: 'star', title: 'Prophets', desc: 'All 25 prophets in order with lessons', href: prophetsUrl },
     { icon: 'book', title: 'Sahaba', desc: 'Lives of the 24 popular companions', href: sahabaUrl },
@@ -90,8 +92,9 @@ const libraryGroups = [
     { icon: 'star', title: 'Names of Allah', desc: 'All 99 names with meaning', href: namesAllahUrl },
     { icon: 'heart', title: 'Names of Muhammad ﷺ', desc: 'His 99 names and titles', href: namesMuhammadUrl },
   ] },
-  { id: 'seasonal', chip: 'Seasonal', title: 'Ramadan & Eid', sub: 'Fasting, festivals and sacrifice.', cards: [
+  { id: 'seasonal', chip: 'Seasonal', title: 'Ramadan, Hajj & Eid', sub: 'Fasting, pilgrimage, festivals and sacrifice.', cards: [
     { icon: 'moon', title: 'Ramadan Guide', desc: 'Fasting rules, duas, Taraweeh & countdown', href: ramadanHubUrl },
+    { icon: 'moon', title: 'Hajj & Umrah Guide', desc: 'Ihram, tawaf, sai, Arafah & day-by-day', href: hajjHubUrl },
     { icon: 'moon', title: 'Eid & Qurbani', desc: 'Both Eids, takbeer, Qurbani shares & Tashriq', href: eidHubUrl },
   ] },
 ] as const;
