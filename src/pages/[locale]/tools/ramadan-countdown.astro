@@ -12,7 +12,7 @@ const faq = [
   { q: 'How should I prepare?', a: 'Revise recitation, practice fasting Mondays/Thursdays, calculate zakat early, and plan taraweeh and daily Quran portions.' },
 ];
 ---
-<BaseLayout title={`${dict.home.ramadanTitle}`} description="Ramadan countdown with Hijri date — always counts to the next Ramadan. Estimated starts, moon sighting may vary by country." locale={locale} canonicalPath="/tools/ramadan-countdown/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: dict.home.ramadanTitle, path: '/tools/ramadan-countdown/' }]}>
+<BaseLayout title={`${dict.home.ramadanTitle} Countdown — Days Left Until Ramadan & Eid`} description="Live Ramadan countdown with Hijri date — always counts to the next Ramadan. Estimated starts, moon sighting may vary by country." keywords="ramadan countdown, when is ramadan, days until ramadan, eid al fitr date, ramzan countdown" locale={locale} canonicalPath="/tools/ramadan-countdown/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: dict.home.ramadanTitle, path: '/tools/ramadan-countdown/' }]}>
   <AppHeader locale={locale} title={dict.home.ramadanTitle} backHref="/tools/" />
   <section class="relative overflow-hidden bg-night-900 text-white">
     <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 85% 10%, rgba(139,124,246,.25), transparent 50%), radial-gradient(circle at 10% 90%, rgba(212,175,55,.12), transparent 40%);"></div>
@@ -93,7 +93,7 @@ const faq = [
     const now = Date.now();
     const past = [...starts].reverse().find((t) => t <= now);
     if (past && now - past < RAMADAN_LEN) {
-      return { target: past + RAMADAN_LEN, label: '🌙 Ramadan Mubarak! Estimated Eid al-Fitr: ' + fmt(past + RAMADAN_LEN) };
+      return { target: past + RAMADAN_LEN, label: '🌙 Ramadan Mubarak! Expected Eid al-Fitr (±1 day): ' + fmt(past + 29 * DAY) + ' or ' + fmt(past + 30 * DAY) };
     }
     let target = starts.find((t) => t > now);
     if (target === undefined) { target = starts[starts.length - 1]; while (target <= now) target += LUNAR_YEAR; }

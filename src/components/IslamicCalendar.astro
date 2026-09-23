@@ -1,0 +1,255 @@
+---
+/* Islamic Calendar — shared body for EN + locale shells.
+ * Client-side Hijri math via Intl (islamic-umalqura); all annual dates
+ * labelled estimates (±1–2 days) — moon sighting decides. */
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { localizedPath } from '../i18n/utils';
+import { CAL_META } from '../lib/calendar-meta';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const L = (p: string) => localizedPath(locale, p);
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Islamic Calendar', path: '/calendar/' },
+];
+---
+<div class="hn-discover hn-section">
+  <Breadcrumbs locale={locale} items={crumbs} />
+  <div class="mt-3 max-w-2xl">
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Live Hijri calendar</span>
+      <span class="hn-badge">12 months</span>
+      <span class="hn-badge">Estimates ±1–2 days</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Islamic Calendar — Hijri Dates & Sacred Days</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">Every popular Islamic date in one place — Ramadan, Laylatul Qadr, both Eids, Hajj days, Ashura, Shab-e-Barat and Shab-e-Miraj — with Gregorian (government-calendar) equivalents, a browsable Hijri month view and upcoming countdowns. Moon sighting decides; converters estimate.</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a href={L('/tools/hijri-converter/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Hijri date converter</a>
+      <a href={L('/tools/ramadan-countdown/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Ramadan countdown</a>
+      <a href={L('/learn/duties/moon-sighting-hilal/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Moon-sighting guide</a>
+    </div>
+  </div>
+
+  <div class="mt-6 grid gap-3 md:grid-cols-3">
+    <div class="hn-card hn-card-pad text-center md:col-span-1">
+      <p class="hn-block-label">Today (Hijri)</p>
+      <p class="font-extrabold text-[24px] leading-9" data-cal-today>—</p>
+      <p class="text-[13px] font-bold mt-1" style="color:var(--hn-muted)" data-cal-civil></p>
+    </div>
+    <div class="hn-card hn-card-pad text-center md:col-span-1">
+      <p class="hn-block-label">Today (Gregorian)</p>
+      <p class="font-extrabold text-[24px] leading-9" data-cal-greg>—</p>
+      <p class="text-[13px] font-bold mt-1" style="color:var(--hn-muted)">Government-calendar date</p>
+    </div>
+    <div class="hn-card hn-card-pad text-center md:col-span-1" style="background:var(--hn-primary-soft)">
+      <p class="hn-block-label">Next big date</p>
+      <p class="font-extrabold text-[20px] leading-8" data-cal-next>—</p>
+      <p class="text-[13px] font-bold mt-1" style="color:var(--hn-primary)" data-cal-next-sub></p>
+    </div>
+  </div>
+
+  <section class="mt-8" aria-label="Hijri month view">
+    <SectionHeader eyebrow="Month view" title="Browse any Hijri month" sub="Prev / next through the year — sacred days are marked." />
+    <div class="hn-card hn-card-pad mt-3">
+      <div class="flex items-center justify-between gap-2">
+        <button class="hn-btn hn-btn-secondary !min-h-[44px] !px-4 text-sm" data-cal-prev aria-label="Previous month">‹ Prev</button>
+        <p class="font-extrabold text-[18px]" data-cal-mtitle>—</p>
+        <button class="hn-btn hn-btn-secondary !min-h-[44px] !px-4 text-sm" data-cal-nextm aria-label="Next month">Next ›</button>
+      </div>
+      <div class="mt-3 text-center"><button class="text-[13px] font-bold" style="color:var(--hn-primary)" data-cal-todaybtn>Jump to this month</button></div>
+      <div class="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-extrabold uppercase tracking-wide" style="color:var(--hn-muted)">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+      <div class="mt-1 grid grid-cols-7 gap-1" data-cal-grid></div>
+      <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12.5px]" style="color:var(--hn-muted)">
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full me-1" style="background:var(--hn-primary)"></span>Sacred day</span>
+        <span><span class="inline-block w-2.5 h-2.5 rounded-full me-1" style="background:#d4af37"></span>Today</span>
+        <span>White days (13–15) suit fasting every month.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-8" aria-label="Upcoming Islamic dates">
+    <SectionHeader eyebrow="Countdowns" title="Upcoming sacred dates" sub="Estimated Gregorian equivalents — sighting may shift by a day." />
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3" data-cal-upcoming></div>
+  </section>
+
+  <section class="mt-8" aria-label="Full year of sacred dates">
+    <SectionHeader eyebrow="Full year" title="All popular dates this Hijri year" sub="Hijri date + Gregorian equivalent + why it matters." />
+    <div class="mt-3 overflow-x-auto hn-card">
+      <table class="w-full text-[14px] leading-6 min-w-[640px]">
+        <thead>
+          <tr class="text-left text-[12px] uppercase tracking-wide" style="color:var(--hn-muted);border-bottom:1px solid var(--hn-border)">
+            <th class="px-4 py-3">Occasion</th>
+            <th class="px-4 py-3">Hijri</th>
+            <th class="px-4 py-3">Gregorian (est.)</th>
+            <th class="px-4 py-3">Guide</th>
+          </tr>
+        </thead>
+        <tbody data-cal-table></tbody>
+      </table>
+    </div>
+    <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">Recurring: White Days (13th–15th of every Hijri month) and Monday & Thursday fasts run all year — see our fasting guide.</p>
+  </section>
+
+  <section class="mt-8" aria-label="Related guides and tools">
+    <SectionHeader eyebrow="Learn" title="Guides for these dates" href={L('/learn/')} linkLabel="All guides" />
+    <div class="grid gap-3 sm:grid-cols-2 mt-3">
+      <a href={L('/learn/duties/roza-fasting/')} class="hn-card hn-card-hover hn-card-pad block"><span class="font-bold block text-[15px]">Fasting rules</span><span class="text-[13px]" style="color:var(--hn-muted)">Ramadan, Shawwal, Ashura, Mondays & Thursdays</span></a>
+      <a href={L('/learn/duties/laylatul-qadr/')} class="hn-card hn-card-hover hn-card-pad block"><span class="font-bold block text-[15px]">Laylatul Qadr</span><span class="text-[13px]" style="color:var(--hn-muted)">Odd nights, the Qadr dua, last-10-nights plan</span></a>
+      <a href={L('/learn/duties/hajj-day-by-day/')} class="hn-card hn-card-hover hn-card-pad block"><span class="font-bold block text-[15px]">Hajj day by day</span><span class="text-[13px]" style="color:var(--hn-muted)">8th–13th Dhul-Hijjah timeline</span></a>
+      <a href={L('/eid/')} class="hn-card hn-card-hover hn-card-pad block"><span class="font-bold block text-[15px]">Eid hub</span><span class="text-[13px]" style="color:var(--hn-muted)">Both Eids: prayer, takbeer, Qurbani</span></a>
+    </div>
+  </section>
+
+  <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+    <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <div class="space-y-3 mt-3">
+      {CAL_META.faq.map((f) => (
+        <details class="hn-faq">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline define:vars={{ learnBase: L('/learn/'), ramadanHref: L('/ramadan/'), eidHref: L('/eid/'), seeratHref: L('/seerat/') }}>
+(() => {
+  const root = document.querySelector('[data-cal-grid]');
+  if (!root || root.dataset.wired) return;
+  root.dataset.wired = '1';
+  const $ = (s) => document.querySelector(s);
+  const MONTHS = ['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Ula','Jumada al-Akhirah','Rajab','Shaban','Ramadan','Shawwal','Dhul-Qadah','Dhul-Hijjah'];
+  const DAY = 864e5;
+  const startOfDay = (t) => { const d = new Date(t); d.setUTCHours(0,0,0,0); return d.getTime(); };
+  const today0 = startOfDay(Date.now());
+  const fmtG = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const fmtH = (t) => { try { return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(t)); } catch { return '—'; } };
+  const fmtHc = (t) => { try { return new Intl.DateTimeFormat('en-u-ca-islamic-civil', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(t)); } catch { return ''; } };
+  const parts = (t) => {
+    const p = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).formatToParts(new Date(t));
+    const g = (k) => Number(p.find((x) => x.type === k).value);
+    return { d: g('day'), m: g('month'), y: g('year') };
+  };
+  const cmpHM = (a, b) => (a.y - b.y) || (a.m - b.m);
+
+  /* ---- event definitions: Hijri month/day + metadata ---- */
+  const EV = [
+    { m: 1, d: 1, name: 'Islamic New Year', note: '1 Muharram — new Hijri year begins', href: learnBase + 'duties/moon-sighting-hilal/' },
+    { m: 1, d: 9, name: 'Tasua (9th Muharram)', note: 'Fast with Ashura (9th + 10th)', href: learnBase + 'duties/ashura-muharram-fasting/' },
+    { m: 1, d: 10, name: 'Day of Ashura', note: '10 Muharram — fast; expiates the past year', href: learnBase + 'duties/ashura-muharram-fasting/' },
+    { m: 3, d: 12, name: 'Mawlid un-Nabi', note: '12 Rabi al-Awwal — study the Seerah', href: seeratHref },
+    { m: 7, d: 27, name: 'Shab-e-Miraj', note: '27 Rajab — the Night Journey; honour with prayer', href: learnBase + 'duties/rajab-virtues/' },
+    { m: 8, d: 15, name: 'Shab-e-Barat', note: '15 Shaban — hopeful individual worship', href: learnBase + 'duties/shaban-shab-e-barat/' },
+    { m: 9, d: 1, name: 'Ramadan begins', note: '1 Ramadan — fasting month starts (sighting)', href: ramadanHref },
+    { m: 9, d: 21, name: 'Laylatul Qadr (odd nights)', note: '21st, 23rd, 25th, 27th, 29th — seek the Night of Power', href: learnBase + 'duties/laylatul-qadr/' },
+    { m: 9, d: 0, name: 'Jummatul-Wida', note: 'Last Friday of Ramadan', href: learnBase + 'duties/last-ten-nights-plan/', fri: true },
+    { m: 10, d: 1, name: 'Eid al-Fitr', note: '1 Shawwal — dates, fitrana, Eid prayer', href: eidHref },
+    { m: 10, d: 2, name: 'Shawwal six fasts', note: 'Any 6 days of Shawwal — a year of fasting', href: learnBase + 'duties/shawwal-six-fasts/' },
+    { m: 12, d: 8, name: 'Day of Tarwiyah', note: '8 Dhul-Hijjah — Hajj rites begin at Mina', href: learnBase + 'duties/hajj-day-by-day/' },
+    { m: 12, d: 9, name: 'Day of Arafah', note: '9 Dhul-Hijjah — the Hajj; fast for non-pilgrims', href: learnBase + 'duties/mina-arafah-muzdalifah/' },
+    { m: 12, d: 10, name: 'Eid al-Adha', note: '10 Dhul-Hijjah — Qurbani after prayer', href: eidHref },
+    { m: 12, d: 11, name: 'Days of Tashriq', note: '11th–13th — stoning; no fasting', href: learnBase + 'duties/tashriq-days-takbeer/' },
+  ];
+
+  /* ---- scan Gregorian days, mapping each annual target to a date ---- */
+  const nowH = parts(today0);
+  const scanStart = today0 - 60 * DAY, scanEnd = today0 + 820 * DAY;
+  const found = {}; // key m-d -> array of gregorian times
+  const push = (k, t) => { (found[k] ||= []).push(t); };
+  for (let t = scanStart; t <= scanEnd; t += DAY) {
+    const h = parts(t);
+    if (h.y !== nowH.y && h.y !== nowH.y + 1) continue;
+    push(h.m + '-' + h.d, t);
+  }
+  const firstOnOrAfter = (k, from) => (found[k] || []).find((t) => t >= from);
+  const occ = EV.map((e) => {
+    let g = null;
+    if (e.fri) {
+      const shawwal = firstOnOrAfter('10-1', today0 - 400 * DAY);
+      if (shawwal) { let f = shawwal - DAY; while (new Date(f).getUTCDay() !== 5) f -= DAY; g = f; }
+    } else {
+      g = firstOnOrAfter(e.m + '-' + e.d, today0 - 400 * DAY);
+    }
+    return { ...e, g };
+  }).filter((e) => e.g !== null);
+
+  const fmtHI = (e) => (e.fri ? 'Last Fri, Ramadan' : e.d + ' ' + MONTHS[e.m - 1]);
+
+  /* ---- hero cards ---- */
+  $('[data-cal-today]').textContent = fmtH(today0);
+  $('[data-cal-civil]').textContent = 'Civil tabular: ' + fmtHc(today0);
+  $('[data-cal-greg]').textContent = new Date(today0).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const upcoming = occ.filter((e) => e.g >= today0).sort((a, b) => a.g - b.g);
+  if (upcoming[0]) {
+    const n = Math.round((upcoming[0].g - today0) / DAY);
+    $('[data-cal-next]').textContent = upcoming[0].name;
+    $('[data-cal-next-sub]').textContent = fmtG(upcoming[0].g) + (n === 0 ? ' — today!' : ' — in ' + n + ' day' + (n === 1 ? '' : 's'));
+  }
+
+  /* ---- month grid ---- */
+  let view = { y: nowH.y, m: nowH.m };
+  const markMap = {};
+  EV.forEach((e) => { if (!e.fri) (markMap[e.m + '-' + e.d] ||= []).push(e.name); });
+  const renderMonth = () => {
+    $('[data-cal-mtitle]').textContent = MONTHS[view.m - 1] + ' ' + view.y + ' AH';
+    // anchor inside target month: jump from today by month diff, then settle
+    const diff = (view.y - nowH.y) * 12 + (view.m - nowH.m);
+    let a = today0 + Math.round(diff * 29.53 * DAY);
+    let guard = 0;
+    while (cmpHM(parts(a), view) > 0 && guard++ < 60) a -= 15 * DAY;
+    guard = 0;
+    while (cmpHM(parts(a), view) < 0 && guard++ < 60) a += 15 * DAY;
+    guard = 0;
+    while (!(parts(a).d === 1 && parts(a).m === view.m && parts(a).y === view.y) && guard++ < 40) a -= DAY;
+    // collect days of the month
+    const days = [];
+    guard = 0;
+    let t = a;
+    while (guard++ < 31) { const h = parts(t); if (h.m !== view.m || h.y !== view.y) break; days.push({ g: t, h: h.d }); t += DAY; }
+    const lead = (new Date(days[0].g).getUTCDay() + 6) % 7; // Monday start
+    let html = '';
+    for (let i = 0; i < lead; i++) html += '<span></span>';
+    days.forEach(({ g, h }) => {
+      const isToday = g === today0;
+      const marks = markMap[view.m + '-' + h] || [];
+      const white = h >= 13 && h <= 15;
+      html += `<div class="rounded-xl px-1 py-1.5 text-center min-h-[52px]" style="${isToday ? 'background:#d4af37;color:#1a1405;' : 'background:var(--hn-primary-soft);'}">`
+        + `<span class="block font-extrabold text-[15px] leading-5">${h}</span>`
+        + `<span class="block text-[11px] leading-4" style="opacity:.75">${new Date(g).toLocaleDateString('en-GB', { day: 'numeric', timeZone: 'UTC' })}</span>`
+        + (marks.length ? `<span class="mx-auto mt-1 block w-2 h-2 rounded-full" style="background:${isToday ? '#1a1405' : 'var(--hn-primary)'}" title="${marks.join('; ')}"></span>` : (white ? '<span class="mx-auto mt-1 block w-2 h-2 rounded-full" style="background:transparent;border:1px solid currentColor;opacity:.4" title="White days — recommended fast"></span>' : ''))
+        + '</div>';
+    });
+    root.innerHTML = html;
+  };
+  document.querySelector('[data-cal-prev]').addEventListener('click', () => { view.m--; if (view.m < 1) { view.m = 12; view.y--; } renderMonth(); });
+  document.querySelector('[data-cal-nextm]').addEventListener('click', () => { view.m++; if (view.m > 12) { view.m = 1; view.y++; } renderMonth(); });
+  document.querySelector('[data-cal-todaybtn]').addEventListener('click', () => { const h = parts(startOfDay(Date.now())); view = { y: h.y, m: h.m }; renderMonth(); });
+  renderMonth();
+
+  /* ---- upcoming cards ---- */
+  $('[data-cal-upcoming]').innerHTML = upcoming.slice(0, 6).map((e) => {
+    const n = Math.round((e.g - today0) / DAY);
+    return `<div class="hn-card hn-card-pad"><p class="hn-block-label">${fmtHI(e)} AH</p>`
+      + `<p class="font-extrabold text-[17px] leading-7">${e.name}</p>`
+      + `<p class="text-[13.5px] mt-1" style="color:var(--hn-muted)">${e.note}</p>`
+      + `<p class="mt-2 text-[14px] font-extrabold" style="color:var(--hn-primary)">${fmtG(e.g)}${n === 0 ? ' — today!' : ' · in ' + n + ' day' + (n === 1 ? '' : 's')}</p>`
+      + `<a href="${e.href}" class="text-[13px] font-bold" style="color:var(--hn-primary)">Read the guide →</a></div>`;
+  }).join('');
+
+  /* ---- full-year table (current Hijri year, sorted) ---- */
+  const thisYear = occ.filter((e) => parts(e.g).y === nowH.y).sort((a, b) => a.g - b.g);
+  document.querySelector('[data-cal-table]').innerHTML = thisYear.map((e) =>
+    `<tr style="border-bottom:1px solid var(--hn-border)"><td class="px-4 py-2.5 font-bold">${e.name}<span class="block text-[12px] font-normal" style="color:var(--hn-muted)">${e.note}</span></td>`
+    + `<td class="px-4 py-2.5 whitespace-nowrap">${fmtHI(e)}</td>`
+    + `<td class="px-4 py-2.5 whitespace-nowrap">${fmtG(e.g)} <span style="color:var(--hn-muted)">(est.)</span></td>`
+    + `<td class="px-4 py-2.5"><a href="${e.href}" class="font-bold text-[13px]" style="color:var(--hn-primary)">Guide →</a></td></tr>`
+  ).join('');
+})();
+</script>

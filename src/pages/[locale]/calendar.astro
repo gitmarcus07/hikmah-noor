@@ -1,0 +1,13 @@
+---
+/* Islamic Calendar hub (locales) — mirrors EN with localized links. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import IslamicCalendar from '../../components/IslamicCalendar.astro';
+import { CAL_META } from '../../lib/calendar-meta';
+import { nonDefaultLocales } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+---
+<BaseLayout title={CAL_META.title} description={CAL_META.description} keywords={CAL_META.keywords} locale={locale} type="article" faq={CAL_META.faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Islamic Calendar', path: '/calendar/' }]} canonicalPath="/calendar/">
+  <IslamicCalendar locale={locale} />
+</BaseLayout>

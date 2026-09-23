@@ -1,0 +1,12 @@
+---
+/* Islamic Calendar hub — full month view, sacred dates with Gregorian
+ * equivalents, countdowns. Logic lives in the shared component. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import IslamicCalendar from '../components/IslamicCalendar.astro';
+import { CAL_META } from '../lib/calendar-meta';
+
+const locale = 'en';
+---
+<BaseLayout title={CAL_META.title} description={CAL_META.description} keywords={CAL_META.keywords} locale={locale} type="article" faq={CAL_META.faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Islamic Calendar', path: '/calendar/' }]} canonicalPath="/calendar/">
+  <IslamicCalendar locale={locale} />
+</BaseLayout>

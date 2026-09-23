@@ -79,7 +79,8 @@ const crumbs = [
       <p class="mt-2 text-[12.5px] leading-5" style="color:var(--hn-muted)">Face the needle. Calibrate with a figure-8 motion; verify once against a known direction.</p>
     </div>
 
-    <p class="mt-3 text-[12.5px] leading-5 text-center" style="color:var(--hn-muted)">Calculated on-device · confirm with your local mosque · times exclude ihtiyat margins.</p>
+    <p class="mt-3 text-[12.5px] leading-5 text-center" style="color:var(--hn-muted)">Calculated on-device · includes a 2-minute Dhuhr precaution · confirm with your local mosque, which may add its own Fajr/Maghrib margins.</p>
+    <p class="mt-2 text-[12.5px] leading-5 text-center font-bold hidden" style="color:var(--hn-primary)" data-pt-polar>High latitude (55°+): Fajr/Isha math is unreliable here in summer — follow your nearest scholars’ timetable.</p>
 
     <section class="mt-8" aria-label="Frequently asked questions">
       <div class="space-y-3">
@@ -221,6 +222,10 @@ const crumbs = [
         }
         times = calc(lat, lng, st.method, st.asr === 'hanafi' ? 2 : 1);
         qb = qibla(lat, lng);
+        try {
+          const polar = $('[data-pt-polar]');
+          if (polar) polar.classList.toggle('hidden', Math.abs(lat) <= 55);
+        } catch {}
         try {
           $('[data-pt-date]').textContent = new Intl.DateTimeFormat('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(new Date()) + (st.label ? ` · ${st.label}` : '');
           $('[data-pt-hijri]').textContent = new Intl.DateTimeFormat('en-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric', timeZone: tz }).format(new Date());

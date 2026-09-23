@@ -15,8 +15,20 @@ const dict = getDict(locale);
 const cat = CATS.find((c) => c.slug === category);
 if (!cat) throw new Error(`Unknown tools category: ${category}`);
 const list = toolsByCat(category);
+const CAT_Q2: Record<string, string> = {
+  'start-here': 'Start with the Obligations Guide: it separates universal dues (zakat) from conditional ones (fidyah, kaffarah), family rights (mahr, nafaqah) and historical levies (jizya, kharaj).',
+  'zakat': 'Most users start with the main zakat calculator, then refine with the gold, silver, cash, business or investment tools. Harvest and livestock have their own schedules.',
+  'fidyah-kaffarah': 'Missed fasts need triage first (qada vs fidyah); broken oaths and Hajj violations follow fixed Quranic sequences the tools enforce step by step.',
+  'qurbani-eid': 'Use the share splitter for cow/camel cost and meat division, and the Eid-day checklist for the Fitr vs Adha hour-by-hour order.',
+  'family-finance': 'Mahr and nafaqah are planned rights with no fixed amounts; mirath divides fixed Quranic shares — use the planner, then confirm complex cases with a scholar.',
+  'classical-finance': 'Khums is school-specific (20% on defined gains); ushr, jizya and kharaj pages are educational references on classical rulings.',
+};
+const faq = [
+  { q: `Which ${cat.title} tool should I use?`, a: `${cat.desc} Open the tool matching your exact situation — each page explains its evidence and school differences.` },
+  { q: `How do I start with ${cat.title}?`, a: (CAT_Q2[cat.slug] || 'Open the tool matching your exact situation — each page explains its evidence and school differences.') + ' All results are educational estimates, not fatwas.' },
+];
 ---
-<BaseLayout title={`${cat.title} Tools — Islamic Finance Calculators`} description={`${cat.desc} Free calculators with evidence and school differences.`} keywords={`${cat.title.toLowerCase()} tools, islamic finance calculator`} locale={locale} canonicalPath={`/tools/${category}/`} faq={[]} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: cat.title, path: `/tools/${category}/` }]}>
+<BaseLayout title={`${cat.title} Tools — Islamic Finance Calculators`} description={`${cat.desc} Free calculators with evidence and school differences.`} keywords={`${cat.title.toLowerCase()} tools, islamic finance calculator`} locale={locale} canonicalPath={`/tools/${category}/`} faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: cat.title, path: `/tools/${category}/` }]}>
   <AppHeader locale={locale} title={`${cat.title} Tools`} backHref="/tools/" />
   <section class={`relative overflow-hidden bg-gradient-to-br ${cat.grad} text-white`}>
     <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(255,255,255,.18), transparent 45%);"></div>

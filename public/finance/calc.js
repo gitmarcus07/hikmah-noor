@@ -111,7 +111,11 @@ export function calculateGoldZakat(input = {}) {
     'Personal-use gold is a known area of scholarly difference (Hanafi vs majority).',
   ];
   const eligibleByWeight = pure >= GOLD_NISAB_GRAMS;
-  r.eligible = hawlMet === 'yes' && value > 0 && (num(valueDirect) > 0 ? true : eligibleByWeight);
+  const nisabValue = num(pricePerGram) > 0 ? GOLD_NISAB_GRAMS * num(pricePerGram) : 0;
+  const eligibleByValue = nisabValue > 0 ? value >= nisabValue : false;
+  r.eligible = hawlMet === 'yes' && value > 0 && (num(valueDirect) > 0 ? (nisabValue > 0 ? eligibleByValue : true) : eligibleByWeight);
+  if (num(valueDirect) > 0 && nisabValue <= 0) r.warnings.push('Nisab could not be verified from value alone — enter today’s gold price (or weight) to confirm the 87.48 g threshold is met.');
+  if (num(valueDirect) > 0 && nisabValue > 0 && !eligibleByValue) r.warnings.push('Entered value is below the nisab value, so no zakat is due on this gold.');
   if (!eligibleByWeight && num(valueDirect) === 0) r.warnings.push('Weight is below the 87.48 g nisab, so no zakat is due on this gold.');
   r.amount = r.eligible ? value * ZAKAT_RATE : 0;
   r.currency = currency; r.disclaimer = EDU_NOTE;
@@ -136,7 +140,11 @@ export function calculateSilverZakat(input = {}) {
     'Many scholars note the silver nisab benefits the poor because its value is lower than gold.',
   ];
   const eligibleByWeight = num(weightGram) >= SILVER_NISAB_GRAMS;
-  r.eligible = hawlMet === 'yes' && value > 0 && (num(valueDirect) > 0 ? true : eligibleByWeight);
+  const nisabValue = num(pricePerGram) > 0 ? SILVER_NISAB_GRAMS * num(pricePerGram) : 0;
+  const eligibleByValue = nisabValue > 0 ? value >= nisabValue : false;
+  r.eligible = hawlMet === 'yes' && value > 0 && (num(valueDirect) > 0 ? (nisabValue > 0 ? eligibleByValue : true) : eligibleByWeight);
+  if (num(valueDirect) > 0 && nisabValue <= 0) r.warnings.push('Nisab could not be verified from value alone — enter today’s silver price (or weight) to confirm the 612.36 g threshold is met.');
+  if (num(valueDirect) > 0 && nisabValue > 0 && !eligibleByValue) r.warnings.push('Entered value is below the nisab value, so no zakat is due on this silver.');
   if (!eligibleByWeight && num(valueDirect) === 0) r.warnings.push('Weight is below the 612.36 g nisab, so no zakat is due on this silver.');
   r.amount = r.eligible ? value * ZAKAT_RATE : 0;
   r.currency = currency; r.disclaimer = EDU_NOTE;
@@ -176,11 +184,15 @@ export function calculateCashZakat(input = {}) {
 
 /* ---------------- Business ---------------- */
 export function calculateBusinessZakat(input = {}) {
-  const { methodology = 'general', currency = 'INR', cash = 0, inventory = 0, receivables = 0, otherAssets = 0, liabilities = 0, nisabValue = 0, hawlMet = 'yes' } = input;
+  const { methodology = 'general', currency = 'INR', cash = 0, inventory = 0, receivables = 0, otherAssets = 0, liabilities = 0, nisabBasis = 'silver', goldPricePerGram = 0, silverPricePerGram = 0, nisabValue = 0, hawlMet = 'yes' } = input;
   const r = base(methodology, ['Only zakatable current assets counted (cash, inventory at market value, strong receivables). Fixed assets, machinery and premises are excluded.', 'Deduct short-term business liabilities.']);
   const gross = num(cash) + num(inventory) + num(receivables) + num(otherAssets);
   const net = Math.max(0, gross - num(liabilities));
-  const nisab = num(nisabValue);
+  let nisab = num(nisabValue);
+  if (!nisab) {
+    if (nisabBasis === 'gold' && num(goldPricePerGram) > 0) nisab = GOLD_NISAB_GRAMS * num(goldPricePerGram);
+    if (nisabBasis === 'silver' && num(silverPricePerGram) > 0) nisab = SILVER_NISAB_GRAMS * num(silverPricePerGram);
+  }
   r.breakdown = [
     row('Business cash', fmt(num(cash), currency)),
     row('Inventory (market value)', fmt(num(inventory), currency)),
@@ -203,23 +215,34 @@ export function calculateBusinessZakat(input = {}) {
 
 /* ---------------- Investments ---------------- */
 export function calculateInvestmentZakat(input = {}) {
-  const { methodology = 'general', currency = 'INR', purpose = 'mixed', stocks = 0, funds = 0, crypto = 0, other = 0 } = input;
+  const { methodology = 'general', currency = 'INR', purpose = 'mixed', stocks = 0, funds = 0, crypto = 0, other = 0, nisabBasis = 'silver', goldPricePerGram = 0, silverPricePerGram = 0, nisabValue = 0, hawlMet = 'yes' } = input;
   const r = base(methodology, ['Uses the zakatable values you entered per asset class.', 'Purpose matters: actively traded holdings are typically zakated at market value; long-term holdings have several methodologies.']);
   const total = num(stocks) + num(funds) + num(crypto) + num(other);
+  let nisab = num(nisabValue);
+  if (!nisab) {
+    if (nisabBasis === 'gold' && num(goldPricePerGram) > 0) nisab = GOLD_NISAB_GRAMS * num(goldPricePerGram);
+    if (nisabBasis === 'silver' && num(silverPricePerGram) > 0) nisab = SILVER_NISAB_GRAMS * num(silverPricePerGram);
+  }
   r.breakdown = [
     row('Stocks (zakatable value)', fmt(num(stocks), currency)),
     row('Funds (zakatable value)', fmt(num(funds), currency)),
     row('Cryptocurrency', fmt(num(crypto), currency)),
     row('Other investments', fmt(num(other), currency)),
     row('Total entered', fmt(total, currency)),
+    row(`Nisab (${nisabBasis})`, nisab > 0 ? fmt(nisab, currency) : 'not provided'),
+    row('Hawl', hawlMet === 'yes' ? 'Met' : 'Not met / unsure'),
     row('Indicative rate', '2.5% (where applicable)'),
   ];
   r.warnings.push('No single ruling covers every investment. Scholars differ on stocks (exclude non-zakatable company assets?), funds, and crypto — this tool does not decide permissibility or method for you.');
+  if (!nisab) r.warnings.push('Enter metal prices or a nisab value so eligibility can be checked — small holdings below nisab owe no zakat.');
+  if (nisabBasis === 'silver') r.warnings.push('Scholars differ on whether investment wealth follows the gold or silver nisab — see Evidence & Methodology.');
+  if (hawlMet !== 'yes') r.warnings.push('Zakat needs one lunar year of possession at/above nisab — day-traded sums held briefly are not zakatable until they complete a hawl.');
   if (purpose === 'trading') r.warnings.push('Actively traded holdings: most methodologies zakat the full market value annually.');
   if (purpose === 'longterm') r.warnings.push('Long-term holdings: some methodologies exclude fixed/non-liquid company assets — a scholar or detailed statement review may be needed.');
   r.evidence = ['Investment zakat is derived by analogy (qiyas) to trade goods and cash; methods differ among contemporary scholars — no single Qur\'anic verse fixes stock zakat.'];
-  r.eligible = total > 0;
-  r.amount = total * ZAKAT_RATE;
+  r.eligible = hawlMet === 'yes' && nisab > 0 && total >= nisab;
+  if (!r.eligible && hawlMet === 'yes' && nisab > 0) r.warnings.push('Total is below nisab, so no zakat is due on these investments.');
+  r.amount = r.eligible ? total * ZAKAT_RATE : 0;
   r.currency = currency; r.disclaimer = EDU_NOTE;
   return r;
 }
@@ -235,12 +258,13 @@ export function calculateAgriculturalZakat(input = {}) {
   r.breakdown = [
     row('Crop type', crop),
     row('Total harvest', `${h.toLocaleString('en-US')} kg`),
-    row('Irrigation', irrigation === 'natural' ? 'Natural (rain/river) → 10%' : irrigation === 'artificial' ? 'Artificial (wells/pumps) → 5%' : 'Mixed → 7.5%'),
+    row('Irrigation', irrigation === 'natural' ? 'Natural (rain/river) → 10%' : irrigation === 'artificial' ? 'Artificial (wells/pumps) → 5%' : 'Mixed → ~7.5% (estimate — see warning)'),
     row(`Threshold (≈${AGRI_NISAB_KG} kg)`, h >= AGRI_NISAB_KG ? 'Met' : 'Below — see warning'),
     row('Zakat due (produce)', `${dueKg.toFixed(2)} kg`),
   ];
   if (num(pricePerKg) > 0) r.breakdown.push(row('Estimated value', fmt(value, currency)));
   if (h < AGRI_NISAB_KG) r.warnings.push(`Harvest is below the commonly cited 5-wasq threshold (≈${AGRI_NISAB_KG} kg). Many scholars require no zakat below it; others differ — see Evidence & Methodology.`);
+  if (irrigation === 'mixed') r.warnings.push('Mixed irrigation (~7.5%) is a convenient estimate, not a fixed ruling — classical manuals apportion each water source (e.g. mostly rain ≈ 10%, mostly pumped ≈ 5%). If one source dominates, use its rate; ask a scholar for large harvests.');
   r.warnings.push('Crop scope differs: some schools limit zakat to staple storable crops; others include all cultivated produce.');
   r.evidence = ["Qur'an 6:141 — give its due on harvest day.", "Hadith: 'On what is watered by rain, a tenth; on what is watered by wells, half a tenth' (reported in Sahih al-Bukhari).", 'The five-wasq threshold is reported in Sahih Muslim.'];
   r.eligible = h >= AGRI_NISAB_KG;
@@ -251,12 +275,12 @@ export function calculateAgriculturalZakat(input = {}) {
 }
 
 /* ---------------- Livestock ---------------- */
-const SHEEP_SCHEDULE = [[40, 120, '1 sheep'], [121, 200, '2 sheep'], [201, 399, '3 sheep']];
+const SHEEP_SCHEDULE = [[40, 120, '1 sheep'], [121, 200, '2 sheep'], [201, 300, '3 sheep']];
 export function sheepDue(n) {
   if (n < 40) return null;
   for (const [a, b, t] of SHEEP_SCHEDULE) if (n >= a && n <= b) return t;
-  const extra = Math.floor((n - 400) / 100);
-  return `${3 + extra + 1} sheep (3 for the first 399, then 1 per 100)`;
+  const extra = Math.floor((n - 201) / 100);
+  return `${3 + extra} sheep (3 for 201–300, then 1 per 100)`;
 }
 export function cattleDue(n) {
   if (n < 30) return null;
@@ -316,6 +340,8 @@ export function calculateLivestockZakat(input = {}) {
   const names = { sheep: 'Sheep / goats', cattle: 'Cattle (cows, buffalo)', camel: 'Camels' };
   r.breakdown = [row('Animal', names[animal] || animal), row('Head count', String(n)), row('Zakat due', due || 'None — below minimum threshold')];
   if (!due) r.warnings.push('Below the minimum head-count (sheep 40, cattle 30, camels 5), so no zakat is due.');
+  if (animal === 'cattle' && n > 120 && n < 130) r.warnings.push(`${n} head has no exact classical combination — the 120-head answer (3 musinnah or 4 tabi') is shown. Consult a scholar for in-between counts.`);
+  if (animal === 'sheep' && n > 300) r.warnings.push('Above 300, the classical rule adds 1 sheep per 100 head — confirm large flocks with a scholar.');
   if (n > 0 && !due) r.eligible = false; else r.eligible = !!due;
   r.warnings.push('Only grazing livestock kept for growth/milk/breeding fall under these schedules in the classical manuals; trade livestock is zakated as business goods.');
   r.evidence = ['Thresholds of five camels, thirty cattle and forty sheep are established in the hadith literature (the camel schedule of Abu Bakr, reported in Sahih al-Bukhari).', 'Above-120 camel/cattle divisions follow the classical per-40 / per-50 and per-30 / per-40 rules.'];
@@ -404,7 +430,7 @@ export function calculateKaffarahOath(input = {}) {
 
 /* ---------------- Kaffarah: fasting violations / zihar ---------------- */
 export function calculateKaffarahFasting(input = {}) {
-  const { methodology = 'general', currency = 'INR', violation = 'ramadan', ability = 'feed', mealCost = 0 } = input;
+  const { methodology = 'general', currency = 'INR', violation = 'ramadan', ability = 'overview', mealCost = 0 } = input;
   const r = base(methodology, ['Sequence for deliberate Ramadan violation (intercourse while fasting): free a slave → fast 60 consecutive days → feed 60 poor (majority order).', 'Zihar follows the same 3-step sequence (Qur\'an 58:3–4).']);
   const feedCount = 60;
   if (ability === 'fast') {
@@ -437,10 +463,11 @@ export function calculateKaffarahFasting(input = {}) {
 
 /* ---------------- Hajj fidyah / hady ---------------- */
 export function calculateHajjFidyah(input = {}) {
-  const { methodology = 'general', currency = 'INR', situation = 'tamattu', hadyCost = 0, mealCost = 0, unableHady = 'no' } = input;
+  const { methodology = 'general', currency = 'INR', situation = 'tamattu', hadyCost = 0, mealCost = 0, canAffordHady = 'yes', unableHady = undefined } = input;
+  const affordHady = unableHady !== undefined ? unableHady !== 'yes' : canAffordHady !== 'no';
   const r = base(methodology, ['Rulings below follow Qur\'an 2:196 and classical manuals; select your school where outcomes differ.']);
   if (situation === 'tamattu') {
-    if (unableHady === 'yes') {
+    if (!affordHady) {
       r.breakdown = [row('Situation', 'Tamattu\'/qiran without available hady'), row('Substitute', 'Fast 3 days during Hajj + 7 after returning = 10 days'), row('Cash due', fmt(0, currency))];
       r.amount = 0; r.eligible = true;
     } else {
@@ -550,7 +577,7 @@ export function calculateKhums(input = {}) {
 export function calculateMirath(input = {}) {
   const {
     methodology = 'general', currency = 'INR',
-    estateValue = 0, deductions = 0,
+    estateValue = 0, deductions = 0, bequest = 0,
     husband = 0, wives = 0, father = 0, mother = 0,
     sons = 0, daughters = 0, siblings2plus = 'no',
   } = input;
@@ -576,6 +603,7 @@ export function calculateMirath(input = {}) {
     r.warnings.push('Both a husband and wife(s) were entered — an estate has one surviving spouse. The wife entry was ignored; correct the inputs.');
     W = 0;
   }
+  if (num(bequest) > num(estateValue) / 3 + 1e-9 && num(estateValue) > 0) r.warnings.push('Bequests cannot exceed one-third of the estate without the heirs’ consent — reduce the bequest or get written heir approval (hadith in Sahih al-Bukhari and Sahih Muslim).');
   if (W > 4) r.warnings.push('More than four wives is not permitted; the count was capped at four.');
   const fixed = [];
   if (H) fixed.push({ label: 'Husband', frac: hasChild ? 1 / 4 : 1 / 2, spouse: true });

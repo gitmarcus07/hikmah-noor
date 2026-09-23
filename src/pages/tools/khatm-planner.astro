@@ -94,7 +94,7 @@ const crumbs = [
         $('[data-k-juz]').textContent = (perDay / 20).toFixed(1);
         $('[data-k-prayer]').textContent = Math.ceil(perDay / 5);
         $('[data-k-days]').textContent = days;
-        $('[data-k-note]').textContent = `${left} pages left over ${days} days. Read ${Math.ceil(perDay / 5)} pages after each of the 5 prayers. Fridays are lighter by design — use them as catch-up.`;
+        $('[data-k-note]').textContent = `${left} pages left over ${days} days. Read ${Math.ceil(perDay / 5)} pages after each of the 5 prayers. Fridays make good catch-up days if you fall behind.`;
         $('[data-k-out]').classList.remove('hidden');
         save({ start: iso(s), end: iso(e), done });
       };

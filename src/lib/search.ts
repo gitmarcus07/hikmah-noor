@@ -239,6 +239,14 @@ export function toolIndexItems(locale: string): IndexItem[] {
       tags: ['hijri date', 'islamic date today', 'hijri converter', 'gregorian to hijri', 'islamic calendar', 'chand ki tareekh', 'aaj hijri tareekh'],
       locale,
     },
+    {
+      title: 'Islamic Calendar — Hijri Dates, Ramadan, Eid & Sacred Days',
+      description: 'Live Islamic (Hijri) calendar: month view, Ramadan, Laylatul Qadr, Eid al-Fitr, Hajj, Eid al-Adha, Ashura and Shab-e-Barat with Gregorian equivalents and countdowns.',
+      category: 'tools',
+      url: `${prefix}/calendar/`,
+      tags: ['islamic calendar', 'hijri calendar', 'hijri months', 'ramadan date', 'eid date', 'eid al fitr date', 'eid al adha date', 'ashura date', 'shab e barat', 'shab e miraj', 'mawlid date', 'arafah date', 'islamic date today', 'muslim calendar', 'chand ki tareekh'],
+      locale,
+    },
   ];
   for (const c of CATS as any[]) {
     items.push({
