@@ -9,6 +9,9 @@ import { DUAS_UR_2 } from '../data/i18n/duas-ur-2';
 import { DUAS_UR_3 } from '../data/i18n/duas-ur-3';
 import { DUAS_UR_4 } from '../data/i18n/duas-ur-4';
 import { DUAS_UR_5 } from '../data/i18n/duas-ur-5';
+import { DUAS_UR_6 } from '../data/i18n/duas-ur-6';
+import { DUAS_HI_1 } from '../data/i18n/duas-hi-1';
+import { DUAS_AR_1 } from '../data/i18n/duas-ar-1';
 
 export interface DuaOverlay {
   title?: string;
@@ -17,10 +20,14 @@ export interface DuaOverlay {
   virtue?: string;
   when?: string;
   aliasesUr?: string[];
+  aliasesHi?: string[];
+  aliasesAr?: string[];
 }
 
-const OVERLAYS: Record<string, Record<string, DuaOverlay>> = { ur: {} };
-for (const part of [DUAS_UR_1, DUAS_UR_2, DUAS_UR_3, DUAS_UR_4, DUAS_UR_5]) Object.assign(OVERLAYS.ur, part);
+const OVERLAYS: Record<string, Record<string, DuaOverlay>> = { ur: {}, hi: {}, ar: {} };
+for (const part of [DUAS_UR_1, DUAS_UR_2, DUAS_UR_3, DUAS_UR_4, DUAS_UR_5, DUAS_UR_6]) Object.assign(OVERLAYS.ur, part);
+Object.assign(OVERLAYS.hi, DUAS_HI_1);
+Object.assign(OVERLAYS.ar, DUAS_AR_1);
 
 /** Overlay locales currently shipped. */
 export function duaLocales(): string[] {
@@ -37,8 +44,8 @@ function defined<T extends object>(o: T): Partial<T> {
 export function localizeDua(dua: any, locale: string): any {
   const ov = (OVERLAYS as any)[locale]?.[dua?.slug];
   if (!ov) return dua;
-  const { aliasesUr, ...rest } = ov as DuaOverlay;
-  return { ...dua, ...defined(rest), aliases: [...((dua as any).aliases || []), ...(aliasesUr || [])] };
+  const { aliasesUr, aliasesHi, aliasesAr, ...rest } = ov as DuaOverlay;
+  return { ...dua, ...defined(rest), aliases: [...((dua as any).aliases || []), ...(aliasesUr || []), ...(aliasesHi || []), ...(aliasesAr || [])] };
 }
 
 /** Localize a list (hub grids, related, siblings). EN returns as-is. */

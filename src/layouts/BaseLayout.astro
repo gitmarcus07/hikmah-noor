@@ -61,6 +61,7 @@ const moreLinks = [
   { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
   { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
   { label: 'Aqeedah', href: L('/aqeedah/'), icon: 'star' },
+  { label: 'Kids Zone', href: L('/kids/'), icon: 'heart' },
   { label: 'History', href: L('/history/'), icon: 'book' },
   { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
   { label: 'Hajj & Umrah', href: L('/hajj/'), icon: 'moon' },
@@ -85,6 +86,7 @@ const mobileGroups = [
   { label: 'Learn', icon: 'book', links: [
     { label: 'Learn', href: L('/learn/') },
     { label: 'Aqeedah', href: L('/aqeedah/') },
+    { label: 'Kids Zone', href: L('/kids/') },
     { label: 'Seerat', href: L('/seerat/') },
     { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/') },
     { label: 'Sahaba', href: L('/sahaba/') },
@@ -99,8 +101,10 @@ const mobileGroups = [
   ] },
   { label: dict.nav.tools ?? 'Tools', icon: 'tools', links: [
     { label: dict.nav.tools ?? 'Tools', href: L('/tools/') },
+    { label: 'Mosque Finder', href: L('/tools/mosque-finder/') },
     { label: 'Quiz', href: L('/quiz/') },
     { label: 'Favourites', href: L('/favourites/') },
+    { label: 'Ask a Question', href: L('/ask/') },
     { label: 'Methodology', href: L('/methodology/') },
     { label: dict.nav.about ?? 'About', href: L('/about/') },
   ] },
@@ -128,6 +132,8 @@ const mobileGroups = [
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
   <meta name="theme-color" content="#FAF8F2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -135,6 +141,13 @@ const mobileGroups = [
   {articleLd && <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />}
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
+  <script is:inline>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </head>
 <body class="min-h-screen flex flex-col overflow-x-clip" style="background:var(--hn-bg);color:var(--hn-ink)">
   <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-2 focus:rounded-lg" style="background:var(--hn-primary);color:#fff">Skip to content</a>
@@ -333,6 +346,7 @@ const mobileGroups = [
           <li><a class="hover:underline" href={L('/history/')}>History</a></li>
           <li><a class="hover:underline" href={L('/ramadan/')}>Ramadan</a></li>
           <li><a class="hover:underline" href={L('/hajj/')}>Hajj & Umrah</a></li>
+          <li><a class="hover:underline" href={L('/kids/')}>Kids Zone</a></li>
           <li><a class="hover:underline" href={L('/calendar/')}>Islamic Calendar</a></li>
           <li><a class="hover:underline" href={L('/eid/')}>Eid & Qurbani</a></li>
           <li><a class="hover:underline" href={L('/names-of-allah/')}>99 Names</a></li>
@@ -355,6 +369,8 @@ const mobileGroups = [
         <ul class="space-y-2 text-sm" style="color:var(--hn-muted)">
           <li><a class="hover:underline" href={L('/about/')}>About</a></li>
           <li><a class="hover:underline" href={L('/methodology/')}>Methodology</a></li>
+          <li><a class="hover:underline" href={L('/scholars/')}>Scholars</a></li>
+          <li><a class="hover:underline" href={L('/ask/')}>Ask a Question</a></li>
           <li><a class="hover:underline" href={L('/contact/')}>Contact</a></li>
           <li><a class="hover:underline" href={L('/privacy/')}>Privacy</a></li>
           <li><a class="hover:underline" href={L('/terms/')}>Terms</a></li>

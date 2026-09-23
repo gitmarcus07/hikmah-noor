@@ -1,0 +1,104 @@
+---
+/* Kids hub — young Muslims start here: short hadees, prayer steps, stories and a kids quiz. Aggregator, no new data. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../../components/hn/SectionHeader.astro';
+import Icon from '../../components/Icon.astro';
+import { nonDefaultLocales, localizedPath } from '../../i18n/utils';
+import { GUIDES } from '../../data/guides';
+import { DUAS } from '../../data/duas';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Kids Zone — Short Hadees, Prayer Steps, Prophets & Quiz for Young Muslims`;
+const description = `Islam for kids: 40 short hadees, how to pray and do wudu step by step, prophet stories, morning duas and a fun kids quiz with instant answers.`;
+const keywords = 'islam for kids, hadees for children, bachon ki hadees, kids islamic quiz, how to pray for kids, prophet stories kids, islamic parenting';
+const faq = [
+  { q: 'At what age should kids start praying?', a: 'Training from seven, firm expectation from ten, full obligation at puberty. Start with the two-minute wudu + two-rakah routine on our kids path below.' },
+  { q: 'How do kids memorize Quran?', a: 'Short surahs with joy from 4–6, structured hifz from ~7. See our memorize-Quran plan guide for the sabq/sabqi/manzil method.' },
+  { q: 'Is the kids quiz too hard?', a: 'No — 10 easy questions with instant explanations. Score 8+ to pass, then try the prophets quiz together as a family.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Kids', path: '/kids/' },
+];
+const startSlugs = ['wudu-ablution', 'how-to-pray-namaz', 'arabic-alphabet-makharij', 'parenting-tarbiyah-guide'];
+const starters = startSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
+const kidDuas = ['morning-remembrance', 'before-sleeping', 'before-eating', 'ruqyah-children'].map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/kids/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">Kids zone</span>
+        <span class="hn-badge">Hadees + Prayer + Quiz</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Kids Zone</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Short hadees, prayer steps with pictures of words, prophet stories and a fun quiz — Islam for young hearts, in simple language.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/quiz/kids-quiz/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Start the kids quiz</a>
+        <a href={L('/hadees/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">40 short hadees</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Start" title="First steps: wudu & prayer" href={L('/learn/')} linkLabel="All guides" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {starters.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Stories" title="Prophets & Seerah for kids" href={L('/prophets/')} linkLabel="All prophets" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {[
+          { t: 'All 25 Prophets in Order', d: 'Adam to Muhammad ﷺ with lessons', h: '/prophets/', i: 'star' },
+          { t: 'Seerat un Nabi ﷺ', d: 'The Prophet’s life in 16 chapters', h: '/seerat/', i: 'star' },
+          { t: '40 Short Hadees', d: 'One-line hadees with lessons', h: '/hadees/', i: 'book' },
+          { t: 'Prophets Quiz', d: '10 questions — family challenge', h: '/quiz/prophets-in-order/', i: 'book' },
+        ].map((c) => (
+          <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.i as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.t}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.d}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Duas" title="First duas to memorize" href={L('/duas/')} linkLabel="All duas" />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {kidDuas.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+  <p class="mx-auto max-w-2xl px-4 pb-2 text-sm font-semibold text-qg-green bg-qg-soft border border-qg-line rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
+</BaseLayout>

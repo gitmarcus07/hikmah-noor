@@ -1,0 +1,111 @@
+---
+/* Ask — structured question intake. No backend: validates, then opens the
+ * review inbox email with subject/body prefilled, plus copy-to-clipboard. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Ask a Question — Sourcing, Rulings & Corrections`;
+const description = `Ask Hikmah Noor about sources, grades, school differences or corrections. Your question opens prefilled in email — complex personal cases are always referred to qualified local scholars.`;
+const keywords = 'ask islamic question, ask scholar online, islamic question answer, report mistake quran site';
+const faq = [
+  { q: 'Will I get a fatwa here?', a: 'No. We answer sourcing and content questions and correct mistakes. Personal halal/haram rulings need a qualified local scholar who knows your full situation.' },
+  { q: 'How fast is a reply?', a: 'Corrections are reviewed weekly. Complex questions take longer — urgent personal matters should go straight to a local scholar, not wait on email.' },
+  { q: 'What should I include?', a: 'The page URL, what you expected, and (for sourcing disputes) the authentic reference. Screenshots of the exact lines help most.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Ask', path: '/ask/' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/ask/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">Ask</span>
+        <span class="hn-badge">Education — not fatwa</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Ask a question</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Pick a topic, write clearly, and your question opens prefilled in an email to our review inbox. For urgent personal rulings, see a qualified local scholar directly.</p>
+    </div>
+
+    <div class="mt-8 max-w-2xl">
+      <SectionHeader eyebrow="Form" title="Write your question" />
+      <form class="hn-card hn-card-pad mt-3 space-y-3" data-ask onsubmit="return false">
+        <div>
+          <label class="hn-block-label" for="ask-topic">Topic</label>
+          <select id="ask-topic" class="hn-input mt-1" data-ask-topic>
+            <option value="correction">Correction (Arabic, source, grade)</option>
+            <option value="ruling">Ruling question (will be referred)</option>
+            <option value="translation">Urdu / Hindi / Arabic translation</option>
+            <option value="request">Content request (new dua, guide, topic)</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="hn-block-label" for="ask-page">Page URL (optional)</label>
+          <input id="ask-page" class="hn-input mt-1" data-ask-page placeholder="https://…/duas/…/" inputmode="url" />
+        </div>
+        <div>
+          <label class="hn-block-label" for="ask-q">Your question</label>
+          <textarea id="ask-q" class="hn-input mt-1 min-h-[140px]" data-ask-q placeholder="Write clearly: what you saw, what you expected, and your reference if any…"></textarea>
+        </div>
+        <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-ask-err>Please write at least 20 characters so we can help.</p>
+        <div class="flex flex-wrap gap-2">
+          <button class="hn-btn hn-btn-primary !min-h-[48px] text-sm" data-ask-send>Open in email →</button>
+          <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-ask-copy>Copy text</button>
+        </div>
+        <p class="text-[13px] leading-6" style="color:var(--hn-muted)">Opens your mail app addressed to hello@hikmah-noor.pages.dev. Nothing is sent automatically — you review and press send.</p>
+      </form>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-ask]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const topic = root.querySelector('[data-ask-topic]');
+      const page = root.querySelector('[data-ask-page]');
+      const q = root.querySelector('[data-ask-q]');
+      const err = root.querySelector('[data-ask-err]');
+      const build = () => {
+        const t = topic?.value || 'other';
+        const p = (page?.value || '').trim();
+        const qq = (q?.value || '').trim();
+        const subject = `[Hikmah Noor][${t}] Question from the site`;
+        const body = `Topic: ${t}\nPage: ${p || '(not given)'}\n\nQuestion:\n${qq}\n\n— sent via hikmah-noor ask form (educational, not a fatwa request)`;
+        return { subject, body, ok: qq.length >= 20 };
+      };
+      root.querySelector('[data-ask-send]')?.addEventListener('click', () => {
+        const { subject, body, ok } = build();
+        err?.classList.toggle('hidden', ok);
+        if (!ok) return;
+        location.href = 'mailto:hello@hikmah-noor.pages.dev?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      });
+      root.querySelector('[data-ask-copy]')?.addEventListener('click', async () => {
+        const { body, ok } = build();
+        err?.classList.toggle('hidden', ok);
+        if (!ok) return;
+        try { await navigator.clipboard.writeText(body); } catch {}
+      });
+    })();
+  </script>
+</BaseLayout>

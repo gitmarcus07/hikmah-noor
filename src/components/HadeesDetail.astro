@@ -7,15 +7,21 @@ import ReadingCard from './hn/ReadingCard.astro';
 import { localizedPath } from '../i18n/utils';
 import { HADEES, HADEES_CATS } from '../data/hadees';
 import { NAWAWI } from '../data/hadees-nawawi';
+import { SAHIH, SAHIH_CATS } from '../data/hadees-sahih';
 
 interface Props { hadees: any; locale: string; collection?: string; }
 const { hadees, locale } = Astro.props;
 const coll = (Astro.props as any).collection ?? (hadees.sabaq === 0 ? 'nawawi' : 'kids');
 const isNawawi = coll === 'nawawi';
-const POOL = isNawawi ? NAWAWI : HADEES;
+const isSahih = coll === 'sahih';
+const POOL = isNawawi ? NAWAWI : isSahih ? SAHIH : HADEES;
 const L = (p: string) => localizedPath(locale, p);
 const hadeesPath = `/hadees/${hadees.slug}/`;
-const cat = HADEES_CATS.find((c) => c.num === hadees.sabaq) ?? { num: 0, title: '40 Hadith of Imam Nawawi', desc: 'Foundations of faith, worship and character.' };
+const cat = isSahih
+  ? SAHIH_CATS.find((c) => c.num === hadees.sabaq) ?? { num: 0, title: 'Sahih Selections', desc: 'Famous Bukhari/Muslim hadees for adults.' }
+  : HADEES_CATS.find((c) => c.num === hadees.sabaq) ?? { num: 0, title: '40 Hadith of Imam Nawawi', desc: 'Foundations of faith, worship and character.' };
+const collLabel = isNawawi ? '40 Hadith of Nawawi' : isSahih ? 'Sahih Selections' : '40 Hadees for Children';
+const collFrom = isNawawi ? 'Al-Arba’in al-Nawawiyyah (Imam Yahya al-Nawawi)' : isSahih ? 'Sahih al-Bukhari and Sahih Muslim selections (plus Tirmidhi, Abu Dawud, Nasai, Ibn Majah where graded Hasan)' : 'Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam)';
 
 const title = `${hadees.title} — Arabic, Urdu & English`;
 let description = `${hadees.arabic} — ${hadees.urdu} ${hadees.translation} Lesson: ${hadees.lesson} Source: ${hadees.source}.`;
@@ -24,8 +30,8 @@ const keywords = hadees.keywords;
 
 const faq = [
   { q: `What does "${hadees.arabic}" mean?`, a: `${hadees.translation} Urdu: ${hadees.urdu}` },
-  { q: `What is the lesson of this hadees${isNawawi ? '' : ' for children'}?`, a: hadees.lesson },
-  { q: `Where is this hadees from?`, a: `Source: ${hadees.source}${hadees.narrator ? ` (narrated by ${hadees.narrator})` : ''}. Grade: ${hadees.grade}. From: ${isNawawi ? 'Al-Arba’in al-Nawawiyyah (Imam Yahya al-Nawawi)' : 'Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam)'}. Learn wording from a teacher; consult scholars for rulings.` },
+  { q: `What is the lesson of this hadees${isNawawi || isSahih ? '' : ' for children'}?`, a: hadees.lesson },
+  { q: `Where is this hadees from?`, a: `Source: ${hadees.source}${hadees.narrator ? ` (narrated by ${hadees.narrator})` : ''}. Grade: ${hadees.grade}. From: ${collFrom}. Learn wording from a teacher; consult scholars for rulings.` },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -61,7 +67,7 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
 
     <div class="grid gap-3 sm:grid-cols-2 mt-3">
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">{isNawawi ? 'Lesson' : 'Kids lesson'}</p>
+        <p class="hn-block-label">{isNawawi || isSahih ? 'Lesson' : 'Kids lesson'}</p>
         <p class="text-[15px] leading-6" style="color:var(--hn-muted)">{hadees.lesson}</p>
       </div>
       <div class="hn-card hn-card-pad">
@@ -70,11 +76,11 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
         {hadees.narrator && <p class="text-[14px] leading-6 mt-1" style="color:var(--hn-muted)">Narrated by {hadees.narrator}</p>}
         <p class="mt-1.5 flex flex-wrap gap-1.5">
           <span class="hn-badge hn-badge-primary">{hadees.grade}</span>
-          <span class="hn-badge">{isNawawi ? '40 Hadith of Nawawi' : '40 Hadees for Children'}</span>
+          <span class="hn-badge">{collLabel}</span>
         </p>
       </div>
     </div>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">From: <strong style="color:var(--hn-ink)">{isNawawi ? 'Al-Arba’in al-Nawawiyyah (Imam Yahya al-Nawawi)' : 'Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam)'}</strong> • Hadees {hadees.num} of 40 • Verify wording with a teacher; rulings differ — consult scholars.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">From: <strong style="color:var(--hn-ink)">{collFrom}</strong> • Hadees {hadees.num} of 40 • Verify wording with a teacher; rulings differ — consult scholars.</p>
 
     <section class="mt-8" aria-label="Frequently asked questions">
       <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
@@ -88,9 +94,9 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
       </div>
     </section>
 
-    {siblings.length > 0 && !isNawawi && (
+    {siblings.length > 0 && coll !== 'nawawi' && (
       <section class="mt-8" aria-label="Same lesson">
-        <SectionHeader eyebrow={`Sabaq ${hadees.sabaq}`} title={cat?.title ?? 'Same lesson'} href={L('/hadees/')} linkLabel="All hadees" />
+        <SectionHeader eyebrow={isSahih ? `Part ${hadees.sabaq}` : `Sabaq ${hadees.sabaq}`} title={cat?.title ?? 'Same lesson'} href={L('/hadees/')} linkLabel="All hadees" />
         <div class="grid gap-3 sm:grid-cols-2">
           {siblings.map((r) => (
             <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
@@ -103,7 +109,7 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
     )}
 
     <section class="mt-8" aria-label="More hadees">
-      <SectionHeader eyebrow="Learn" title="More hadees" href={L('/hadees/')} linkLabel={isNawawi ? 'All 40 Nawawi' : 'All 40 for children'} />
+      <SectionHeader eyebrow="Learn" title="More hadees" href={L('/hadees/')} linkLabel={collLabel} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">

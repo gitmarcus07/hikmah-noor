@@ -55,6 +55,7 @@ const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : n
       {gradeLabel && <span class="hn-badge">{gradeLabel}</span>}
       {(dua as any).hisnNo && <span class="hn-badge hn-badge-gold">Hisn #{(dua as any).hisnNo}</span>}
       <span class="ms-auto"><BookmarkButton kind="dua" bmRef={duaPath} title={dua.title} /></span>
+      <span class="no-print"><button onclick="window.print()" class="hn-icon-btn !w-11 !h-11 !border-0" aria-label="Print or save PDF" title="Print / PDF">🖨</button></span>
       <ShareButtons title={dua.title} path={duaPath} locale={locale} />
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{dua.title}</h1>

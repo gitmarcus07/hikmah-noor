@@ -1,0 +1,158 @@
+---
+/* Ayah Card Maker — client-side canvas generator: pick an ayah, style it, download PNG for sharing. No backend. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'Where do the verses come from?', a: 'The same translation texts this site reads (Urdu: Jalandhry, English: Clear Quran, Hindi: Suhel Farooq Khan). Pick any verse by surah and ayah number, or shuffle for a random one.' },
+  { q: 'Can I share the image anywhere?', a: 'Yes — download the PNG and share freely for dawah. Keep the reference line intact so readers can verify the verse.' },
+  { q: 'Why do fonts look different on download?', a: 'The card is drawn with your device fonts (serif + system Arabic). For the most beautiful Arabic, open this page in a browser with Arabic fonts installed.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Ayah Card Maker', path: '/tools/ayah-card/' },
+];
+---
+<BaseLayout title="Ayah Card Maker — Beautiful Quran Verse Images to Share" description="Create shareable Quran verse cards: pick any ayah with Urdu/English/Hindi meaning, choose a theme, download the PNG for WhatsApp and social media." keywords="ayah card maker, quran verse image, islamic wallpaper maker, ayah png download, quran quote card" locale={locale} canonicalPath="/tools/ayah-card/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Ayah Card Maker" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-ac>
+    <div class="hn-card hn-card-pad space-y-3">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-[13px] font-bold">Surah (1–114)<input data-ac-surah inputmode="numeric" value="112" class="hn-input mt-1" aria-label="Surah number" /></label>
+        <label class="text-[13px] font-bold">Ayah<input data-ac-ayah inputmode="numeric" value="1" class="hn-input mt-1" aria-label="Ayah number" /></label>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-[13px] font-bold">Meaning
+          <select data-ac-lang class="hn-input mt-1"><option value="ur">Urdu</option><option value="en" selected>English</option><option value="hi">Hindi</option></select>
+        </label>
+        <label class="text-[13px] font-bold">Theme
+          <select data-ac-theme class="hn-input mt-1"><option value="night">Midnight gold</option><option value="dawn">Dawn sand</option><option value="emerald">Emerald</option></select>
+        </label>
+      </div>
+      <div class="flex gap-2">
+        <button data-ac-load class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm">Load verse</button>
+        <button data-ac-random class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🎲 Random</button>
+      </div>
+      <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-ac-err>Verse not found — check the numbers.</p>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad text-center">
+      <canvas data-ac-canvas width="1080" height="1080" class="w-full rounded-[12px]" style="border:1px solid var(--hn-border)"></canvas>
+      <button data-ac-dl class="hn-btn hn-btn-primary w-full !min-h-[48px] text-sm mt-3">Download PNG</button>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 — perfect for WhatsApp status & posts.</p>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-ac]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const cv = $('[data-ac-canvas]');
+      const cx = cv.getContext('2d');
+      const THEMES = {
+        night: { bg1: '#101828', bg2: '#1d2939', gold: '#d4af37', ink: '#ffffff', mut: '#d5dbe5' },
+        dawn: { bg1: '#faf3e3', bg2: '#f0e2c4', gold: '#8a6d1b', ink: '#2b2113', mut: '#6b5f45' },
+        emerald: { bg1: '#062e22', bg2: '#0b4d3a', gold: '#e9c46a', ink: '#ffffff', mut: '#cfe3d8' },
+      };
+      let cur = { ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ', tr: 'Say: He is Allah, the One.', ref: 'Quran 112:1' };
+      let metaCache = null;
+      const meta = async () => {
+        if (metaCache) return metaCache;
+        const r = await fetch('/search-index.json');
+        const j = await r.json();
+        metaCache = j
+          .filter((x) => x.category === 'surahs')
+          .map((x) => {
+            const m = String(x.url || '').match(/\/(\d+)-[^/]+\/$/);
+            const v = String(x.description || '').match(/(\d+) verses/);
+            return { num: Number(m?.[1] || 0), verses: Number(v?.[1] || 0) };
+          })
+          .filter((x) => x.num > 0 && x.verses > 0);
+        return metaCache;
+      };
+      const wrap = (c, text, max, font) => {
+        c.font = font;
+        const words = String(text).split(/\s+/);
+        const lines = [];
+        let line = '';
+        for (const w of words) {
+          const t = line ? line + ' ' + w : w;
+          if (c.measureText(t).width > max && line) { lines.push(line); line = w; }
+          else line = t;
+        }
+        if (line) lines.push(line);
+        return lines;
+      };
+      const draw = () => {
+        const T = THEMES[$('[data-ac-theme]').value] || THEMES.night;
+        const W = 1080, H = 1080;
+        const g = cx.createLinearGradient(0, 0, W, H);
+        g.addColorStop(0, T.bg1); g.addColorStop(1, T.bg2);
+        cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+        cx.strokeStyle = T.gold; cx.lineWidth = 6; cx.strokeRect(48, 48, W - 96, H - 96);
+        cx.lineWidth = 2; cx.strokeRect(64, 64, W - 128, H - 128);
+        cx.textAlign = 'center'; cx.fillStyle = T.gold;
+        cx.font = '700 44px Georgia, serif';
+        cx.fillText('☪ Hikmah Noor', W / 2, 150);
+        cx.fillStyle = T.ink;
+        const arLines = wrap(cx, cur.ar, W - 220, '44px "Amiri Quran", "Noto Naskh Arabic", serif');
+        let y = 300;
+        for (const ln of arLines.slice(0, 8)) { cx.fillText(ln, W / 2, y); y += 64; }
+        cx.fillStyle = T.gold; cx.fillRect(W / 2 - 60, y + 6, 120, 3);
+        y += 60;
+        cx.fillStyle = T.mut;
+        const trLines = wrap(cx, '“' + cur.tr + '”', W - 220, 'italic 40px Georgia, serif');
+        for (const ln of trLines.slice(0, 8)) { cx.fillText(ln, W / 2, y); y += 58; }
+        cx.fillStyle = T.gold; cx.font = '700 40px Georgia, serif';
+        cx.fillText(cur.ref, W / 2, H - 120);
+      };
+      const load = async (s, v) => {
+        const err = $('[data-ac-err]');
+        err?.classList.add('hidden');
+        try {
+          const lang = $('[data-ac-lang]').value;
+          const r = await fetch(`/api/verse?surah=${encodeURIComponent(s)}&verse=${encodeURIComponent(v)}&lang=${encodeURIComponent(lang)}`);
+          if (!r.ok) throw 0;
+          const j = await r.json();
+          if (!j.ar) throw 0;
+          cur = { ar: j.ar, tr: j.text || '', ref: `Quran ${j.surah}:${j.verse}${j.sname ? ` (${j.sname})` : ''}` };
+          draw();
+        } catch { err?.classList.remove('hidden'); }
+      };
+      $('[data-ac-load]').addEventListener('click', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
+      $('[data-ac-lang]').addEventListener('change', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
+      $('[data-ac-theme]').addEventListener('change', draw);
+      $('[data-ac-random]').addEventListener('click', async () => {
+        try {
+          const m = await meta();
+          const pick = m[Math.floor(Math.random() * m.length)];
+          const v = 1 + Math.floor(Math.random() * pick.verses);
+          $('[data-ac-surah]').value = pick.num; $('[data-ac-ayah]').value = v;
+          load(pick.num, v);
+        } catch {}
+      });
+      $('[data-ac-dl]').addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.download = 'ayah-card.png';
+        a.href = cv.toDataURL('image/png');
+        a.click();
+      });
+      load(112, 1);
+    })();
+  </script>
+</BaseLayout>

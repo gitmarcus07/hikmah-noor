@@ -12,12 +12,12 @@ const { locale } = Astro.props;
 const L = (p: string) => localizedPath(locale, p);
 
 const title = `Islamic Quizzes — Test Your Knowledge (${QUIZZES.length} quizzes)`;
-const description = `Free Islamic quizzes with instant answers: prophets in order, Seerah of Muhammad ﷺ, and Quran surahs & facts. Score 8+ to pass — share your result.`;
-const keywords = 'islamic quiz, quran quiz, seerah quiz, prophets quiz, ambiya quiz, muslim quiz questions answers';
+const description = `Free Islamic quizzes with instant answers: prophets in order, Seerah of Muhammad ﷺ, Quran surahs & facts, plus kids, Ramadan and Hajj tracks. Score 8+ to pass — share your result.`;
+const keywords = 'islamic quiz, quran quiz, seerah quiz, prophets quiz, ambiya quiz, muslim quiz questions answers, kids islamic quiz, ramadan quiz, hajj quiz';
 const faq = [
   { q: 'How does scoring work?', a: 'Each quiz has 10 questions with 4 options. Answer all ten to get your score out of 10 — 8 or more passes. Your best score per quiz is saved on this device.' },
-  { q: 'Where do the answers come from?', a: 'Every answer shows its explanation with the Quran reference or the site page it came from — prophet stories, seerah chapters and the Quran index.' },
-  { q: 'Are more quizzes coming?', a: 'Yes — duas, Hajj/Umrah and Ramadan quizzes are planned. Master these three first.' },
+  { q: 'Where do the answers come from?', a: 'Every answer shows its explanation with the Quran reference or the site page it came from — prophet stories, seerah chapters, the Quran index, Ramadan guides and Hajj rites.' },
+  { q: 'Are more quizzes coming?', a: 'Six tracks live now — prophets, seerah, Quran, kids, Ramadan and Hajj. Duas and finance quizzes are planned next.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },

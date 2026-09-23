@@ -23,6 +23,7 @@
     "content:women": "node scripts/validate-women.mjs",
     "content:stories:ur": "node scripts/validate-stories-ur.mjs",
     "content:hadees": "node scripts/validate-hadees.mjs",
+    "content:sahih": "node scripts/validate-hadees-sahih.mjs",
     "content:nawawi": "node scripts/validate-nawawi.mjs",
     "content:seerat": "node scripts/validate-seerah.mjs",
     "content:guides": "node scripts/validate-guides.mjs",

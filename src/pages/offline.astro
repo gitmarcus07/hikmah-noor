@@ -1,0 +1,48 @@
+---
+/* Offline fallback — shown by the service worker when navigation fails offline. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import Icon from '../components/Icon.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const L = (p: string) => localizedPath(locale, p);
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Offline', path: '/offline/' },
+];
+---
+<BaseLayout title="Offline — Saved Pages Still Work" description="You are offline. Pages you already opened (Quran, duas, guides) are saved on this device and keep working without internet." locale={locale} canonicalPath="/offline/" noindex={true} crumbs={crumbs}>
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <span class="hn-badge hn-badge-primary">Offline mode</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">No internet — reading still works</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Every page you open is saved on this device automatically. Reconnect once to save more; prayer times, Qibla and audio need internet.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button onclick="location.reload()" class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Try again</button>
+        <a href={L('/quran/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Open Quran</a>
+      </div>
+    </div>
+    <div class="mt-8">
+      <SectionHeader eyebrow="Saved" title="Good offline reads" sub="If you opened these before, they work now." />
+      <div class="grid gap-3 sm:grid-cols-2 mt-3">
+        {[
+          { t: 'Quran — 30 paras', d: 'Full text with translation', h: '/quran/', i: 'quran' },
+          { t: 'All Duas', d: '300 duas with Arabic & meaning', h: '/duas/', i: 'duas' },
+          { t: 'How-To Guides', d: 'Prayer, fasting, Hajj & more', h: '/learn/', i: 'book' },
+          { t: 'Hadees Library', d: '120 hadees with lessons', h: '/hadees/', i: 'book' },
+        ].map((c) => (
+          <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.i as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.t}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.d}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

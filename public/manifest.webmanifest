@@ -1,0 +1,17 @@
+{
+  "name": "Hikmah Noor — Islamic Knowledge, Made Simple",
+  "short_name": "Hikmah Noor",
+  "description": "Quran, duas, hadees, seerah and Islamic tools — with offline reading.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF8F2",
+  "theme_color": "#FAF8F2",
+  "dir": "auto",
+  "lang": "en",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,71 @@
+---
+/* Scholars — who reviews Hikmah Noor content. Honest, process-first:
+ * no invented names; real scholar credits are added as reviewers onboard. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Scholarly Review — Who Checks Hikmah Noor`;
+const description = `How Hikmah Noor content is reviewed: editorial sourcing, grade checks, school-difference notes, scholar verification onboarding, and how to ask a question.`;
+const keywords = 'islamic scholars review, hikmah noor scholars, ask scholar question, fatwa disclaimer, content review process';
+const faq = [
+  { q: 'Is Hikmah Noor a fatwa site?', a: 'No. Every page is educational. Personal rulings need a qualified scholar who knows your situation — use the Ask page and always confirm locally.' },
+  { q: 'Who are your scholars?', a: 'Content is drafted from the Quran and named hadith collections, then checked against classical fiqh positions with school differences noted. Named scholar reviewers are published on this page as they onboard — nothing is invented.' },
+  { q: 'How do I ask a religious question?', a: 'Use the Ask page: pick a topic, write your question, and it opens an email to our review inbox with everything prefilled. Complex or personal cases are always referred to qualified local scholars.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Scholars', path: '/scholars/' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/scholars/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">Trust</span>
+        <span class="hn-badge">Review, not fatwa</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Scholarly review</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Every page passes sourcing, grading and school-difference checks. Named scholar reviewers are credited here as they onboard — we publish process first and add names only when real.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/ask/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Ask a question</a>
+        <a href={L('/methodology/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Our methodology</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Process" title="Three review gates" sub="Nothing publishes without all three." />
+      <div class="grid gap-3 sm:grid-cols-3 mt-3">
+        <div class="hn-card hn-card-pad"><p class="font-extrabold">1. Sourcing</p><p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">Quran verses with numbers; hadith with named collections, narrators and Sahih/Hasan/Daif grades. No invented references, ever.</p></div>
+        <div class="hn-card hn-card-pad"><p class="font-extrabold">2. School check</p><p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">Hanafi, Shafii, Maliki and Hanbali positions compared where practice differs — the page says so instead of hiding it.</p></div>
+        <div class="hn-card hn-card-pad"><p class="font-extrabold">3. Scholar verify</p><p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">Qualified reviewers confirm rulings before sensitive pages go live. Their names appear below as they join.</p></div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Board" title="Review board" sub="Names appear here as scholars onboard." />
+      <div class="hn-card hn-card-pad mt-3">
+        <p class="font-extrabold">Founding review: Hikmah Noor Editorial</p>
+        <p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">Quran-first sourcing, grade labelling, school-difference notes and weekly correction reviews. Individual scholar credits are added with their permission as verification partnerships form — no anonymous authority claims, no invented titles.</p>
+        <p class="mt-2 text-sm leading-6" style="color:var(--hn-muted)">Are you a qualified scholar (ijazah-holding alim/mufti) willing to review pages in your field? <a href={L('/contact/')} class="font-bold underline underline-offset-2" style="color:var(--hn-primary)">Contact us →</a></p>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

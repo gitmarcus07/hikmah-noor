@@ -2,10 +2,13 @@
 import HadeesDetail from '../../components/HadeesDetail.astro';
 import { HADEES, hadeesBySlug } from '../../data/hadees';
 import { NAWAWI, nawawiBySlug } from '../../data/hadees-nawawi';
+import { SAHIH, sahihBySlug } from '../../data/hadees-sahih';
 const locale = 'en';
 export async function getStaticPaths() {
-  return [...HADEES, ...NAWAWI].map((h) => ({ params: { slug: h.slug }, props: { hadeesSlug: h.slug } }));
+  return [...HADEES, ...NAWAWI, ...SAHIH].map((h) => ({ params: { slug: h.slug }, props: { hadeesSlug: h.slug } }));
 }
-const hadees = hadeesBySlug((Astro.props as any).hadeesSlug) ?? nawawiBySlug((Astro.props as any).hadeesSlug);
+const _sahihHit = sahihBySlug((Astro.props as any).hadeesSlug);
+const hadees = hadeesBySlug((Astro.props as any).hadeesSlug) ?? nawawiBySlug((Astro.props as any).hadeesSlug) ?? _sahihHit;
+const collection = _sahihHit ? 'sahih' : undefined;
 ---
-<HadeesDetail hadees={hadees} locale={locale} />
+<HadeesDetail hadees={hadees} locale={locale} collection={collection} />

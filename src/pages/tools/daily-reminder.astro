@@ -1,0 +1,120 @@
+---
+/* Daily Reminder — browser-based ayah/dhikr reminder. No backend, no account:
+ * pick a time; whenever you open the site after that time, one notification
+ * arrives with the day's verse. Honest scope, stated on the page. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'Will it remind me if I never open the site?', a: 'No — browsers only let installed apps with servers send background push. This reminder fires when you open Hikmah Noor after your chosen time each day. Open once daily and you never miss it.' },
+  { q: 'Where does the daily verse come from?', a: 'The same rotating ayah list as the homepage — one verse per day, with English meaning and a link back to its reader page.' },
+  { q: 'How do I stop reminders?', a: 'Tap “Stop reminders” below, or block notifications for this site in your browser settings. Nothing leaves your device.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Daily Reminder', path: '/tools/daily-reminder/' },
+];
+---
+<BaseLayout title="Daily Reminder — One Ayah Notification Every Day" description="A free daily ayah reminder in your browser: pick a time, get one verse notification each day you visit. No account, no email, nothing leaves your device." keywords="daily ayah reminder, quran reminder notification, daily dhikr reminder, ayah of the day notification" locale={locale} canonicalPath="/tools/daily-reminder/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Daily Reminder" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-dr>
+    <p class="text-center text-[15px] leading-6" style="color:var(--hn-muted)">One verse, once a day — delivered in your browser whenever you open the site after your chosen time.</p>
+
+    <div class="mt-4 hn-card hn-card-pad space-y-3">
+      <div>
+        <label class="hn-block-label" for="dr-time">Reminder time</label>
+        <input id="dr-time" type="time" value="06:00" class="hn-input mt-1" data-dr-time />
+      </div>
+      <p class="text-[13.5px] leading-6" style="color:var(--hn-muted)">Status: <strong data-dr-status>not set</strong></p>
+      <div class="flex gap-2">
+        <button class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm" data-dr-on>Enable reminders</button>
+        <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-dr-off>Stop</button>
+      </div>
+      <button class="hn-btn hn-btn-secondary w-full !min-h-[44px] text-sm" data-dr-test>Send a test now</button>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad">
+      <p class="hn-block-label">Today’s verse</p>
+      <p class="font-arabic text-xl mt-2 leading-[2]" lang="ar" dir="rtl" data-dr-ar>…</p>
+      <p class="text-[14px] mt-1 leading-6" style="color:var(--hn-muted)" data-dr-en></p>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-dr]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const KEY = 'hn.daily.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ on: false, time: '06:00', last: '' }, load());
+      const today = () => new Date().toISOString().slice(0, 10);
+      const paint = () => {
+        $('[data-dr-time]').value = st.time;
+        $('[data-dr-status]').textContent = st.on ? `on — daily after ${st.time}` : 'not set';
+      };
+      const daily = async () => {
+        try {
+          const list = await (await fetch('/habits/ayahs.json')).json();
+          if (!list?.length) return null;
+          return list[Math.floor(Date.now() / 864e5) % list.length];
+        } catch { return null; }
+      };
+      const showToday = async () => {
+        const a = await daily();
+        if (!a) return;
+        const ar = $('[data-dr-ar]');
+        if (ar && a.ar) ar.textContent = a.ar;
+        const en = $('[data-dr-en]');
+        if (en) en.textContent = (a.en ? `“${a.en}” — ` : '') + `Quran ${a.surah}:${a.verse}`;
+      };
+      const maybe = async () => {
+        if (!st.on || !('Notification' in window) || Notification.permission !== 'granted') return;
+        if (st.last === today()) return;
+        const [h, m] = String(st.time || '06:00').split(':').map(Number);
+        const now = new Date();
+        if (now.getHours() * 60 + now.getMinutes() < h * 60 + m) return;
+        const a = await daily();
+        if (!a) return;
+        try {
+          new Notification('Ayah of the day', { body: `${a.en || ''} — Quran ${a.surah}:${a.verse}`, tag: 'hn-daily' });
+          st.last = today(); save(st);
+        } catch {}
+      };
+      $('[data-dr-on]').addEventListener('click', async () => {
+        if (!('Notification' in window)) return;
+        st.time = $('[data-dr-time]').value || '06:00';
+        const r = await Notification.requestPermission().catch(() => 'denied');
+        if (r !== 'granted') return;
+        st.on = true; save(st); paint(); maybe();
+      });
+      $('[data-dr-off]').addEventListener('click', () => { st.on = false; save(st); paint(); });
+      $('[data-dr-time]').addEventListener('change', (e) => { st.time = e.target.value || '06:00'; save(st); paint(); });
+      $('[data-dr-test]').addEventListener('click', async () => {
+        if (!('Notification' in window)) return;
+        const r = await Notification.requestPermission().catch(() => 'denied');
+        if (r !== 'granted') return;
+        const a = await daily();
+        try { new Notification('Ayah of the day (test)', { body: a ? `${a.en || ''} — Quran ${a.surah}:${a.verse}` : 'Reminders work.', tag: 'hn-test' }); } catch {}
+      });
+      paint();
+      showToday();
+      maybe();
+    })();
+  </script>
+</BaseLayout>

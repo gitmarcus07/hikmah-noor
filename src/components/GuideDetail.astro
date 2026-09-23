@@ -147,7 +147,7 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">Guide</span>
       <span class="hn-badge">{cat.title}</span>
-      <span class="ms-auto"><ShareButtons title={guide.title} path={guidePath} locale={locale} /></span>
+      <span class="ms-auto flex gap-2 items-center no-print"><button onclick="window.print()" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-3.5 text-sm">🖨 Print / PDF</button><ShareButtons title={guide.title} path={guidePath} locale={locale} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{guide.title}</h1>
     <p class="mt-2 text-[16px] leading-8" style="color:var(--hn-muted)">{guide.intro}</p>

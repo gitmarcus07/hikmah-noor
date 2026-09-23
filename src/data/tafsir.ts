@@ -223,4 +223,50 @@ export const VERSE_TAFSIR: Record<number, Record<number, string>> = {
     109: 'Were the sea ink for your Lord\u2019s words, it would run dry — inexhaustible knowledge.',
     110: 'Whoever hopes to meet His Lord — righteous deeds and no partners in worship.',
   },
+  2: {
+    2: 'This Book without doubt — guidance for the God-conscious in belief and action.',
+    152: 'Remember Me and I will remember you — remembrance and gratitude drawing divine remembrance.',
+    255: 'Ayatul Kursi: Allah\u2019s eternal life, knowledge and throne — no fatigue guarding heavens and earth.',
+    285: 'The Messenger believes and so do believers — faith in Allah, angels, Books and messengers without distinction.',
+    286: 'No soul burdened beyond capacity — accountability with mercy, pardon and relief from hardship.',
+  },
+  4: {
+    1: 'Mankind from a single soul — shared origin calling to consciousness of Allah and care for kinship.',
+    135: 'Stand firm for justice as witnesses to Allah — even against yourselves, kin, rich or poor.',
+  },
+  5: {
+    3: 'Today your religion perfected and favour completed — Islam as the chosen, completed way.',
+    8: 'Be witnesses for Allah in justice — let no hatred prevent fairness; piety is nearer to justice.',
+  },
+  9: {
+    40: 'Do not grieve, Allah is with us — divine company in the Cave turning fear into calm.',
+    105: 'Act, for Allah, His Messenger and believers will see — deeds witnessed, then returned to the Knower of the unseen.',
+  },
+  12: {
+    53: 'The soul inclines to evil except what my Lord spares — mercy, not self-claims, is the refuge.',
+    87: 'Despair not of Allah\u2019s relief — none despairs of His mercy except the disbelieving.',
+    92: 'No blame on you today — Yusuf\u2019s forgiveness modelling pardon after power over wrongdoing.',
+  },
+  17: {
+    1: 'Glory to Him who journeyed His servant by night — Isra from the Sacred Mosque to the Farthest Mosque in signs.',
+    23: 'Worship none but Him and excel to parents — kindness in speech and humility in old age.',
+    82: 'The Quran sends healing and mercy for believers — guidance increasing, loss only for wrongdoers.',
+  },
+  19: {
+    4: 'Never unblessed in calling You, my Lord — Zakariya\u2019s plea in frail age with certain hope.',
+    30: 'I am Allah\u2019s servant — Isa\u2019s cradle speech affirming scripture, prophethood and duty.',
+  },
+  20: {
+    14: 'I am Allah, none worthy but Me — worship Me and establish prayer for My remembrance.',
+    25: 'My Lord, expand my chest — Musa\u2019s dua for capacity, ease of speech and effective mission.',
+    114: 'My Lord, increase me in knowledge — seeking beneficial knowledge without haste in recitation.',
+  },
+  48: {
+    1: 'We granted you a clear victory — Hudaybiyyah\u2019s treaty opening doors beyond battle.',
+    4: 'He sent tranquillity into believers\u2019 hearts — faith increased with calm in trial.',
+    29: 'Muhammad is Allah\u2019s Messenger — his companions merciful among themselves, firm against denial.',
+  },
+  78: {
+    9: 'We made your sleep a rest — night as mercy renewing body and mind before the Day of Sorting.',
+  },
 };

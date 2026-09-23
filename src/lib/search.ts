@@ -16,6 +16,7 @@ import { WOMEN } from '../data/women';
 import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
 import { HADEES } from '../data/hadees';
 import { NAWAWI } from '../data/hadees-nawawi';
+import { SAHIH } from '../data/hadees-sahih';
 import { SEERAH } from '../data/seerah';
 
 /** Common alternate spellings / transliterations people actually type.
@@ -306,7 +307,7 @@ export function duaIndexItems(locale: string): IndexItem[] {
     });
   }
   for (const d0 of DUAS) {
-    const d: any = locale === 'ur' ? localizeDua(d0, locale) : d0;
+    const d: any = ['ur', 'hi', 'ar'].includes(locale) ? localizeDua(d0, locale) : d0;
     const cat = DUA_CATS.find((c) => c.slug === d.cat);
     const origin = (d as any).origin ?? (String(d.source).startsWith('Quran') ? 'quran' : 'hadith');
     items.push({
@@ -503,20 +504,20 @@ export function sahabaIndexItems(locale: string): IndexItem[] {
   }
   return items;
 }
-/** Hadees hub + individual hadees entries for a locale (kids 40 + Nawawi 40). */
+/** Hadees hub + individual hadees entries for a locale (kids 40 + Nawawi 40 + Sahih 40). */
 export function hadeesIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
   const items: IndexItem[] = [
     {
-      title: 'Hadees Library — 40 for Children + 40 of Imam Nawawi',
-      description: 'All 80 hadees: 40 short hadees for kids plus the 40 Hadith of Imam Nawawi — Arabic, Urdu, English, lesson and source. Each hadees has its own page.',
+      title: 'Hadees Library — 40 for Children + 40 of Imam Nawawi + 40 Sahih Selections',
+      description: 'All 120 hadees: 40 short hadees for kids, the 40 Hadith of Imam Nawawi, plus 40 Sahih selections — Arabic, Urdu, English, lesson and source. Each hadees has its own page.',
       category: 'hadees',
       url: `${prefix}/hadees/`,
-      tags: ['hadees', 'hadith', 'hadees in urdu', '40 hadees', 'nawawi', '40 hadith nawawi', 'choti hadees', 'bachon ki hadees', 'short hadith'],
+      tags: ['hadees', 'hadith', 'hadees in urdu', '40 hadees', 'nawawi', '40 hadith nawawi', 'sahih bukhari', 'sahih muslim', 'choti hadees', 'bachon ki hadees', 'short hadith'],
       locale,
     },
   ];
-  for (const h of [...HADEES, ...NAWAWI]) {
+  for (const h of [...HADEES, ...NAWAWI, ...SAHIH]) {
     items.push({
       title: `${h.title}`,
       description: `${h.urdu} ${h.translation} Lesson: ${h.lesson} Source: ${h.source}.`,
@@ -607,7 +608,7 @@ export function guideIndexItems(locale: string): IndexItem[] {
     });
   }
   for (const g0 of GUIDES) {
-    const g: any = locale === 'ur' ? localizeGuide(g0, locale) : g0;
+    const g: any = ['ur', 'hi', 'ar'].includes(locale) ? localizeGuide(g0, locale) : g0;
     items.push({
       title: g.title,
       description: g.intro,
