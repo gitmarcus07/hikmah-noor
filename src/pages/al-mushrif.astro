@@ -70,7 +70,7 @@ const crumbs = [
             <textarea id="mushrif-msg" class="hn-input mt-1 min-h-[140px]" data-message maxlength="600" placeholder="e.g. If this site helped you, share it with your family and friends. Whoever benefits through your share, you share its reward — knowledge shared for Allah's sake is Sadaqah Jariyah."></textarea>
             <p class="text-xs mt-1" style="color:var(--hn-muted)"><span data-count>0</span>/600</p>
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-3 sm:grid-cols-2" data-cta-row>
             <div>
               <label class="hn-block-label" for="mushrif-cta-label">Button label (optional)</label>
               <input id="mushrif-cta-label" class="hn-input mt-1" data-cta-label maxlength="40" placeholder="e.g. Donate any amount" />
@@ -80,6 +80,7 @@ const crumbs = [
               <input id="mushrif-cta-url" class="hn-input mt-1" data-cta-url maxlength="500" inputmode="url" placeholder="https://… or upi://…" />
             </div>
           </div>
+          <p class="text-[13px] leading-6 hidden" style="color:var(--hn-muted)" data-cta-note>Share appeals show only the Share button — no link needed. Tapping Share opens the visitor's apps (WhatsApp, Telegram, Facebook, X, Email).</p>
           <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-form-err></p>
           <p class="text-[13px] font-bold hidden" style="color:var(--hn-primary)" data-form-ok></p>
           <div class="flex flex-wrap gap-2">
@@ -133,6 +134,8 @@ const crumbs = [
       const pvMsg = $('[data-preview-msg]');
       const pvCtaWrap = $('[data-preview-cta-wrap]');
       const pvCta = $('[data-preview-cta]');
+      const ctaRow = $('[data-cta-row]');
+      const ctaNote = $('[data-cta-note]');
 
       const token = () => { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } };
       const setToken = (t) => { try { t ? sessionStorage.setItem(TOKEN_KEY, t) : sessionStorage.removeItem(TOKEN_KEY); } catch {} };
@@ -168,13 +171,22 @@ const crumbs = [
         paintPreview();
       }
       function paintPreview() {
+        const isShare = kind?.value === 'share';
         if (pvBadge) pvBadge.textContent = KIND_BADGE[kind?.value] || KIND_BADGE.info;
         if (pvCard) pvCard.style.borderTopColor = kind?.value === 'donate' ? 'var(--hn-gold)' : 'var(--hn-primary)';
         if (pvTitle) pvTitle.textContent = (title?.value || '').trim() || 'Your title appears here';
         if (pvMsg) pvMsg.textContent = (message?.value || '').trim() || 'Your message appears here.';
-        const hasCta = !!((ctaLabel?.value || '').trim() || (ctaUrl?.value || '').trim());
-        show(pvCtaWrap, hasCta);
-        if (pvCta) pvCta.textContent = (ctaLabel?.value || '').trim() || 'Button';
+        // Share appeals show only the Share button; hide the link fields.
+        show(ctaRow, !isShare);
+        show(ctaNote, !!isShare);
+        if (isShare) {
+          show(pvCtaWrap, true);
+          if (pvCta) pvCta.textContent = 'Share';
+        } else {
+          const hasCta = !!((ctaLabel?.value || '').trim() || (ctaUrl?.value || '').trim());
+          show(pvCtaWrap, hasCta);
+          if (pvCta) pvCta.textContent = (ctaLabel?.value || '').trim() || 'Button';
+        }
         if (count) count.textContent = String((message?.value || '').length);
       }
       ['input', 'change'].forEach((ev) => root.addEventListener(ev, (e) => {
@@ -232,12 +244,14 @@ const crumbs = [
 
       async function publish() {
         sayErr(''); sayOk('');
+        const isShare = kind?.value === 'share';
         const payload = {
           kind: kind?.value,
           title: title?.value || '',
           message: message?.value || '',
-          cta_label: ctaLabel?.value || '',
-          cta_url: ctaUrl?.value || '',
+          // Share appeals carry no link — the popup shows only Share.
+          cta_label: isShare ? '' : (ctaLabel?.value || ''),
+          cta_url: isShare ? '' : (ctaUrl?.value || ''),
         };
         if ((payload.title || '').trim().length < 3) return sayErr('Title needs at least 3 characters.');
         if ((payload.message || '').trim().length < 10) return sayErr('Message needs at least 10 characters.');

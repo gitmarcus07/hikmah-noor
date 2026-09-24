@@ -60,6 +60,28 @@
     cursor: pointer;
   }
   .hn-notice-close:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+  .hn-share-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .hn-share-opt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid var(--hn-border);
+    background: var(--hn-bg-soft);
+    color: var(--hn-ink);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .hn-share-opt:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
   @media print {
     #hn-notice-root { display: none !important; }
   }
@@ -93,17 +115,58 @@
       if (e.key === 'Escape') close();
     }
 
-    function shareSite() {
-      const data = {
+    function shareData() {
+      return {
         title: 'Hikmah Noor',
         text: 'Hikmah Noor — Quran, duas and guides. Sharing beneficial knowledge is Sadaqah Jariyah.',
         url: location.origin + '/',
       };
+    }
+
+    function shareSite(anchor) {
+      const data = shareData();
       if (navigator.share) {
         navigator.share(data).catch(() => {});
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(data.url).catch(() => {});
+        return;
       }
+      // Desktop fallback: inline picker with every share app.
+      toggleShareMenu(anchor, data);
+    }
+
+    function toggleShareMenu(anchor, data) {
+      const card = anchor.closest('.hn-notice-card');
+      if (!card) return;
+      const old = card.querySelector('.hn-share-menu');
+      if (old) { old.remove(); return; }
+      const enc = encodeURIComponent;
+      const menu = document.createElement('div');
+      menu.className = 'hn-share-menu';
+      const links = [
+        { t: 'WhatsApp', h: 'https://wa.me/?text=' + enc(data.text + ' ' + data.url) },
+        { t: 'Telegram', h: 'https://t.me/share/url?url=' + enc(data.url) + '&text=' + enc(data.text) },
+        { t: 'Facebook', h: 'https://www.facebook.com/sharer/sharer.php?u=' + enc(data.url) },
+        { t: 'X', h: 'https://twitter.com/intent/tweet?text=' + enc(data.text) + '&url=' + enc(data.url) },
+        { t: 'Email', h: 'mailto:?subject=' + enc(data.title) + '&body=' + enc(data.text + '\n' + data.url) },
+      ];
+      for (const l of links) {
+        const a = document.createElement('a');
+        a.className = 'hn-share-opt';
+        a.textContent = l.t;
+        a.href = l.h;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        menu.appendChild(a);
+      }
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'hn-share-opt';
+      copy.textContent = 'Copy link';
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(data.url); copy.textContent = 'Copied ✓'; }
+        catch { copy.textContent = data.url; }
+      });
+      menu.appendChild(copy);
+      anchor.after(menu);
     }
 
     function render(n) {
@@ -139,16 +202,16 @@
       actions.className = 'mt-4 flex flex-wrap gap-2';
 
       if (n.kind === 'share') {
+        // Share appeals show ONLY the Share button — no donation/CTA button.
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'hn-btn hn-btn-primary !min-h-[46px] text-sm';
-        b.textContent = 'Share Hikmah Noor';
-        b.addEventListener('click', shareSite);
+        b.textContent = 'Share';
+        b.addEventListener('click', () => shareSite(b));
         actions.appendChild(b);
-      }
-      if (n.cta_url) {
+      } else if (n.cta_url) {
         const a = document.createElement('a');
-        a.className = 'hn-btn ' + (n.kind === 'share' ? 'hn-btn-secondary' : 'hn-btn-primary') + ' !min-h-[46px] text-sm';
+        a.className = 'hn-btn hn-btn-primary !min-h-[46px] text-sm';
         a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
         a.href = n.cta_url;
         a.target = '_blank';
