@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const main = await readFile(join(ROOT, 'src', 'data', 'duas.ts'), 'utf8');
 const parts = [];
-for (const f of ['duas-ar-1.ts', 'duas-ar-2.ts']) {
+for (const f of ['duas-ar-1.ts', 'duas-ar-2.ts', 'duas-ar-3.ts', 'duas-ar-4.ts', 'duas-ar-5.ts', 'duas-ar-6.ts', 'duas-ar-7.ts']) {
   parts.push(await readFile(join(ROOT, 'src', 'data', 'i18n', f), 'utf8'));
 }
 const txt = parts.join('\n');
