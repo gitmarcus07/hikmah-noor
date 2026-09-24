@@ -21,7 +21,7 @@ interface Props {
   theme?: 'dark' | 'light';
 }
 
-const { title, description, locale, keywords, image = '/og-cover.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
+const { title, description, locale, keywords, image = '/og-cover-v2.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
@@ -129,7 +129,11 @@ const mobileGroups = [
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
   <meta property="og:image" content={`${site}${image}`} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Hikmah Noor — authentic Islamic knowledge: 114 surahs, 300 duas, 4 languages" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={`${site}${image}`} />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
