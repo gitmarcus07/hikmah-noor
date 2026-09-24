@@ -1,7 +1,7 @@
 ---
 // Global site-notice popup (managed from /al-mushrif/).
-// Fetches GET /api/notices/active once per page view, renders nothing when
-// there is no active notice or the visitor already dismissed that notice id.
+// Fetches GET /api/notices/active on every page load and shows the active
+// notice each time — the cross button only closes the current view.
 // All text is injected via textContent (never innerHTML) — admin input
 // cannot execute scripts. No props: styling is pre-built (emerald/gold).
 //
@@ -42,20 +42,20 @@
     position: relative;
     pointer-events: auto;
     width: 100%;
-    max-width: 27rem;
-    max-height: min(86vh, 34rem);
+    max-width: 22rem;
+    max-height: min(86vh, 30rem);
     overflow-y: auto;
     overscroll-behavior: contain;
     background: var(--hn-card);
     border: 1px solid var(--hn-border);
     border-top: 4px solid var(--hn-primary);
     box-shadow: var(--hn-shadow-lg);
-    padding: 1.4rem 1.35rem 1.25rem;
+    padding: 1.25rem 1.15rem 1.1rem;
     border-radius: 20px 20px 0 0;
     animation: hn-notice-up 0.25s ease;
   }
   @media (min-width: 640px) {
-    .hn-notice-card { border-radius: 20px; padding: 1.6rem 1.6rem 1.4rem; }
+    .hn-notice-card { border-radius: 20px; padding: 1.35rem 1.3rem 1.2rem; }
   }
   .hn-notice-card[data-kind="donate"] { border-top-color: var(--hn-gold); }
   .hn-notice-close {
@@ -77,7 +77,7 @@
   }
   .hn-notice-close:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
   .hn-notice-card h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: -0.01em;
     line-height: 1.45;
@@ -86,9 +86,9 @@
     padding-inline-end: 2.75rem;
   }
   .hn-notice-card p {
-    margin: 0.55rem 0 0;
-    font-size: 0.95rem;
-    line-height: 1.8;
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.75;
     color: var(--hn-muted);
   }
   .hn-notice-actions {
@@ -139,7 +139,8 @@
 <script is:inline>
   (() => {
     const ROOT_ID = 'hn-notice-root';
-    const LS_KEY = 'hn-notice-dismissed';
+    // No dismissal memory: the popup shows on EVERY visit / page load.
+    // The cross button only closes it for the current view.
     // Never pop over the admin panel itself.
     if (location.pathname.replace(/\/$/, '') === '/al-mushrif') return;
     const root = document.getElementById(ROOT_ID);
@@ -147,13 +148,6 @@
     root.dataset.wired = '1';
 
     const KIND_LABEL = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
-
-    function dismissedId() {
-      try { return localStorage.getItem(LS_KEY) || ''; } catch { return ''; }
-    }
-    function markDismissed(id) {
-      try { localStorage.setItem(LS_KEY, String(id)); } catch {}
-    }
 
     function close() {
       root.hidden = true;
@@ -251,7 +245,7 @@
       x.className = 'hn-notice-close';
       x.setAttribute('aria-label', 'Dismiss');
       x.textContent = '×';
-      x.addEventListener('click', () => { markDismissed(n.id); close(); });
+      x.addEventListener('click', close);
 
       const badge = document.createElement('span');
       badge.className = 'hn-badge ' + (n.kind === 'donate' ? 'hn-badge-gold' : 'hn-badge-primary');
@@ -303,7 +297,6 @@
       }
       const n = data && data.notice;
       if (!n || !n.id) return;
-      if (dismissedId() === String(n.id)) return;
       // Small delay so the popup never blocks first paint.
       setTimeout(() => render(n), 1200);
     }
