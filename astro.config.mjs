@@ -27,6 +27,7 @@ export default defineConfig({
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
         !/\/tools\/(read|my-progress)\//.test(page) &&
+        !/\/al-mushrif\//.test(page) &&
         !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|gems|challenges)\//.test(page),
     }),
   ],

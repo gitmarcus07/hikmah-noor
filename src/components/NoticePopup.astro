@@ -1,0 +1,194 @@
+---
+// Global site-notice popup (managed from /al-mushrif/).
+// Fetches GET /api/notices/active once per page view, renders nothing when
+// there is no active notice or the visitor already dismissed that notice id.
+// All text is injected via textContent (never innerHTML) — admin input
+// cannot execute scripts. No props: styling is pre-built (emerald/gold).
+---
+<div id="hn-notice-root" hidden></div>
+
+<style>
+  #hn-notice-root {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+  #hn-notice-root[hidden] { display: none; }
+  @media (min-width: 640px) {
+    #hn-notice-root { align-items: center; }
+  }
+  .hn-notice-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(23, 32, 27, 0.45);
+    pointer-events: auto;
+  }
+  .hn-notice-card {
+    position: relative;
+    pointer-events: auto;
+    width: 100%;
+    max-width: 26rem;
+    max-height: min(80vh, 32rem);
+    overflow-y: auto;
+    background: var(--hn-card);
+    border: 1px solid var(--hn-border);
+    border-top: 4px solid var(--hn-primary);
+    border-radius: 16px;
+    box-shadow: var(--hn-shadow-lg);
+    padding: 1.25rem 1.25rem 1.1rem;
+  }
+  .hn-notice-card[data-kind="donate"] { border-top-color: var(--hn-gold); }
+  .hn-notice-close {
+    position: absolute;
+    top: 0.5rem;
+    inset-inline-end: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 10px;
+    border: 1px solid var(--hn-border);
+    background: var(--hn-card);
+    color: var(--hn-muted);
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .hn-notice-close:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+  @media print {
+    #hn-notice-root { display: none !important; }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const ROOT_ID = 'hn-notice-root';
+    const LS_KEY = 'hn-notice-dismissed';
+    // Never pop over the admin panel itself.
+    if (location.pathname.replace(/\/$/, '') === '/al-mushrif') return;
+    const root = document.getElementById(ROOT_ID);
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+
+    const KIND_LABEL = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
+
+    function dismissedId() {
+      try { return localStorage.getItem(LS_KEY) || ''; } catch { return ''; }
+    }
+    function markDismissed(id) {
+      try { localStorage.setItem(LS_KEY, String(id)); } catch {}
+    }
+
+    function close() {
+      root.hidden = true;
+      root.innerHTML = '';
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+    }
+
+    function shareSite() {
+      const data = {
+        title: 'Hikmah Noor',
+        text: 'Hikmah Noor — Quran, duas and guides. Sharing beneficial knowledge is Sadaqah Jariyah.',
+        url: location.origin + '/',
+      };
+      if (navigator.share) {
+        navigator.share(data).catch(() => {});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(data.url).catch(() => {});
+      }
+    }
+
+    function render(n) {
+      root.innerHTML = '';
+      const dir = document.documentElement.dir || 'ltr';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'hn-notice-backdrop';
+      backdrop.addEventListener('click', close);
+
+      const card = document.createElement('div');
+      card.className = 'hn-notice-card';
+      card.dataset.kind = n.kind || 'info';
+      card.setAttribute('role', 'dialog');
+      card.setAttribute('aria-modal', 'true');
+      card.setAttribute('aria-label', n.title);
+      card.dir = dir === 'rtl' ? 'rtl' : 'ltr';
+
+      const badge = document.createElement('span');
+      badge.className = 'hn-badge ' + (n.kind === 'donate' ? 'hn-badge-gold' : 'hn-badge-primary');
+      badge.textContent = KIND_LABEL[n.kind] || KIND_LABEL.info;
+
+      const title = document.createElement('h2');
+      title.className = 'text-xl font-extrabold tracking-tight mt-2 pe-10';
+      title.style.color = 'var(--hn-ink)';
+      title.textContent = n.title;
+
+      const msg = document.createElement('p');
+      msg.className = 'mt-2 text-[15px] leading-7';
+      msg.style.color = 'var(--hn-muted)';
+      msg.textContent = n.message;
+
+      const actions = document.createElement('div');
+      actions.className = 'mt-4 flex flex-wrap gap-2';
+
+      if (n.kind === 'share') {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'hn-btn hn-btn-primary !min-h-[46px] text-sm';
+        b.textContent = 'Share Hikmah Noor';
+        b.addEventListener('click', shareSite);
+        actions.appendChild(b);
+      }
+      if (n.cta_url) {
+        const a = document.createElement('a');
+        a.className = 'hn-btn ' + (n.kind === 'share' ? 'hn-btn-secondary' : 'hn-btn-primary') + ' !min-h-[46px] text-sm';
+        a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
+        a.href = n.cta_url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        actions.appendChild(a);
+      }
+
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'hn-notice-close';
+      x.setAttribute('aria-label', 'Dismiss');
+      x.textContent = '×';
+      x.addEventListener('click', () => { markDismissed(n.id); close(); });
+
+      card.append(badge, title, msg);
+      if (actions.childNodes.length) card.appendChild(actions);
+      card.appendChild(x);
+      root.append(backdrop, card);
+      root.hidden = false;
+      document.addEventListener('keydown', onKey);
+      x.focus({ preventScroll: true });
+    }
+
+    async function boot() {
+      let data = null;
+      try {
+        const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' } });
+        if (!r.ok) return;
+        data = await r.json();
+      } catch {
+        return;
+      }
+      const n = data && data.notice;
+      if (!n || !n.id) return;
+      if (dismissedId() === String(n.id)) return;
+      // Small delay so the popup never blocks first paint.
+      setTimeout(() => render(n), 1200);
+    }
+
+    if (document.readyState === 'complete') boot();
+    else window.addEventListener('load', boot);
+  })();
+</script>

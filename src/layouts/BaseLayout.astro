@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { isRTL, localeNames, locales, getDict, localizedPath } from '../i18n/utils';
 import Icon from '../components/Icon.astro';
+import NoticePopup from '../components/NoticePopup.astro';
 
 interface Props {
   title: string;
@@ -385,5 +386,6 @@ const mobileGroups = [
     </div>
   </footer>
   )}
+  <NoticePopup />
 </body>
 </html>

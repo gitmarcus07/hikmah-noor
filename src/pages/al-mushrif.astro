@@ -1,0 +1,251 @@
+---
+/* Al-Mushrif — private site-notice console (shared admin password).
+ * Unlisted, noindex, excluded from sitemap. The password lives only in the
+ * Cloudflare ADMIN_SECRET env var — never in code. The browser keeps it in
+ * sessionStorage for the tab lifetime and sends it as an Authorization
+ * Bearer header; wrong passwords get one generic error either way. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Al-Mushrif', path: '/al-mushrif/' },
+];
+---
+<BaseLayout title="Al-Mushrif — Site Notices" description="Private console for publishing Hikmah Noor site notices." locale={locale} canonicalPath="/al-mushrif/" noindex={true} hideFooter={true} crumbs={crumbs}>
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <span class="hn-badge hn-badge-primary">Private console</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Al-Mushrif</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Publish one popup notice for the whole site. Visitors see it once and can dismiss it with ✕. Styling is pre-built — just write and send.</p>
+    </div>
+
+    <div class="mt-8 max-w-2xl" data-mushrif>
+      {/* ---------- Login ---------- */}
+      <section class="hn-card hn-card-pad" data-pane-login>
+        <SectionHeader eyebrow="Step 1" title="Unlock" sub="Enter the admin password set as ADMIN_SECRET." />
+        <form class="mt-3 space-y-3" data-login-form onsubmit="return false">
+          <div>
+            <label class="hn-block-label" for="mushrif-pass">Admin password</label>
+            <input id="mushrif-pass" type="password" class="hn-input mt-1" data-pass autocomplete="current-password" maxlength="256" placeholder="••••••••" />
+          </div>
+          <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-login-err>Incorrect password or too many attempts. Wait a few minutes and try again.</p>
+          <div class="flex flex-wrap gap-2">
+            <button class="hn-btn hn-btn-primary !min-h-[48px] text-sm" data-unlock>Unlock</button>
+          </div>
+        </form>
+      </section>
+
+      {/* ---------- Console ---------- */}
+      <section class="hn-card hn-card-pad hidden" data-pane-console>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="hn-badge hn-badge-primary">Unlocked</span>
+          <button class="hn-btn hn-btn-ghost !min-h-[44px] text-sm ms-auto" data-lock>Lock</button>
+        </div>
+        <div class="mt-3 rounded-[10px] border px-3.5 py-3 text-[13.5px] leading-6" style="border-color:var(--hn-border);background:var(--hn-bg-soft);color:var(--hn-muted)" data-current>
+          No active notice on the site right now.
+        </div>
+
+        <div class="mt-5">
+          <SectionHeader eyebrow="Step 2" title="Write the notice" sub="One message for all languages. Publishing replaces the current popup." />
+        </div>
+        <form class="mt-3 space-y-3" data-compose onsubmit="return false">
+          <div>
+            <label class="hn-block-label" for="mushrif-kind">Type</label>
+            <select id="mushrif-kind" class="hn-input mt-1" data-kind>
+              <option value="share">Share appeal (Sadaqah Jariyah)</option>
+              <option value="donate">Donation appeal (one-time, any amount)</option>
+              <option value="info">General notice</option>
+            </select>
+          </div>
+          <div>
+            <label class="hn-block-label" for="mushrif-title">Title (3–80)</label>
+            <input id="mushrif-title" class="hn-input mt-1" data-title maxlength="80" placeholder="e.g. Share Hikmah Noor, earn Sadaqah Jariyah" />
+          </div>
+          <div>
+            <label class="hn-block-label" for="mushrif-msg">Message (10–600)</label>
+            <textarea id="mushrif-msg" class="hn-input mt-1 min-h-[140px]" data-message maxlength="600" placeholder="e.g. If this site helped you, share it with your family and friends. Whoever benefits through your share, you share its reward — knowledge shared for Allah's sake is Sadaqah Jariyah."></textarea>
+            <p class="text-xs mt-1" style="color:var(--hn-muted)"><span data-count>0</span>/600</p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="hn-block-label" for="mushrif-cta-label">Button label (optional)</label>
+              <input id="mushrif-cta-label" class="hn-input mt-1" data-cta-label maxlength="40" placeholder="e.g. Donate any amount" />
+            </div>
+            <div>
+              <label class="hn-block-label" for="mushrif-cta-url">Button link (optional)</label>
+              <input id="mushrif-cta-url" class="hn-input mt-1" data-cta-url maxlength="500" inputmode="url" placeholder="https://… or upi://…" />
+            </div>
+          </div>
+          <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-form-err></p>
+          <p class="text-[13px] font-bold hidden" style="color:var(--hn-primary)" data-form-ok></p>
+          <div class="flex flex-wrap gap-2">
+            <button class="hn-btn hn-btn-primary !min-h-[48px] text-sm" data-publish>Publish popup</button>
+            <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-unpublish>Remove popup</button>
+          </div>
+          <p class="text-[13px] leading-6" style="color:var(--hn-muted)">For donations paste a payment link (Stripe / Razorpay) or UPI link. Visitors pay what they can — one-time, no membership.</p>
+        </form>
+
+        {/* Live preview — same pre-built styling as the site popup */}
+        <div class="mt-6">
+          <SectionHeader eyebrow="Preview" title="How visitors see it" />
+          <div class="hn-card hn-card-pad mt-3" style="border-top:4px solid var(--hn-primary)" data-preview-card>
+            <div><span class="hn-badge hn-badge-primary" data-preview-badge>Share the reward</span></div>
+            <div class="text-lg font-extrabold mt-2" data-preview-title>Your title appears here</div>
+            <p class="mt-1.5 text-[14.5px] leading-7" style="color:var(--hn-muted)" data-preview-msg>Your message appears here.</p>
+            <div class="mt-3 flex flex-wrap gap-2 hidden" data-preview-cta-wrap>
+              <span class="hn-btn hn-btn-primary !min-h-[44px] text-sm" data-preview-cta>Button</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-mushrif]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const TOKEN_KEY = 'hn-mushrif-token';
+      const $ = (s) => root.querySelector(s);
+      const loginPane = $('[data-pane-login]');
+      const consolePane = $('[data-pane-console]');
+      const pass = $('[data-pass]');
+      const loginErr = $('[data-login-err]');
+      const unlockBtn = $('[data-unlock]');
+      const current = $('[data-current]');
+      const kind = $('[data-kind]');
+      const title = $('[data-title]');
+      const message = $('[data-message]');
+      const ctaLabel = $('[data-cta-label]');
+      const ctaUrl = $('[data-cta-url]');
+      const formErr = $('[data-form-err]');
+      const formOk = $('[data-form-ok]');
+      const count = $('[data-count]');
+      const pvCard = $('[data-preview-card]');
+      const pvBadge = $('[data-preview-badge]');
+      const pvTitle = $('[data-preview-title]');
+      const pvMsg = $('[data-preview-msg]');
+      const pvCtaWrap = $('[data-preview-cta-wrap]');
+      const pvCta = $('[data-preview-cta]');
+
+      const token = () => { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } };
+      const setToken = (t) => { try { t ? sessionStorage.setItem(TOKEN_KEY, t) : sessionStorage.removeItem(TOKEN_KEY); } catch {} };
+      const authHeaders = () => ({ 'content-type': 'application/json', accept: 'application/json', authorization: 'Bearer ' + token() });
+      const show = (el, on) => el?.classList.toggle('hidden', !on);
+      const sayErr = (m) => { if (!formErr) return; formErr.textContent = m; show(formErr, !!m); show(formOk, false); };
+      const sayOk = (m) => { if (!formOk) return; formOk.textContent = m; show(formOk, !!m); show(formErr, false); };
+
+      const KIND_BADGE = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
+      function paintPreview() {
+        if (pvBadge) pvBadge.textContent = KIND_BADGE[kind?.value] || KIND_BADGE.info;
+        if (pvCard) pvCard.style.borderTopColor = kind?.value === 'donate' ? 'var(--hn-gold)' : 'var(--hn-primary)';
+        if (pvTitle) pvTitle.textContent = (title?.value || '').trim() || 'Your title appears here';
+        if (pvMsg) pvMsg.textContent = (message?.value || '').trim() || 'Your message appears here.';
+        const hasCta = !!((ctaLabel?.value || '').trim() || (ctaUrl?.value || '').trim());
+        show(pvCtaWrap, hasCta);
+        if (pvCta) pvCta.textContent = (ctaLabel?.value || '').trim() || 'Button';
+        if (count) count.textContent = String((message?.value || '').length);
+      }
+      ['input', 'change'].forEach((ev) => root.addEventListener(ev, (e) => {
+        if (e.target === kind || e.target === title || e.target === message || e.target === ctaLabel || e.target === ctaUrl) paintPreview();
+      }));
+      paintPreview();
+
+      function setLocked(locked) {
+        show(loginPane, locked);
+        show(consolePane, !locked);
+        if (!locked && pass) pass.value = '';
+        loginErr && show(loginErr, false);
+      }
+
+      async function refreshCurrent() {
+        try {
+          const r = await fetch('/api/notices/status', { headers: { accept: 'application/json', authorization: 'Bearer ' + token() } });
+          if (r.status === 401 || r.status === 429) { setToken(''); setLocked(true); loginErr && show(loginErr, true); return; }
+          if (!r.ok) return;
+          const d = await r.json();
+          if (d && d.notice) {
+            if (current) current.textContent = `Live now — [${d.notice.kind}] ${d.notice.title}`;
+          } else if (current) {
+            current.textContent = 'No active notice on the site right now.';
+          }
+        } catch {}
+      }
+
+      let cooling = false;
+      async function unlock() {
+        if (cooling) return;
+        const t = (pass?.value || '').trim();
+        if (!t) { loginErr && show(loginErr, true); return; }
+        unlockBtn && (unlockBtn.disabled = true);
+        try {
+          const r = await fetch('/api/notices/status', { headers: { accept: 'application/json', authorization: 'Bearer ' + t } });
+          if (r.ok) {
+            setToken(t);
+            setLocked(false);
+            sayOk('');
+            refreshCurrent();
+          } else {
+            show(loginErr, true);
+            cooling = true;
+            setTimeout(() => { cooling = false; }, 2000);
+          }
+        } catch {
+          show(loginErr, true);
+        } finally {
+          unlockBtn && (unlockBtn.disabled = false);
+        }
+      }
+
+      async function publish() {
+        sayErr(''); sayOk('');
+        const payload = {
+          kind: kind?.value,
+          title: title?.value || '',
+          message: message?.value || '',
+          cta_label: ctaLabel?.value || '',
+          cta_url: ctaUrl?.value || '',
+        };
+        if ((payload.title || '').trim().length < 3) return sayErr('Title needs at least 3 characters.');
+        if ((payload.message || '').trim().length < 10) return sayErr('Message needs at least 10 characters.');
+        try {
+          const r = await fetch('/api/notices/publish', { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+          const d = await r.json().catch(() => ({}));
+          if (r.status === 401 || r.status === 429) { setToken(''); setLocked(true); show(loginErr, true); return; }
+          if (!r.ok) return sayErr('Could not publish (' + (d.error || ('http_' + r.status)) + '). Check lengths and link (https:// or upi://).');
+          sayOk('Published — the popup is now live on the site.');
+          refreshCurrent();
+        } catch {
+          sayErr('Network error — try again.');
+        }
+      }
+
+      async function unpublish() {
+        sayErr(''); sayOk('');
+        try {
+          const r = await fetch('/api/notices/clear', { method: 'POST', headers: authHeaders(), body: '{}' });
+          if (r.status === 401 || r.status === 429) { setToken(''); setLocked(true); show(loginErr, true); return; }
+          if (!r.ok) return sayErr('Could not remove the popup. Try again.');
+          sayOk('Removed — no popup is showing now.');
+          refreshCurrent();
+        } catch {
+          sayErr('Network error — try again.');
+        }
+      }
+
+      unlockBtn?.addEventListener('click', unlock);
+      pass?.addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+      root.querySelector('[data-publish]')?.addEventListener('click', publish);
+      root.querySelector('[data-unpublish]')?.addEventListener('click', unpublish);
+      root.querySelector('[data-lock]')?.addEventListener('click', () => { setToken(''); setLocked(true); });
+
+      // Resume session if the tab still holds a token — verified server-side.
+      if (token()) { setLocked(false); refreshCurrent(); } else { setLocked(true); }
+    })();
+  </script>
+</BaseLayout>
