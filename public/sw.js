@@ -1,9 +1,10 @@
-/* Hikmah Noor service worker — offline-first reading (v1).
+/* Hikmah Noor service worker — offline-first reading (v2).
  * Same-origin GET requests are cached at runtime; navigations fall back
  * to /offline/ when the network fails. Third-party (fonts, audio, APIs)
  * is left alone so it never breaks the shell.
+ * /api/* is NEVER cached (notices, search must always be fresh).
  */
-const V = 'hn-v1';
+const V = 'hn-v2';
 const CORE = ['/', '/offline/', '/favicon.svg'];
 
 self.addEventListener('install', (e) => {
@@ -25,6 +26,8 @@ self.addEventListener('fetch', (e) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  // API responses must always be fresh — never serve or store them.
+  if (url.pathname.startsWith('/api/')) return;
   if (request.mode === 'navigate') {
     e.respondWith(
       fetch(request)

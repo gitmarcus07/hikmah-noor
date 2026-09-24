@@ -238,7 +238,7 @@
     async function boot() {
       let data = null;
       try {
-        const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' } });
+        const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' }, cache: 'no-store' });
         if (!r.ok) return;
         data = await r.json();
       } catch {
