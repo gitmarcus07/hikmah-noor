@@ -85,6 +85,7 @@ const crumbs = [
           <div class="flex flex-wrap gap-2">
             <button class="hn-btn hn-btn-primary !min-h-[48px] text-sm" data-publish>Publish popup</button>
             <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-unpublish>Remove popup</button>
+            <button class="hn-btn hn-btn-ghost !min-h-[48px] text-sm" data-preset>Fill preset text</button>
           </div>
           <p class="text-[13px] leading-6" style="color:var(--hn-muted)">For donations paste a payment link (Stripe / Razorpay) or UPI link. Visitors pay what they can — one-time, no membership.</p>
         </form>
@@ -141,6 +142,31 @@ const crumbs = [
       const sayOk = (m) => { if (!formOk) return; formOk.textContent = m; show(formOk, !!m); show(formErr, false); };
 
       const KIND_BADGE = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
+      const PRESETS = {
+        share: {
+          title: 'Share Hikmah Noor, earn Sadaqah Jariyah',
+          message: "If Hikmah Noor helped you, share it with your family, relatives and friends. Whoever learns and benefits through your share, you share in its reward — spreading beneficial knowledge is Sadaqah Jariyah that keeps earning even after us.",
+          cta_label: '',
+        },
+        donate: {
+          title: 'Help keep Hikmah Noor free for everyone',
+          message: 'Hikmah Noor is free and has no memberships or subscriptions. If you can, donate whatever amount you wish to help cover the cost of running this site, so this knowledge stays available to all. Every contribution, big or small, counts.',
+          cta_label: 'Donate any amount',
+        },
+      };
+      const presetTexts = () => Object.values(PRESETS).flatMap((p) => [p.title, p.message, p.cta_label]);
+      /** Fill title/message (/cta label for donations) with the preset for the
+       *  selected type. Auto-fills only empty-or-preset fields so your own
+       *  wording is never overwritten; "Fill preset text" forces it. */
+      function applyPreset(force) {
+        const p = PRESETS[kind?.value];
+        if (!p) return;
+        const known = new Set(presetTexts());
+        if (title && (force || !title.value.trim() || known.has(title.value.trim()))) title.value = p.title;
+        if (message && (force || !message.value.trim() || known.has(message.value.trim()))) message.value = p.message;
+        if (ctaLabel && p.cta_label && (force || !ctaLabel.value.trim() || known.has(ctaLabel.value.trim()))) ctaLabel.value = p.cta_label;
+        paintPreview();
+      }
       function paintPreview() {
         if (pvBadge) pvBadge.textContent = KIND_BADGE[kind?.value] || KIND_BADGE.info;
         if (pvCard) pvCard.style.borderTopColor = kind?.value === 'donate' ? 'var(--hn-gold)' : 'var(--hn-primary)';
@@ -153,7 +179,9 @@ const crumbs = [
       }
       ['input', 'change'].forEach((ev) => root.addEventListener(ev, (e) => {
         if (e.target === kind || e.target === title || e.target === message || e.target === ctaLabel || e.target === ctaUrl) paintPreview();
+        if (e.target === kind && ev === 'change') applyPreset(false);
       }));
+      root.querySelector('[data-preset]')?.addEventListener('click', () => applyPreset(true));
       paintPreview();
 
       function setLocked(locked) {
