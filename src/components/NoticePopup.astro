@@ -4,10 +4,14 @@
 // there is no active notice or the visitor already dismissed that notice id.
 // All text is injected via textContent (never innerHTML) — admin input
 // cannot execute scripts. No props: styling is pre-built (emerald/gold).
+//
+// NOTE: styles MUST stay is:global — the whole card is built at runtime by
+// JavaScript, and Astro's default scoped styles never match runtime-created
+// elements (that bug once rendered the popup as unstyled inline content).
 ---
 <div id="hn-notice-root" hidden></div>
 
-<style>
+<style is:global>
   #hn-notice-root {
     position: fixed;
     inset: 0;
@@ -15,73 +19,118 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    padding: 0 0 env(safe-area-inset-bottom);
     pointer-events: none;
   }
-  #hn-notice-root[hidden] { display: none; }
+  #hn-notice-root[hidden] { display: none !important; }
   @media (min-width: 640px) {
-    #hn-notice-root { align-items: center; }
+    #hn-notice-root {
+      align-items: center;
+      padding: 1.5rem;
+    }
   }
   .hn-notice-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(23, 32, 27, 0.45);
+    background: rgba(23, 32, 27, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
+    animation: hn-notice-fade 0.2s ease;
   }
   .hn-notice-card {
     position: relative;
     pointer-events: auto;
     width: 100%;
-    max-width: 26rem;
-    max-height: min(80vh, 32rem);
+    max-width: 27rem;
+    max-height: min(86vh, 34rem);
     overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--hn-card);
     border: 1px solid var(--hn-border);
     border-top: 4px solid var(--hn-primary);
-    border-radius: 16px;
     box-shadow: var(--hn-shadow-lg);
-    padding: 1.25rem 1.25rem 1.1rem;
+    padding: 1.4rem 1.35rem 1.25rem;
+    border-radius: 20px 20px 0 0;
+    animation: hn-notice-up 0.25s ease;
+  }
+  @media (min-width: 640px) {
+    .hn-notice-card { border-radius: 20px; padding: 1.6rem 1.6rem 1.4rem; }
   }
   .hn-notice-card[data-kind="donate"] { border-top-color: var(--hn-gold); }
   .hn-notice-close {
     position: absolute;
-    top: 0.5rem;
-    inset-inline-end: 0.5rem;
+    top: 0.7rem;
+    inset-inline-end: 0.7rem;
     width: 2.5rem;
     height: 2.5rem;
     display: inline-grid;
     place-items: center;
-    border-radius: 10px;
+    border-radius: 999px;
     border: 1px solid var(--hn-border);
-    background: var(--hn-card);
+    background: var(--hn-bg-soft);
     color: var(--hn-muted);
-    font-size: 1.15rem;
+    font-size: 1.25rem;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
   }
   .hn-notice-close:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
-  .hn-share-menu {
+  .hn-notice-card h2 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.45;
+    color: var(--hn-ink);
+    margin: 0.6rem 0 0;
+    padding-inline-end: 2.75rem;
+  }
+  .hn-notice-card p {
+    margin: 0.55rem 0 0;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--hn-muted);
+  }
+  .hn-notice-actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+  }
+  .hn-share-menu {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
-    margin-top: 0.75rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--hn-border);
+    animation: hn-notice-fade 0.18s ease;
   }
   .hn-share-opt {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
-    padding: 0.6rem 1rem;
+    min-height: 48px;
+    padding: 0.65rem 0.5rem;
     font-size: 0.85rem;
     font-weight: 700;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 1px solid var(--hn-border);
     background: var(--hn-bg-soft);
     color: var(--hn-ink);
     text-decoration: none;
     cursor: pointer;
+    font-family: inherit;
   }
   .hn-share-opt:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+  @keyframes hn-notice-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hn-notice-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hn-notice-backdrop, .hn-notice-card, .hn-share-menu { animation: none; }
+  }
   @media print {
     #hn-notice-root { display: none !important; }
   }
@@ -126,10 +175,21 @@
     function shareSite(anchor) {
       const data = shareData();
       if (navigator.share) {
-        navigator.share(data).catch(() => {});
-        return;
+        try {
+          const p = navigator.share(data);
+          if (p && p.catch) {
+            // User cancelled the sheet (AbortError) → stay quiet.
+            // Any real failure → show the in-card app grid instead.
+            p.catch((err) => {
+              if (err && err.name !== 'AbortError') toggleShareMenu(anchor, data);
+            });
+          }
+          return;
+        } catch {
+          // Fall through to the in-card grid.
+        }
       }
-      // Desktop fallback: inline picker with every share app.
+      // Laptops/desktops (no native sheet): inline picker with every share app.
       toggleShareMenu(anchor, data);
     }
 
@@ -141,6 +201,8 @@
       const enc = encodeURIComponent;
       const menu = document.createElement('div');
       menu.className = 'hn-share-menu';
+      menu.setAttribute('role', 'group');
+      menu.setAttribute('aria-label', 'Share via');
       const links = [
         { t: 'WhatsApp', h: 'https://wa.me/?text=' + enc(data.text + ' ' + data.url) },
         { t: 'Telegram', h: 'https://t.me/share/url?url=' + enc(data.url) + '&text=' + enc(data.text) },
@@ -184,41 +246,6 @@
       card.setAttribute('aria-label', n.title);
       card.dir = dir === 'rtl' ? 'rtl' : 'ltr';
 
-      const badge = document.createElement('span');
-      badge.className = 'hn-badge ' + (n.kind === 'donate' ? 'hn-badge-gold' : 'hn-badge-primary');
-      badge.textContent = KIND_LABEL[n.kind] || KIND_LABEL.info;
-
-      const title = document.createElement('h2');
-      title.className = 'text-xl font-extrabold tracking-tight mt-2 pe-10';
-      title.style.color = 'var(--hn-ink)';
-      title.textContent = n.title;
-
-      const msg = document.createElement('p');
-      msg.className = 'mt-2 text-[15px] leading-7';
-      msg.style.color = 'var(--hn-muted)';
-      msg.textContent = n.message;
-
-      const actions = document.createElement('div');
-      actions.className = 'mt-4 flex flex-wrap gap-2';
-
-      if (n.kind === 'share') {
-        // Share appeals show ONLY the Share button — no donation/CTA button.
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'hn-btn hn-btn-primary !min-h-[46px] text-sm';
-        b.textContent = 'Share';
-        b.addEventListener('click', () => shareSite(b));
-        actions.appendChild(b);
-      } else if (n.cta_url) {
-        const a = document.createElement('a');
-        a.className = 'hn-btn hn-btn-primary !min-h-[46px] text-sm';
-        a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
-        a.href = n.cta_url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        actions.appendChild(a);
-      }
-
       const x = document.createElement('button');
       x.type = 'button';
       x.className = 'hn-notice-close';
@@ -226,9 +253,39 @@
       x.textContent = '×';
       x.addEventListener('click', () => { markDismissed(n.id); close(); });
 
-      card.append(badge, title, msg);
+      const badge = document.createElement('span');
+      badge.className = 'hn-badge ' + (n.kind === 'donate' ? 'hn-badge-gold' : 'hn-badge-primary');
+      badge.textContent = KIND_LABEL[n.kind] || KIND_LABEL.info;
+
+      const title = document.createElement('h2');
+      title.textContent = n.title;
+
+      const msg = document.createElement('p');
+      msg.textContent = n.message;
+
+      const actions = document.createElement('div');
+      actions.className = 'hn-notice-actions';
+
+      if (n.kind === 'share') {
+        // Share appeals show ONLY the Share button — no donation/CTA button.
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+        b.textContent = 'Share';
+        b.addEventListener('click', () => shareSite(b));
+        actions.appendChild(b);
+      } else if (n.cta_url) {
+        const a = document.createElement('a');
+        a.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+        a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
+        a.href = n.cta_url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        actions.appendChild(a);
+      }
+
+      card.append(x, badge, title, msg);
       if (actions.childNodes.length) card.appendChild(actions);
-      card.appendChild(x);
       root.append(backdrop, card);
       root.hidden = false;
       document.addEventListener('keydown', onKey);
