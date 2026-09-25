@@ -9,8 +9,10 @@ interface Props {
   title: string;
   /** When set, the top-left shows a ← back link. */
   backHref?: string;
+  /** Set false on pages that render their own <h1> (keeps exactly one h1). */
+  h1?: boolean;
 }
-const { locale = 'en', title, backHref = '' } = Astro.props;
+const { locale = 'en', title, backHref = '', h1 = true } = Astro.props;
 const backUrl = backHref ? localizedPath(locale, backHref) : '';
 ---
 <div data-appheader class="sticky top-14 z-40 bg-qg-bg/90 backdrop-blur-md border-b border-qg-line">
@@ -20,7 +22,11 @@ const backUrl = backHref ? localizedPath(locale, backHref) : '';
     ) : (
       <span aria-hidden="true"></span>
     )}
-    <h1 class="text-center text-[22px] leading-7 font-extrabold text-qg-ink truncate">{title}</h1>
+    {h1 ? (
+      <h1 class="text-center text-[22px] leading-7 font-extrabold text-qg-ink truncate">{title}</h1>
+    ) : (
+      <p class="text-center text-[22px] leading-7 font-extrabold text-qg-ink truncate" aria-hidden="true">{title}</p>
+    )}
     <span aria-hidden="true"></span>
   </div>
 </div>

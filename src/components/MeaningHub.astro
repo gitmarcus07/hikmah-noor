@@ -71,6 +71,17 @@ const crumbs = [
         </div>
       </div>
     )}
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <h2 class="text-xl md:text-2xl font-extrabold mb-3">Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
   </div>
 </BaseLayout>
 <style>.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }</style>

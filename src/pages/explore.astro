@@ -55,8 +55,11 @@ const GROUPS = [
 <BaseLayout title="Explore — Quranic Gems, Quran, Duas & Tools" description="Explore Hikmah Noor: discover Quranic gems, read the Quran with translation, browse duas, and use Islamic tools." keywords="explore quran, quranic gems, duas, islamic tools" locale={locale} canonicalPath="/explore/" crumbs={crumbs}>
   <div class="hn-discover hn-section">
     <Breadcrumbs locale={locale} items={crumbs} />
-    <div class="mt-3">
-      <SectionHeader eyebrow="Explore" title="Explore the library" sub="Jump straight into reading, searching and tools." />
+    <div class="mt-3 max-w-2xl">
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Explore the library</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Quran, duas, guides, stories and tools — every page with sources and translation. Pick a collection below and start reading.</p>
+    </div>
+    <div class="mt-6">
       {GROUPS.map((g) => (
         <div class="mt-6">
           <SectionHeader eyebrow={g.chip} title={g.title} />

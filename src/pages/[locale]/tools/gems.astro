@@ -12,9 +12,25 @@ const crumbs = [
   { name: 'Explore', path: '/explore/' },
   { name: 'Quranic Gems', path: '/tools/gems/' },
 ];
+const faq = [
+  { q: 'What are Quranic gems?', a: 'Topic tiles for moments of the heart — patience, gratitude, forgiveness, fear, love and more. Tap a topic to read its verses with translation.' },
+  { q: 'Where do the verses come from?', a: 'The same Quran text and translations as the readers: Arabic with Urdu, English and Hindi meaning, with recitation on each verse page.' },
+  { q: 'Do gems work offline?', a: 'Only pages you already opened. The topic search itself needs an internet connection.' },
+];
 ---
-<BaseLayout title="Quranic Gems — Verses for Every Heart" description="Quranic gems by topic — patience, gratitude, forgiveness, fear, love and more. Tap a topic to read its verses." locale={locale} canonicalPath="/tools/gems/" crumbs={crumbs} noindex={true} hideFooter>
+<BaseLayout title="Quranic Gems — Verses for Every Heart" description="Quranic gems by topic — patience, gratitude, forgiveness, fear, love and more. Tap a topic to read its verses." keywords="quranic gems, quran verses by topic, patience verses, gratitude quran, forgiveness verses" locale={locale} canonicalPath="/tools/gems/" faq={faq} crumbs={crumbs} hideFooter>
   <AppHeader locale={locale} title={t.explore.gemsT} backHref="/explore/" />
   <GemsBoard locale={locale} />
+  <section class="max-w-md mx-auto px-4 pb-4" aria-label="Frequently asked questions">
+    <h2 class="text-xl font-extrabold mb-3">Frequently asked questions</h2>
+    <div class="space-y-3">
+      {faq.map((f) => (
+        <details class="hn-faq">
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
   <p class="mx-auto max-w-md px-4 pb-2 text-sm font-semibold text-qg-green bg-qg-soft border border-qg-line rounded-2xl px-4 py-3">English guide — translation coming soon.</p>
 </BaseLayout>

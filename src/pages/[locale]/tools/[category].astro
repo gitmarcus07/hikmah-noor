@@ -29,7 +29,7 @@ const faq = [
 ];
 ---
 <BaseLayout title={`${cat.title} Tools — Islamic Finance Calculators`} description={`${cat.desc} Free calculators with evidence and school differences.`} keywords={`${cat.title.toLowerCase()} tools, islamic finance calculator`} locale={locale} canonicalPath={`/tools/${category}/`} faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: cat.title, path: `/tools/${category}/` }]}>
-  <AppHeader locale={locale} title={`${cat.title} Tools`} backHref="/tools/" />
+  <AppHeader locale={locale} title={`${cat.title} Tools`} backHref="/tools/" h1={false} />
   <section class={`relative overflow-hidden bg-gradient-to-br ${cat.grad} text-white`}>
     <div class="pointer-events-none absolute inset-0" aria-hidden="true" style="background-image: radial-gradient(circle at 88% 8%, rgba(255,255,255,.18), transparent 45%);"></div>
     <div class="relative max-w-7xl mx-auto px-4 pt-8 pb-9 md:pt-12 md:pb-12">

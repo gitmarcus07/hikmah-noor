@@ -43,6 +43,13 @@ if (surahNum) {
   nextMeta = idx < (surahsMeta as any[]).length - 1 ? (surahsMeta as any[])[idx + 1] : null;
 }
 const tafsir = surahNum ? tafsirFor(surahNum) : null;
+// Shared by the FAQPage schema AND the visible FAQ section below (they must match).
+const surahFaq = surah ? [
+  { q: `How many verses are in Surah ${surah.name}?`, a: `Surah ${surah.name} (${surah.englishName}) has ${surah.verseCount} verses and is ${surah.revelation === 'Mecca' ? 'Makki (revealed in Mecca)' : 'Madani (revealed in Medina)'}.` },
+  { q: `Can I read Surah ${surah.name} with translation?`, a: `Yes. This page shows every verse of Surah ${surah.name} in Arabic with Urdu, English and Hindi meaning. Use the language buttons above the verses to switch translation.` },
+  { q: `Is audio available for Surah ${surah.name}?`, a: `Yes. Press play on any verse for Arabic recitation — choose from 5 reciters (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi) in the 🎙 menu — or use Play surah to listen continuously. Urdu and English translation audio is available from the dropdown.` },
+  ...(tafsir ? [{ q: `What is Surah ${surah.name} about?`, a: `${tafsir.intro} Key themes: ${tafsir.themes.join(', ')}.` }] : []),
+] : [];
 
 const entry = (Astro.props as any).entry;
 let Content: any = null;
@@ -66,12 +73,7 @@ if (entry) {
   keywords={`surah ${surah.name.toLowerCase()}, surah ${surah.num}, ${surah.slug}, surah ${surah.name.toLowerCase()} in urdu, surah ${surah.name.toLowerCase()} english translation, surah ${surah.name.toLowerCase()} hindi meaning, surah ${surah.name.toLowerCase()} transliteration, surah ${surah.name.toLowerCase()} with audio, surah ${surah.name.toLowerCase()} recitation${tafsir ? `, surah ${surah.name.toLowerCase()} tafsir, ${tafsir.themes.join(', ').toLowerCase()}` : ''}`}
   type="article"
   canonicalPath={`/surahs/${surah.slug}/`}
-  faq={[
-    { q: `How many verses are in Surah ${surah.name}?`, a: `Surah ${surah.name} (${surah.englishName}) has ${surah.verseCount} verses and is ${surah.revelation === 'Mecca' ? 'Makki (revealed in Mecca)' : 'Madani (revealed in Medina)'}.` },
-    { q: `Can I read Surah ${surah.name} with translation?`, a: `Yes. This page shows every verse of Surah ${surah.name} in Arabic with Urdu, English and Hindi meaning. Use the language buttons above the verses to switch translation.` },
-    { q: `Is audio available for Surah ${surah.name}?`, a: `Yes. Press play on any verse for Arabic recitation — choose from 5 reciters (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi) in the 🎙 menu — or use Play surah to listen continuously. Urdu and English translation audio is available from the dropdown.` },
-    ...(tafsir ? [{ q: `What is Surah ${surah.name} about?`, a: `${tafsir.intro} Key themes: ${tafsir.themes.join(', ')}.` }] : []),
-  ]}
+  faq={surahFaq}
 >
   <div class="max-w-4xl mx-auto px-4 py-6 md:py-8">
     <SurahReader surah={surah} prev={prevMeta} next={nextMeta} locale={locale} />
@@ -93,6 +95,17 @@ if (entry) {
           <p class="mt-2 text-sm opacity-80">Summary: Hikmah Noor editorial. For rulings and detail see classical tafsir (Ibn Kathir, Jalalayn) and consult scholars — <a class="font-bold text-brand-300 hover:text-brand-200" href={localizedPath(locale, '/methodology/')}>our methodology</a>.</p>
         </>
       )}
+    </section>
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <h2 class="text-xl md:text-2xl font-extrabold mb-3">Frequently asked questions</h2>
+      <div class="space-y-3">
+        {surahFaq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
     </section>
   </div>
 </BaseLayout>

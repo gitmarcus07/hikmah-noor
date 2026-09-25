@@ -8,7 +8,7 @@ const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wu
 const searchUrl = localizedPath(locale, '/search/');
 const indexUrl = localizedPath(locale, '/search-index.json');
 ---
-<BaseLayout title={`Search — Hikmah Noor`} description={`Search Islamic articles on Quran, duas, kalimas in ${locale}.`} locale={locale} canonicalPath="/search/">
+<BaseLayout title={`Search — Hikmah Noor`} description={`Search Islamic articles on Quran, duas, kalimas in ${locale}.`} locale={locale} canonicalPath="/search/" noindex={true}>
 <div class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-3xl font-extrabold mb-4 text-white">🔍 {dict.nav.search}</h1>
   <form method="get" action={searchUrl} class="flex gap-2" role="search">

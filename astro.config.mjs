@@ -23,12 +23,14 @@ export default defineConfig({
     mdx(),
     sitemap({
       // Keep noindex redirect stubs, login-gated habit pages,
-      // and account/app-shell pages out.
+      // account/app-shell pages, and site-search pages out.
+      // (gems IS indexed, so it stays in.)
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
         !/\/tools\/(read|my-progress)\//.test(page) &&
         !/\/al-mushrif\//.test(page) &&
-        !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|gems|challenges)\//.test(page),
+        !/\/search\//.test(page) &&
+        !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|challenges)\//.test(page),
     }),
   ],
 });

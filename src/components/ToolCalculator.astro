@@ -58,7 +58,7 @@ const crumbs = [
 ];
 ---
 <BaseLayout title={tool.title} description={tool.desc} keywords={tool.keywords} locale={locale} canonicalPath={toolPath} type="article" faq={tool.faq || []} crumbs={crumbs}>
-  <AppHeader locale={locale} title={shortName} backHref={catPath} />
+  <AppHeader locale={locale} title={shortName} backHref={catPath} h1={false} />
   <div data-toolroot>
     <!-- HERO -->
     <section>

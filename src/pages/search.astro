@@ -8,7 +8,7 @@ const locale = 'en';
 const dict = getDict(locale);
 const popular = ['dua', 'quran', 'zakat', 'fitrana', 'surah yaseen', 'mahr', 'wudu', 'livestock'];
 ---
-<BaseLayout title="Search — Hikmah Noor" description="Search Islamic articles on Quran, duas, kalimas." locale={locale} canonicalPath="/search/" crumbs={[{ name: 'Home', path: '/' }, { name: 'Search', path: '/search/' }]}>
+<BaseLayout title="Search — Hikmah Noor" description="Search Islamic articles on Quran, duas, kalimas." locale={locale} canonicalPath="/search/" noindex={true} crumbs={[{ name: 'Home', path: '/' }, { name: 'Search', path: '/search/' }]}>
 <div class="hn-read hn-section">
   <Breadcrumbs locale={locale} items={[{ name: 'Home', path: '/' }, { name: 'Search', path: '/search/' }]} />
   <h1 class="text-3xl font-extrabold mt-3">Search</h1>

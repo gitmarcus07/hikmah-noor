@@ -116,7 +116,7 @@ const tools = [
 const duas = (catGroups.duas ?? []).slice(0, 4);
 const recent = (latest ?? []).slice(0, 3);
 ---
-<BaseLayout title={dict.home.heroTitle} description={dict.home.heroSub} locale={locale} canonicalPath="/" faq={dict.home.faq} type="website">
+<BaseLayout title={dict.home.heroTitle} description={dict.home.heroSub} keywords="quran with translation, duas in arabic with transliteration, islamic knowledge, kalimas, seerah, hadees, prayer times, zakat calculator" locale={locale} canonicalPath="/" faq={dict.home.faq} type="website">
   <div class="hn-discover">
     {/* ===== Compact hero ===== */}
     <section class="hn-section hn-pattern" aria-label="Hikmah Noor" style="border-radius:16px">
@@ -263,6 +263,20 @@ const recent = (latest ?? []).slice(0, 3);
               <span class="font-bold text-[15px] leading-6 mt-2 block line-clamp-2">{a.data.title}</span>
               <span class="mt-1 text-xs font-semibold" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
             </a>
+          ))}
+        </div>
+      </section>
+    )}
+    {/* ===== FAQ (visible — matches the FAQPage schema above) ===== */}
+    {Array.isArray(dict.home.faq) && dict.home.faq.length > 0 && (
+      <section class="hn-section" style="padding-top:0" aria-label={dict.home.faqTitle ?? 'Frequently asked questions'}>
+        <SectionHeader eyebrow="FAQ" title={dict.home.faqTitle ?? 'Frequently asked questions'} />
+        <div class="space-y-3 max-w-3xl">
+          {dict.home.faq.map((f: any) => (
+            <details class="hn-faq">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
           ))}
         </div>
       </section>

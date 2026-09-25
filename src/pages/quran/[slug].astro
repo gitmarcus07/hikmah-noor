@@ -87,6 +87,17 @@ if (entry) {
       <ul>{sections.map(s => <li><a class="font-semibold text-brand-300 hover:text-brand-200" href={localizedPath(locale, `/surahs/${s.surah.slug}/`)}>Surah {s.surah.name} ({s.surah.englishName})</a> — verses {s.verses[0].v}–{s.verses[s.verses.length - 1].v}</li>)}</ul>
       <p><a class="font-bold text-brand-300 hover:text-brand-200" href={localizedPath(locale, '/quran/')}>← All 30 paras</a> • <a class="font-bold text-brand-300 hover:text-brand-200" href={localizedPath(locale, '/surahs/')}>All 114 surahs →</a></p>
     </section>
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <h2 class="text-xl md:text-2xl font-extrabold mb-3">Frequently asked questions</h2>
+      <div class="space-y-3">
+        {paraFaq(para).map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
   </div>
 </BaseLayout>
 ) : (

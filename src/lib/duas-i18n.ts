@@ -57,7 +57,16 @@ export function localizeDua(dua: any, locale: string): any {
   const ov = (OVERLAYS as any)[locale]?.[dua?.slug];
   if (!ov) return dua;
   const { aliasesUr, aliasesHi, aliasesAr, ...rest } = ov as DuaOverlay;
-  return { ...dua, ...defined(rest), aliases: [...((dua as any).aliases || []), ...(aliasesUr || []), ...(aliasesHi || []), ...(aliasesAr || [])] };
+  const out = { ...dua, ...defined(rest), aliases: [...((dua as any).aliases || []), ...(aliasesUr || []), ...(aliasesHi || []), ...(aliasesAr || [])] };
+  // The English titles of rabbana-duas entries carry a "— Rabbana Dua" suffix
+  // that sets them apart from the same verse in topical categories. Overlays
+  // drop it, recreating duplicate titles — restore a per-locale marker.
+  if (dua?.cat === 'rabbana-duas' && typeof out.title === 'string') {
+    if (locale === 'ar' && !out.title.includes('ربنا')) out.title += ' — دعاء ربنا';
+    if (locale === 'ur' && !out.title.includes('ربنا')) out.title += ' — ربنا دعا';
+    if (locale === 'hi' && !out.title.includes('रब्बना')) out.title += ' — रब्बना दुआ';
+  }
+  return out;
 }
 
 /** Localize a list (hub grids, related, siblings). EN returns as-is. */
