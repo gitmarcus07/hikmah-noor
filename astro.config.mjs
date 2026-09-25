@@ -27,7 +27,8 @@ export default defineConfig({
       // (gems IS indexed, so it stays in.)
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
-        !/\/tools\/(read|my-progress)\//.test(page) &&
+        !/\/tools\/read\/\d/.test(page) &&
+        !/\/tools\/my-progress\//.test(page) &&
         !/\/al-mushrif\//.test(page) &&
         !/\/search\//.test(page) &&
         !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|challenges)\//.test(page),
