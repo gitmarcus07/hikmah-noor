@@ -69,7 +69,7 @@ if (entry) {
   faq={[
     { q: `How many verses are in Surah ${surah.name}?`, a: `Surah ${surah.name} (${surah.englishName}) has ${surah.verseCount} verses and is ${surah.revelation === 'Mecca' ? 'Makki (revealed in Mecca)' : 'Madani (revealed in Medina)'}.` },
     { q: `Can I read Surah ${surah.name} with translation?`, a: `Yes. This page shows every verse of Surah ${surah.name} in Arabic with Urdu, English and Hindi meaning. Use the language buttons above the verses to switch translation.` },
-    { q: `Is audio available for Surah ${surah.name}?`, a: `Yes. Press play on any verse for Arabic recitation (Mishary Alafasy), or use Play surah to listen continuously. Urdu and English translation audio is available from the dropdown.` },
+    { q: `Is audio available for Surah ${surah.name}?`, a: `Yes. Press play on any verse for Arabic recitation — choose from 5 reciters (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi) in the 🎙 menu — or use Play surah to listen continuously. Urdu and English translation audio is available from the dropdown.` },
     ...(tafsir ? [{ q: `What is Surah ${surah.name} about?`, a: `${tafsir.intro} Key themes: ${tafsir.themes.join(', ')}.` }] : []),
   ]}
 >

@@ -19,14 +19,14 @@ const crumbs = [
     <div class="mt-3 max-w-2xl">
       <span class="hn-badge hn-badge-primary">Offline mode</span>
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">No internet — reading still works</h1>
-      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Every page you open is saved on this device automatically. Reconnect once to save more; prayer times, Qibla and audio need internet.</p>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Pages you already opened are saved on this device and keep working — open them once while online to save them. Prayer-time maths and Qibla work offline too once saved; live GPS, search, audio recitation and translation voices need internet.</p>
       <div class="mt-4 flex flex-wrap gap-2">
         <button onclick="location.reload()" class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Try again</button>
         <a href={L('/quran/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Open Quran</a>
       </div>
     </div>
     <div class="mt-8">
-      <SectionHeader eyebrow="Saved" title="Good offline reads" sub="If you opened these before, they work now." />
+      <SectionHeader eyebrow="Saved" title="Good offline reads" sub="Only pages you opened before work offline — tap one you have visited." />
       <div class="grid gap-3 sm:grid-cols-2 mt-3">
         {[
           { t: 'Quran — 30 paras', d: 'Full text with translation', h: '/quran/', i: 'quran' },

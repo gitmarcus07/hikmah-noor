@@ -70,8 +70,10 @@ const readBase = localizedPath(locale, '/tools/read/');
       if (!root || root.dataset.wired) return;
       root.dataset.wired = '1';
       const $ = (s) => root.querySelector(s);
-      const todayUTC = () => new Date().toISOString().slice(0, 10);
-      const addDays = (s, n) => { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+      // Local calendar days — streaks flip at local midnight, never UTC.
+      const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const todayKey = () => dayKey(new Date());
+      const addDays = (s, n) => { const [y, m, dd] = s.split('-').map(Number); const d = new Date(y, m - 1, dd); d.setDate(d.getDate() + n); return dayKey(d); };
       const computeStreak = (active, today) => {
         const set = new Set(active);
         const end = set.has(today) ? today : addDays(today, -1);
@@ -93,7 +95,7 @@ const readBase = localizedPath(locale, '/tools/read/');
       const active = Array.isArray(p.activeDays) ? p.activeDays : [];
       const verses = Number(p.versesTotal) || 0;
       const hasanat = Number(p.hasanatTotal) || 0;
-      const t = todayUTC();
+      const t = todayKey();
       const streak = computeStreak(active, t);
       if (!active.length && !verses) {
         $('[data-pg-empty]').classList.remove('hidden');

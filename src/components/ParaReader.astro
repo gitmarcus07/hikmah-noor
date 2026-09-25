@@ -14,9 +14,6 @@ import { localizedPath } from '../i18n/utils';
 import Icon from './Icon.astro';
 import { VERSE_TAFSIR } from '../data/tafsir';
 const { para, sections, prev, next, locale } = Astro.props;
-const pad = (n: number) => String(n).padStart(3, '0');
-const audioBase = 'https://everyayah.com/data/Alafasy_128kbps/';
-const audioOf = (s: number, v: number) => `${audioBase}${pad(s)}${pad(v)}.mp3`;
 const totalVerses = sections.reduce((a, s) => a + s.verses.length, 0);
 const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 ---
@@ -53,6 +50,20 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
       <button type="button" role="option" aria-selected="false" data-tropt="hi" class="tropt"><span class="tropt-tick" aria-hidden="true">✓</span><span>+ हिन्दी voice</span></button>
     </div>
   </div>
+  <div class="relative" data-recwrap>
+    <button type="button" id="recbtn" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2 !px-3 text-sm" aria-haspopup="listbox" aria-expanded="false" title="Choose reciter">
+      <Icon name="audio" size={16} />
+      <span data-reclabel>Mishary Alafasy</span>
+      <span aria-hidden="true" class="text-xs opacity-70">▾</span>
+    </button>
+    <div data-recmenu hidden role="listbox" aria-label="Reciter" class="absolute start-0 z-40 mt-1.5 min-w-[230px] hn-card p-1.5" style="box-shadow:var(--hn-shadow-lg)">
+      <button type="button" role="option" aria-selected="true" data-recopt="alafasy" class="tropt is-on"><span class="tropt-tick" aria-hidden="true">✓</span><span>Mishary Alafasy</span></button>
+      <button type="button" role="option" aria-selected="false" data-recopt="basit" class="tropt"><span class="tropt-tick" aria-hidden="true">✓</span><span>Abdul Basit (Mujawwad)</span></button>
+      <button type="button" role="option" aria-selected="false" data-recopt="husary" class="tropt"><span class="tropt-tick" aria-hidden="true">✓</span><span>Mahmoud Al-Husary</span></button>
+      <button type="button" role="option" aria-selected="false" data-recopt="muaiqly" class="tropt"><span class="tropt-tick" aria-hidden="true">✓</span><span>Maher Al-Muaiqly</span></button>
+      <button type="button" role="option" aria-selected="false" data-recopt="minshawi" class="tropt"><span class="tropt-tick" aria-hidden="true">✓</span><span>Al-Minshawi (Murattal)</span></button>
+    </div>
+  </div>
   <div class="ms-auto flex gap-2">
     <button id="playall" class="hn-btn hn-btn-primary !min-h-[44px] !py-2 !px-4 text-sm">Play para</button>
     <button id="stopall" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2 !px-4 text-sm hidden">Stop</button>
@@ -79,7 +90,7 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
             <div class="flex items-center gap-2 mb-2">
               <span class="text-xs font-bold" style="color:var(--hn-muted)">{surah.num}:{verse.v}</span>
               <span class="hn-verse-num">{verse.v}</span>
-              <button class="vplay hn-icon-btn !w-10 !h-10 !rounded-full" data-s={surah.num} data-v={verse.v} data-src={audioOf(surah.num, verse.v)} aria-label={`Play Surah ${surah.num} verse ${verse.v}`}>
+                <button class="vplay hn-icon-btn !w-10 !h-10 !rounded-full" data-s={surah.num} data-v={verse.v} aria-label={`Play Surah ${surah.num} verse ${verse.v}`}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               </button>
             </div>
@@ -103,7 +114,7 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
 
 <p class="text-xs text-ink-500 mt-6 leading-6">
   Arabic: Uthmani script. Urdu meaning: Fateh Muhammad Jalandhry • English: The Clear Quran, Dr. Mustafa Khattab •
-  Hindi: Suhel Farooq Khan • Recitation: Mishary Alafasy via EveryAyah.
+  Hindi: Suhel Farooq Khan • Recitation: Mishary Alafasy, Abdul Basit, Mahmoud Al-Husary, Maher Al-Muaiqly &amp; Muhammad Al-Minshawi via EveryAyah — choose your reciter above.
   Translation audio: English (Sahih International, Ibrahim Walk) & Urdu (Shamshad Ali Khan) via EveryAyah;
   Hindi uses your device's voice reader and needs internet voices on some phones.
   Spoken translation wording may differ slightly from the displayed text.
@@ -202,6 +213,48 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
     document.addEventListener('click', (e) => { if (!trWrap.contains(e.target) && !trMenu.hidden) setTrMode(trMode._v, false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !trMenu.hidden) setTrMode(trMode._v, true); });
     const pad3 = (n) => String(n).padStart(3, '0');
+    // Reciter choice — persisted; audio URLs follow the EveryAyah pattern.
+    const RECITERS = {
+      alafasy: { label: 'Mishary Alafasy', base: 'https://everyayah.com/data/Alafasy_128kbps/' },
+      basit: { label: 'Abdul Basit (Mujawwad)', base: 'https://everyayah.com/data/Abdul_Basit_Mujawwad_128kbps/' },
+      husary: { label: 'Mahmoud Al-Husary', base: 'https://everyayah.com/data/Husary_128kbps/' },
+      muaiqly: { label: 'Maher Al-Muaiqly', base: 'https://everyayah.com/data/Maher_AlMuaiqly_64kbps/' },
+      minshawi: { label: 'Al-Minshawi (Murattal)', base: 'https://everyayah.com/data/Minshawy_Murattal_128kbps/' },
+    };
+    let reciter = 'alafasy';
+    try { const saved = localStorage.getItem('hn.reciter.v1'); if (saved && RECITERS[saved]) reciter = saved; } catch {}
+    const recWrap = document.querySelector('[data-recwrap]');
+    const recBtn = document.getElementById('recbtn');
+    const recLabel = recWrap.querySelector('[data-reclabel]');
+    const recMenu = recWrap.querySelector('[data-recmenu]');
+    const reciterSrc = (s, v) => RECITERS[reciter].base + pad3(s) + pad3(v) + '.mp3';
+    function paintReciter() {
+      recLabel.textContent = RECITERS[reciter].label;
+      recMenu.querySelectorAll('[data-recopt]').forEach(o => {
+        const on = o.dataset.recopt === reciter;
+        o.classList.toggle('is-on', on);
+        o.setAttribute('aria-selected', String(on));
+      });
+    }
+    function setReciter(m, refocus) {
+      reciter = m;
+      try { localStorage.setItem('hn.reciter.v1', m); } catch {}
+      paintReciter();
+      recMenu.hidden = true;
+      recBtn.setAttribute('aria-expanded', 'false');
+      stop();
+      if (refocus) recBtn.focus();
+    }
+    recBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = recMenu.hidden;
+      recMenu.hidden = !open;
+      recBtn.setAttribute('aria-expanded', String(open));
+    });
+    recMenu.querySelectorAll('[data-recopt]').forEach(o => o.addEventListener('click', () => setReciter(o.dataset.recopt, false)));
+    document.addEventListener('click', (e) => { if (!recWrap.contains(e.target) && !recMenu.hidden) { recMenu.hidden = true; recBtn.setAttribute('aria-expanded', 'false'); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !recMenu.hidden) { recMenu.hidden = true; recBtn.setAttribute('aria-expanded', 'false'); recBtn.focus(); } });
+    paintReciter();
     const TR_BASE = {
       ur: 'https://everyayah.com/data/translations/urdu_shamshad_ali_khan_46kbps/',
       en: 'https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/',
@@ -230,7 +283,8 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
       currentCard = card;
       playingAll = all;
       const btn = card.querySelector('.vplay');
-      audio.src = btn.dataset.src;
+      if (!btn) { stop(); return; }
+      audio.src = reciterSrc(+card.dataset.surah, +card.dataset.verse);
       audio.play().catch(() => stop());
       highlight(card);
       stopAll.classList.toggle('hidden', !all);

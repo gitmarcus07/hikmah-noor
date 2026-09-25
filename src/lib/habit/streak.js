@@ -1,30 +1,36 @@
 // Pure habit math — no DOM, no Node APIs. Safe to import in
 // Pages Functions, Astro components, and plain `node` tests.
-// Dates are YYYY-MM-DD strings in UTC.
+// Dates are YYYY-MM-DD strings in the user's LOCAL calendar day
+// (midnight-to-midnight where they live — never UTC midnight).
 
-export function todayUTC(d = new Date()) {
-  return d.toISOString().slice(0, 10);
+export function dayKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-export function addDaysUTC(dateStr, n) {
-  const d = new Date(dateStr + 'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
+export function todayKey(d = new Date()) {
+  return dayKey(d);
+}
+
+export function addDays(dateStr, n) {
+  const [y, m, dd] = dateStr.split('-').map(Number);
+  const d = new Date(y, m - 1, dd);
+  d.setDate(d.getDate() + n);
+  return dayKey(d);
 }
 
 // Quranly rule: +1 per consecutive active day, one-day grace
 // (a single missed day keeps the streak), two consecutive
 // misses reset to 0. `active` is an iterable of YYYY-MM-DD.
-export function computeStreak(active, today = todayUTC()) {
+export function computeStreak(active, today = todayKey()) {
   const set = new Set(active);
   // Grace: if today is inactive, the run may still end yesterday.
-  const end = set.has(today) ? today : addDaysUTC(today, -1);
+  const end = set.has(today) ? today : addDays(today, -1);
   if (!set.has(end)) return 0;
   let streak = 0;
   let cursor = end;
   while (set.has(cursor)) {
     streak += 1;
-    cursor = addDaysUTC(cursor, -1);
+    cursor = addDays(cursor, -1);
   }
   return streak;
 }
@@ -56,8 +62,9 @@ export function estimatePages(verses) {
 
 // Deterministic Ayah-of-the-Day: day index → global verse ordinal.
 // Needs totalVerses (6236) and a resolver ordinal→{surah,verse}.
-export function ayahOfDayIndex(dateStr = todayUTC(), totalVerses = 6236) {
-  const dayNum = Math.floor(new Date(dateStr + 'T00:00:00Z').getTime() / 864e5);
+export function ayahOfDayIndex(dateStr = todayKey(), totalVerses = 6236) {
+  const [y, m, dd] = dateStr.split('-').map(Number);
+  const dayNum = Math.floor(new Date(y, m - 1, dd).getTime() / 864e5);
   return dayNum % totalVerses;
 }
 

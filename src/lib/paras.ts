@@ -79,7 +79,7 @@ export function paraFaq(para: ParaMeta) {
     },
     {
       q: `Can I listen to Quran Para ${para.num} audio?`,
-      a: `Yes. Press play on any verse for Arabic recitation (Mishary Alafasy), or use Play para to listen continuously. Urdu and English translation audio is available from the dropdown.`,
+      a: `Yes. Press play on any verse for Arabic recitation — choose from 5 reciters (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi) in the 🎙 menu — or use Play para to listen continuously. Urdu and English translation audio is available from the dropdown.`,
     },
   ];
 }

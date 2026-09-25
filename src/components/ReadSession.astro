@@ -65,7 +65,9 @@ const pad = (n: number) => String(n).padStart(3, '0');
     /* --- device-local progress (hn.progress.v1 / hn.challenges.v1) --- */
     const PKEY = 'hn.progress.v1';
     const CKEY = 'hn.challenges.v1';
-    const todayUTC = () => new Date().toISOString().slice(0, 10);
+    // Local calendar day — "today" must flip at local midnight, never UTC.
+    const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const todayKey = () => dayKey(new Date());
     const pload = () => { try { const v = JSON.parse(localStorage.getItem(PKEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; } };
     const psave = (v) => { try { localStorage.setItem(PKEY, JSON.stringify(v)); } catch {} };
     const cload = () => { try { const v = JSON.parse(localStorage.getItem(CKEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; } };
@@ -152,7 +154,7 @@ const pad = (n: number) => String(n).padStart(3, '0');
         vv += 1;
         hs += letters(x.ar) * 10;
       }
-      const t = todayUTC();
+      const t = todayKey();
       const p = pload();
       p.activeDays = Array.isArray(p.activeDays) ? p.activeDays : [];
       if (!p.activeDays.includes(t)) p.activeDays.push(t);
@@ -161,10 +163,11 @@ const pad = (n: number) => String(n).padStart(3, '0');
       psave(p);
       const c = cload();
       if (S === 18) {
-        const d = new Date(t + 'T00:00:00Z');
-        const back = (d.getUTCDay() - 5 + 7) % 7; // Friday-start week
-        d.setUTCDate(d.getUTCDate() - back);
-        const wk = d.toISOString().slice(0, 10);
+        const [wy, wm, wd] = t.split('-').map(Number);
+        const d = new Date(wy, wm - 1, wd);
+        const back = (d.getDay() - 5 + 7) % 7; // Friday-start week
+        d.setDate(d.getDate() - back);
+        const wk = dayKey(d);
         c.kahf = (c.kahf && c.kahf.week === wk) ? c.kahf : { week: wk, n: 0 };
         c.kahf.n = (Number(c.kahf.n) || 0) + vv;
       }

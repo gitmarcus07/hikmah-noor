@@ -119,23 +119,34 @@ const CITIES = [
         setLoc(b.dataset.qLat, b.dataset.qLng, b.dataset.qCity);
       }));
       $('[data-q-manual]').addEventListener('click', () => {
-        const lat = $('[data-q-lat]').value, lng = $('[data-q-lng]').value;
-        if (lat === '' || lng === '') return;
-        setLoc(lat, lng, `${Number(lat).toFixed(2)}°, ${Number(lng).toFixed(2)}°`);
+        const la = parseFloat($('[data-q-lat]').value), ln = parseFloat($('[data-q-lng]').value);
+        if (!isFinite(la) || !isFinite(ln) || Math.abs(la) > 90 || Math.abs(ln) > 180) {
+          $('[data-q-place]').textContent = 'Enter valid coordinates — latitude ±90, longitude ±180.';
+          return;
+        }
+        setLoc(la, ln, `${la.toFixed(2)}°, ${ln.toFixed(2)}°`);
       });
+      let compassOn = false;
       $('[data-q-compass]').addEventListener('click', async () => {
+        if (compassOn) return;
+        const live = $('[data-q-live]');
         const onHead = (e) => {
           const h = e.webkitCompassHeading !== undefined ? e.webkitCompassHeading : (e.alpha !== null ? 360 - e.alpha : null);
-          if (h !== null && !Number.isNaN(h)) { heading = h; paint(); }
+          if (h !== null && !Number.isNaN(h)) { compassOn = true; heading = h; paint(); }
         };
         try {
           if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
             const r = await DeviceOrientationEvent.requestPermission();
-            if (r !== 'granted') return;
+            if (r !== 'granted') { if (live) live.textContent = 'Compass permission denied — allow motion access, or use the static bearing above.'; return; }
           }
           window.addEventListener('deviceorientationabsolute', onHead, true);
           window.addEventListener('deviceorientation', onHead, true);
-        } catch {}
+          if (live && !compassOn) live.textContent = 'Waiting for motion sensor… move your phone.';
+          // Desktops / sensor-less phones never fire — say so instead of hanging.
+          setTimeout(() => {
+            if (!compassOn && live) live.textContent = 'No motion sensor found — hold the phone flat with top pointing North and use the static bearing.';
+          }, 4000);
+        } catch { if (live) live.textContent = 'Compass unavailable on this device — use the static bearing.'; }
       });
     })();
   </script>

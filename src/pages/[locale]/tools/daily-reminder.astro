@@ -65,7 +65,8 @@ const crumbs = [
       const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
       const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
       const st = Object.assign({ on: false, time: '06:00', last: '' }, load());
-      const today = () => new Date().toISOString().slice(0, 10);
+      // Local calendar day — "today" must not flip at UTC midnight.
+      const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
       const paint = () => {
         $('[data-dr-time]').value = st.time;
         $('[data-dr-status]').textContent = st.on ? `on — daily after ${st.time}` : 'not set';
@@ -79,10 +80,14 @@ const crumbs = [
       };
       const showToday = async () => {
         const a = await daily();
-        if (!a) return;
         const ar = $('[data-dr-ar]');
-        if (ar && a.ar) ar.textContent = a.ar;
         const en = $('[data-dr-en]');
+        if (!a) {
+          if (ar) ar.textContent = '—';
+          if (en) en.textContent = 'Connect to the internet once to load today’s verse.';
+          return;
+        }
+        if (ar && a.ar) ar.textContent = a.ar;
         if (en) en.textContent = (a.en ? `“${a.en}” — ` : '') + `Quran ${a.surah}:${a.verse}`;
       };
       const maybe = async () => {

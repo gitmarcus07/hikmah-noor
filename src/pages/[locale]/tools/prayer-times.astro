@@ -29,6 +29,7 @@ const crumbs = [
         <select data-pt-city class="hn-input flex-1" aria-label="City"></select>
         <button data-pt-gps class="hn-btn hn-btn-secondary !min-h-[48px] !px-4 text-sm shrink-0">📍 GPS</button>
       </div>
+      <p class="text-[13px] font-bold mt-2 hidden" style="color:#b3261e" data-pt-locmsg role="status"></p>
       <details class="mt-2">
         <summary class="text-[13px] font-bold cursor-pointer" style="color:var(--hn-primary)">Custom coordinates</summary>
         <div class="mt-2 grid grid-cols-2 gap-2">
@@ -137,6 +138,22 @@ const crumbs = [
 
       const citySel = $('[data-pt-city]');
       citySel.innerHTML = CITIES.map((c, i) => `<option value="${i}">${c[0]}</option>`).join('') + `<option value="gps">📍 My GPS location</option><option value="custom">Custom coordinates…</option>`;
+      const locMsg = (m) => { const el = $('[data-pt-locmsg]'); if (!el) return; el.textContent = m || ''; el.classList.toggle('hidden', !m); };
+      const useGps = () => {
+        locMsg('');
+        if (!navigator.geolocation) { locMsg('GPS is not available on this device — pick a city or enter coordinates.'); syncSel(); return; }
+        locMsg('Locating… allow location access when asked.');
+        navigator.geolocation.getCurrentPosition((pos) => {
+          st.mode = 'gps'; st.lat = pos.coords.latitude; st.lng = pos.coords.longitude;
+          st.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+          st.label = 'GPS location'; locMsg(''); save(st); syncSel(); render();
+        }, (err) => {
+          locMsg(err && err.code === 1
+            ? 'Location blocked — allow access in your browser settings, or pick a city below.'
+            : 'Could not get your location — check GPS/internet, or pick a city below.');
+          syncSel();
+        }, { timeout: 12000 });
+      };
       const syncSel = () => {
         citySel.value = st.mode === 'gps' ? 'gps' : st.mode === 'custom' ? 'custom' : String(st.city);
         $('[data-pt-method]').value = st.method;
@@ -193,6 +210,7 @@ const crumbs = [
       const paintAlertBtn = () => {
         const b = alertBtn();
         if (!b) return;
+        if (b.dataset.blocked) { b.textContent = 'Alerts blocked — allow in browser settings'; return; }
         const on = !!st.alerts;
         b.textContent = on ? 'Prayer alerts on ✓ (tap to stop)' : 'Enable prayer alerts';
         b.classList.toggle('hn-btn-primary', on);
@@ -269,21 +287,18 @@ const crumbs = [
       citySel.addEventListener('change', () => {
         const v = citySel.value;
         if (v === 'gps') {
-          if (!navigator.geolocation) return;
-          navigator.geolocation.getCurrentPosition((pos) => {
-            st.mode = 'gps'; st.lat = pos.coords.latitude; st.lng = pos.coords.longitude;
-            st.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-            st.label = 'GPS location'; save(st); syncSel(); render();
-          }, () => {}, { timeout: 10000 });
+          useGps();
         } else if (v === 'custom') {
           st.mode = 'custom'; save(st); syncSel();
         } else {
           st.mode = 'city'; st.city = Number(v); save(st); syncSel(); render();
         }
       });
+      $('[data-pt-gps]').addEventListener('click', () => { citySel.value = 'gps'; useGps(); });
       $('[data-pt-custom]').addEventListener('click', () => {
         const la = parseFloat($('[data-pt-lat]').value), ln = parseFloat($('[data-pt-lng]').value);
-        if (!isFinite(la) || !isFinite(ln) || Math.abs(la) > 90 || Math.abs(ln) > 180) return;
+        if (!isFinite(la) || !isFinite(ln) || Math.abs(la) > 90 || Math.abs(ln) > 180) { locMsg('Enter valid coordinates — latitude ±90, longitude ±180.'); return; }
+        locMsg('');
         st.mode = 'custom'; st.lat = la; st.lng = ln;
         st.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
         st.label = `${la.toFixed(2)}, ${ln.toFixed(2)}`; save(st); syncSel(); render();
@@ -291,10 +306,11 @@ const crumbs = [
       $('[data-pt-method]').addEventListener('change', (e) => { st.method = e.target.value; save(st); render(); });
       $('[data-pt-asr]').addEventListener('change', (e) => { st.asr = e.target.value; save(st); render(); });
       alertBtn()?.addEventListener('click', async () => {
-        if (!('Notification' in window)) return;
+        if (!('Notification' in window)) { const b = alertBtn(); if (b) { b.dataset.blocked = '1'; paintAlertBtn(); } return; }
         if (!st.alerts) {
           const r = await Notification.requestPermission().catch(() => 'denied');
-          if (r !== 'granted') return;
+          if (r !== 'granted') { const b = alertBtn(); if (b) { b.dataset.blocked = '1'; paintAlertBtn(); } return; }
+          const b = alertBtn(); if (b) delete b.dataset.blocked;
           st.alerts = true; save(st); paintAlertBtn(); armAlerts();
         } else {
           st.alerts = false; save(st); paintAlertBtn();
@@ -310,18 +326,27 @@ const crumbs = [
         if (needle) needle.style.transform = `rotate(${qb - deg}deg)`;
       };
       $('[data-pt-compass]').addEventListener('click', async () => {
+        if ($('[data-pt-compass]').dataset.wired) return;
         try {
           if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
             const r = await DeviceOrientationEvent.requestPermission();
             if (r !== 'granted') { if (headEl) headEl.textContent = 'Permission denied'; return; }
           }
+          let seen = false;
           window.addEventListener('deviceorientation', (e) => {
             let deg = null;
             if (e.webkitCompassHeading != null) deg = e.webkitCompassHeading;
             else if (e.alpha != null) deg = 360 - e.alpha;
-            if (deg != null) onHead(deg);
+            if (deg != null) { seen = true; onHead(deg); }
           });
           if (headEl) headEl.textContent = 'Move your phone…';
+          // Desktops / sensor-less phones never fire — say so instead of hanging.
+          setTimeout(() => {
+            if (!seen && headEl && headEl.textContent === 'Move your phone…') {
+              headEl.textContent = 'No motion sensor found — use the Qibla angle with a normal compass.';
+            }
+          }, 4000);
+          $('[data-pt-compass]').dataset.wired = '1';
         } catch { if (headEl) headEl.textContent = 'Compass unavailable on this device'; }
       });
 

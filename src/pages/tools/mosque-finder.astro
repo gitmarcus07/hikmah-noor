@@ -107,6 +107,9 @@ const crumbs = [
           render(lat, lng, els);
         } catch {
           say('Search failed — check internet and try again.');
+          list.innerHTML = `<button data-mf-retry class="hn-btn hn-btn-secondary w-full !min-h-[48px] text-sm">Retry search</button>`;
+          const rb = list.querySelector('[data-mf-retry]');
+          if (rb) rb.addEventListener('click', () => search(lat, lng));
         }
       };
       try {

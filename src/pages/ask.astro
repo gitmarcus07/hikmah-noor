@@ -61,6 +61,7 @@ const crumbs = [
           <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-ask-copy>Copy text</button>
         </div>
         <p class="text-[13px] leading-6" style="color:var(--hn-muted)">Opens your mail app addressed to hello@hikmah-noor.pages.dev. Nothing is sent automatically — you review and press send.</p>
+        <p class="text-[13px] font-bold hidden" style="color:var(--hn-primary)" data-ask-sent>Your mail app should have opened — if nothing happened, tap “Copy text” and email it to hello@hikmah-noor.pages.dev manually.</p>
       </form>
     </div>
 
@@ -99,12 +100,21 @@ const crumbs = [
         err?.classList.toggle('hidden', ok);
         if (!ok) return;
         location.href = 'mailto:hello@hikmah-noor.pages.dev?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        // mailto: gives no success signal — if no mail app exists nothing
+        // happens, so always show the manual fallback right away.
+        root.querySelector('[data-ask-sent]')?.classList.remove('hidden');
       });
-      root.querySelector('[data-ask-copy]')?.addEventListener('click', async () => {
+      root.querySelector('[data-ask-copy]')?.addEventListener('click', async (e) => {
         const { body, ok } = build();
         err?.classList.toggle('hidden', ok);
         if (!ok) return;
-        try { await navigator.clipboard.writeText(body); } catch {}
+        try {
+          await navigator.clipboard.writeText(body);
+          const b = e.currentTarget;
+          const old = b.textContent;
+          b.textContent = 'Copied ✓';
+          setTimeout(() => { b.textContent = old; }, 2200);
+        } catch {}
       });
     })();
   </script>

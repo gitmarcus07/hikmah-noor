@@ -74,17 +74,24 @@ const crumbs = [
         { name: 'Astaghfirullah', ar: 'أَسْتَغْفِرُ اللَّهَ' },
         { name: 'SubhanAllahi wa bihamdihi', ar: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ' },
       ];
-      const todayUTC = () => new Date().toISOString().slice(0, 10);
+      const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const todayKey = () => dayKey(new Date());
       const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
       const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
-      let phrase = 0, goal = 100, count = 0;
+      let phrase = 0, goal = 100;
       const $ = (s) => root.querySelector(s);
       const day = () => {
         const s = load();
-        if (s.day !== todayUTC()) { s.day = todayUTC(); s.per = {}; save(s); }
+        if (s.day !== todayKey()) { s.day = todayKey(); s.per = {}; s.session = {}; save(s); }
         return s;
       };
+      // Session counts are kept per phrase+goal, so switching phrases or
+      // goals never wipes progress — switching back restores it.
+      const skey = () => phrase + ':' + goal;
+      const getCount = () => Number((day().session || {})[skey()] || 0);
+      const setCount = (v) => { const s = day(); s.session = s.session || {}; s.session[skey()] = v; save(s); };
       const paint = () => {
+        const count = getCount();
         $('[data-t-count]').textContent = count;
         $('[data-t-goal-label]').textContent = goal;
         const pct = goal > 0 ? Math.min(100, Math.round((count / goal) * 100)) : 0;
@@ -111,22 +118,22 @@ const crumbs = [
           <span class="font-arabic block text-lg leading-8" lang="ar" dir="rtl">${p.ar}</span>
         </button>`).join('');
       box.querySelectorAll('[data-t-phrase]').forEach((b) => b.addEventListener('click', () => {
-        phrase = Number(b.dataset.tPhrase); count = 0; paint();
+        phrase = Number(b.dataset.tPhrase); paint();
       }));
       root.querySelectorAll('[data-t-goal]').forEach((b) => b.addEventListener('click', () => {
-        goal = Number(b.dataset.tGoal); count = 0; paint();
+        goal = Number(b.dataset.tGoal); paint();
       }));
       $('[data-t-tap]').addEventListener('click', () => {
-        count += 1;
+        setCount(getCount() + 1);
         const s = day();
         s.per = s.per || {};
         const k = PHRASES[phrase].name;
         s.per[k] = (Number(s.per[k]) || 0) + 1;
         save(s);
-        if (goal > 0 && count % goal === 0 && navigator.vibrate) { try { navigator.vibrate(40); } catch {} }
+        if (goal > 0 && getCount() % goal === 0 && navigator.vibrate) { try { navigator.vibrate(40); } catch {} }
         paint();
       });
-      $('[data-t-reset]').addEventListener('click', () => { count = 0; paint(); });
+      $('[data-t-reset]').addEventListener('click', () => { setCount(0); paint(); });
       paint();
     })();
   </script>

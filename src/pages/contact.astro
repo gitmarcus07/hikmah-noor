@@ -14,19 +14,32 @@ const crumbs = [
 <div class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-3xl font-extrabold mb-3 text-white">Contact</h1>
   <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
-    <p>For corrections, translation help or dua requests, email: <b>hello@hikmah-noor.pages.dev</b></p>
+    <p>For corrections, translation help or dua requests, email: <a href="mailto:hello@hikmah-noor.pages.dev" class="font-bold underline underline-offset-2">hello@hikmah-noor.pages.dev</a></p>
     <p>Please include article URL and authentic source for corrections. We review weekly.</p>
+    <p><button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm mt-1" data-copy-email>Copy email address</button></p>
   </div>
-  <section class="mt-8">
-    <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
-    <div class="space-y-3">
-      {faq.map(f => (
-        <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
-          <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
-          <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
-        </details>
-      ))}
-    </div>
-  </section>
-</div>
+    <section class="mt-8">
+      <h2 class="text-xl font-extrabold mb-3 text-white">❓ Frequently asked questions</h2>
+      <div class="space-y-3">
+        {faq.map(f => (
+          <details class="bg-night-850 border border-white/10 rounded-2xl p-4">
+            <summary class="font-bold cursor-pointer text-ink-50">{f.q}</summary>
+            <p class="mt-2 text-ink-300 leading-7">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+  <script is:inline>
+    (() => {
+      const btn = document.querySelector('[data-copy-email]');
+      if (!btn || btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText('hello@hikmah-noor.pages.dev'); btn.textContent = 'Copied ✓'; }
+        catch { btn.textContent = 'hello@hikmah-noor.pages.dev'; }
+        setTimeout(() => { btn.textContent = 'Copy email address'; }, 2200);
+      });
+    })();
+  </script>
 </BaseLayout>

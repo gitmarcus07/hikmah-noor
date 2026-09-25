@@ -59,25 +59,27 @@ const crumbs = [
       root.dataset.wired = '1';
       const KEY = 'hn.prayers.v1';
       const PRAYERS = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-      const todayUTC = () => new Date().toISOString().slice(0, 10);
+      // Local calendar day (YYYY-MM-DD) — streaks must flip at local
+      // midnight, never UTC midnight.
+      const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const todayKey = () => dayKey(new Date());
       const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
       const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
-      const dayKey = (d) => d.toISOString().slice(0, 10);
       const $ = (s) => root.querySelector(s);
       const isDone = (s, k) => !!(s.days && s.days[k] && PRAYERS.every((p) => s.days[k][p]));
       const streak = (s) => {
         let n = 0; const d = new Date();
-        if (!isDone(s, dayKey(d))) d.setUTCDate(d.getUTCDate() - 1);
-        while (isDone(s, dayKey(d))) { n += 1; d.setUTCDate(d.getUTCDate() - 1); }
+        if (!isDone(s, dayKey(d))) d.setDate(d.getDate() - 1);
+        while (isDone(s, dayKey(d))) { n += 1; d.setDate(d.getDate() - 1); }
         return n;
       };
       const toggle = (p) => {
-        const s = load(); const k = todayUTC();
+        const s = load(); const k = todayKey();
         s.days = s.days || {}; s.days[k] = s.days[k] || {};
         s.days[k][p] = !s.days[k][p]; save(s); paint();
       };
       const paint = () => {
-        const s = load(); const k = todayUTC();
+        const s = load(); const k = todayKey();
         const box = $('[data-pt-prayers]');
         box.innerHTML = PRAYERS.map((p) => {
           const on = !!(s.days && s.days[k] && s.days[k][p]);
@@ -91,18 +93,18 @@ const crumbs = [
         $('[data-pt-streak]').textContent = streak(s);
         const wk = $('[data-pt-week]'); wk.innerHTML = '';
         for (let i = 6; i >= 0; i--) {
-          const d = new Date(); d.setUTCDate(d.getUTCDate() - i);
+          const d = new Date(); d.setDate(d.getDate() - i);
           const done = isDone(s, dayKey(d));
           const dot = document.createElement('div');
           dot.className = 'flex-1 rounded-xl grid place-items-center font-extrabold text-[12px]';
           dot.style.cssText = `min-height:44px;background:${done ? 'var(--hn-primary)' : 'var(--hn-border)'};color:${done ? '#fff' : 'var(--hn-muted)'}`;
-          dot.textContent = 'SMTWTFS'[d.getUTCDay()] === 'S' ? 'Su' : 'SMTWTFS'[d.getUTCDay()];
+          dot.textContent = 'SMTWTFS'[d.getDay()] === 'S' ? 'Su' : 'SMTWTFS'[d.getDay()];
           dot.title = `${dayKey(d)} — ${done ? 'all five' : 'incomplete'}`;
           wk.appendChild(dot);
         }
       };
       $('[data-pt-reset-day]').addEventListener('click', () => {
-        const s = load(); if (s.days) delete s.days[todayUTC()]; save(s); paint();
+        const s = load(); if (s.days) delete s.days[todayKey()]; save(s); paint();
       });
       paint();
     })();
