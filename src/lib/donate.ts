@@ -7,6 +7,15 @@
 
 export const DONATE_PAYEE = 'Hikmah Noor';
 
+/**
+ * Exact account-holder name as shown by UPI apps at payment confirmation.
+ * UPI always reveals the registered name — `pn` is only a hint and cannot
+ * rename the account. Set this to the real name once the owner confirms it,
+ * so the site matches what donors see in PhonePe / GPay / Paytm.
+ * Empty = owner hasn't confirmed yet → UI shows a generic verify-payee note.
+ */
+export const DONATE_ACCOUNT_HOLDER = '';
+
 // Full VPA kept in one place. Assembled from parts only to avoid accidental
 // display via naive text search in templates — still present in built JS.
 const P1 = '9906273197';
@@ -19,13 +28,16 @@ export const DONATE_VPA = `${P1}${P2}${P3}`;
 export const DONATE_VPA_MASKED = '•••••• ••••@ybl';
 
 export function upiQrPayload(note = 'Hikmah Noor Donation'): string {
-  const params = new URLSearchParams({
-    pa: DONATE_VPA,
-    pn: DONATE_PAYEE,
-    cu: 'INR',
-    tn: note,
-  });
-  return `upi://pay?${params.toString()}`;
+  // NOTE: `pa` keeps the raw `@` (not %40) — PhonePe rejects over-encoded VPAs.
+  // `pn` prefers the real account-holder name when known (matches what the
+  // UPI app shows); falls back to the site name.
+  const pn = DONATE_ACCOUNT_HOLDER || DONATE_PAYEE;
+  return (
+    `upi://pay?pa=${DONATE_VPA}` +
+    `&pn=${encodeURIComponent(pn)}` +
+    `&cu=INR` +
+    `&tn=${encodeURIComponent(note)}`
+  );
 }
 
 /** upi:// intent URL for "Pay via UPI app" buttons (mobile). */

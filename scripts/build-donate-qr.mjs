@@ -11,8 +11,12 @@ const P2 = '-2';
 const P3 = '@ybl';
 const VPA = `${P1}${P2}${P3}`;
 
-const params = new URLSearchParams({ pa: VPA, pn: 'Hikmah Noor', cu: 'INR', tn: 'Hikmah Noor Donation' });
-const payload = `upi://pay?${params.toString()}`;
+const params = null; // (kept explicit below — pa must keep raw `@` for PhonePe)
+const payload =
+  `upi://pay?pa=${VPA}` +
+  `&pn=${encodeURIComponent('Hikmah Noor')}` +
+  `&cu=INR` +
+  `&tn=${encodeURIComponent('Hikmah Noor Donation')}`;
 
 const svg = await QRCode.toString(payload, {
   type: 'svg',

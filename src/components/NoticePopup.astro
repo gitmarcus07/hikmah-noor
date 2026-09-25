@@ -119,18 +119,18 @@
   }
   .hn-share-opt:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
   .hn-donate-mini {
-    margin-top: 0.9rem;
-    padding-top: 0.9rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
     border-top: 1px dashed var(--hn-border);
     display: grid;
-    gap: 0.6rem;
+    gap: 0.55rem;
     justify-items: center;
     text-align: center;
   }
   .hn-donate-qr-frame {
     position: relative;
-    padding: 0.5rem;
-    border-radius: 18px;
+    padding: 0.45rem;
+    border-radius: 16px;
     background: #fff;
     border: 2px solid var(--hn-gold);
     box-shadow: 0 6px 18px rgba(15, 81, 50, 0.12);
@@ -140,6 +140,10 @@
     width: 150px;
     height: 150px;
     border-radius: 10px;
+  }
+  @media (max-width: 480px) {
+    .hn-donate-qr-frame img { width: 118px; height: 118px; }
+    .hn-donate-mini { gap: 0.45rem; }
   }
   .hn-donate-qr-crescent {
     position: absolute;
@@ -169,6 +173,33 @@
   }
   .hn-donate-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
   .hn-donate-note { font-size: 0.76rem; line-height: 1.6; color: var(--hn-muted); margin: 0; }
+  /* Collapsible QR keeps the popup short on phones — no forced scroll. */
+  .hn-donate-qr-toggle { width: 100%; }
+  .hn-donate-qr-toggle > summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0.65rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--hn-border);
+    background: var(--hn-bg-soft);
+    color: var(--hn-ink);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .hn-donate-qr-toggle > summary::-webkit-details-marker { display: none; }
+  .hn-donate-qr-toggle > summary::marker { content: ''; }
+  .hn-donate-qr-toggle > summary:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+  .hn-donate-qr-body {
+    display: grid;
+    gap: 0.45rem;
+    justify-items: center;
+    padding-top: 0.6rem;
+    animation: hn-notice-fade 0.18s ease;
+  }
   @keyframes hn-notice-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes hn-notice-up {
     from { opacity: 0; transform: translateY(14px); }
@@ -222,13 +253,63 @@
       return (m ? '/' + m[1] : '') + '/donate/';
     }
     function upiIntent() {
-      return 'upi://pay?pa=' + encodeURIComponent(DONATE_VPA)
+      // Raw `@` in pa — PhonePe rejects the %40-encoded form.
+      return 'upi://pay?pa=' + DONATE_VPA
         + '&pn=' + encodeURIComponent('Hikmah Noor')
         + '&cu=INR&tn=' + encodeURIComponent('Hikmah Noor Donation');
+    }
+    function isMobileUpi() {
+      try {
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
+        if (window.matchMedia && matchMedia('(pointer:coarse)').matches) return true;
+      } catch {}
+      return false;
     }
     function buildDonateMini() {
       const box = document.createElement('div');
       box.className = 'hn-donate-mini';
+      const mask = document.createElement('div');
+      mask.className = 'hn-donate-mask';
+      mask.textContent = 'Hikmah Noor • UPI ' + DONATE_MASKED;
+      const row = document.createElement('div');
+      row.className = 'hn-donate-row';
+      const pay = document.createElement('a');
+      pay.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+      pay.textContent = 'Donate via UPI app';
+      pay.href = upiIntent();
+      // Desktop browsers have no UPI apps — a dead click looks broken.
+      // Intercept and explain instead; phones navigate normally.
+      pay.addEventListener('click', (e) => {
+        if (isMobileUpi()) return;
+        e.preventDefault();
+        deskHint.hidden = false;
+      });
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'hn-btn hn-btn-secondary !min-h-[48px] text-sm';
+      copy.textContent = 'Copy UPI ID';
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(DONATE_VPA); copy.textContent = 'Copied ✓'; }
+        catch { try { window.prompt('Copy UPI ID:', DONATE_VPA); } catch {} }
+        setTimeout(() => { copy.textContent = 'Copy UPI ID'; }, 2200);
+      });
+      row.append(pay, copy);
+      const deskHint = document.createElement('p');
+      deskHint.className = 'hn-donate-note';
+      deskHint.hidden = true;
+      deskHint.textContent = 'UPI apps live on your phone — please scan the QR below or open this page on mobile.';
+      // QR behind a toggle so phones never have to scroll the popup.
+      // Open by default on desktop, closed on touch devices.
+      const toggle = document.createElement('details');
+      toggle.className = 'hn-donate-qr-toggle';
+      if (!isMobileUpi()) toggle.open = true;
+      const sum = document.createElement('summary');
+      sum.textContent = 'Show QR to scan';
+      toggle.addEventListener('toggle', () => {
+        sum.textContent = toggle.open ? 'Hide QR' : 'Show QR to scan';
+      });
+      const body = document.createElement('div');
+      body.className = 'hn-donate-qr-body';
       const frame = document.createElement('div');
       frame.className = 'hn-donate-qr-frame';
       const img = document.createElement('img');
@@ -241,33 +322,23 @@
       badge.setAttribute('aria-hidden', 'true');
       badge.textContent = '☪';
       frame.append(img, badge);
-      const mask = document.createElement('div');
-      mask.className = 'hn-donate-mask';
-      mask.textContent = 'Hikmah Noor • UPI ' + DONATE_MASKED;
-      const row = document.createElement('div');
-      row.className = 'hn-donate-row';
-      const pay = document.createElement('a');
-      pay.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
-      pay.textContent = 'Donate via UPI app';
-      pay.href = upiIntent();
-      const qr = document.createElement('a');
-      qr.className = 'hn-btn hn-btn-secondary !min-h-[48px] text-sm';
-      qr.textContent = 'Scan QR';
-      qr.href = donatePageHref();
-      const copy = document.createElement('button');
-      copy.type = 'button';
-      copy.className = 'hn-btn hn-btn-ghost !min-h-[48px] text-sm';
-      copy.textContent = 'Copy UPI ID';
-      copy.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(DONATE_VPA); copy.textContent = 'Copied ✓'; }
-        catch { try { window.prompt('Copy UPI ID:', DONATE_VPA); } catch {} }
-        setTimeout(() => { copy.textContent = 'Copy UPI ID'; }, 2200);
-      });
-      row.append(pay, qr, copy);
+      const apps = document.createElement('p');
+      apps.className = 'hn-donate-note';
+      apps.textContent = 'Scan with PhonePe / GPay / Paytm / BHIM.';
+      body.append(frame, apps);
+      toggle.append(sum, body);
       const note = document.createElement('p');
       note.className = 'hn-donate-note';
-      note.textContent = 'Scan with PhonePe / GPay / Paytm / BHIM. Confirm “Hikmah Noor” in your app before paying.';
-      box.append(frame, mask, row, note);
+      // The VPA is registered to the owner personally — UPI always shows the
+      // real account name at payment time, so ask donors to verify it.
+      note.textContent = 'In your UPI app, verify the payee name before paying. ' +
+        'Full details on the donate page:';
+      const more = document.createElement('a');
+      more.className = 'hn-donate-note';
+      more.href = donatePageHref();
+      more.style.fontWeight = '800';
+      more.textContent = 'Open donate page →';
+      box.append(mask, row, deskHint, toggle, note, more);
       return box;
     }
 

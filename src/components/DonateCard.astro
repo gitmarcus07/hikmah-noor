@@ -6,7 +6,7 @@
  * (unavoidable: UPI apps need it). For a fully number-free address, create
  * an alias VPA (e.g. hikmahnoor@ybl) and update src/lib/donate.ts + rebuild QR.
  */
-import { DONATE_PAYEE, DONATE_VPA, DONATE_VPA_MASKED, upiIntentUrl } from '../lib/donate';
+import { DONATE_PAYEE, DONATE_VPA, DONATE_VPA_MASKED, DONATE_ACCOUNT_HOLDER, upiIntentUrl } from '../lib/donate';
 
 interface Props {
   compact?: boolean;
@@ -15,6 +15,8 @@ interface Props {
 
 const { compact = false, showSteps = true } = Astro.props;
 const upiHref = upiIntentUrl();
+// Shown at step 2: the real registered name when known, else a generic line.
+const verifyName = DONATE_ACCOUNT_HOLDER || '';
 ---
 
 <div class={`hn-donate${compact ? ' is-compact' : ''}`}>
@@ -37,15 +39,18 @@ const upiHref = upiIntentUrl();
   </div>
 
   <div class="hn-donate-actions">
-    <a class="hn-btn hn-btn-primary !min-h-[48px] text-sm" href={upiHref}>Donate via UPI app</a>
+    <a class="hn-btn hn-btn-primary !min-h-[48px] text-sm" href={upiHref} data-upi-btn>Donate via UPI app</a>
     <button type="button" class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-copy-vpa={DONATE_VPA}>Copy UPI ID</button>
   </div>
   <p class="hn-donate-hint" data-copy-msg hidden>Copied ✓ — paste it in PhonePe / GPay / Paytm</p>
+  <p class="hn-donate-hint" data-upi-desktop-msg hidden>UPI apps live on your phone — please scan the QR above or open this page on mobile.</p>
 
   {showSteps && (
     <ol class="hn-donate-steps">
-      <li><b>1.</b> Scan the QR with PhonePe, GPay, Paytm or BHIM — or tap <b>Donate via UPI app</b>.</li>
-      <li><b>2.</b> Your app will show <b>{DONATE_PAYEE}</b> — confirm the name before paying.</li>
+      <li><b>1.</b> Scan the QR with PhonePe, GPay, Paytm or BHIM — or tap <b>Donate via UPI app</b> (on your phone).</li>
+      {verifyName
+        ? <li><b>2.</b> Your app will show <b>{verifyName}</b> — please verify the name before paying.</li>
+        : <li><b>2.</b> Your app will show the account holder's name — please verify it before paying.</li>}
       <li><b>3.</b> Pay any amount. Every contribution keeps this knowledge free.</li>
     </ol>
   )}
@@ -80,6 +85,11 @@ const upiHref = upiIntentUrl();
     width: 200px;
     height: 200px;
     border-radius: 12px;
+  }
+  @media (max-width: 480px) {
+    .hn-donate { padding: 1rem 0.9rem 0.95rem; gap: 0.7rem; }
+    .hn-donate-qr { width: 172px; height: 172px; }
+    .hn-donate-actions .hn-btn { flex: 1 1 100%; }
   }
   .hn-donate.is-compact .hn-donate-qr { width: 168px; height: 168px; }
   .hn-donate-qr-badge {
@@ -129,7 +139,25 @@ const upiHref = upiIntentUrl();
 
 <script is:inline>
   (() => {
-    const root = document.currentScript?.previousElementSibling;
+    const isMobileUpi = () => {
+      try {
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
+        if (window.matchMedia && matchMedia('(pointer:coarse)').matches) return true;
+      } catch {}
+      return false;
+    };
+    // Desktop browsers have no UPI apps — explain instead of a dead click.
+    document.querySelectorAll('[data-upi-btn]').forEach((a) => {
+      if (a.dataset.wired) return;
+      a.dataset.wired = '1';
+      a.addEventListener('click', (e) => {
+        if (isMobileUpi()) return;
+        e.preventDefault();
+        const card = a.closest('.hn-donate') || document;
+        const msg = card.querySelector?.('[data-upi-desktop-msg]');
+        if (msg) msg.hidden = false;
+      });
+    });
     // Wire every copy button on the page (page + popup-safe).
     document.querySelectorAll('[data-copy-vpa]').forEach((btn) => {
       if (btn.dataset.wired) return;
