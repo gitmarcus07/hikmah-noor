@@ -23,4 +23,4 @@ both via EveryAyah. Hindi uses the visitor's own device voice reader. Spoken
 translation wording may differ slightly from the displayed text.
 
 If any rights-holder wants a different attribution or removal, contact
-hello@hikmah-noor.pages.dev and we will act promptly.
+hello@hikmahnoor.in and we will act promptly.

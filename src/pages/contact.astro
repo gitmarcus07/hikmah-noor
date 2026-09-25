@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 const locale = 'en';
 const faq = [
-  { q: 'How do I report a mistake?', a: 'Email hello@hikmah-noor.pages.dev with the page URL and, for sourcing issues, the authentic reference. Corrections are reviewed weekly.' },
+  { q: 'How do I report a mistake?', a: 'Email hello@hikmahnoor.in with the page URL and, for sourcing issues, the authentic reference. Corrections are reviewed weekly.' },
   { q: 'Can I request a dua or topic?', a: 'Yes — dua requests and topic suggestions are welcome at the same address. Include transliteration needs (Urdu/Hindi) if relevant.' },
 ];
 const crumbs = [
@@ -14,7 +14,7 @@ const crumbs = [
 <div class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-3xl font-extrabold mb-3 text-white">Contact</h1>
   <div class="bg-night-850 border border-white/10 rounded-2xl p-6 prose-islamic">
-    <p>For corrections, translation help or dua requests, email: <a href="mailto:hello@hikmah-noor.pages.dev" class="font-bold underline underline-offset-2">hello@hikmah-noor.pages.dev</a></p>
+    <p>For corrections, translation help or dua requests, email: <a href="mailto:hello@hikmahnoor.in" class="font-bold underline underline-offset-2">hello@hikmahnoor.in</a></p>
     <p>Please include article URL and authentic source for corrections. We review weekly.</p>
     <p><button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm mt-1" data-copy-email>Copy email address</button></p>
   </div>
@@ -36,8 +36,8 @@ const crumbs = [
       if (!btn || btn.dataset.wired) return;
       btn.dataset.wired = '1';
       btn.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText('hello@hikmah-noor.pages.dev'); btn.textContent = 'Copied ✓'; }
-        catch { btn.textContent = 'hello@hikmah-noor.pages.dev'; }
+        try { await navigator.clipboard.writeText('hello@hikmahnoor.in'); btn.textContent = 'Copied ✓'; }
+        catch { btn.textContent = 'hello@hikmahnoor.in'; }
         setTimeout(() => { btn.textContent = 'Copy email address'; }, 2200);
       });
     })();

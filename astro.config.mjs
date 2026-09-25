@@ -9,7 +9,7 @@ import sitemap from '@astrojs/sitemap';
 // Astro's automatic i18n is disabled to avoid double-prefixing (/hi/hi/...) and
 // route collisions between root English files and [locale] files.
 export default defineConfig({
-  site: 'https://hikmah-noor.pages.dev',
+  site: 'https://hikmahnoor.in',
   output: 'static',
   i18n: {
     locales: ['en', 'hi', 'ur', 'ar'],

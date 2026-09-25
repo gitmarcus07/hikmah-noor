@@ -33,7 +33,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     <rect x="686" y="428" width="280" height="64" rx="32" fill="${GREEN}"/>
     <text x="826" y="471" text-anchor="middle" fill="#FFFFFF">4 Languages</text>
   </g>
-  <text x="600" y="556" text-anchor="middle" font-family="Verdana, Geneva, sans-serif" font-size="30" fill="${MUTED}">hikmah-noor.pages.dev  —  free, no account needed</text>
+  <text x="600" y="556" text-anchor="middle" font-family="Verdana, Geneva, sans-serif" font-size="30" fill="${MUTED}">hikmahnoor.in  —  free, no account needed</text>
 </svg>`;
 
 await sharp(Buffer.from(svg)).jpeg({ quality: 88, mozjpeg: true }).toFile('public/og-cover-v2.jpg');

@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://hikmah-noor.pages.dev/sitemap-index.xml
+Sitemap: https://hikmahnoor.in/sitemap-index.xml

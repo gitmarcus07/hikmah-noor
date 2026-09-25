@@ -24,7 +24,7 @@ interface Props {
 const { title, description, locale, keywords, image = '/og-cover-v2.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
-const site = (Astro.site?.toString() ?? 'https://hikmah-noor.pages.dev').replace(/\/$/, '');
+const site = (Astro.site?.toString() ?? 'https://hikmahnoor.in').replace(/\/$/, '');
 const canonical = `${site}${localizedPath(locale, canonicalPath || '/')}`;
 const fontCss = 'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap';
 
