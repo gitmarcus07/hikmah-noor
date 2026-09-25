@@ -6,7 +6,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
 import DonateCard from '../components/DonateCard.astro';
-import { localizedPath } from '../i18n/utils';
+import ShareButton from '../components/ShareButton.astro';
 
 const locale = 'en';
 const crumbs = [
@@ -45,7 +45,7 @@ const crumbs = [
         UPI works for Indian bank accounts. If you are abroad, please make dua for us and
         share the site — spreading beneficial knowledge is also Sadaqah Jariyah.
       </p>
-      <a href={localizedPath(locale, '/')} class="hn-btn hn-btn-ghost !min-h-[48px] text-sm mt-3">Share instead →</a>
+      <ShareButton label="Share instead →" />
     </div>
 
     <p class="mt-6 text-center text-xs leading-6" style="color:var(--hn-muted)">

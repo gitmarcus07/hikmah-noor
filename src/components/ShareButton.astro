@@ -1,0 +1,86 @@
+---
+/* ShareButton — "share via apps" button with fallback grid.
+ * Tries the native share sheet first (phones); otherwise toggles an inline
+ * grid with WhatsApp / Telegram / Facebook / X / Email / Copy link.
+ * Reuses the global .hn-share-menu / .hn-share-opt styles from NoticePopup.
+ */
+interface Props {
+  label?: string;
+}
+
+const { label = 'Share instead →' } = Astro.props;
+---
+
+<div class="hn-share-wrap">
+  <button type="button" class="hn-btn hn-btn-ghost !min-h-[48px] text-sm mt-3" data-hn-share-btn>{label}</button>
+  <div class="hn-share-menu text-start" data-hn-share-menu hidden></div>
+</div>
+
+<script is:inline>
+  (() => {
+    function shareData() {
+      return {
+        title: 'Hikmah Noor',
+        text: 'Assalamu alaikum! Hikmah Noor has the Quran with translation, 300 duas and Islamic guides — free in 4 languages. Sharing beneficial knowledge is Sadaqah Jariyah:',
+        url: location.origin + '/',
+      };
+    }
+    function buildMenu(box, data) {
+      const enc = encodeURIComponent;
+      box.innerHTML = '';
+      const links = [
+        { t: 'WhatsApp', h: 'https://wa.me/?text=' + enc(data.text + ' ' + data.url) },
+        { t: 'Telegram', h: 'https://t.me/share/url?url=' + enc(data.url) + '&text=' + enc(data.text) },
+        { t: 'Facebook', h: 'https://www.facebook.com/sharer/sharer.php?u=' + enc(data.url) },
+        { t: 'X', h: 'https://twitter.com/intent/tweet?text=' + enc(data.text) + '&url=' + enc(data.url) },
+        { t: 'Email', h: 'mailto:?subject=' + enc(data.title) + '&body=' + enc(data.text + '\n' + data.url) },
+      ];
+      for (const l of links) {
+        const a = document.createElement('a');
+        a.className = 'hn-share-opt';
+        a.textContent = l.t;
+        a.href = l.h;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        box.appendChild(a);
+      }
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'hn-share-opt';
+      copy.textContent = 'Copy link';
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(data.url); copy.textContent = 'Copied ✓'; }
+        catch { copy.textContent = data.url; }
+      });
+      box.appendChild(copy);
+    }
+    document.querySelectorAll('[data-hn-share-btn]').forEach((btn) => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', () => {
+        const wrap = btn.closest('.hn-share-wrap') || document;
+        const box = wrap.querySelector?.('[data-hn-share-menu]');
+        if (!box) return;
+        const data = shareData();
+        const showGrid = () => {
+          if (box.hidden) buildMenu(box, data);
+          box.hidden = !box.hidden;
+        };
+        if (navigator.share) {
+          try {
+            const p = navigator.share(data);
+            if (p && p.catch) {
+              // User cancelled (AbortError) → stay quiet.
+              // Real failure → fall back to the in-page app grid.
+              p.catch((err) => { if (err && err.name !== 'AbortError') showGrid(); });
+            }
+            return;
+          } catch {
+            // Fall through to the grid.
+          }
+        }
+        showGrid();
+      });
+    });
+  })();
+</script>
