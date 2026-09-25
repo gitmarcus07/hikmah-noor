@@ -1,8 +1,9 @@
 ---
 // Global site-notice popup (managed from /al-mushrif/).
-// Fetches GET /api/notices/active on every page load.
-// Timing: first show 10s after visit, then repeat every 5 mins after dismiss.
-// Throttled with localStorage so page navigations don't re-spam the popup.
+// Fetches GET /api/notices/active. Timing per notice: first show 10s after
+// the visitor arrives, then every 5 mins after dismiss.
+// Timing state is scoped to the notice ID — disabling then publishing starts
+// a brand-new 10s → 5-min cycle even for visitors who saw the old notice.
 // All text is injected via textContent (never innerHTML) — admin input
 // cannot execute scripts. No props: styling is pre-built (emerald/gold).
 //
@@ -216,10 +217,10 @@
 <script is:inline>
   (() => {
     const ROOT_ID = 'hn-notice-root';
-    const FIRST_DELAY = 10_000; // first show: 10s after visit
+    const FIRST_DELAY = 10_000; // first show of a notice: 10s after arrival
     const REPEAT_DELAY = 5 * 60_000; // re-show: every 5 mins after dismiss
-    const KEY_SHOWN = 'hn-notice-last-shown';
-    const KEY_CLOSED = 'hn-notice-last-closed';
+    const RECHECK_DELAY = 60_000; // while disabled: quietly re-check for a new notice
+    const STATE_KEY = 'hn-notice-state-v1'; // { id, shown, closed } — per notice
     // Never pop over the admin panel itself.
     if (location.pathname.replace(/\/$/, '') === '/al-mushrif') return;
     const root = document.getElementById(ROOT_ID);
@@ -228,16 +229,31 @@
 
     let showTimer = 0;
     let current = null;
+    let pendingId = 0; // notice ID the pending timer was scheduled for
 
     function now() { return Date.now(); }
-    function readKey(k) {
-      try { return Number(localStorage.getItem(k)) || 0; } catch { return 0; }
+    function readState() {
+      try {
+        const o = JSON.parse(localStorage.getItem(STATE_KEY));
+        if (o && typeof o.id === 'number') return o;
+      } catch { /* private mode / corrupt */ }
+      return null;
     }
-    function writeKey(k, v) {
-      try { localStorage.setItem(k, String(v)); } catch { /* private mode */ }
+    function writeState(s) {
+      try { localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch { /* private mode */ }
     }
-    function lastActivity() {
-      return Math.max(readKey(KEY_SHOWN), readKey(KEY_CLOSED));
+    // Retire pre-ID keys (could not tell notices apart) — one fresh cycle.
+    try { localStorage.removeItem('hn-notice-last-shown'); localStorage.removeItem('hn-notice-last-closed'); } catch {}
+    function delayFor(id) {
+      const st = readState();
+      // Unknown or replaced notice (re-published after disable) → fresh 10s.
+      if (!st || st.id !== id) return FIRST_DELAY;
+      const last = Math.max(st.shown || 0, st.closed || 0);
+      if (!last) return FIRST_DELAY;
+      const remaining = REPEAT_DELAY - (now() - last);
+      // Already waited 5+ mins (e.g. navigated back later): show quickly.
+      // Otherwise wait out the remainder so navigations don't re-spam.
+      return remaining <= 0 ? 2000 : remaining;
     }
 
     const KIND_LABEL = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
@@ -348,8 +364,10 @@
       root.hidden = true;
       root.innerHTML = '';
       document.removeEventListener('keydown', onKey);
-      writeKey(KEY_CLOSED, now());
-      // Re-show 5 mins after dismiss (same tab).
+      const st = readState() || {};
+      const id = (current && current.id) || st.id || pendingId || 0;
+      writeState({ id, shown: st.id === id ? (st.shown || 0) : 0, closed: now() });
+      // Re-show this same notice 5 mins after dismiss (same tab).
       scheduleShow(REPEAT_DELAY);
     }
     function onKey(e) {
@@ -496,24 +514,40 @@
       }
       root.append(backdrop, card);
       root.hidden = false;
-      writeKey(KEY_SHOWN, now());
+      // Stamp this notice ID as seen — old IDs keep no power over new ones.
+      const prev = readState();
+      writeState({ id: n.id, shown: now(), closed: prev && prev.id === n.id ? (prev.closed || 0) : 0 });
       document.addEventListener('keydown', onKey);
       x.focus({ preventScroll: true });
+    }
+
+    async function fetchNotice() {
+      try {
+        const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' }, cache: 'no-store' });
+        if (!r.ok) return null;
+        const data = await r.json();
+        const n = data && data.notice;
+        return (n && n.id) ? n : null;
+      } catch {
+        return null;
+      }
     }
 
     async function fetchAndShow() {
       // Don't stack: if already open, wait for dismiss (close() reschedules).
       if (!root.hidden) return;
-      let data = null;
-      try {
-        const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' }, cache: 'no-store' });
-        if (!r.ok) return;
-        data = await r.json();
-      } catch {
+      const n = await fetchNotice();
+      // Disabled in admin panel → stay quiet, keep watching for re-enable.
+      if (!n) { scheduleShow(RECHECK_DELAY); return; }
+      const st = readState();
+      if ((!st || st.id !== n.id) && n.id !== pendingId) {
+        // A newer notice replaced the old one mid-cycle (disable → publish):
+        // previous timing is out, restart with a fresh 10s.
+        pendingId = n.id;
+        scheduleShow(FIRST_DELAY);
         return;
       }
-      const n = data && data.notice;
-      if (!n || !n.id) return;
+      pendingId = n.id;
       current = n;
       render(n);
     }
@@ -523,19 +557,14 @@
       showTimer = setTimeout(fetchAndShow, Math.max(0, delayMs));
     }
 
-    function boot() {
-      const last = lastActivity();
-      let delay;
-      if (!last) {
-        // First visit: show 10s after load (never blocks first paint).
-        delay = FIRST_DELAY;
-      } else {
-        const remaining = REPEAT_DELAY - (now() - last);
-        // Already waited 5+ mins (e.g. navigated back later): show quickly.
-        // Otherwise wait out the remainder so navigations don't re-spam.
-        delay = remaining <= 0 ? 2000 : remaining;
-      }
-      scheduleShow(delay);
+    async function boot() {
+      // Silent fetch first: the delay depends on WHICH notice is live.
+      const n = await fetchNotice();
+      // Nothing published (or disabled) → no popup, re-check quietly.
+      if (!n) { scheduleShow(RECHECK_DELAY); return; }
+      pendingId = n.id;
+      // Fresh/unknown notice → 10s; known notice → remainder of its 5 mins.
+      scheduleShow(delayFor(n.id));
     }
 
     if (document.readyState === 'complete') boot();
