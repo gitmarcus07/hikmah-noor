@@ -14,7 +14,7 @@ export const DONATE_PAYEE = 'Hikmah Noor';
  * so the site matches what donors see in PhonePe / GPay / Paytm.
  * Empty = owner hasn't confirmed yet → UI shows a generic verify-payee note.
  */
-export const DONATE_ACCOUNT_HOLDER = '';
+export const DONATE_ACCOUNT_HOLDER = 'ABDUL WASEEM AHANGER';
 
 // Full VPA kept in one place. Assembled from parts only to avoid accidental
 // display via naive text search in templates — still present in built JS.

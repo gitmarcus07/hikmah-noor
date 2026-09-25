@@ -248,14 +248,18 @@
     // VPA (e.g. hikmahnoor@ybl) and update the parts below + /donate-qr.svg.
     const DONATE_VPA = ['9906273197', '-2', '@ybl'].join('');
     const DONATE_MASKED = '•••••• ••••@ybl';
+    // Registered UPI account-holder name — shown so donors can verify it in
+    // their UPI app (UPI always reveals the real name at payment time).
+    const DONATE_ACCOUNT = 'ABDUL WASEEM AHANGER';
     function donatePageHref() {
       const m = location.pathname.match(/^\/(hi|ur|ar)(?=\/|$)/);
       return (m ? '/' + m[1] : '') + '/donate/';
     }
     function upiIntent() {
       // Raw `@` in pa — PhonePe rejects the %40-encoded form.
+      // pn = real account-holder name (matches the UPI app screen).
       return 'upi://pay?pa=' + DONATE_VPA
-        + '&pn=' + encodeURIComponent('Hikmah Noor')
+        + '&pn=' + encodeURIComponent(DONATE_ACCOUNT)
         + '&cu=INR&tn=' + encodeURIComponent('Hikmah Noor Donation');
     }
     function isMobileUpi() {
@@ -329,10 +333,8 @@
       toggle.append(sum, body);
       const note = document.createElement('p');
       note.className = 'hn-donate-note';
-      // The VPA is registered to the owner personally — UPI always shows the
-      // real account name at payment time, so ask donors to verify it.
-      note.textContent = 'In your UPI app, verify the payee name before paying. ' +
-        'Full details on the donate page:';
+      // Names the real payee so donors trust the UPI confirmation screen.
+      note.textContent = 'In your UPI app the payee will appear as ' + DONATE_ACCOUNT + ' — please verify before paying.';
       const more = document.createElement('a');
       more.className = 'hn-donate-note';
       more.href = donatePageHref();

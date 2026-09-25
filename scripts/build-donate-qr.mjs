@@ -14,7 +14,7 @@ const VPA = `${P1}${P2}${P3}`;
 const params = null; // (kept explicit below — pa must keep raw `@` for PhonePe)
 const payload =
   `upi://pay?pa=${VPA}` +
-  `&pn=${encodeURIComponent('Hikmah Noor')}` +
+  `&pn=${encodeURIComponent('ABDUL WASEEM AHANGER')}` +
   `&cu=INR` +
   `&tn=${encodeURIComponent('Hikmah Noor Donation')}`;
 
