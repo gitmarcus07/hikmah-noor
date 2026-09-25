@@ -247,13 +247,22 @@ const crumbs = [
       async function publish() {
         sayErr(''); sayOk('');
         const isShare = kind?.value === 'share';
+        const isDonate = kind?.value === 'donate';
+        // Donation appeals default to the built-in /donate/ page (beautiful UPI
+        // QR, masked ID) when the link is left empty — so publish never fails
+        // with cta_url_required just because the button label was filled.
+        let url = isShare ? '' : ((ctaUrl?.value || '').trim());
+        if (isDonate && !url) {
+          url = '/donate/';
+          if (ctaUrl) ctaUrl.value = url;
+        }
         const payload = {
           kind: kind?.value,
           title: title?.value || '',
           message: message?.value || '',
           // Share appeals carry no link — the popup shows only Share.
           cta_label: isShare ? '' : (ctaLabel?.value || ''),
-          cta_url: isShare ? '' : (ctaUrl?.value || ''),
+          cta_url: url,
         };
         if ((payload.title || '').trim().length < 3) return sayErr('Title needs at least 3 characters.');
         if ((payload.message || '').trim().length < 10) return sayErr('Message needs at least 10 characters.');
@@ -261,7 +270,7 @@ const crumbs = [
           const r = await fetch('/api/notices/publish', { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
           const d = await r.json().catch(() => ({}));
           if (r.status === 401 || r.status === 429) { setToken(''); setLocked(true); show(loginErr, true); return; }
-          if (!r.ok) return sayErr('Could not publish (' + (d.error || ('http_' + r.status)) + '). Check lengths and link (https:// or upi://).');
+          if (!r.ok) return sayErr('Could not publish (' + (d.error || ('http_' + r.status)) + '). Check lengths and link (/donate/, https:// or upi://).');
           sayOk('Published — the popup is now live on the site.');
           refreshCurrent();
         } catch {
