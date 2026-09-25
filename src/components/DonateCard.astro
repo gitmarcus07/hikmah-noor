@@ -1,0 +1,154 @@
+---
+/* DonateCard — beautiful on-brand UPI donation card.
+ * Uses /donate-qr.svg (emerald-on-white, pre-generated from the same UPI ID).
+ * NEVER renders the full UPI ID as visible text — only a masked label.
+ * The full VPA travels only in the upi:// href + copy-button data attribute
+ * (unavoidable: UPI apps need it). For a fully number-free address, create
+ * an alias VPA (e.g. hikmahnoor@ybl) and update src/lib/donate.ts + rebuild QR.
+ */
+import { DONATE_PAYEE, DONATE_VPA, DONATE_VPA_MASKED, upiIntentUrl } from '../lib/donate';
+
+interface Props {
+  compact?: boolean;
+  showSteps?: boolean;
+}
+
+const { compact = false, showSteps = true } = Astro.props;
+const upiHref = upiIntentUrl();
+---
+
+<div class={`hn-donate${compact ? ' is-compact' : ''}`}>
+  <div class="hn-donate-qr-wrap">
+    <img
+      src="/donate-qr.svg"
+      alt="Scan to donate to Hikmah Noor via UPI"
+      class="hn-donate-qr"
+      width="220"
+      height="220"
+      loading="lazy"
+      decoding="async"
+    />
+    <span class="hn-donate-qr-badge" aria-hidden="true">☪</span>
+  </div>
+
+  <div class="hn-donate-meta">
+    <div class="hn-donate-payee">{DONATE_PAYEE}</div>
+    <div class="hn-donate-masked" aria-label="UPI ID hidden for privacy">UPI • {DONATE_VPA_MASKED}</div>
+  </div>
+
+  <div class="hn-donate-actions">
+    <a class="hn-btn hn-btn-primary !min-h-[48px] text-sm" href={upiHref}>Donate via UPI app</a>
+    <button type="button" class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-copy-vpa={DONATE_VPA}>Copy UPI ID</button>
+  </div>
+  <p class="hn-donate-hint" data-copy-msg hidden>Copied ✓ — paste it in PhonePe / GPay / Paytm</p>
+
+  {showSteps && (
+    <ol class="hn-donate-steps">
+      <li><b>1.</b> Scan the QR with PhonePe, GPay, Paytm or BHIM — or tap <b>Donate via UPI app</b>.</li>
+      <li><b>2.</b> Your app will show <b>{DONATE_PAYEE}</b> — confirm the name before paying.</li>
+      <li><b>3.</b> Pay any amount. Every contribution keeps this knowledge free.</li>
+    </ol>
+  )}
+  <p class="hn-donate-privacy">UPI ID is hidden here for privacy — scanning or Copy fills it automatically. No sign-up, no membership.</p>
+</div>
+
+<style>
+  .hn-donate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+    padding: 1.25rem 1.1rem 1.1rem;
+    border-radius: 20px;
+    border: 1px solid var(--hn-border);
+    border-top: 4px solid var(--hn-gold);
+    background: var(--hn-card);
+    box-shadow: var(--hn-shadow-lg);
+  }
+  .hn-donate.is-compact { padding: 1rem 0.9rem 0.9rem; gap: 0.7rem; box-shadow: none; }
+  .hn-donate-qr-wrap {
+    position: relative;
+    padding: 0.7rem;
+    border-radius: 22px;
+    background: #fff;
+    border: 2px solid var(--hn-gold);
+    box-shadow: 0 8px 24px rgba(15, 81, 50, 0.12);
+  }
+  .hn-donate-qr {
+    display: block;
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+  }
+  .hn-donate.is-compact .hn-donate-qr { width: 168px; height: 168px; }
+  .hn-donate-qr-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--hn-primary-deep);
+    color: #fff;
+    font-size: 1.35rem;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  }
+  .hn-donate-payee { font-weight: 800; font-size: 1.05rem; color: var(--hn-ink); letter-spacing: -0.01em; }
+  .hn-donate-masked {
+    margin-top: 0.2rem;
+    display: inline-block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--hn-muted);
+    background: var(--hn-bg-soft);
+    border: 1px dashed var(--hn-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+  }
+  .hn-donate-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }
+  .hn-donate-hint { font-size: 0.82rem; font-weight: 700; color: var(--hn-primary); margin: 0; }
+  .hn-donate-steps {
+    margin: 0.2rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.45rem;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--hn-muted);
+    text-align: start;
+  }
+  .hn-donate-privacy { font-size: 0.76rem; line-height: 1.6; color: var(--hn-muted); margin: 0; opacity: 0.9; }
+</style>
+
+<script is:inline>
+  (() => {
+    const root = document.currentScript?.previousElementSibling;
+    // Wire every copy button on the page (page + popup-safe).
+    document.querySelectorAll('[data-copy-vpa]').forEach((btn) => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', async () => {
+        const vpa = btn.getAttribute('data-copy-vpa') || '';
+        const card = btn.closest('.hn-donate') || document;
+        const msg = card.querySelector?.('[data-copy-msg]');
+        try {
+          await navigator.clipboard.writeText(vpa);
+          const old = btn.textContent;
+          btn.textContent = 'Copied ✓';
+          if (msg) msg.hidden = false;
+          setTimeout(() => { btn.textContent = old; if (msg) msg.hidden = true; }, 2200);
+        } catch {
+          // Clipboard blocked — select manually via prompt fallback.
+          try { window.prompt('Copy UPI ID:', vpa); } catch {}
+        }
+      });
+    });
+  })();
+</script>

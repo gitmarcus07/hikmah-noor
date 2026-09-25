@@ -28,7 +28,7 @@ export function validateNotice(body) {
   if (cta_label.length > LIMITS.ctaLabel) return { ok: false, error: 'invalid_cta_label' };
   if (cta_url.length > LIMITS.ctaUrl) return { ok: false, error: 'invalid_cta_url' };
   if (cta_label && !cta_url) return { ok: false, error: 'cta_url_required' };
-  if (cta_url && !/^(https:\/\/|http:\/\/|upi:\/\/)/i.test(cta_url)) return { ok: false, error: 'invalid_cta_url' };
+  if (cta_url && !/^((https?:\/\/|upi:\/\/)|\/[^\/\s])/i.test(cta_url)) return { ok: false, error: 'invalid_cta_url' };
   if (/^(javascript|data|vbscript|file):/i.test(cta_url)) return { ok: false, error: 'invalid_cta_url' };
 
   return { ok: true, notice: { kind, title, message, cta_label, cta_url } };

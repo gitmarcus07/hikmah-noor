@@ -88,7 +88,7 @@ const crumbs = [
             <button class="hn-btn hn-btn-secondary !min-h-[48px] text-sm" data-unpublish>Remove popup</button>
             <button class="hn-btn hn-btn-ghost !min-h-[48px] text-sm" data-preset>Fill preset text</button>
           </div>
-          <p class="text-[13px] leading-6" style="color:var(--hn-muted)">For donations paste a payment link (Stripe / Razorpay) or UPI link. Visitors pay what they can — one-time, no membership.</p>
+          <p class="text-[13px] leading-6" style="color:var(--hn-muted)">For donations link to <b>/donate/</b> — the page and popup already show the beautiful UPI QR (ID masked for privacy). External links also work (Stripe / Razorpay / https:// / upi://).</p>
         </form>
 
         {/* Live preview — same pre-built styling as the site popup */}
@@ -153,13 +153,14 @@ const crumbs = [
         },
         donate: {
           title: 'Help keep Hikmah Noor free for everyone',
-          message: 'Hikmah Noor is free and has no memberships or subscriptions. If you can, donate whatever amount you wish to help cover the cost of running this site, so this knowledge stays available to all. Every contribution, big or small, counts.',
+          message: 'Hikmah Noor is free and has no memberships or subscriptions. If you can, donate whatever amount you wish to help cover the cost of running this site, so this knowledge stays available to all. Indian users can scan the UPI QR right here — every contribution, big or small, counts.',
           cta_label: 'Donate any amount',
+          cta_url: '/donate/',
         },
       };
-      const presetTexts = () => Object.values(PRESETS).flatMap((p) => [p.title, p.message, p.cta_label]);
-      /** Fill title/message (/cta label for donations) with the preset for the
-       *  selected type. Auto-fills only empty-or-preset fields so your own
+      const presetTexts = () => Object.values(PRESETS).flatMap((p) => [p.title, p.message, p.cta_label, p.cta_url]);
+      /** Fill title/message (/cta label+url for donations) with the preset for
+       *  the selected type. Auto-fills only empty-or-preset fields so your own
        *  wording is never overwritten; "Fill preset text" forces it. */
       function applyPreset(force) {
         const p = PRESETS[kind?.value];
@@ -168,6 +169,7 @@ const crumbs = [
         if (title && (force || !title.value.trim() || known.has(title.value.trim()))) title.value = p.title;
         if (message && (force || !message.value.trim() || known.has(message.value.trim()))) message.value = p.message;
         if (ctaLabel && p.cta_label && (force || !ctaLabel.value.trim() || known.has(ctaLabel.value.trim()))) ctaLabel.value = p.cta_label;
+        if (ctaUrl && p.cta_url && (force || !ctaUrl.value.trim() || known.has(ctaUrl.value.trim()))) ctaUrl.value = p.cta_url;
         paintPreview();
       }
       function paintPreview() {

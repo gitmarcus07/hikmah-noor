@@ -1,7 +1,8 @@
 ---
 // Global site-notice popup (managed from /al-mushrif/).
-// Fetches GET /api/notices/active on every page load and shows the active
-// notice each time — the cross button only closes the current view.
+// Fetches GET /api/notices/active on every page load.
+// Timing: first show 10s after visit, then repeat every 5 mins after dismiss.
+// Throttled with localStorage so page navigations don't re-spam the popup.
 // All text is injected via textContent (never innerHTML) — admin input
 // cannot execute scripts. No props: styling is pre-built (emerald/gold).
 //
@@ -117,6 +118,57 @@
     font-family: inherit;
   }
   .hn-share-opt:hover { border-color: var(--hn-primary); color: var(--hn-primary); }
+  .hn-donate-mini {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--hn-border);
+    display: grid;
+    gap: 0.6rem;
+    justify-items: center;
+    text-align: center;
+  }
+  .hn-donate-qr-frame {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 18px;
+    background: #fff;
+    border: 2px solid var(--hn-gold);
+    box-shadow: 0 6px 18px rgba(15, 81, 50, 0.12);
+  }
+  .hn-donate-qr-frame img {
+    display: block;
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+  }
+  .hn-donate-qr-crescent {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 2.2rem;
+    height: 2.2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--hn-primary-deep);
+    color: #fff;
+    font-size: 1.1rem;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .hn-donate-mask {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--hn-muted);
+    background: var(--hn-bg-soft);
+    border: 1px dashed var(--hn-border);
+    border-radius: 999px;
+    padding: 0.28rem 0.7rem;
+  }
+  .hn-donate-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+  .hn-donate-note { font-size: 0.76rem; line-height: 1.6; color: var(--hn-muted); margin: 0; }
   @keyframes hn-notice-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes hn-notice-up {
     from { opacity: 0; transform: translateY(14px); }
@@ -133,20 +185,99 @@
 <script is:inline>
   (() => {
     const ROOT_ID = 'hn-notice-root';
-    // No dismissal memory: the popup shows on EVERY visit / page load.
-    // The cross button only closes it for the current view.
+    const FIRST_DELAY = 10_000; // first show: 10s after visit
+    const REPEAT_DELAY = 5 * 60_000; // re-show: every 5 mins after dismiss
+    const KEY_SHOWN = 'hn-notice-last-shown';
+    const KEY_CLOSED = 'hn-notice-last-closed';
     // Never pop over the admin panel itself.
     if (location.pathname.replace(/\/$/, '') === '/al-mushrif') return;
     const root = document.getElementById(ROOT_ID);
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
 
+    let showTimer = 0;
+    let current = null;
+
+    function now() { return Date.now(); }
+    function readKey(k) {
+      try { return Number(localStorage.getItem(k)) || 0; } catch { return 0; }
+    }
+    function writeKey(k, v) {
+      try { localStorage.setItem(k, String(v)); } catch { /* private mode */ }
+    }
+    function lastActivity() {
+      return Math.max(readKey(KEY_SHOWN), readKey(KEY_CLOSED));
+    }
+
     const KIND_LABEL = { share: 'Share the reward', donate: 'Support us', info: 'Notice' };
+
+    // Donation UPI — full ID never shown as visible text (masked label only).
+    // NOTE: view-source still contains the VPA inside the upi:// href + QR
+    // payload (unavoidable). For a fully number-free address, create an alias
+    // VPA (e.g. hikmahnoor@ybl) and update the parts below + /donate-qr.svg.
+    const DONATE_VPA = ['9906273197', '-2', '@ybl'].join('');
+    const DONATE_MASKED = '•••••• ••••@ybl';
+    function donatePageHref() {
+      const m = location.pathname.match(/^\/(hi|ur|ar)(?=\/|$)/);
+      return (m ? '/' + m[1] : '') + '/donate/';
+    }
+    function upiIntent() {
+      return 'upi://pay?pa=' + encodeURIComponent(DONATE_VPA)
+        + '&pn=' + encodeURIComponent('Hikmah Noor')
+        + '&cu=INR&tn=' + encodeURIComponent('Hikmah Noor Donation');
+    }
+    function buildDonateMini() {
+      const box = document.createElement('div');
+      box.className = 'hn-donate-mini';
+      const frame = document.createElement('div');
+      frame.className = 'hn-donate-qr-frame';
+      const img = document.createElement('img');
+      img.src = '/donate-qr.svg';
+      img.alt = 'Scan to donate to Hikmah Noor via UPI';
+      img.width = 150; img.height = 150;
+      img.loading = 'lazy'; img.decoding = 'async';
+      const badge = document.createElement('span');
+      badge.className = 'hn-donate-qr-crescent';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.textContent = '☪';
+      frame.append(img, badge);
+      const mask = document.createElement('div');
+      mask.className = 'hn-donate-mask';
+      mask.textContent = 'Hikmah Noor • UPI ' + DONATE_MASKED;
+      const row = document.createElement('div');
+      row.className = 'hn-donate-row';
+      const pay = document.createElement('a');
+      pay.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+      pay.textContent = 'Donate via UPI app';
+      pay.href = upiIntent();
+      const qr = document.createElement('a');
+      qr.className = 'hn-btn hn-btn-secondary !min-h-[48px] text-sm';
+      qr.textContent = 'Scan QR';
+      qr.href = donatePageHref();
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'hn-btn hn-btn-ghost !min-h-[48px] text-sm';
+      copy.textContent = 'Copy UPI ID';
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(DONATE_VPA); copy.textContent = 'Copied ✓'; }
+        catch { try { window.prompt('Copy UPI ID:', DONATE_VPA); } catch {} }
+        setTimeout(() => { copy.textContent = 'Copy UPI ID'; }, 2200);
+      });
+      row.append(pay, qr, copy);
+      const note = document.createElement('p');
+      note.className = 'hn-donate-note';
+      note.textContent = 'Scan with PhonePe / GPay / Paytm / BHIM. Confirm “Hikmah Noor” in your app before paying.';
+      box.append(frame, mask, row, note);
+      return box;
+    }
 
     function close() {
       root.hidden = true;
       root.innerHTML = '';
       document.removeEventListener('keydown', onKey);
+      writeKey(KEY_CLOSED, now());
+      // Re-show 5 mins after dismiss (same tab).
+      scheduleShow(REPEAT_DELAY);
     }
     function onKey(e) {
       if (e.key === 'Escape') close();
@@ -262,25 +393,44 @@
         b.textContent = 'Share';
         b.addEventListener('click', () => shareSite(b));
         actions.appendChild(b);
-      } else if (n.cta_url) {
-        const a = document.createElement('a');
-        a.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
-        a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
-        a.href = n.cta_url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        actions.appendChild(a);
+      } else {
+        if (n.cta_url) {
+          const a = document.createElement('a');
+          a.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+          a.textContent = n.cta_label || (n.kind === 'donate' ? 'Donate any amount' : 'Learn more');
+          a.href = n.cta_url;
+          // Internal donate page stays in-tab; external links open new tab.
+          if (/^https?:/i.test(n.cta_url) && !n.cta_url.includes(location.host)) {
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+          }
+          actions.appendChild(a);
+        } else if (n.kind === 'donate') {
+          // No CTA configured — deep-link to the beautiful donate page.
+          const a = document.createElement('a');
+          a.className = 'hn-btn hn-btn-primary !min-h-[48px] text-sm';
+          a.textContent = n.cta_label || 'Donate any amount';
+          a.href = donatePageHref();
+          actions.appendChild(a);
+        }
       }
 
       card.append(x, badge, title, msg);
       if (actions.childNodes.length) card.appendChild(actions);
+      // Donation appeals always carry the UPI QR block (masked ID, no digits shown).
+      if (n.kind === 'donate') {
+        try { card.appendChild(buildDonateMini()); } catch {}
+      }
       root.append(backdrop, card);
       root.hidden = false;
+      writeKey(KEY_SHOWN, now());
       document.addEventListener('keydown', onKey);
       x.focus({ preventScroll: true });
     }
 
-    async function boot() {
+    async function fetchAndShow() {
+      // Don't stack: if already open, wait for dismiss (close() reschedules).
+      if (!root.hidden) return;
       let data = null;
       try {
         const r = await fetch('/api/notices/active', { headers: { accept: 'application/json' }, cache: 'no-store' });
@@ -291,8 +441,28 @@
       }
       const n = data && data.notice;
       if (!n || !n.id) return;
-      // Small delay so the popup never blocks first paint.
-      setTimeout(() => render(n), 1200);
+      current = n;
+      render(n);
+    }
+
+    function scheduleShow(delayMs) {
+      if (showTimer) clearTimeout(showTimer);
+      showTimer = setTimeout(fetchAndShow, Math.max(0, delayMs));
+    }
+
+    function boot() {
+      const last = lastActivity();
+      let delay;
+      if (!last) {
+        // First visit: show 10s after load (never blocks first paint).
+        delay = FIRST_DELAY;
+      } else {
+        const remaining = REPEAT_DELAY - (now() - last);
+        // Already waited 5+ mins (e.g. navigated back later): show quickly.
+        // Otherwise wait out the remainder so navigations don't re-spam.
+        delay = remaining <= 0 ? 2000 : remaining;
+      }
+      scheduleShow(delay);
     }
 
     if (document.readyState === 'complete') boot();

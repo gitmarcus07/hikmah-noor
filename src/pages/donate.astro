@@ -1,0 +1,55 @@
+---
+/* Donate — one-time UPI support page (Indian users).
+ * No amounts, no memberships. QR is pre-generated (/donate-qr.svg, emerald on
+ * white). Full UPI ID is never shown as text — masked + copy button only.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import DonateCard from '../components/DonateCard.astro';
+import { localizedPath } from '../i18n/utils';
+
+const locale = 'en';
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Donate', path: '/donate/' },
+];
+---
+<BaseLayout
+  title="Donate — Keep Hikmah Noor Free"
+  description="Support Hikmah Noor with a one-time UPI donation. Scan the QR with PhonePe, GPay, Paytm or BHIM — any amount helps keep 114 surahs, duas and guides free."
+  keywords="donate hikmah noor, upi donation, sadaqah jariyah, support islamic site"
+  locale={locale}
+  type="article"
+  canonicalPath="/donate/"
+  crumbs={crumbs}
+>
+  <div class="hn-container hn-section max-w-3xl">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 text-center">
+      <span class="hn-badge hn-badge-gold">Support us • Sadaqah Jariyah</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Help keep Hikmah Noor free</h1>
+      <p class="mt-2 leading-7 max-w-xl mx-auto" style="color:var(--hn-muted)">
+        Hikmah Noor is free — no memberships, no subscriptions. If this site helped you,
+        donate whatever you wish, one time. Your contribution covers running costs so this
+        knowledge stays available to all. Every amount, big or small, counts.
+      </p>
+    </div>
+
+    <div class="mt-6 max-w-md mx-auto">
+      <DonateCard />
+    </div>
+
+    <div class="mt-6 max-w-md mx-auto hn-card hn-card-pad text-center">
+      <p class="text-sm font-bold" style="color:var(--hn-ink)">Outside India?</p>
+      <p class="text-sm mt-1 leading-6" style="color:var(--hn-muted)">
+        UPI works for Indian bank accounts. If you are abroad, please make dua for us and
+        share the site — spreading beneficial knowledge is also Sadaqah Jariyah.
+      </p>
+      <a href={localizedPath(locale, '/')} class="hn-btn hn-btn-ghost !min-h-[48px] text-sm mt-3">Share instead →</a>
+    </div>
+
+    <p class="mt-6 text-center text-xs leading-6" style="color:var(--hn-muted)">
+      “Whoever guides to good has the reward of the one who does it.” — Sahih Muslim 1893
+    </p>
+  </div>
+</BaseLayout>

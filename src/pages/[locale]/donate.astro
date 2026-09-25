@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DonateCard from '../../components/DonateCard.astro';
+import { nonDefaultLocales, getDict, localizedPath } from '../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map(locale => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const dict = getDict(locale);
+---
+<BaseLayout
+  title="Donate — Keep Hikmah Noor Free"
+  description="Support Hikmah Noor with a one-time UPI donation. Scan the QR with PhonePe, GPay, Paytm or BHIM."
+  locale={locale}
+  type="article"
+  canonicalPath="/donate/"
+>
+  <div class="hn-container hn-section max-w-3xl">
+    <nav class="text-xs mb-4" style="color:var(--hn-muted)"><a href={localizedPath(locale, '/')} class="hover:underline">{dict.nav.home}</a> / <span>Donate</span></nav>
+    <div class="mt-1 text-center">
+      <span class="hn-badge hn-badge-gold">Support us • Sadaqah Jariyah</span>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Help keep Hikmah Noor free</h1>
+      <p class="mt-2 leading-7 max-w-xl mx-auto" style="color:var(--hn-muted)">English guide — translation coming soon. UPI donation works the same in every language.</p>
+    </div>
+    <div class="mt-6 max-w-md mx-auto">
+      <DonateCard />
+    </div>
+  </div>
+</BaseLayout>
