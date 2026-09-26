@@ -5,6 +5,7 @@ import Breadcrumbs from '../../components/hn/Breadcrumbs.astro';
 import SectionHeader from '../../components/hn/SectionHeader.astro';
 import Icon from '../../components/Icon.astro';
 import { nonDefaultLocales, localizedPath, getDict } from '../../i18n/utils';
+import { getMixedLocale } from '../../lib/articles';
 
 export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
 const { locale } = Astro.params;
@@ -14,6 +15,10 @@ const crumbs = [
   { name: 'Home', path: '/' },
   { name: 'Explore', path: '/explore/' },
 ];
+
+const latestAll = (await getMixedLocale(locale as string)).slice(0, 12);
+const slugOf = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const fmtDate = (d: any) => { try { const tag = locale === 'hi' ? 'hi-IN' : locale === 'ur' ? 'ur-PK' : locale === 'ar' ? 'ar-SA' : 'en-US'; return new Date(d).toLocaleDateString(tag, { year: 'numeric', month: 'short', day: 'numeric' }); } catch { return ''; } };
 
 const GROUPS = [
   { chip: 'Read', title: 'Read the Quran', cards: [
@@ -57,6 +62,20 @@ const GROUPS = [
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{t.tabs.explore}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">Quran, duas, guides, stories and tools — every page with sources and translation.</p>
     </div>
+    {latestAll.length > 0 && (
+      <div class="mt-6">
+        <SectionHeader eyebrow="Fresh" title="Latest articles" />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
+          {latestAll.map((a: any) => (
+            <a href={L(`/${a.data.category}/${slugOf(a.id)}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="hn-badge">{a.data.category}</span>
+              <span class="block font-extrabold text-[16px] leading-6 mt-2 line-clamp-2">{a.data.title}</span>
+              <span class="block mt-1 text-[13px]" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
     <div class="mt-6">
       {GROUPS.map((g) => (
         <div class="mt-6">
