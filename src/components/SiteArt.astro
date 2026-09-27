@@ -3,6 +3,9 @@
  * Abstract, geometric, no animate depictions. Usage:
  *   <SiteArt name="card-duas" title="..." />
  * IDs are prefixed per design so repeated cards never clash.
+ * Palette follows the light design system: ivory parchment skies,
+ * emerald greens, restrained gold. One night scene (article-desert)
+ * uses deep emerald instead of the old purple.
  */
 import type { ArtName } from '../lib/art';
 
@@ -10,268 +13,331 @@ interface Props { name: ArtName; title?: string; }
 const { name, title } = Astro.props;
 const p = name.replace(/-/g, '');
 const label = title ?? name.replace(/-/g, ' ');
+const night = name === 'article-desert' || name === 'hero-quran';
 ---
 <svg viewBox="0 0 800 450" class="w-full h-full block" role="img" aria-label={label} preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id={`${p}-bg`} x1="0" y1="0" x2="0" y2="1">
-      {(name === 'article-desert') ? (<><stop offset="0" stop-color="#141233" /><stop offset="0.62" stop-color="#1C1650" /><stop offset="1" stop-color="#2A2160" /></>) : null}
-      {(name === 'card-duas') ? (<><stop offset="0" stop-color="#12102A" /><stop offset="1" stop-color="#0C0A1E" /></>) : null}
-      {(name !== 'article-desert' && name !== 'card-duas') ? (<><stop offset="0" stop-color="#1B1440" /><stop offset="0.55" stop-color="#171233" /><stop offset="1" stop-color="#100C26" /></>) : null}
+    <linearGradient id={`${p}-sky`} x1="0" y1="0" x2="0" y2="1">
+      {(name === 'article-desert') ? (<><stop offset="0" stop-color="#071C14" /><stop offset="0.6" stop-color="#0C3325" /><stop offset="1" stop-color="#13503A" /></>) : null}
+      {(name === 'hero-quran') ? (<><stop offset="0" stop-color="#08241A" /><stop offset="0.62" stop-color="#0F5132" /><stop offset="1" stop-color="#177A5C" /></>) : null}
+      {(name === 'card-duas') ? (<><stop offset="0" stop-color="#FDF8EA" /><stop offset="0.65" stop-color="#F6ECD4" /><stop offset="1" stop-color="#EBDCB8" /></>) : null}
+      {(name === 'article-istiqlal') ? (<><stop offset="0" stop-color="#FDF9EE" /><stop offset="0.6" stop-color="#F4EAD0" /><stop offset="1" stop-color="#E4D3A8" /></>) : null}
+      {(name === 'article-kaaba') ? (<><stop offset="0" stop-color="#F8F4E9" /><stop offset="0.7" stop-color="#EFE8D5" /><stop offset="1" stop-color="#E2D6B8" /></>) : null}
+      {(!night && name !== 'card-duas' && name !== 'article-istiqlal' && name !== 'article-kaaba') ? (<><stop offset="0" stop-color="#FBF7EC" /><stop offset="0.62" stop-color="#F3ECDA" /><stop offset="1" stop-color="#E6D9BC" /></>) : null}
     </linearGradient>
     <linearGradient id={`${p}-gold`} x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#F7E08B" />
-      <stop offset="0.5" stop-color="#D4AF37" />
-      <stop offset="1" stop-color="#9A7B1E" />
+      <stop offset="0" stop-color="#EFD88F" />
+      <stop offset="0.52" stop-color="#C9A84C" />
+      <stop offset="1" stop-color="#8C6D1F" />
     </linearGradient>
-    <radialGradient id={`${p}-glow`} cx="0.5" cy="0.38" r="0.55">
-      <stop offset="0" stop-color="#F7E08B" stop-opacity="0.16" />
-      <stop offset="1" stop-color="#F7E08B" stop-opacity="0" />
+    <linearGradient id={`${p}-emer`} x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#177A5C" />
+      <stop offset="0.55" stop-color="#0F5132" />
+      <stop offset="1" stop-color="#093B25" />
+    </linearGradient>
+    <radialGradient id={`${p}-glow`} cx="0.5" cy="0.34" r="0.55">
+      {night
+        ? (<><stop offset="0" stop-color="#EFD88F" stop-opacity="0.20" /><stop offset="1" stop-color="#EFD88F" stop-opacity="0" /></>)
+        : (<><stop offset="0" stop-color="#B8944A" stop-opacity="0.20" /><stop offset="1" stop-color="#B8944A" stop-opacity="0" /></>)}
     </radialGradient>
-    <radialGradient id={`${p}-vig`} cx="0.5" cy="0.5" r="0.75">
-      <stop offset="0.62" stop-color="#000000" stop-opacity="0" />
-      <stop offset="1" stop-color="#000000" stop-opacity="0.42" />
+    <radialGradient id={`${p}-vig`} cx="0.5" cy="0.5" r="0.78">
+      <stop offset="0.72" stop-color="#000000" stop-opacity="0" />
+      <stop offset="1" stop-color={night ? '#000000' : '#3A2E12'} stop-opacity={night ? 0.35 : 0.12} />
     </radialGradient>
-    <pattern id={`${p}-pat`} width="96" height="96" patternUnits="userSpaceOnUse">
-      <g fill="none" stroke="#D4AF37" stroke-opacity="0.14" stroke-width="1.2">
-        <g transform="translate(48,48)">
-          <rect x="-14" y="-14" width="28" height="28" />
-          <rect x="-14" y="-14" width="28" height="28" transform="rotate(45)" />
+    <pattern id={`${p}-pat`} width="120" height="120" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke={night ? '#EFD88F' : '#0F5132'} stroke-opacity={night ? 0.10 : 0.07} stroke-width="1.2">
+        <g transform="translate(60,60)">
+          <rect x="-15" y="-15" width="30" height="30" />
+          <rect x="-15" y="-15" width="30" height="30" transform="rotate(45)" />
+          <circle r="2.2" fill={night ? '#EFD88F' : '#0F5132'} stroke="none" opacity="0.8" />
         </g>
       </g>
     </pattern>
   </defs>
 
-  <rect width="800" height="450" fill={`url(#${p}-bg)`} />
+  <rect width="800" height="450" fill={`url(#${p}-sky)`} />
   <rect width="800" height="450" fill={`url(#${p}-pat)`} />
   <rect width="800" height="450" fill={`url(#${p}-glow)`} />
 
   {name === 'hero-quran' && (
     <g>
-      <g stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.5">
-        <line x1="400" y1="290" x2="250" y2="110" />
-        <line x1="400" y1="290" x2="330" y2="90" />
-        <line x1="400" y1="290" x2="400" y2="80" />
-        <line x1="400" y1="290" x2="470" y2="90" />
-        <line x1="400" y1="290" x2="550" y2="110" />
+      <g stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.55" stroke-linecap="round">
+        <line x1="400" y1="310" x2="238" y2="118" />
+        <line x1="400" y1="310" x2="322" y2="88" />
+        <line x1="400" y1="310" x2="400" y2="76" />
+        <line x1="400" y1="310" x2="478" y2="88" />
+        <line x1="400" y1="310" x2="562" y2="118" />
       </g>
-      <g transform="translate(400,120)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3">
-        <rect x="-20" y="-20" width="40" height="40" />
-        <rect x="-20" y="-20" width="40" height="40" transform="rotate(45)" />
-      </g>
-      <g stroke-linecap="round">
-        <line x1="315" y1="375" x2="485" y2="235" stroke="#7A5A2E" stroke-width="16" />
-        <line x1="485" y1="375" x2="315" y2="235" stroke="#7A5A2E" stroke-width="16" />
+      <ellipse cx="400" cy="392" rx="215" ry="17" fill="#000000" opacity="0.35" />
+      <g transform="translate(400,118)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5">
+        <rect x="-22" y="-22" width="44" height="44" />
+        <rect x="-22" y="-22" width="44" height="44" transform="rotate(45)" />
+        <circle r="7" fill={`url(#${p}-gold)`} stroke="none" />
       </g>
       <g stroke={`url(#${p}-gold)`} stroke-width="4">
-        <polygon points="255,215 390,188 390,318 255,345" fill="#F5EFDC" />
-        <polygon points="545,215 410,188 410,318 545,345" fill="#EFE3C8" />
+        <polygon points="248,232 392,202 392,332 248,362" fill="#F8F1DE" />
+        <polygon points="552,232 408,202 408,332 552,362" fill="#EADFC2" />
       </g>
-      <g stroke="#2A2160" stroke-width="5" stroke-linecap="round" opacity="0.65">
-        <line x1="280" y1="232" x2="368" y2="216" />
-        <line x1="280" y1="256" x2="368" y2="240" />
-        <line x1="280" y1="280" x2="368" y2="264" />
-        <line x1="432" y1="216" x2="520" y2="232" />
-        <line x1="432" y1="240" x2="520" y2="256" />
-        <line x1="432" y1="264" x2="520" y2="280" />
+      <g stroke="#0F5132" stroke-width="5" stroke-linecap="round" opacity="0.55">
+        <line x1="276" y1="250" x2="366" y2="232" />
+        <line x1="276" y1="274" x2="366" y2="256" />
+        <line x1="276" y1="298" x2="366" y2="280" />
+        <line x1="434" y1="232" x2="524" y2="250" />
+        <line x1="434" y1="256" x2="524" y2="274" />
+        <line x1="434" y1="280" x2="524" y2="298" />
+      </g>
+      <g fill="#EFD88F">
+        <circle cx="150" cy="90" r="2.4" opacity="0.8" /><circle cx="650" cy="80" r="2.2" opacity="0.7" />
+        <circle cx="580" cy="150" r="1.8" opacity="0.6" /><circle cx="220" cy="160" r="1.8" opacity="0.6" />
       </g>
     </g>
   )}
 
   {name === 'card-quran' && (
     <g>
-      <rect x="330" y="105" width="140" height="240" rx="10" fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="5" />
-      <line x1="358" y1="105" x2="358" y2="345" stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.7" />
-      <g transform="translate(414,225)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5">
-        <rect x="-30" y="-30" width="60" height="60" />
-        <rect x="-30" y="-30" width="60" height="60" transform="rotate(45)" />
-        <circle r="8" fill={`url(#${p}-gold)`} stroke="none" />
+      <path d="M310 360 V210 C310 150 352 118 400 100 C448 118 490 150 490 210 V360" fill="#E9F3EC" stroke="#0F5132" stroke-width="4" />
+      <path d="M334 360 V218 C334 170 368 142 400 128 C432 142 466 170 466 218 V360" fill="none" stroke="#B8944A" stroke-width="2.5" opacity="0.9" />
+      <rect x="342" y="180" width="116" height="150" rx="8" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <line x1="364" y1="180" x2="364" y2="330" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.8" />
+      <g transform="translate(410,255)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3">
+        <rect x="-24" y="-24" width="48" height="48" />
+        <rect x="-24" y="-24" width="48" height="48" transform="rotate(45)" />
+        <circle r="6.5" fill={`url(#${p}-gold)`} stroke="none" />
       </g>
-      <polygon points="428,105 446,105 446,168 437,156 428,168" fill="#8E2F3C" stroke={`url(#${p}-gold)`} stroke-width="2" />
+      <polygon points="440,180 456,180 456,236 448,226 440,236" fill="#8E2F3C" stroke={`url(#${p}-gold)`} stroke-width="2" />
+      <ellipse cx="400" cy="372" rx="90" ry="10" fill="#0F5132" opacity="0.15" />
     </g>
   )}
 
   {name === 'card-surahs' && (
-    <g fill="none" stroke={`url(#${p}-gold)`} stroke-width="4">
-      <path d="M200 300 C240 190 320 130 400 130 C480 130 560 190 600 300" stroke-dasharray="1 14" stroke-linecap="round" stroke-width="6" opacity="0.5" />
-      <circle cx="212" cy="282" r="13" /><circle cx="252" cy="228" r="13" /><circle cx="304" cy="188" r="13" />
-      <circle cx="364" cy="166" r="13" /><circle cx="428" cy="164" r="13" /><circle cx="488" cy="182" r="13" />
-      <circle cx="540" cy="216" r="13" /><circle cx="578" cy="260" r="13" />
-      <path d="M578 260 L596 340 M590 340 L586 372 M602 340 L606 372 M578 340 L574 372" stroke-width="4" />
-      <rect x="582" y="330" width="28" height="12" rx="3" />
-      <path d="M330 340 C330 300 365 285 400 268 C435 285 470 300 470 340" stroke-width="3" opacity="0.8" />
-      <line x1="330" y1="340" x2="470" y2="340" stroke-width="3" opacity="0.8" />
+    <g fill="none">
+      <path d="M196 308 C238 196 318 134 400 134 C482 134 562 196 604 308" stroke={`url(#${p}-emer)`} stroke-width="3" opacity="0.35" />
+      <path d="M200 300 C240 190 320 130 400 130 C480 130 560 190 600 300" stroke-dasharray="1 13" stroke-linecap="round" stroke={`url(#${p}-gold)`} stroke-width="7" opacity="0.85" />
+      <g fill="#F8F1DE" stroke={`url(#${p}-gold)`} stroke-width="4">
+        <circle cx="212" cy="282" r="14" /><circle cx="252" cy="228" r="14" /><circle cx="304" cy="188" r="14" />
+        <circle cx="364" cy="166" r="14" /><circle cx="428" cy="164" r="14" /><circle cx="488" cy="182" r="14" />
+        <circle cx="540" cy="216" r="14" /><circle cx="578" cy="260" r="14" />
+      </g>
+      <g fill={`url(#${p}-emer)`} opacity="0.9">
+        <circle cx="212" cy="282" r="4" /><circle cx="304" cy="188" r="4" /><circle cx="428" cy="164" r="4" /><circle cx="540" cy="216" r="4" />
+      </g>
+      <g stroke={`url(#${p}-gold)`} stroke-width="4" stroke-linecap="round">
+        <path d="M578 274 L594 344" />
+      </g>
+      <rect x="580" y="342" width="28" height="13" rx="4" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="3" />
+      <g stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.7">
+        <line x1="586" y1="358" x2="586" y2="376" /><line x1="594" y1="358" x2="594" y2="376" /><line x1="602" y1="358" x2="602" y2="376" />
+      </g>
+      <g transform="translate(400,330)" fill="none" stroke="#0F5132" stroke-width="3" opacity="0.5">
+        <rect x="-20" y="-20" width="40" height="40" />
+        <rect x="-20" y="-20" width="40" height="40" transform="rotate(45)" />
+      </g>
     </g>
   )}
 
   {name === 'card-duas' && (
     <g fill="none">
-      <circle cx="150" cy="90" r="26" stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.8" />
-      <path d="M176 90 A26 26 0 1 0 150 116 A21 21 0 1 1 176 90 Z" fill={`url(#${p}-gold)`} opacity="0.85" stroke="none" />
-      <g stroke={`url(#${p}-gold)`} stroke-width="6" stroke-linecap="round">
-        <path d="M282 330 C320 368 480 368 518 330" />
-        <path d="M282 330 L248 282 M518 330 L552 282" stroke-width="12" />
+      <path d="M300 370 V230 C300 160 348 120 400 104 C452 120 500 160 500 230 V370" stroke="#0F5132" stroke-width="5" />
+      <path d="M322 370 V236 C322 178 362 142 400 130 C438 142 478 178 478 236 V370" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.9" />
+      <circle cx="400" cy="195" r="34" stroke={`url(#${p}-gold)`} stroke-width="4" opacity="0.9" />
+      <path d="M434 195 A34 34 0 1 0 400 229 A27 27 0 1 1 434 195 Z" fill={`url(#${p}-gold)`} stroke="none" opacity="0.95" />
+      <g stroke={`url(#${p}-gold)`} stroke-width="5" stroke-linecap="round" opacity="0.85">
+        <line x1="400" y1="300" x2="400" y2="252" />
+        <line x1="362" y1="302" x2="344" y2="258" />
+        <line x1="438" y1="302" x2="456" y2="258" />
       </g>
-      <g stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.6">
-        <line x1="400" y1="300" x2="400" y2="230" />
-        <line x1="360" y1="300" x2="335" y2="240" />
-        <line x1="440" y1="300" x2="465" y2="240" />
-      </g>
-      <g transform="translate(400,190)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3">
-        <rect x="-22" y="-22" width="44" height="44" />
-        <rect x="-22" y="-22" width="44" height="44" transform="rotate(45)" />
+      <path d="M330 370 C360 344 440 344 470 370" stroke="#0F5132" stroke-width="5" stroke-linecap="round" />
+      <g fill={`url(#${p}-gold)`} stroke="none" opacity="0.8">
+        <circle cx="300" cy="120" r="2.4" /><circle cx="500" cy="110" r="2.2" /><circle cx="452" cy="80" r="1.8" />
       </g>
     </g>
   )}
 
   {name === 'card-kalimas' && (
     <g>
-      <rect x="170" y="350" width="460" height="16" rx="4" fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <path d="M285 350 C285 260 340 222 400 192 C460 222 515 260 515 350" fill="#EFE7D2" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <line x1="400" y1="192" x2="400" y2="168" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <circle cx="400" cy="158" r="9" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <g fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3">
-        <rect x="216" y="230" width="30" height="120" />
-        <rect x="208" y="262" width="46" height="10" />
-        <polygon points="216,230 231,200 246,230" />
-        <rect x="554" y="230" width="30" height="120" />
-        <rect x="546" y="262" width="46" height="10" />
-        <polygon points="554,230 569,200 584,230" />
+      <ellipse cx="400" cy="384" rx="230" ry="14" fill="#0F5132" opacity="0.12" />
+      <rect x="170" y="362" width="460" height="16" rx="5" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="3" />
+      <path d="M272 362 C272 256 332 214 400 182 C468 214 528 256 528 362" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <path d="M300 362 C300 280 348 244 400 218 C452 244 500 280 500 362" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.8" />
+      <line x1="400" y1="182" x2="400" y2="152" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <circle cx="400" cy="140" r="13" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
+      <path d="M413 140 A13 13 0 1 0 400 153 A10.5 10.5 0 1 1 413 140 Z" fill={`url(#${p}-gold)`} stroke="none" />
+      <g fill="#F8F1DE" stroke={`url(#${p}-gold)`} stroke-width="3">
+        <rect x="206" y="238" width="30" height="124" />
+        <polygon points="206,238 221,208 236,238" />
+        <rect x="564" y="238" width="30" height="124" />
+        <polygon points="564,238 579,208 594,238" />
       </g>
-      <path d="M372 350 V300 C372 282 388 274 400 266 C412 274 428 282 428 300 V350" fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3" />
+      <g stroke="#0F5132" stroke-width="3" opacity="0.7">
+        <line x1="198" y1="272" x2="244" y2="272" /><line x1="556" y1="272" x2="602" y2="272" />
+      </g>
+      <path d="M372 362 V308 C372 290 388 282 400 274 C412 282 428 290 428 308 V362" fill="#F8F1DE" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
     </g>
   )}
 
   {name === 'card-meanings' && (
     <g>
+      <ellipse cx="400" cy="380" rx="210" ry="14" fill="#0F5132" opacity="0.12" />
       <g stroke={`url(#${p}-gold)`} stroke-width="4">
-        <polygon points="230,230 390,200 390,330 230,360" fill="#F5EFDC" />
-        <polygon points="570,230 410,200 410,330 570,360" fill="#EFE3C8" />
+        <polygon points="222,238 392,206 392,336 222,368" fill="#FDF8EA" />
+        <polygon points="578,238 408,206 408,336 578,368" fill="#F1E6CB" />
       </g>
-      <g stroke="#2A2160" stroke-width="5" stroke-linecap="round" opacity="0.65">
-        <line x1="258" y1="248" x2="362" y2="230" />
-        <line x1="258" y1="272" x2="362" y2="254" />
-        <line x1="438" y1="230" x2="542" y2="248" />
-        <line x1="438" y1="254" x2="542" y2="272" />
+      <g stroke="#0F5132" stroke-width="5" stroke-linecap="round" opacity="0.55">
+        <line x1="252" y1="256" x2="360" y2="238" />
+        <line x1="252" y1="280" x2="360" y2="262" />
+        <line x1="252" y1="304" x2="336" y2="290" />
+        <line x1="440" y1="238" x2="548" y2="256" />
+        <line x1="440" y1="262" x2="548" y2="280" />
+        <line x1="464" y1="290" x2="548" y2="304" />
       </g>
-      <g transform="translate(400,130)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5">
+      <g transform="translate(400,132)" fill="none" stroke="#0F5132" stroke-width="3.5">
         <rect x="-26" y="-26" width="52" height="52" />
         <rect x="-26" y="-26" width="52" height="52" transform="rotate(45)" />
         <circle r="7" fill={`url(#${p}-gold)`} stroke="none" />
       </g>
+      <line x1="400" y1="206" x2="400" y2="336" stroke={`url(#${p}-gold)`} stroke-width="3" />
     </g>
   )}
 
   {name === 'card-waqiat' && (
     <g>
-      <rect x="190" y="185" width="420" height="100" rx="10" fill="#EFE3C8" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <circle cx="190" cy="235" r="30" fill="#D9C89A" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <circle cx="610" cy="235" r="30" fill="#D9C89A" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <g stroke="#241C56" stroke-width="5" stroke-linecap="round" opacity="0.6">
-        <line x1="250" y1="215" x2="480" y2="215" />
-        <line x1="250" y1="238" x2="540" y2="238" />
-        <line x1="250" y1="261" x2="430" y2="261" />
+      <circle cx="618" cy="112" r="46" fill={`url(#${p}-gold)`} opacity="0.18" />
+      <circle cx="618" cy="112" r="27" fill={`url(#${p}-gold)`} opacity="0.9" />
+      <g fill="#0F5132" opacity="0.16">
+        <ellipse cx="200" cy="120" rx="70" ry="16" /><ellipse cx="330" cy="92" rx="50" ry="12" />
       </g>
-      <circle cx="545" cy="315" r="28" fill="#8E2F3C" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <g transform="translate(545,315) scale(0.55)" fill="none" stroke="#F7E08B" stroke-width="4">
-        <rect x="-22" y="-22" width="44" height="44" />
-        <rect x="-22" y="-22" width="44" height="44" transform="rotate(45)" />
+      <rect x="268" y="118" width="14" height="150" fill="#6B4423" stroke={`url(#${p}-gold)`} stroke-width="2.5" />
+      <path d="M282 132 C360 140 430 176 458 244 C390 236 322 210 282 132 Z" fill="#FDF8EA" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <path d="M282 132 C250 170 236 214 238 252 C268 226 280 180 282 132 Z" fill="#F1E6CB" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <path d="M196 268 L604 268 L560 322 L240 322 Z" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <path d="M196 268 L604 268 L592 286 L208 286 Z" fill={`url(#${p}-gold)`} opacity="0.85" />
+      <g stroke="#FDF8EA" stroke-width="4" stroke-linecap="round" opacity="0.7">
+        <line x1="280" y1="300" x2="330" y2="300" /><line x1="380" y1="300" x2="440" y2="300" />
       </g>
+      <path d="M0 346 Q200 312 400 340 T800 332 V450 H0 Z" fill="#0F5132" opacity="0.85" />
+      <path d="M0 384 Q220 352 440 380 T800 372 V450 H0 Z" fill="#177A5C" />
+      <path d="M0 414 Q260 392 520 408 T800 402 V450 H0 Z" fill="#0F5132" opacity="0.55" />
     </g>
   )}
 
   {name === 'article-kaaba' && (
     <g>
-      <g fill="#F7E08B">
-        <circle cx="140" cy="90" r="2.4" opacity="0.7" /><circle cx="660" cy="70" r="2" opacity="0.6" />
-        <circle cx="600" cy="150" r="1.8" opacity="0.5" /><circle cx="200" cy="160" r="1.8" opacity="0.5" />
+      <path d="M120 360 V220 C120 170 160 140 200 128 M680 360 V220 C680 170 640 140 600 128" fill="none" stroke="#0F5132" stroke-width="4" opacity="0.35" />
+      <ellipse cx="400" cy="386" rx="200" ry="16" fill="#0F5132" opacity="0.14" />
+      <polygon points="298,196 352,150 548,150 496,196" fill="#2A2A2A" stroke="#0F5132" stroke-width="3" />
+      <polygon points="496,196 548,150 548,330 496,372" fill="#101010" stroke="#0F5132" stroke-width="3" />
+      <rect x="298" y="196" width="198" height="176" fill="#1B1B1B" stroke="#0F5132" stroke-width="3" />
+      <polygon points="496,246 548,204 548,232 496,274" fill={`url(#${p}-gold)`} />
+      <rect x="298" y="246" width="198" height="28" fill={`url(#${p}-gold)`} />
+      <rect x="452" y="292" width="30" height="80" fill={`url(#${p}-gold)`} opacity="0.9" />
+      <g transform="translate(400,96)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3">
+        <rect x="-20" y="-20" width="40" height="40" />
+        <rect x="-20" y="-20" width="40" height="40" transform="rotate(45)" />
       </g>
-      <ellipse cx="400" cy="392" rx="190" ry="16" fill="#000000" opacity="0.5" />
-      <polygon points="310,190 358,148 542,148 494,190" fill="#1E1E1E" stroke="#3A3A3A" stroke-width="2" />
-      <polygon points="494,190 542,148 542,328 494,370" fill="#050505" stroke="#2A2A2A" stroke-width="2" />
-      <rect x="310" y="190" width="184" height="180" fill="#101010" stroke="#2E2E2E" stroke-width="2" />
-      <polygon points="494,242 542,200 542,228 494,270" fill={`url(#${p}-gold)`} opacity="0.95" />
-      <rect x="310" y="242" width="184" height="28" fill={`url(#${p}-gold)`} opacity="0.95" />
-      <rect x="452" y="288" width="30" height="82" fill={`url(#${p}-gold)`} opacity="0.8" />
     </g>
   )}
 
   {name === 'article-prayer' && (
     <g>
-      <rect x="288" y="70" width="224" height="320" rx="16" fill="#7A2E3A" stroke={`url(#${p}-gold)`} stroke-width="5" />
-      <rect x="310" y="92" width="180" height="276" rx="8" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2" opacity="0.8" />
-      <path d="M332 236 V176 C332 146 368 134 400 114 C432 134 468 146 468 176 V236" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
-      <line x1="400" y1="60" x2="400" y2="30" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <g transform="translate(400,20)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5">
+      <ellipse cx="400" cy="398" rx="170" ry="13" fill="#0F5132" opacity="0.14" />
+      <rect x="284" y="66" width="232" height="326" rx="18" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="5" />
+      <rect x="306" y="88" width="188" height="282" rx="10" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.9" />
+      <path d="M330 244 V182 C330 150 368 138 400 118 C432 138 470 150 470 182 V244" fill="#F8F1DE" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
+      <line x1="400" y1="64" x2="400" y2="34" stroke={`url(#${p}-gold)`} stroke-width="3" />
+      <g transform="translate(400,24)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5">
         <rect x="-8" y="-8" width="16" height="16" />
         <rect x="-8" y="-8" width="16" height="16" transform="rotate(45)" />
       </g>
-      <g stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.85">
-        <line x1="300" y1="390" x2="300" y2="408" /><line x1="320" y1="390" x2="320" y2="408" />
-        <line x1="340" y1="390" x2="340" y2="408" /><line x1="360" y1="390" x2="360" y2="408" />
-        <line x1="380" y1="390" x2="380" y2="408" /><line x1="400" y1="390" x2="400" y2="408" />
-        <line x1="420" y1="390" x2="420" y2="408" /><line x1="440" y1="390" x2="440" y2="408" />
-        <line x1="460" y1="390" x2="460" y2="408" /><line x1="480" y1="390" x2="480" y2="408" />
-        <line x1="500" y1="390" x2="500" y2="408" />
+      <g stroke={`url(#${p}-gold)`} stroke-width="3.5" stroke-linecap="round" opacity="0.9">
+        <line x1="300" y1="394" x2="300" y2="412" /><line x1="322" y1="394" x2="322" y2="412" />
+        <line x1="344" y1="394" x2="344" y2="412" /><line x1="366" y1="394" x2="366" y2="412" />
+        <line x1="388" y1="394" x2="388" y2="412" /><line x1="410" y1="394" x2="410" y2="412" />
+        <line x1="432" y1="394" x2="432" y2="412" /><line x1="454" y1="394" x2="454" y2="412" />
+        <line x1="476" y1="394" x2="476" y2="412" /><line x1="498" y1="394" x2="498" y2="412" />
       </g>
     </g>
   )}
 
   {name === 'article-istiqlal' && (
     <g>
-      <rect x="150" y="360" width="500" height="14" rx="4" fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <path d="M255 360 C255 240 320 195 400 160 C480 195 545 240 545 360" fill="#EFE7D2" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <line x1="400" y1="160" x2="400" y2="128" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <circle cx="400" cy="118" r="10" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <path d="M410 118 A10 10 0 1 0 400 128 A8 8 0 1 1 410 118 Z" fill={`url(#${p}-gold)`} opacity="0.9" stroke="none" />
-      <g fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3">
-        <rect x="196" y="200" width="30" height="160" />
-        <rect x="188" y="238" width="46" height="10" />
-        <rect x="188" y="292" width="46" height="10" />
-        <polygon points="196,200 211,168 226,200" />
-        <rect x="574" y="200" width="30" height="160" />
-        <rect x="566" y="238" width="46" height="10" />
-        <rect x="566" y="292" width="46" height="10" />
-        <polygon points="574,200 589,168 604,200" />
+      <circle cx="400" cy="130" r="70" fill={`url(#${p}-gold)`} opacity="0.16" />
+      <ellipse cx="400" cy="388" rx="250" ry="14" fill="#0F5132" opacity="0.12" />
+      <rect x="140" y="366" width="520" height="14" rx="5" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="3" />
+      <path d="M250 366 C250 244 318 198 400 162 C482 198 550 244 550 366" fill={`url(#${p}-emer)`} stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <path d="M292 366 C292 282 342 246 400 220 C458 246 508 282 508 366" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.85" />
+      <line x1="400" y1="162" x2="400" y2="130" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <circle cx="400" cy="116" r="14" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
+      <path d="M414 116 A14 14 0 1 0 400 130 A11 11 0 1 1 414 116 Z" fill={`url(#${p}-gold)`} stroke="none" />
+      <g fill="#FDF8EA" stroke={`url(#${p}-gold)`} stroke-width="3">
+        <rect x="188" y="204" width="30" height="162" />
+        <rect x="180" y="242" width="46" height="10" />
+        <rect x="180" y="296" width="46" height="10" />
+        <polygon points="188,204 203,172 218,204" />
+        <rect x="582" y="204" width="30" height="162" />
+        <rect x="574" y="242" width="46" height="10" />
+        <rect x="574" y="296" width="46" height="10" />
+        <polygon points="582,204 597,172 612,204" />
       </g>
-      <path d="M368 360 V316 C368 300 386 294 400 286 C414 294 432 300 432 316 V360" fill="#241C56" stroke={`url(#${p}-gold)`} stroke-width="3" />
-      <g fill="#F7E08B">
-        <circle cx="140" cy="110" r="2.2" opacity="0.6" /><circle cx="660" cy="100" r="2.2" opacity="0.6" />
-        <circle cx="600" cy="170" r="1.8" opacity="0.5" /><circle cx="200" cy="150" r="1.8" opacity="0.5" />
+      <path d="M366 366 V320 C366 304 384 298 400 290 C416 298 434 304 434 320 V366" fill="#FDF8EA" stroke={`url(#${p}-gold)`} stroke-width="3.5" />
+      <g fill={`url(#${p}-gold)`} stroke="none" opacity="0.7">
+        <circle cx="140" cy="110" r="2.2" /><circle cx="660" cy="100" r="2.2" /><circle cx="600" cy="170" r="1.8" />
       </g>
     </g>
   )}
 
   {name === 'article-dates' && (
     <g>
-      <g fill="none" stroke="#5EC8B4" stroke-width="5" stroke-linecap="round" opacity="0.9">
-        <path d="M400 150 C360 120 310 115 270 130" />
-        <path d="M400 150 C440 120 490 115 530 130" />
-        <path d="M400 150 C400 125 400 115 400 100" />
+      <g fill="none" stroke="#0F5132" stroke-width="5" stroke-linecap="round" opacity="0.85">
+        <path d="M400 148 C360 118 310 112 268 128" />
+        <path d="M400 148 C440 118 490 112 532 128" />
+        <path d="M400 148 C400 122 400 112 400 96" />
       </g>
-      <path d="M270 250 C270 320 330 345 400 345 C470 345 530 320 530 250" fill="#6B4423" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <ellipse cx="400" cy="250" rx="130" ry="24" fill="#3A2412" stroke={`url(#${p}-gold)`} stroke-width="4" />
-      <g fill="#2E1A0E" stroke="#A9763B" stroke-width="3">
-        <ellipse cx="350" cy="232" rx="17" ry="25" />
-        <ellipse cx="400" cy="222" rx="17" ry="25" />
-        <ellipse cx="450" cy="232" rx="17" ry="25" />
-        <ellipse cx="375" cy="252" rx="17" ry="22" />
-        <ellipse cx="425" cy="252" rx="17" ry="22" />
+      <g fill="#0F5132" opacity="0.25">
+        <ellipse cx="268" cy="128" rx="26" ry="10" /><ellipse cx="532" cy="128" rx="26" ry="10" />
       </g>
-      <path d="M320 345 H480" stroke={`url(#${p}-gold)`} stroke-width="4" stroke-linecap="round" />
+      <ellipse cx="400" cy="392" rx="180" ry="13" fill="#0F5132" opacity="0.12" />
+      <path d="M268 252 C268 322 330 348 400 348 C470 348 532 322 532 252" fill="#6B4423" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <ellipse cx="400" cy="252" rx="132" ry="25" fill="#3A2412" stroke={`url(#${p}-gold)`} stroke-width="4" />
+      <g stroke="#A9763B" stroke-width="3">
+        <ellipse cx="348" cy="234" rx="17" ry="25" fill="#2E1A0E" />
+        <ellipse cx="400" cy="224" rx="17" ry="25" fill="#2E1A0E" />
+        <ellipse cx="452" cy="234" rx="17" ry="25" fill="#2E1A0E" />
+        <ellipse cx="374" cy="254" rx="17" ry="22" fill="#241408" />
+        <ellipse cx="426" cy="254" rx="17" ry="22" fill="#241408" />
+      </g>
+      <g stroke="#EFD88F" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+        <line x1="344" y1="222" x2="340" y2="232" /><line x1="396" y1="212" x2="392" y2="222" /><line x1="448" y1="222" x2="444" y2="232" />
+      </g>
+      <path d="M318 348 H482" stroke={`url(#${p}-gold)`} stroke-width="4" stroke-linecap="round" />
+      <g transform="translate(400,120)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3">
+        <rect x="-18" y="-18" width="36" height="36" />
+        <rect x="-18" y="-18" width="36" height="36" transform="rotate(45)" />
+      </g>
     </g>
   )}
 
   {name === 'article-desert' && (
     <g>
-      <circle cx="560" cy="235" r="64" fill={`url(#${p}-gold)`} opacity="0.22" />
-      <circle cx="560" cy="235" r="38" fill={`url(#${p}-gold)`} opacity="0.95" />
-      <g fill="#F7E08B">
-        <circle cx="150" cy="80" r="2.2" opacity="0.7" /><circle cx="300" cy="55" r="1.8" opacity="0.6" />
-        <circle cx="680" cy="70" r="2.2" opacity="0.7" /><circle cx="480" cy="45" r="1.6" opacity="0.5" />
+      <circle cx="584" cy="168" r="86" fill={`url(#${p}-gold)`} opacity="0.16" />
+      <circle cx="584" cy="168" r="52" fill={`url(#${p}-gold)`} opacity="0.28" />
+      <circle cx="584" cy="168" r="36" fill="none" stroke={`url(#${p}-gold)`} stroke-width="3" opacity="0.9" />
+      <path d="M600 168 A36 36 0 1 0 584 204 A29 29 0 1 1 600 168 Z" fill={`url(#${p}-gold)`} stroke="none" />
+      <g fill="#EFD88F" stroke="none">
+        <circle cx="120" cy="72" r="2.6" opacity="0.9" /><circle cx="208" cy="140" r="2" opacity="0.7" />
+        <circle cx="300" cy="60" r="1.8" opacity="0.6" /><circle cx="392" cy="110" r="2.2" opacity="0.75" />
+        <circle cx="470" cy="52" r="1.6" opacity="0.55" /><circle cx="690" cy="80" r="2.4" opacity="0.85" />
+        <circle cx="726" cy="180" r="1.8" opacity="0.6" /><circle cx="90" cy="220" r="1.8" opacity="0.6" />
+        <circle cx="492" cy="150" r="1.5" opacity="0.5" /><circle cx="250" cy="200" r="1.5" opacity="0.5" />
       </g>
-      <path d="M0 330 Q200 278 400 318 T800 308 V450 H0 Z" fill="#0C4A38" />
-      <path d="M0 372 Q220 330 430 366 T800 356 V450 H0 Z" fill="#10604A" />
-      <path d="M0 412 Q250 382 500 406 T800 400 V450 H0 Z" fill="#177A5C" />
+      <path d="M0 322 Q200 272 400 312 T800 300 V450 H0 Z" fill="#0B2E21" />
+      <path d="M0 322 Q200 272 400 312 T800 300 V450 H0 Z" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2" opacity="0.5" />
+      <path d="M0 366 Q220 326 430 360 T800 350 V450 H0 Z" fill="#13503A" />
+      <path d="M0 406 Q250 378 500 400 T800 394 V450 H0 Z" fill="#1B6B4D" />
+      <path d="M0 406 Q250 378 500 400 T800 394" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2" opacity="0.45" />
+      <g transform="translate(150,300)" fill="none" stroke={`url(#${p}-gold)`} stroke-width="2.5" opacity="0.55">
+        <rect x="-16" y="-16" width="32" height="32" />
+        <rect x="-16" y="-16" width="32" height="32" transform="rotate(45)" />
+      </g>
     </g>
   )}
 

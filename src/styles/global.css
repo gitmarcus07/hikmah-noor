@@ -173,6 +173,15 @@ svg { height: auto; }
 .hn-card-pad { padding: 1.1rem; }
 @media (min-width: 768px) { .hn-card-pad { padding: 1.4rem; } }
 
+/* ---------- Card artwork ---------- */
+.hn-card > span:first-child { border-bottom: 1px solid var(--hn-border); background: var(--hn-bg-soft); }
+.hn-card > span:first-child svg { transition: transform 0.35s ease; }
+.hn-card:hover > span:first-child svg { transform: scale(1.045); }
+@media (prefers-reduced-motion: reduce) {
+  .hn-card > span:first-child svg { transition: none; }
+  .hn-card:hover > span:first-child svg { transform: none; }
+}
+
 .hn-eyebrow {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
