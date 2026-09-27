@@ -1,0 +1,23 @@
+---
+/* Article hero/thumbnail art — topic-matched story card when the slug has
+ * a mapping in lib/article-art, otherwise the generic SiteArt fallback. */
+import SiteArt from './SiteArt.astro';
+import WaqiahArt from './WaqiahArt.astro';
+import { artFor } from '../lib/art';
+import { articleTopic } from '../lib/article-art';
+
+interface Props {
+  slug: string;
+  category: string;
+  title: string;
+  image?: string;
+}
+const { slug, category, title, image } = Astro.props;
+const topic = articleTopic(slug);
+const fallback = artFor(image, category);
+---
+{topic ? (
+  <WaqiahArt motif={topic.motif} arabic={topic.arabic} prophet={topic.name} accent={topic.accent} caption={topic.caption} />
+) : (
+  <SiteArt name={fallback} title={title} />
+)}

@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import WaqiahDetail from '../../components/WaqiahDetail.astro';
-import SiteArt from '../../components/SiteArt.astro';
+import ArticleArt from '../../components/ArticleArt.astro';
 import { artFor } from '../../lib/art';
 import { getCollection, render } from 'astro:content';
 import { getDict, localizedPath } from '../../i18n/utils';
@@ -45,7 +45,7 @@ const pub = entry ? new Date(entry.data.pubDate).toLocaleDateString() : '';
       <span class="text-[11px] font-bold uppercase tracking-wide text-brand-300 bg-brand-500/15 px-2.5 py-1 rounded-full">{entry.data.category}</span>
       <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 mb-2 text-white">{entry.data.title}</h1>
       <p class="text-sm text-ink-500 mb-4">{dict.article.by} <b>{entry.data.author}</b> • {pub}</p>
-      <div class="rounded-2xl border border-white/10 overflow-hidden mb-2"><SiteArt name={artFor(entry.data.image, entry.data.category)} title={entry.data.title} /></div>
+      <div class="rounded-2xl border border-white/10 overflow-hidden mb-2"><ArticleArt slug={slug} category={entry.data.category} title={entry.data.title} image={entry.data.image} /></div>
       {entry.data.arabic && (
         <div class="bg-night-850 border border-white/10 rounded-2xl p-5 md:p-6 my-5">
           <div class="text-xs font-bold text-gold-300 mb-2">{dict.article.arabic}</div>

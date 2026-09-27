@@ -1,7 +1,6 @@
 ---
 /* ONE card system for article teasers (related, popular, latest). */
-import SiteArt from './SiteArt.astro';
-import { artFor } from '../lib/art';
+import ArticleArt from './ArticleArt.astro';
 import { localizedPath } from '../i18n/utils';
 
 interface Props {
@@ -19,11 +18,10 @@ const { locale, category, slug, title, description, date, image, entryLocale } =
 const realLocale = entryLocale ?? locale;
 const isFallback = realLocale !== locale;
 const href = localizedPath(realLocale, `/${category}/${slug}/`);
-const img = artFor(image, category);
 const d = date ? new Date(date).toLocaleDateString(locale === 'hi' ? 'hi-IN' : locale === 'ur' ? 'ur-PK' : locale === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
 ---
 <a href={href} class="hn-card hn-card-hover overflow-hidden flex flex-col">
-  <span class="block h-40 overflow-hidden"><SiteArt name={img} title={title} /></span>
+  <span class="block h-40 overflow-hidden"><ArticleArt slug={slug} category={category} title={title} image={image} /></span>
   <div class="hn-card-pad flex flex-col gap-2 flex-1">
     <span class="flex items-center gap-1.5 self-start">
       <span class="hn-badge hn-badge-primary">{category}</span>
