@@ -18,12 +18,40 @@ const fail = (msg) => { errors++; console.error('❌ ' + msg); };
 
 const mainSlugs = [...main.matchAll(/\{ slug: '([^']+)', cat: '/g)].map((m) => m[1]);
 const mainSet = new Set(mainSlugs);
-// English-first batch (Eid season 2026): Urdu overlays land in a follow-up pass.
+// English-first batches: Urdu overlays land in a follow-up pass.
 const PENDING_UR = new Set([
   'sehri-intention', 'afiyah-pardon-wellbeing', 'mercy-comprehensive-dua',
   'shawwal-intention', 'gathering-expiation-dua', 'qurbani-slaughter-dua',
   'qurbani-intention', 'eat-feed-qurbani-verse', 'dhuha-glorification', 'hajah-need-dua',
   'hijri-new-year-dua', 'shaban-blessing-dua',
+  // 2026 large expansion: 9 new categories, English-first (94 duas).
+  'adhan-reply-word', 'adhan-shahada-reply', 'between-adhan-iqamah', 'going-mosque-step',
+  'mosque-greeting-tahiyyah', 'mosque-itikaf-intent', 'adhan-fajr-blessing', 'mosque-after-prayer-wait',
+  'jumuah-ghusl-early', 'jumuah-kahf-recite', 'jumuah-answered-hour', 'jumuah-salawat-abundant',
+  'eid-ghusl-adornment', 'eid-prayer-takbirat', 'eid-takbir-route', 'eid-congratulate-dua',
+  'jumuah-man-ghusl-scent', 'eid-sacrifice-share',
+  'fear-loneliness-emptiness', 'grief-sorrow-yunus-light', 'waswasah-doubt-cure', 'envy-hassad-shield',
+  'anger-cooling-wudu', 'nightmare-recurring-shield', 'heaviness-chest-sharh', 'sadness-debt-dua-deep',
+  'shame-regret-tawbah-open', 'overthinking-sleep-release', 'people-fear-stage', 'jealousy-heart-clean',
+  'panic-breathe-hawqalah', 'hope-dawn-verse',
+  'newborn-tahnik-adhan', 'newborn-aqiqah-barakah', 'spouse-mawaddah-love', 'inlaws-harmony-dua',
+  'parents-alive-service', 'parents-deceased-sadaqah', 'marriage-first-night-calm', 'infertility-zakariya-cry',
+  'children-teen-guidance', 'home-new-house-barzah',
+  'job-seeking-halal', 'interview-calm-clarity', 'business-opening-barakah', 'morning-rizq-early',
+  'debt-repay-plan-dua', 'loss-recovery-istirja', 'halal-earning-hands', 'rizq-musa-needy-dua',
+  'promotion-exam-tawakkul', 'wealth-gratitude-zakat',
+  'hajj-miqat-talbiyah-start', 'hajj-tawaf-seven-rounds', 'hajj-multazam-cling', 'hajj-sai-safa-marwa',
+  'hajj-arafah-wuquf', 'hajj-muzdalifah-night', 'hajj-rami-stoning-order', 'hajj-qurbani-shave-order',
+  'hajj-farewell-tawaf', 'umrah-complete-steps', 'hajj-arafah-fasting-nonpilgrim', 'hajj-zamzam-intent-drink',
+  'fever-cooling-sadaqah', 'eye-pain-healing', 'ruqyah-fatihah-seven', 'sick-person-own-words',
+  'visiting-sick-etiquette', 'chronic-illness-sabr', 'medicine-honey-blackseed', 'mental-health-ruqyah-daily',
+  'hospital-operation-dua', 'shifa-complete-verse',
+  'greeting-salam-full', 'thanking-jazakallah-best', 'sneezing-full-reply', 'visiting-brother-love',
+  'neighbour-rights-gift', 'forgiving-others-night', 'backbiting-kaffarah-clean', 'guest-honour-three-days',
+  'congratulate-blessing-barik', 'promise-keeping-amanah',
+  'tahajjud-opening-praise', 'last-third-descends', 'witr-seal-quddus', 'sahar-istighfar-dawn',
+  'night-waking-dhikr-accepted', 'tahajjud-long-sujood-ask', 'qiyam-ramadan-forgiven', 'dua-after-tahajjud-list',
+  'waking-tahajjud-intent-sleep', 'laylatul-qadr-search-odd',
 ]);
 const ovSlugs = [...txt.matchAll(/'([^']+)': \{ title:/g)].map((m) => m[1]);
 

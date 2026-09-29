@@ -1,4 +1,4 @@
-// Waqiat library validator: 10 stories, unique slugs/motifs, required fields,
+// Waqiat library validator: 10+ stories, unique slugs, required fields,
 // no collisions with waqiat article slugs.
 // Run: npm run content:waqiat
 import { readFile, readdir } from 'node:fs/promises';
@@ -22,7 +22,7 @@ starts.forEach((s, i) => {
   const body = txt.slice(s, i + 1 < starts.length ? starts[i + 1] : txt.length);
   for (const f of required) if (!body.includes(f)) fail(`waqiah ${slugs[i]} missing ${f}`);
   const motifs = (body.match(/motif: '([^']+)'/) || [])[1];
-  if (!['well', 'fire', 'waves', 'ship', 'whale', 'mountain', 'crown', 'sling', 'palm', 'cave'].includes(motifs)) fail(`waqiah ${slugs[i]} bad motif: ${motifs}`);
+  if (!['well', 'fire', 'waves', 'ship', 'whale', 'mountain', 'crown', 'sling', 'palm', 'cave', 'moon', 'book', 'dome', 'drop', 'bowl', 'heart', 'compass'].includes(motifs)) fail(`waqiah ${slugs[i]} bad motif: ${motifs}`);
 });
 
 // No collisions with waqiat article slugs (EN + locale share /waqiat/:slug/)
@@ -42,9 +42,10 @@ await walk(artDir);
 for (const s of slugs) if (artSlugs.has(s)) fail(`slug collision with article: ${s}`);
 
 const motifList = [...txt.matchAll(/motif: '([^']+)'/g)].map((m) => m[1]);
-if (new Set(motifList).size !== motifList.length) fail('motifs must be unique per story');
+// Motifs may repeat now that the library exceeds the artwork set — reuse is fine.
+console.log(`📊 motifs used: ${[...new Set(motifList)].join(', ')}`);
 
 console.log(`\n📊 Waqiat: ${slugs.length} — ${slugs.join(', ')}`);
 console.log(`📊 Search index entries per locale: ${1 + slugs.length} (hub + stories)`);
 if (errors) { console.error(`\n${errors} error(s).`); process.exit(1); }
-console.log('✅ waqiat.ts valid — unique slugs/motifs, no collisions, fields present.');
+console.log('✅ waqiat.ts valid — unique slugs, no collisions, fields present.');
