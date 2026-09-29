@@ -90,6 +90,7 @@ const mobileGroups = [
     { label: 'Kids Zone', href: L('/kids/') },
     { label: 'Seerat', href: L('/seerat/') },
     { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/') },
+    { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/') },
     { label: 'Sahaba', href: L('/sahaba/') },
     { label: 'Women', href: L('/women/') },
     { label: 'History', href: L('/history/') },
@@ -346,6 +347,7 @@ const mobileGroups = [
           <li><a class="hover:underline" href={L('/kalimas/')}>Kalimas</a></li>
           <li><a class="hover:underline" href={L('/hadees/')}>Hadees</a></li>
           <li><a class="hover:underline" href={L('/seerat/')}>Seerat</a></li>
+          <li><a class="hover:underline" href={L('/waqiat/')}>{dict.nav.waqiat ?? 'Stories'}</a></li>
           <li><a class="hover:underline" href={L('/prophets/')}>Prophets</a></li>
           <li><a class="hover:underline" href={L('/sahaba/')}>Sahaba</a></li>
           <li><a class="hover:underline" href={L('/women/')}>Women</a></li>
