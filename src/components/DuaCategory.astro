@@ -4,35 +4,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { DUA_CATS } from '../data/duas';
 import { localizeList } from '../lib/duas-i18n';
+import { localizeDuaCat, duaUI } from '../lib/dua-ui-i18n';
 
 interface Props { cat: any; duas: any[]; locale: string; }
 const { cat, duas: duasRaw, locale } = Astro.props;
+const catL = localizeDuaCat(cat, locale);
 const duas = localizeList(duasRaw, locale);
+const dict = getDict(locale);
+const T = duaUI(locale);
 const L = (p: string) => localizedPath(locale, p);
 const catPath = `/duas/${cat.slug}/`;
 
-const title = `${cat.title} Duas in Arabic with Meaning (${duas.length} duas)`;
+const title = T.catTitle.replace('{c}', catL.title).replace('{n}', String(duas.length));
 const topNames = duas.slice(0, 3).map((d: any) => d.title).join(', ');
-let description = `${duas.length} authentic ${cat.title.toLowerCase()} duas: ${topNames} and more — Arabic, transliteration, meaning, when to recite, virtue, narrator and grade. ${cat.desc}`;
+let description = `${duas.length} — ${catL.title}: ${topNames}. ${catL.desc}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
 const sourceNames = [...new Set(duas.map((d: any) => String(d.source || '').split(';')[0].trim()).filter(Boolean))].slice(0, 4).join(', ');
-const keywords = `${cat.title.toLowerCase()} duas, dua in arabic, transliteration, meaning, ${duas.map((d: any) => d.title.toLowerCase()).slice(0, 6).join(', ')}${sourceNames ? `, ${sourceNames.toLowerCase()}` : ''}`;
+const keywords = `${catL.title.toLowerCase()}, ${duas.map((d: any) => d.title.toLowerCase()).slice(0, 6).join(', ')}${sourceNames ? `, ${sourceNames.toLowerCase()}` : ''}`;
 
 const faq = [
-  { q: `Which ${cat.title.toLowerCase()} duas are included?`, a: `${duas.map((d: any) => d.title).join('; ')}. Open any dua for Arabic text, transliteration, meaning, when to recite, virtue, narrator, grade and source.` },
-  { q: `Are these ${cat.title.toLowerCase()} duas authentic?`, a: `Every dua names its source (Quran passage or hadith collection) without invented numbers, plus narrator where known and a Sahih/Hasan/Daif or Quranic grade. Learn wording from a teacher; consult scholars for rulings.` },
-  { q: `How do I use these ${cat.title.toLowerCase()} duas daily?`, a: `Pick one dua for your moment, read its "when to recite" and "repeat" lines, memorise the Arabic via the transliteration, and repeat it at the stated time (e.g. morning, after salah, before sleep). Combine with the related duas linked at the bottom of each page.` },
-  { q: `Do these pages include transliteration and meaning?`, a: `Yes — every dua in this topic has Arabic, easy transliteration, English meaning, purpose, virtue, source, narrator and grade on its own page, with previous/next navigation inside ${cat.title}.` },
+  { q: T.faqCatWhich.replace('{c}', catL.title), a: `${duas.map((d: any) => d.title).join('; ')}.` },
+  { q: T.faqCatAuth.replace('{c}', catL.title), a: T.faqCatAuthA },
+  { q: T.faqCatHow.replace('{c}', catL.title), a: T.faqCatHowA },
+  { q: T.faqCatTr, a: T.faqCatTrA.replace('{c}', catL.title) },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Duas', path: '/duas/' },
-  { name: cat.title, path: catPath },
+  { name: dict.nav.home, path: '/' },
+  { name: dict.nav.duas, path: '/duas/' },
+  { name: catL.title, path: catPath },
 ];
-const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
+const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug).map((c) => localizeDuaCat(c, locale));
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={catPath}>
   <div class="hn-discover hn-section">
@@ -40,22 +44,22 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
     <div class="mt-3 flex items-start gap-3.5 max-w-3xl">
       <span class="w-12 h-12 shrink-0 grid place-items-center rounded-[12px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={cat.icon as any || 'duas'} size={26} /></span>
       <div class="min-w-0">
-        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{cat.title} Duas</h1>
-        <p class="mt-2 leading-7" style="color:var(--hn-muted)">{cat.desc}</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{catL.title}</h1>
+        <p class="mt-2 leading-7" style="color:var(--hn-muted)">{catL.desc}</p>
         <div class="mt-2 flex flex-wrap gap-2">
-          <span class="hn-badge hn-badge-primary">{duas.length} duas</span>
-          <span class="hn-badge">Arabic + transliteration + meaning</span>
+          <span class="hn-badge hn-badge-primary">{duas.length} {T.badges.duas}</span>
+          <span class="hn-badge">{dict.article.arabic} + {dict.article.transliteration} + {dict.article.meaning}</span>
         </div>
       </div>
     </div>
 
     <div class="mt-6 max-w-3xl">
-      <input id="catfilter" class="hn-input" placeholder="Filter in this category — e.g. rain, debt, parents…" aria-label="Filter duas" />
+      <input id="catfilter" class="hn-input" placeholder={T.catFilterPh} aria-label={T.catFilterPh} />
     </div>
 
-    <section class="mt-6 max-w-3xl hn-card hn-card-pad" aria-label={`About ${cat.title} duas`}>
-      <h2 class="font-extrabold text-lg leading-7">How to use these {cat.title.toLowerCase()} duas</h2>
-      <p class="mt-2 text-[15px] leading-7" style="color:var(--hn-muted)">{cat.desc} Start with {topNames}, read each dua's when-to-recite and virtue, then memorise one at a time with its transliteration. Every page cites its source{sourceNames ? ` (e.g. ${sourceNames})` : ''} so you learn with confidence.</p>
+    <section class="mt-6 max-w-3xl hn-card hn-card-pad" aria-label={T.howTitle.replace('{c}', catL.title)}>
+      <h2 class="font-extrabold text-lg leading-7">{T.howTitle.replace('{c}', catL.title)}</h2>
+      <p class="mt-2 text-[15px] leading-7" style="color:var(--hn-muted)">{T.howBody.replace('{d}', catL.desc).replace('{t}', topNames).replace('{s}', sourceNames ? ` (${sourceNames})` : '')}</p>
     </section>
 
     <div class="mt-4 grid gap-3 md:grid-cols-2" id="catgrid">
@@ -64,7 +68,7 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
           <span class="hn-verse-num shrink-0">{i + 1}</span>
           <span class="min-w-0">
             <span class="font-extrabold block leading-6">{d.title}</span>
-            <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">For: {d.use}</span>
+            <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">{T.forPrefix} {d.use}</span>
             <span class="mt-1.5 flex flex-wrap gap-1.5">
               {d.grade && <span class="hn-badge hn-badge-primary">{d.grade}</span>}
               <span class="hn-badge">{d.source}</span>
@@ -85,8 +89,8 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
       })();
     </script>
 
-    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8 max-w-3xl" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -97,8 +101,8 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
       </div>
     </section>
 
-    <section class="mt-8" aria-label="All dua categories">
-      <SectionHeader eyebrow="More" title="All dua categories" href={L('/duas/')} linkLabel="All duas" />
+    <section class="mt-8" aria-label={T.secCategories}>
+      <SectionHeader eyebrow={T.relatedEyebrow} title={T.secCategories} href={L('/duas/')} linkLabel={dict.nav.duas} />
       <div class="flex flex-wrap gap-2">
         {siblings.map((s) => (
           <a href={L(`/duas/${s.slug}/`)} class="hn-badge hn-card-hover" style="padding:0.55rem 1rem;font-size:0.85rem">{s.title}</a>

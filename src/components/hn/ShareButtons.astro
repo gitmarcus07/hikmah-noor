@@ -3,16 +3,18 @@
  * Props take the canonical EN path; locale prefix applied per page locale. */
 import Icon from '../Icon.astro';
 import { localizedPath } from '../../i18n/utils';
+import { widgetUI } from '../../lib/dua-ui-i18n';
 
 interface Props { title: string; path: string; locale: string; }
 const { title, path, locale } = Astro.props;
+const W = widgetUI(locale);
 const urlPath = localizedPath(locale, path);
 const waHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${urlPath}`)}`;
 ---
 <span class="inline-flex items-center gap-1.5" data-share data-share-title={title} data-share-path={urlPath}>
-  <a href={waHref} target="_blank" rel="noopener" aria-label="Share on WhatsApp" class="hn-icon-btn !w-11 !h-11 !border-0" style="font-size:20px;line-height:1">✆</a>
-  <button type="button" data-share-copy aria-label="Copy link" class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="copy" size={19} /></button>
-  <button type="button" data-share-native aria-label="Share" class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="share" size={19} /></button>
+  <a href={waHref} target="_blank" rel="noopener" aria-label={W.shareWA} class="hn-icon-btn !w-11 !h-11 !border-0" style="font-size:20px;line-height:1">✆</a>
+  <button type="button" data-share-copy aria-label={W.copyLink} class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="copy" size={19} /></button>
+  <button type="button" data-share-native aria-label={W.shareNative} class="hn-icon-btn !w-11 !h-11 !border-0"><Icon name="share" size={19} /></button>
 </span>
 <script is:inline>
   (() => {

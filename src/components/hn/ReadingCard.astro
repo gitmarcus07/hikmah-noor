@@ -2,6 +2,8 @@
 /* Reusable reading block: Arabic (focus) + transliteration + meaning + reference.
  * Only renders sections when data exists. Includes copy/share actions (progressive). */
 import Icon from '../Icon.astro';
+import { getDict } from '../../i18n/utils';
+import { widgetUI } from '../../lib/dua-ui-i18n';
 
 interface Props {
   arabic?: string;
@@ -9,45 +11,48 @@ interface Props {
   translation?: string;
   reference?: string;
   id?: string;
+  locale?: string;
 }
-const { arabic, translit, translation, reference, id = 'reading' } = Astro.props;
+const { arabic, translit, translation, reference, id = 'reading', locale = 'en' } = Astro.props;
+const dict = getDict(locale);
+const W = widgetUI(locale);
 const shareText = [arabic, translation].filter(Boolean).join('\n\n');
 ---
 <div class="hn-reading-card" id={id}>
   {arabic && (
     <div>
-      <p class="hn-block-label">Arabic</p>
+      <p class="hn-block-label">{dict.article.arabic}</p>
       <p class="arabic-block" lang="ar" dir="rtl">{arabic}</p>
     </div>
   )}
   {translit && (
     <div>
       <hr class="hn-divider" />
-      <p class="hn-block-label">Transliteration</p>
+      <p class="hn-block-label">{dict.article.transliteration}</p>
       <p class="translit-block">{translit}</p>
     </div>
   )}
   {translation && (
     <div>
       <hr class="hn-divider" />
-      <p class="hn-block-label">Meaning</p>
+      <p class="hn-block-label">{dict.article.meaning}</p>
       <p class="meaning-block">{translation}</p>
     </div>
   )}
   {reference && (
     <div>
       <hr class="hn-divider" />
-      <p class="hn-block-label">Reference</p>
+      <p class="hn-block-label">{W.reference}</p>
       <p class="text-sm font-semibold">{reference}</p>
     </div>
   )}
   <hr class="hn-divider" />
   <div class="flex flex-wrap gap-2" data-reading-actions>
-    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-copy={shareText} aria-label="Copy text">
-      <Icon name="copy" size={17} /> Copy
+    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-copy={shareText} data-copied={W.copied} aria-label={W.copy}>
+      <Icon name="copy" size={17} /> {W.copy}
     </button>
-    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-share={shareText} aria-label="Share">
-      <Icon name="share" size={17} /> Share
+    <button type="button" class="hn-btn hn-btn-secondary !min-h-[44px] !py-2.5 !px-4 text-sm" data-share={shareText} data-copied={W.copied} aria-label={W.share}>
+      <Icon name="share" size={17} /> {W.share}
     </button>
   </div>
 </div>
@@ -61,7 +66,7 @@ const shareText = [arabic, translation].filter(Boolean).join('\n\n');
         try {
           await navigator.clipboard.writeText(text);
           const orig = copyBtn.innerHTML;
-          copyBtn.innerHTML = 'Copied';
+          copyBtn.innerHTML = copyBtn.getAttribute('data-copied') ?? 'Copied';
           setTimeout(() => { copyBtn.innerHTML = orig; }, 1600);
         } catch {}
       });
@@ -72,7 +77,7 @@ const shareText = [arabic, translation].filter(Boolean).join('\n\n');
           else {
             await navigator.clipboard.writeText(text);
             const orig = shareBtn.innerHTML;
-            shareBtn.innerHTML = 'Copied';
+            shareBtn.innerHTML = shareBtn.getAttribute('data-copied') ?? 'Copied';
             setTimeout(() => { shareBtn.innerHTML = orig; }, 1600);
           }
         } catch {}

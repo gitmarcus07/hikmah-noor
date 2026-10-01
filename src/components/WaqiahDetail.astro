@@ -6,31 +6,34 @@ import SectionHeader from './hn/SectionHeader.astro';
 import WaqiahArt from './WaqiahArt.astro';
 import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
+import { storyUI } from '../lib/dua-ui-i18n';
 
 interface Props { waqiah: any; locale: string; }
 const { locale } = Astro.props;
 const waqiah = localizeStory((Astro.props as any).waqiah, 'waqiat', locale);
+const dict = getDict(locale);
+const S = storyUI(locale);
 const L = (p: string) => localizedPath(locale, p);
 const waqiahPath = `/waqiat/${waqiah.slug}/`;
 
-const title = `${waqiah.title} — Story & Lessons`;
-let description = `${waqiah.title}: ${waqiah.summary} References: ${waqiah.quranRef}.`;
+const title = `${waqiah.title}${S.detailSuffix}`;
+let description = `${waqiah.title}: ${waqiah.summary}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${waqiah.title.toLowerCase()}, ${waqiah.prophet.toLowerCase()} story, prophet stories islam, ${waqiah.quranRef.toLowerCase()}, lessons from ${waqiah.prophet.toLowerCase()}${waqiah.aliases?.length ? `, ${waqiah.aliases.join(', ')}` : ''}`;
+const keywords = `${waqiah.title.toLowerCase()}, ${waqiah.prophet.toLowerCase()}, ${waqiah.quranRef.toLowerCase()}${waqiah.aliases?.length ? `, ${waqiah.aliases.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `What happened in the story of ${waqiah.prophet}?`, a: waqiah.summary },
-  { q: `What are the lessons from ${waqiah.prophet}’s story?`, a: waqiah.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
-  { q: `Where is this story in the Quran?`, a: `References: ${waqiah.quranRef}. Read the verses with translation; consult scholars for deeper rulings.` },
-  { q: `How is the story structured on this page?`, a: `Summary first, then the emblematic verse, the full narrative in short sections, the events in order (${waqiah.events.length} steps), and ${waqiah.lessons.length} lessons with references.` },
-  { q: `What should I read next?`, a: `Continue with the 4 related stories and previous/next links below — e.g. pair ${waqiah.title} with other prophets or seerah events in order.` },
+  { q: S.whatQ.replace('{p}', waqiah.prophet), a: waqiah.summary },
+  { q: S.lessonQ.replace('{p}', waqiah.prophet), a: waqiah.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: S.whereQ, a: S.whereA.replace('{r}', waqiah.quranRef) },
+  { q: S.structQ, a: S.structA.replace('{e}', String(waqiah.events.length)).replace('{l}', String(waqiah.lessons.length)) },
+  { q: S.nextQ, a: S.nextA },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Waqiat', path: '/waqiat/' },
+  { name: dict.nav.home, path: '/' },
+  { name: dict.nav.waqiat, path: '/waqiat/' },
   { name: waqiah.title, path: waqiahPath },
 ];
 const WL = localizeStoryList(WAQIAT, 'waqiat', locale);
@@ -44,13 +47,13 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{waqiah.prophet}</span>
-      <span class="ms-auto"><BookmarkButton kind="waqiah" bmRef={waqiahPath} title={waqiah.title} /></span>
+      <span class="ms-auto"><BookmarkButton kind="waqiah" bmRef={waqiahPath} title={waqiah.title} locale={locale} /></span>
       <ShareButtons title={waqiah.title} path={waqiahPath} locale={locale} />
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{waqiah.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{waqiah.summary}</p>
     {waqiah.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {waqiah.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{S.alsoSearched} {waqiah.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
@@ -60,29 +63,29 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
     </div>
 
     <div class="hn-reading-card">
-      <p class="hn-block-label">Emblematic verse</p>
+      <p class="hn-block-label">{S.emblemLabel}</p>
       <p class="arabic-block" lang="ar" dir="rtl">{waqiah.arabic}</p>
       {waqiah.translit && (
         <>
           <hr class="hn-divider" />
-          <p class="hn-block-label">Transliteration</p>
+          <p class="hn-block-label">{S.translitLabel}</p>
           <p class="translit-block">{waqiah.translit}</p>
         </>
       )}
     </div>
 
-    <section class="mt-8" aria-label="The full story">
-      <SectionHeader eyebrow="Story" title="The full story" />
+    <section class="mt-8" aria-label={S.secStory}>
+      <SectionHeader eyebrow={S.secStory} title={S.secStoryTitle} />
       <div class="space-y-4">
         {(waqiah.narrative || []).map((p: string) => (
           <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
         ))}
       </div>
-      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated strictly from the Quran ({waqiah.quranRef}) without invented details.</p>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{S.narratedNote.replace('{r}', waqiah.quranRef)}</p>
     </section>
 
-    <section class="mt-8" aria-label="The story in order">
-      <SectionHeader eyebrow="Timeline" title="The story in order" />
+    <section class="mt-8" aria-label={S.secTimeline}>
+      <SectionHeader eyebrow={S.secTimeline} title={S.timelineTitle} />
       <ol class="space-y-3">
         {waqiah.events.map((e: string, i: number) => (
           <li class="hn-card hn-card-pad flex gap-3">
@@ -93,19 +96,19 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
       </ol>
     </section>
 
-    <section class="mt-8" aria-label="Lessons">
-      <SectionHeader eyebrow="Reflect" title="Lessons" />
+    <section class="mt-8" aria-label={S.lessonsTitle}>
+      <SectionHeader eyebrow={S.secReflect} title={S.lessonsTitle} />
       <div class="hn-card hn-card-pad">
         <ul class="space-y-2.5 leading-7 text-[15px]">
           {waqiah.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
         </ul>
       </div>
     </section>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{waqiah.quranRef}</strong></p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Narrated from the Quran without invented details; consult scholars for rulings.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{S.refLabel} <strong style="color:var(--hn-ink)">{waqiah.quranRef}</strong></p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">{S.consultNote}</p>
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={S.faqTitle2}>
+      <SectionHeader eyebrow={S.secFaq} title={S.faqTitle2} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -116,8 +119,8 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
       </div>
     </section>
 
-    <section class="mt-8" aria-label="More stories">
-      <SectionHeader eyebrow="Stories" title="More stories" href={L('/waqiat/')} linkLabel="All stories" />
+    <section class="mt-8" aria-label={S.moreTitle}>
+      <SectionHeader eyebrow={S.secStories2} title={S.moreTitle} href={L('/waqiat/')} linkLabel={S.moreLink} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/waqiat/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
@@ -135,13 +138,13 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More stories">
         {prevW ? (
           <a href={L(`/waqiat/${prevW.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous story</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{S.prevLabel}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevW.title}</span>
           </a>
         ) : <span />}
         {nextW && (
           <a href={L(`/waqiat/${nextW.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next story →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{S.nextLabel}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextW.title}</span>
           </a>
         )}
