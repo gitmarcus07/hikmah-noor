@@ -15,13 +15,17 @@ const L = (p: string) => localizedPath(locale, p);
 const catPath = `/duas/${cat.slug}/`;
 
 const title = `${cat.title} Duas in Arabic with Meaning (${duas.length} duas)`;
-let description = `${duas.length} authentic ${cat.title.toLowerCase()} duas: ${duas.slice(0, 3).map((d: any) => d.title).join(', ')} and more — Arabic, transliteration, meaning, virtue.`;
+const topNames = duas.slice(0, 3).map((d: any) => d.title).join(', ');
+let description = `${duas.length} authentic ${cat.title.toLowerCase()} duas: ${topNames} and more — Arabic, transliteration, meaning, when to recite, virtue, narrator and grade. ${cat.desc}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${cat.title.toLowerCase()} duas, dua in arabic, transliteration, meaning, ${duas.map((d: any) => d.title.toLowerCase()).slice(0, 5).join(', ')}`;
+const sourceNames = [...new Set(duas.map((d: any) => String(d.source || '').split(';')[0].trim()).filter(Boolean))].slice(0, 4).join(', ');
+const keywords = `${cat.title.toLowerCase()} duas, dua in arabic, transliteration, meaning, ${duas.map((d: any) => d.title.toLowerCase()).slice(0, 6).join(', ')}${sourceNames ? `, ${sourceNames.toLowerCase()}` : ''}`;
 
 const faq = [
-  { q: `Which ${cat.title.toLowerCase()} duas are included?`, a: `${duas.map((d: any) => d.title).join('; ')}. Open any dua for Arabic text, transliteration, meaning, narrator, grade and source.` },
+  { q: `Which ${cat.title.toLowerCase()} duas are included?`, a: `${duas.map((d: any) => d.title).join('; ')}. Open any dua for Arabic text, transliteration, meaning, when to recite, virtue, narrator, grade and source.` },
   { q: `Are these ${cat.title.toLowerCase()} duas authentic?`, a: `Every dua names its source (Quran passage or hadith collection) without invented numbers, plus narrator where known and a Sahih/Hasan/Daif or Quranic grade. Learn wording from a teacher; consult scholars for rulings.` },
+  { q: `How do I use these ${cat.title.toLowerCase()} duas daily?`, a: `Pick one dua for your moment, read its "when to recite" and "repeat" lines, memorise the Arabic via the transliteration, and repeat it at the stated time (e.g. morning, after salah, before sleep). Combine with the related duas linked at the bottom of each page.` },
+  { q: `Do these pages include transliteration and meaning?`, a: `Yes — every dua in this topic has Arabic, easy transliteration, English meaning, purpose, virtue, source, narrator and grade on its own page, with previous/next navigation inside ${cat.title}.` },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -48,6 +52,11 @@ const siblings = DUA_CATS.filter((c) => c.slug !== cat.slug);
     <div class="mt-6 max-w-3xl">
       <input id="catfilter" class="hn-input" placeholder="Filter in this category — e.g. rain, debt, parents…" aria-label="Filter duas" />
     </div>
+
+    <section class="mt-6 max-w-3xl hn-card hn-card-pad" aria-label={`About ${cat.title} duas`}>
+      <h2 class="font-extrabold text-lg leading-7">How to use these {cat.title.toLowerCase()} duas</h2>
+      <p class="mt-2 text-[15px] leading-7" style="color:var(--hn-muted)">{cat.desc} Start with {topNames}, read each dua's when-to-recite and virtue, then memorise one at a time with its transliteration. Every page cites its source{sourceNames ? ` (e.g. ${sourceNames})` : ''} so you learn with confidence.</p>
+    </section>
 
     <div class="mt-4 grid gap-3 md:grid-cols-2" id="catgrid">
       {duas.map((d: any, i: number) => (

@@ -12,12 +12,16 @@ import { localizeStoryList } from '../lib/stories-i18n';
 interface Props { locale: string; }
 const { locale } = Astro.props;
 
+const storyNames = WAQIAT.map((w) => w.title).join('; ');
 const title = `Stories of the Prophets in Islam — Qisse with Lessons (${WAQIAT.length} stories)`;
-const description = `All ${WAQIAT.length} prophet stories — Yusuf, Ibrahim, Musa, Nuh, Yunus, Ayyub, Sulayman, Dawud, Isa and the Hijrah — with events, lessons and Quran references.`;
-const keywords = 'prophet stories islam, qisse ambiya, yusuf story, ibrahim fire, musa sea, noah ark, yunus whale, seerah stories';
+const description = `All ${WAQIAT.length} prophet & seerah stories with events in order, lessons and Quran references — from Yusuf, Ibrahim and Musa to Uhud, Khandaq, Hudaybiyyah and Fath Makkah.`;
+const keywords = `prophet stories islam, qisse ambiya, seerah stories, ${WAQIAT.map((w) => w.prophet.toLowerCase()).slice(0, 8).join(', ')}, quran stories with lessons, ${WAQIAT.map((w) => w.slug.replace(/-/g, ' ')).slice(0, 4).join(', ')}`;
 const faq = [
-  { q: 'Where do these stories come from?', a: 'Each story cites its Quran surahs — no invented details. Lessons are drawn plainly from the verses; consult scholars for deeper rulings.' },
-  { q: 'What will I learn on each story page?', a: 'A summary, the key events in order, three lessons, the Quran references, and the emblematic verse in Arabic.' },
+  { q: 'Where do these stories come from?', a: 'Each story cites its Quran surahs or seerah sources — no invented details. Lessons are drawn plainly from the verses; consult scholars for deeper rulings.' },
+  { q: 'What will I learn on each story page?', a: 'A summary, the key events in order, the full narrative in sections, lessons, the Quran references, the emblematic verse in Arabic with transliteration, FAQs and links to 4 more stories plus previous/next.' },
+  { q: `Which ${WAQIAT.length} stories are included?`, a: storyNames },
+  { q: 'Are these suitable for kids and new Muslims?', a: 'Yes — summaries first, then events in order, then the full story in short sections. Start with Yusuf, Ibrahim, Musa, Maryam or the Hijrah, then continue through Uhud, Khandaq and the Conquest.' },
+  { q: 'How should I study them?', a: 'Read one story fully, note its 3–5 lessons, read the cited Quran passages with translation, and share one lesson with family. Use previous/next links to continue in order.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },

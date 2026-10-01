@@ -26,12 +26,14 @@ const aliasList = (dua.aliases ?? []) as string[];
 const title = `${dua.title} in Arabic with Transliteration & Meaning`;
 let description = `${dua.title}: Arabic dua, transliteration, English meaning, when to recite and virtue. Source: ${dua.source}${gradeLabel ? ` (${gradeLabel})` : ''}.`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${dua.title.toLowerCase()}, dua in arabic, transliteration, english meaning, when to recite, virtue, ${dua.source.toLowerCase()}, ${cat.title.toLowerCase()} duas${originLabel ? `, ${originLabel.toLowerCase()}` : ''}${gradeLabel ? `, ${gradeLabel.toLowerCase()}` : ''}${aliasList.length ? `, ${aliasList.join(', ')}` : ''}`;
+const keywords = `${dua.title.toLowerCase()}, dua in arabic, transliteration, english meaning, when to recite, virtue, ${dua.source.toLowerCase()}, ${cat.title.toLowerCase()} duas${originLabel ? `, ${originLabel.toLowerCase()}` : ''}${gradeLabel ? `, ${gradeLabel.toLowerCase()}` : ''}${(dua as any).hisnNo ? `, hisn al muslim ${(dua as any).hisnNo}` : ''}${aliasList.length ? `, ${aliasList.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `When should I recite ${dua.title}?`, a: `${dua.when}. ${dua.repeat !== 'Often' && dua.repeat !== 'Once' ? 'Repeat: ' + dua.repeat + '.' : dua.repeat === 'Once' ? 'Recite it once.' : 'Recite it often.'}` },
+  { q: `When should I recite ${dua.title}?`, a: `${dua.when}. ${dua.repeat !== 'Often' && dua.repeat !== 'Once' ? 'Repeat: ' + dua.repeat + '.' : dua.repeat === 'Once' ? 'Recite it once.' : 'Recite it often.'} Memorise it via the transliteration above and use it at the stated moment.` },
   { q: `What is the virtue of ${dua.title}?`, a: dua.virtue },
-  { q: `Where is ${dua.title} from?`, a: `Source: ${dua.source}${narratorLabel ? ` (narrated by ${narratorLabel})` : ''}${gradeLabel ? `. Grade: ${gradeLabel}` : ''}. As always, learn the wording from a teacher and consult scholars for rulings.` },
+  { q: `Where is ${dua.title} from?`, a: `Source: ${dua.source}${narratorLabel ? ` (narrated by ${narratorLabel})` : ''}${gradeLabel ? `. Grade: ${gradeLabel}` : ''}${originLabel ? `. Category: ${originLabel}` : ''}. As always, learn the wording from a teacher and consult scholars for rulings.` },
+  { q: `What is the Arabic and meaning of ${dua.title}?`, a: `Arabic above with transliteration for pronunciation and an English translation of the meaning. Read the Arabic aloud, follow with the transliteration until fluent, then reflect on the translation.` },
+  { q: `How many times should I repeat it?`, a: `${dua.repeat}. Keep consistency daily — small regular adhkar outweigh occasional long sessions — and combine with the related ${cat.title.toLowerCase()} duas linked below.` },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },

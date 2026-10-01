@@ -19,12 +19,14 @@ const waqiahPath = `/waqiat/${waqiah.slug}/`;
 const title = `${waqiah.title} — Story & Lessons`;
 let description = `${waqiah.title}: ${waqiah.summary} References: ${waqiah.quranRef}.`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${waqiah.title.toLowerCase()}, ${waqiah.prophet.toLowerCase()} story, prophet stories islam${waqiah.aliases?.length ? `, ${waqiah.aliases.join(', ')}` : ''}`;
+const keywords = `${waqiah.title.toLowerCase()}, ${waqiah.prophet.toLowerCase()} story, prophet stories islam, ${waqiah.quranRef.toLowerCase()}, lessons from ${waqiah.prophet.toLowerCase()}${waqiah.aliases?.length ? `, ${waqiah.aliases.join(', ')}` : ''}`;
 
 const faq = [
   { q: `What happened in the story of ${waqiah.prophet}?`, a: waqiah.summary },
   { q: `What are the lessons from ${waqiah.prophet}’s story?`, a: waqiah.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
   { q: `Where is this story in the Quran?`, a: `References: ${waqiah.quranRef}. Read the verses with translation; consult scholars for deeper rulings.` },
+  { q: `How is the story structured on this page?`, a: `Summary first, then the emblematic verse, the full narrative in short sections, the events in order (${waqiah.events.length} steps), and ${waqiah.lessons.length} lessons with references.` },
+  { q: `What should I read next?`, a: `Continue with the 4 related stories and previous/next links below — e.g. pair ${waqiah.title} with other prophets or seerah events in order.` },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },

@@ -23,12 +23,15 @@ const nHadith = DL.filter((d: any) => originOf(d) === 'hadith').length;
 const hisnList = DL.filter((d: any) => (d as any).hisnNo).sort((a: any, b: any) => (a as any).hisnNo - (b as any).hisnNo);
 
 const title = `All Duas in Arabic with Transliteration, Meaning & Sources (${DL.length}+ duas)`;
-const description = `All ${DL.length} authentic duas by category — morning, salah, Ramadan, Hajj, prophets’ duas, marriage, children, death, hereafter and more. Arabic, transliteration, meaning, narrator and authenticity grade.`;
-const keywords = 'all duas, dua in arabic, masnoon duas, transliteration, meaning, rabbana duas, morning evening duas, duas for protection, prophets duas, ramadan duas, funeral dua';
+const catNames = DUA_CATS.map((c) => c.title).join(', ');
+const description = `All ${DL.length} authentic duas across ${DUA_CATS.length} topics — ${catNames}. Every dua with Arabic, transliteration, meaning, when to recite, virtue, narrator and authenticity grade.`;
+const keywords = `all duas, dua in arabic, masnoon duas, transliteration, meaning, ${DUA_CATS.map((c) => `${c.title.toLowerCase()} duas`).join(', ')}, rabbana duas, hisn al muslim, authenticity grade, narrator`;
 const faq = [
-  { q: 'How are the duas organized?', a: 'By life moment and source: morning & evening, salah, Ramadan, travel, food, home, marriage, children, sleep, health, forgiveness, hardship & rizq, purity, worship & knowledge, Hajj, prophets’ duas, death & funeral, hereafter and daily life. Every dua page names its source, narrator (when known) and authenticity grade.' },
-  { q: 'Does every dua include transliteration and meaning?', a: 'Yes — Arabic text, easy transliteration, English meaning, when to recite, virtue, source, narrator and grade on each dua’s own page.' },
+  { q: 'How are the duas organized?', a: `By life moment and source across ${DUA_CATS.length} categories: ${catNames}. Every dua page names its source, narrator (when known) and authenticity grade.` },
+  { q: 'Does every dua include transliteration and meaning?', a: 'Yes — Arabic text, easy transliteration, English meaning, when to recite, virtue, source, narrator and grade on each dua page. Use the filter above by category (e.g. Ramadan, Hajj, Prophets) or by source (Quranic, Prophetic, Companion, Scholarly).' },
   { q: 'Are these duas authentic?', a: 'Only well-known duas are included. Quranic duas are marked Quranic; hadith duas name their collection (e.g. Sahih al-Bukhari, Sahih Muslim) without invented numbers, plus a Sahih/Hasan/Daif grade where established. Learn wording from a teacher; consult scholars for rulings.' },
+  { q: 'How do I find a dua for my situation?', a: 'Type a keyword above (e.g. anxiety, debt, exam, parents, travel, sleep, marriage) or open a category. Each category page lists its duas with purpose lines, and each dua page links to 4 related duas plus previous/next in the same topic.' },
+  { q: 'What is the Hisn al-Muslim filter?', a: 'Duas also found in Hisn al-Muslim (Fortress of the Muslim) carry a Hisn chapter badge. Use the Hisn filter above to browse only those — ideal for daily adhkar completion.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
