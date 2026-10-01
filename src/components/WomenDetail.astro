@@ -6,29 +6,33 @@ import SectionHeader from './hn/SectionHeader.astro';
 import WomenArt from './WomenArt.astro';
 import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { WOMEN, prevWoman, nextWoman } from '../data/women';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
+import { secUI, secE, WOMEN_UI } from '../lib/site-ui-1';
 
 interface Props { woman: any; locale: string; }
 const { locale } = Astro.props;
 const woman = localizeStory((Astro.props as any).woman, 'women', locale);
+const dict = getDict(locale);
+const T = secUI(locale, WOMEN_UI);
+const E = secE(locale);
 const L = (p: string) => localizedPath(locale, p);
 const womanPath = `/women/${woman.slug}/`;
 
-const title = `${woman.title} — Story & Lessons`;
+const title = `${woman.title}${T.detSuffix}`;
 let description = `${woman.title}: ${woman.summary}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
 const keywords = `${woman.title.toLowerCase()}, hazrat ${woman.name.toLowerCase()} story, women in islam${woman.aliases?.length ? `, ${woman.aliases.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `Who was ${woman.name}?`, a: woman.summary },
-  { q: `What are the lessons from ${woman.name}’s life?`, a: woman.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
-  { q: `Where is this story sourced from?`, a: `References: ${woman.references}. Consult scholars for deeper rulings.` },
+  { q: T.detFaqWho.replace('{p}', woman.name), a: woman.summary },
+  { q: T.detFaqLes.replace('{p}', woman.name), a: woman.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: T.detFaqWhere, a: `${woman.references}.` },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Women', path: '/women/' },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/women/' },
   { name: woman.title, path: womanPath },
 ];
 const others = localizeStoryList(WOMEN.filter((w) => w.slug !== woman.slug && w.era === woman.era).concat(WOMEN.filter((w) => w.slug !== woman.slug && w.era !== woman.era)).slice(0, 4), 'women', locale);
@@ -39,16 +43,16 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
   <div class="hn-article hn-section">
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <span class="hn-badge hn-badge-primary">Figure {woman.order} of 12</span>
+      <span class="hn-badge hn-badge-primary">{T.badgeFig.replace('{o}', String(woman.order))}</span>
       <span class="hn-badge">{woman.era}</span>
       <span class="hn-badge hn-badge-gold">{woman.name}</span>
-      <span class="ms-auto"><BookmarkButton kind="women" bmRef={womanPath} title={woman.title} /></span>
+      <span class="ms-auto"><BookmarkButton kind="women" bmRef={womanPath} title={woman.title} locale={locale} /></span>
       <ShareButtons title={woman.title} path={womanPath} locale={locale} />
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{woman.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{woman.summary}</p>
     {woman.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {woman.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {woman.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
@@ -58,29 +62,29 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
     </div>
 
     <div class="hn-reading-card">
-      <p class="hn-block-label">Emblematic words</p>
+      <p class="hn-block-label">{T.emblemL}</p>
       <p class="arabic-block" lang="ar" dir="rtl">{woman.arabic}</p>
       {woman.translit && (
         <>
           <hr class="hn-divider" />
-          <p class="hn-block-label">Transliteration</p>
+          <p class="hn-block-label">{T.translitL}</p>
           <p class="translit-block">{woman.translit}</p>
         </>
       )}
     </div>
 
-    <section class="mt-8" aria-label="The full story">
-      <SectionHeader eyebrow="Story" title="The full story" />
+    <section class="mt-8" aria-label={T.secStory}>
+      <SectionHeader eyebrow={E.story} title={T.secStory} />
       <div class="space-y-4">
         {(woman.narrative || []).map((p: string) => (
           <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
         ))}
       </div>
-      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated from the Quran, seerah and hadith collections without invented details.</p>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.narratedL}</p>
     </section>
 
-    <section class="mt-8" aria-label="The story in order">
-      <SectionHeader eyebrow="Timeline" title="The life in order" />
+    <section class="mt-8" aria-label={T.timelineL}>
+      <SectionHeader eyebrow={E.time} title={T.timelineL} />
       <ol class="space-y-3">
         {woman.events.map((e: string, i: number) => (
           <li class="hn-card hn-card-pad flex gap-3">
@@ -91,19 +95,19 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
       </ol>
     </section>
 
-    <section class="mt-8" aria-label="Lessons">
-      <SectionHeader eyebrow="Reflect" title="Lessons" />
+    <section class="mt-8" aria-label={T.reflectL}>
+      <SectionHeader eyebrow={E.refl} title={T.reflectL} />
       <div class="hn-card hn-card-pad">
         <ul class="space-y-2.5 leading-7 text-[15px]">
           {woman.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
         </ul>
       </div>
     </section>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{woman.references}</strong></p>
-    <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For the companions around them, see the <a href={L('/sahaba/')} class="font-bold" style="color:var(--hn-primary)">24 Sahaba →</a></p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.refL} <strong style="color:var(--hn-ink)">{woman.references}</strong></p>
+    <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.sahabaQ} <a href={L('/sahaba/')} class="font-bold" style="color:var(--hn-primary)">{T.sahabaA}</a></p>
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -114,8 +118,8 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
       </div>
     </section>
 
-    <section class="mt-8" aria-label="More figures">
-      <SectionHeader eyebrow="Women" title="More figures" href={L('/women/')} linkLabel="All 12 figures" />
+    <section class="mt-8" aria-label={T.moreTitle}>
+      <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/women/')} linkLabel={T.moreLink} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/women/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
@@ -133,13 +137,13 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More figures">
         {prevP ? (
           <a href={L(`/women/${prevP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Figure {prevP.order}</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL.replace('{o}', String(prevP.order))}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevP.title}</span>
           </a>
         ) : <span />}
         {nextP && (
           <a href={L(`/women/${nextP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Figure {nextP.order} →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL.replace('{o}', String(nextP.order))}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextP.title}</span>
           </a>
         )}

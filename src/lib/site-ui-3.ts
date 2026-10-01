@@ -1,0 +1,258 @@
+/* Hikmah Noor — site section chrome localization, part 3.
+ * Quiz / Guides / Names / Nav menus / Tools core / Pages in en/hi/ur/ar.
+ * English strings are byte-identical to current pages.
+ */
+export function secUI3(locale: string, map: Record<string, any>): any {
+  return (map as any)[locale] ?? map.en;
+}
+
+export const QUIZ_UI: Record<string, any> = {
+  en: {
+    crumb: 'Quiz',
+    hubTitle: 'Islamic Quizzes — 10 Questions Each with Instant Answers (Prophets, Seerah, Quran, Kids, Ramadan, Hajj)',
+    hubDesc: 'Test yourself on prophets, seerah, Quran, kids basics, Ramadan and Hajj — 10 questions each, instant answers. Score 8+ to pass.',
+    hubKw: 'islamic quiz, prophets quiz, seerah quiz, quran quiz, kids quiz, ramadan quiz, hajj quiz',
+    hubFaq: [
+      { q: 'How do quizzes work?', a: 'Pick a quiz: 10 questions, instant answers with page references. Score 8+ to pass. Your best score saves on this device.' },
+      { q: 'Where do answers come from?', a: 'Every question is answerable from site content; each answer links the story or guide page to revise.' },
+      { q: 'Is there a kids quiz?', a: 'Yes — easy questions on kalimas, prayer and prophets for young Muslims.' },
+    ],
+    hubH1: 'Islamic Quizzes', hubSub: 'Test yourself — 10 questions each, instant answers. Score 8+ to pass.',
+    badgeN: 'quizzes', badgeQ: '10 questions each', badgeA: 'Instant answers',
+    secPick: 'Pick a quiz', qCount: '{n} questions', startL: 'Start quiz',
+    detPrefix: 'Quiz', alsoSearched: 'Also searched as:',
+    readyL: 'Ready?', readySub: '10 questions · instant answers · 8 to pass', bestL: 'Best score saves on this device',
+    qOf: 'Question {a} of {n}', scoreL: 'Score:', nextL: 'Next →', yourScore: 'Your score',
+    shareScore: 'Share score on WhatsApp ↗', retryL: 'Try again',
+    passL: 'MashaAllah — passed! 🌙', failL: 'Good effort — revise and retry', lowL: 'Keep learning — try the stories first',
+    bestNew: 'New personal best!', bestIs: 'Best on this device:',
+    shareText: 'I scored {s}/{n} on {t} — can you beat me?',
+    moreTitle: 'More quizzes', moreLink: 'All quizzes', bestSuffix: '(best: {b}/{n})',
+    detFaqHow: 'How does this quiz work?', detFaqScore: 'What is a passing score?', detFaqRevise: 'Where can I revise?',
+    correctL: '✓ Correct', answerIs: '✗ The answer is: ', seeScore: 'See my score →',
+  },
+  ur: {
+    crumb: 'کوئز',
+    hubTitle: 'اسلامی کوئز — ہر ایک میں 10 سوالات فوری جواب کے ساتھ',
+    hubDesc: 'انبیاء، سیرت، قرآن، بچوں، رمضان اور حج پر خود کو آزماؤ — ہر ایک میں 10 سوالات، فوری جواب۔ 8+ پر پاس۔',
+    hubKw: 'اسلامی کوئز, انبیاء کوئز, سیرت کوئز, قرآن کوئز, بچوں کوئز, رمضان کوئز, حج کوئز',
+    hubFaq: [
+      { q: 'کوئز کیسے کام کرتے ہیں؟', a: 'کوئز چنو: 10 سوالات، حوالوں سمیت فوری جواب۔ 8+ پر پاس۔ بہترین اسکور اسی ڈیوائس پر محفوظ۔' },
+      { q: 'جواب کہاں سے آتے ہیں؟', a: 'ہر سوال کا جواب سائٹ کے مواد سے دیا جا سکتا ہے؛ ہر جواب نظر ثانی کے لیے صفحے سے جوڑتا ہے۔' },
+      { q: 'کیا بچوں کا کوئز ہے؟', a: 'جی ہاں — نوجوان مسلمانوں کے لیے کلمات، نماز اور انبیاء پر آسان سوالات۔' },
+    ],
+    hubH1: 'اسلامی کوئز', hubSub: 'خود کو آزماؤ — ہر ایک میں 10 سوالات، فوری جواب۔ 8+ پر پاس۔',
+    badgeN: 'کوئز', badgeQ: 'ہر ایک میں 10 سوالات', badgeA: 'فوری جواب',
+    secPick: 'کوئز چنو', qCount: '{n} سوالات', startL: 'کوئز شروع کرو',
+    detPrefix: 'کوئز', alsoSearched: 'اس نام سے بھی تلاش ہوتا ہے:',
+    readyL: 'تیار؟', readySub: '10 سوالات · فوری جواب · پاس کے لیے 8', bestL: 'بہترین اسکور اسی ڈیوائس پر محفوظ',
+    qOf: 'سوال {a} از {n}', scoreL: 'اسکور:', nextL: 'اگلا →', yourScore: 'تمہارا اسکور',
+    shareScore: 'واٹس ایپ پر اسکور شیئر کرو ↗', retryL: 'دوبارہ کوشش',
+    passL: 'ماشاء اللہ — پاس! 🌙', failL: 'اچھی کوشش — دہراؤ اور دوبارہ کرو', lowL: 'سیکھتے رہو — پہلے واقعات پڑھو',
+    bestNew: 'نیا ذاتی بہترین!', bestIs: 'اس ڈیوائس پر بہترین:',
+    shareText: 'میں نے {t} میں {s}/{n} اسکور کیا — کیا تم ہرا سکتے ہو؟',
+    moreTitle: 'مزید کوئز', moreLink: 'تمام کوئز', bestSuffix: '(بہترین: {b}/{n})',
+    detFaqHow: 'یہ کوئز کیسے کام کرتا ہے؟', detFaqScore: 'پاسنگ اسکور کیا ہے؟', detFaqRevise: 'نظر ثانی کہاں کروں؟',
+    correctL: '✓ درست', answerIs: '✗ جواب ہے: ', seeScore: 'میرا اسکور دیکھو →',
+  },
+  hi: {
+    crumb: 'क्विज़',
+    hubTitle: 'इस्लामी क्विज़ — हर एक में 10 प्रश्न तत्काल उत्तर सहित',
+    hubDesc: 'नबियों, सीरत, क़ुरान, बच्चों, रमज़ान और Hajj पर स्वयं को परखो — हर एक में 10 प्रश्न, तत्काल उत्तर। 8+ पर उत्तीर्ण।',
+    hubKw: 'इस्लामी क्विज़, नबी क्विज़, सीरत क्विज़, क़ुरान क्विज़, बच्चे क्विज़, रमज़ान क्विज़, Hajj क्विज़',
+    hubFaq: [
+      { q: 'क्विज़ कैसे कार्य करते हैं?', a: 'क्विज़ चुनो: 10 प्रश्न, संदर्भों सहित तत्काल उत्तर। 8+ पर उत्तीर्ण। सर्वोत्तम स्कोर इसी डिवाइस पर सहेजा जाता है।' },
+      { q: 'उत्तर कहां से आते हैं?', a: 'हर प्रश्न का उत्तर साइट सामग्री से दिया जा सकता है; हर उत्तर दोहराव हेतु पृष्ठ से जोड़ता है।' },
+      { q: 'क्या बच्चों का क्विज़ है?', a: 'हां — युवा मुसलमानों हेतु कलिमों, नमाज़ और नबियों पर सरल प्रश्न।' },
+    ],
+    hubH1: 'इस्लामी क्विज़', hubSub: 'स्वयं को परखो — हर एक में 10 प्रश्न, तत्काल उत्तर। 8+ पर उत्तीर्ण।',
+    badgeN: 'क्विज़', badgeQ: 'हर एक में 10 प्रश्न', badgeA: 'तत्काल उत्तर',
+    secPick: 'क्विज़ चुनो', qCount: '{n} प्रश्न', startL: 'क्विज़ आरंभ करो',
+    detPrefix: 'क्विज़', alsoSearched: 'इन नामों से भी खोजा जाता है:',
+    readyL: 'तैयार?', readySub: '10 प्रश्न · तत्काल उत्तर · उत्तीर्ण हेतु 8', bestL: 'सर्वोत्तम स्कोर इसी डिवाइस पर सहेजा जाता है',
+    qOf: 'प्रश्न {a} / {n}', scoreL: 'स्कोर:', nextL: 'अगला →', yourScore: 'तुम्हारा स्कोर',
+    shareScore: 'WhatsApp पर स्कोर साझा करो ↗', retryL: 'पुनः प्रयास',
+    passL: 'माशाअल्लाह — उत्तीर्ण! 🌙', failL: 'अच्छा प्रयास — दोहराओ और पुनः करो', lowL: 'सीखते रहो — पहले कहानियां पढ़ो',
+    bestNew: 'नया व्यक्तिगत सर्वश्रेष्ठ!', bestIs: 'इस डिवाइस पर सर्वश्रेष्ठ:',
+    shareText: 'मैंने {t} में {s}/{n} स्कोर किया — क्या तुम हरा सकते हो?',
+    moreTitle: 'और क्विज़', moreLink: 'सभी क्विज़', bestSuffix: '(सर्वश्रेष्ठ: {b}/{n})',
+    detFaqHow: 'यह क्विज़ कैसे कार्य करता है?', detFaqScore: 'उत्तीर्ण स्कोर क्या है?', detFaqRevise: 'दोहराव कहां करूं?',
+    correctL: '✓ सही', answerIs: '✗ उत्तर है: ', seeScore: 'मेरा स्कोर देखो →',
+  },
+  ar: {
+    crumb: 'الاختبار',
+    hubTitle: 'الاختبارات الإسلامية — 10 أسئلة لكل اختبار بإجابات فورية',
+    hubDesc: 'اختبر نفسك في الأنبياء والسيرة والقرآن والأطفال ورمضان والحج — 10 أسئلة لكل اختبار وإجابات فورية. 8+ للنجاح.',
+    hubKw: 'اختبار إسلامي, اختبار الأنبياء, اختبار السيرة, اختبار القرآن, اختبار الأطفال, اختبار رمضان, اختبار الحج',
+    hubFaq: [
+      { q: 'كيف تعمل الاختبارات؟', a: 'اختر اختبارا: 10 أسئلة وإجابات فورية بالمراجع. 8+ للنجاح. تحفظ أفضل نتيجة على هذا الجهاز.' },
+      { q: 'من أين تأتي الإجابات؟', a: 'كل سؤال يجاب من محتوى الموقع؛ وكل إجابة تربط بصفحة للمراجعة.' },
+      { q: 'هل يوجد اختبار للأطفال؟', a: 'نعم — أسئلة سهلة للمسلمين الصغار في الكلمات والصلاة والأنبياء.' },
+    ],
+    hubH1: 'الاختبارات الإسلامية', hubSub: 'اختبر نفسك — 10 أسئلة لكل اختبار وإجابات فورية. 8+ للنجاح.',
+    badgeN: 'اختبارات', badgeQ: '10 أسئلة لكل اختبار', badgeA: 'إجابات فورية',
+    secPick: 'اختر اختبارا', qCount: '{n} أسئلة', startL: 'ابدأ الاختبار',
+    detPrefix: 'اختبار', alsoSearched: 'يُبحث عنه أيضا باسم:',
+    readyL: 'مستعد؟', readySub: '10 أسئلة · إجابات فورية · 8 للنجاح', bestL: 'تحفظ أفضل نتيجة على هذا الجهاز',
+    qOf: 'السؤال {a} من {n}', scoreL: 'النتيجة:', nextL: 'التالي →', yourScore: 'نتيجتك',
+    shareScore: 'شارك النتيجة على واتساب ↗', retryL: 'حاول مجددا',
+    passL: 'ما شاء الله — نجحت! 🌙', failL: 'محاولة جيدة — راجع وحاول مجددا', lowL: 'واصل التعلم — اقرأ القصص أولا',
+    bestNew: 'أفضل شخصية جديدة!', bestIs: 'الأفضل على هذا الجهاز:',
+    shareText: 'سجلت {s}/{n} في {t} — هل يمكنك التفوق علي؟',
+    moreTitle: 'المزيد من الاختبارات', moreLink: 'جميع الاختبارات', bestSuffix: '(الأفضل: {b}/{n})',
+    detFaqHow: 'كيف يعمل هذا الاختبار؟', detFaqScore: 'ما درجة النجاح؟', detFaqRevise: 'أين أراجع؟',
+    correctL: '✓ صحيح', answerIs: '✗ الجواب هو: ', seeScore: 'انظر نتيجتي ←',
+  },
+};
+
+export const GUIDE_UI: Record<string, any> = {
+  en: {
+    crumb: 'Learn',
+    hubTitle: 'Islamic Guides — Step-by-Step How-To (Prayer, Wudu, Fasting, Family, Aqeedah)',
+    hubDesc: 'Learn how to pray, do wudu, fast, marry and believe — 114 step-by-step guides with evidence, steps and FAQs across 4 categories.',
+    hubKw: 'islamic guides, how to pray, wudu steps, fasting rules, marriage in islam, aqeedah',
+    hubFaq: [
+      { q: 'What will I learn in each guide?', a: 'Plain steps in order, the conditions before you start, what breaks the act, and answers to the most asked questions — each with its Quran or hadith basis.' },
+      { q: 'Which school of thought is followed?', a: 'Guides teach the widely agreed essentials; where schools differ, it is noted — learn personal details from a qualified teacher.' },
+      { q: 'Are these guides a fatwa?', a: 'No. They are educational summaries for learning. For real cases and differences, consult qualified scholars.' },
+    ],
+    hubH1: 'Islamic Guides', hubSub: 'Learn how to pray, fast, marry and believe — step by step with evidence.',
+    searchPh: 'Search guides - e.g. wudu, namaz, roza...', badgeN: 'guides', badgeC: 'categories', badgeS: 'Step by step',
+    secCats: 'Browse by category', secAll: 'Every guide', secAllSub: 'All topics in one list.',
+    catSuffix: 'Guides', catMeta: '{n} guides', catSub: 'Steps + evidence + FAQs', readL: 'Read guide',
+    catFaqWhich: 'Which {c} topics are covered?', catFaqAuth: 'Are these guides authentic?',
+    catFaqAuthA: 'Every guide names its Quran or hadith basis without invented details. Learn personal rulings from a qualified teacher.',
+    detPrefix: 'Guide', alsoSearched: 'Also searched as:', stepsL: 'Steps in order', detSuffix: ' - Step by Step with Evidence', detSuffix: ' - Step by Step with Evidence',
+    relDua: 'Related duas', relDuaLink: 'All duas', relMore: 'More guides', relMoreLink: 'All guides',
+    printL: '🖨 Print / PDF', moreCats: 'All guide categories', moreCatsLink: 'All guides',
+  },
+  ur: {
+    crumb: 'سیکھیں',
+    hubTitle: 'اسلامی رہنمائی — مرحلہ وار طریقہ (نماز، وضو، روزہ، خاندان، عقیدہ)',
+    hubDesc: 'نماز، وضو، روزہ، شادی اور عقیدہ سیکھو — 4 زمروں میں دلیل، مراحل اور سوالات سمیت 114 مرحلہ وار رہنمائی۔',
+    hubKw: 'اسلامی رہنمائی, نماز کا طریقہ, وضو کے مراحل, روزے کے مسائل, شادی اسلام میں, عقیدہ',
+    hubFaq: [
+      { q: 'ہر رہنمائی میں کیا سیکھوں گا؟', a: 'ترتیب سے واضح مراحل، شروع سے پہلے شرائط، توڑنے والی چیزیں، اور اکثر پوچھے سوالات کے جواب — ہر ایک قرآنی یا حدیثی دلیل کے ساتھ۔' },
+      { q: 'کس مسلک کی پیروی ہے؟', a: 'رہنمائی متفقہ بنیادیں سکھاتی ہے؛ جہاں مسالک مختلف ہیں وہاں لکھا ہے — ذاتی مسائل مستند استاد سے سیکھو۔' },
+      { q: 'کیا یہ فتویٰ ہیں؟', a: 'نہیں۔ یہ سیکھنے کے لیے تعلیمی خلاصے ہیں۔ اصل مقدمات کے لیے مستند علماء سے رجوع کرو۔' },
+    ],
+    hubH1: 'اسلامی رہنمائی', hubSub: 'نماز، روزہ، شادی اور عقیدہ سیکھو — دلیل کے ساتھ مرحلہ وار۔',
+    searchPh: 'رہنمائی تلاش کریں - مثلاً وضو، نماز، روزہ...', badgeN: 'رہنمائی', badgeC: 'زمرے', badgeS: 'مرحلہ وار',
+    secCats: 'زمرے کے حساب سے', secAll: 'ہر رہنمائی', secAllSub: 'تمام موضوعات ایک فہرست میں۔',
+    catSuffix: 'رہنمائی', catMeta: '{n} رہنمائی', catSub: 'مراحل + دلیل + سوالات', readL: 'رہنمائی پڑھو',
+    catFaqWhich: 'کون سے {c} موضوعات شامل ہیں؟', catFaqAuth: 'کیا یہ رہنمائی مستند ہے؟',
+    catFaqAuthA: 'ہر رہنمائی قرآنی یا حدیثی حوالہ بغیر گھڑی تفصیل کے دیتی ہے۔ ذاتی مسائل مستند استاد سے سیکھو۔',
+    detPrefix: 'رہنمائی', alsoSearched: 'اس نام سے بھی تلاش ہوتی ہے:', stepsL: 'ترتیب سے مراحل', detSuffix: ' - مرحلہ وار دلیل کے ساتھ',
+    relDua: 'متعلقہ دعائیں', relDuaLink: 'تمام دعائیں', relMore: 'مزید رہنمائی', relMoreLink: 'تمام رہنمائی',
+    printL: '🖨 پرنٹ / PDF', moreCats: 'تمام رہنمائی زمرے', moreCatsLink: 'تمام رہنمائی',
+  },
+  hi: {
+    crumb: 'सीखें',
+    hubTitle: 'इस्लामी मार्गदर्शन — चरणबद्ध विधि (नमाज़, वुज़ू, रोज़ा, परिवार, अक़ीदा)',
+    hubDesc: 'नमाज़, वुज़ू, रोज़ा, विवाह और अक़ीदा सीखो — 4 श्रेणियों में प्रमाण, चरणों और प्रश्नों सहित 114 चरणबद्ध मार्गदर्शन।',
+    hubKw: 'इस्लामी मार्गदर्शन, नमाज़ की विधि, वुज़ू के चरण, रोज़े के नियम, इस्लाम में विवाह, अक़ीदा',
+    hubFaq: [
+      { q: 'हर मार्गदर्शन में क्या सीखूंगा?', a: 'क्रम से स्पष्ट चरण, शुरू से पहले शर्तें, तोड़ने वाली वस्तुएं, और सर्वाधिक पूछे प्रश्नों के उत्तर — हर एक क़ुरानी या हदीसी प्रमाण सहित।' },
+      { q: 'किस मत का पालन है?', a: 'मार्गदर्शन सर्वसम्मत बुनियादें सिखाता है; जहां मत भिन्न हैं वहां लिखा है — व्यक्तिगत नियम योग्य शिक्षक से सीखो।' },
+      { q: 'क्या ये फ़तवा हैं?', a: 'नहीं। ये सीखने हेतु शैक्षणिक सारांश हैं। वास्तविक मामलों हेतु योग्य विद्वानों से पूछो।' },
+    ],
+    hubH1: 'इस्लामी मार्गदर्शन', hubSub: 'नमाज़, रोज़ा, विवाह और अक़ीदा सीखो — प्रमाण सहित चरणबद्ध।',
+    searchPh: 'मार्गदर्शन खोजें - जैसे वुज़ू, नमाज़, रोज़ा...', badgeN: 'मार्गदर्शन', badgeC: 'श्रेणियां', badgeS: 'चरणबद्ध',
+    secCats: 'श्रेणी के अनुसार', secAll: 'हर मार्गदर्शन', secAllSub: 'सभी विषय एक सूची में।',
+    catSuffix: 'मार्गदर्शन', catMeta: '{n} मार्गदर्शन', catSub: 'चरण + प्रमाण + प्रश्न', readL: 'मार्गदर्शन पढ़ो',
+    catFaqWhich: 'कौन से {c} विषय शामिल हैं?', catFaqAuth: 'क्या ये मार्गदर्शन प्रामाणिक हैं?',
+    catFaqAuthA: 'हर मार्गदर्शन क़ुरानी या हदीसी आधार बिना गढ़े विवरण के देता है। व्यक्तिगत नियम योग्य शिक्षक से सीखो।',
+    detPrefix: 'मार्गदर्शन', alsoSearched: 'इन नामों से भी खोजा जाता है:', stepsL: 'क्रम से चरण', detSuffix: ' - चरणबद्ध प्रमाण सहित',
+    relDua: 'संबंधित दुआएं', relDuaLink: 'सभी दुआएं', relMore: 'और मार्गदर्शन', relMoreLink: 'सभी मार्गदर्शन',
+    printL: '🖨 प्रिंट / PDF', moreCats: 'सभी मार्गदर्शन श्रेणियां', moreCatsLink: 'सभी मार्गदर्शन',
+  },
+  ar: {
+    crumb: 'تعلم',
+    hubTitle: 'الأدلة الإسلامية — خطوة بخطوة (الصلاة والوضوء والصيام والأسرة والعقيدة)',
+    hubDesc: 'تعلم الصلاة والوضوء والصيام والزواج والعقيدة — 114 دليلا خطوة بخطوة بالأدلة والخطوات والأسئلة في 4 تصنيفات.',
+    hubKw: 'أدلة إسلامية, كيفية الصلاة, خطوات الوضوء, أحكام الصيام, الزواج في الإسلام, العقيدة',
+    hubFaq: [
+      { q: 'ماذا سأتعلم في كل دليل؟', a: 'خطوات واضحة مرتبة والشروط قبل البدء وما ينقض العمل وإجابات أكثر الأسئلة — كلها بأدلتها من القرآن أو الحديث.' },
+      { q: 'أي مذهب متبع؟', a: 'تعلم الأدلة الأساسيات المتفق عليها؛ وحيث تختلف المذاهب ذكر ذلك — وتعلم التفاصيل الشخصية من معلم مؤهل.' },
+      { q: 'هل هذه فتاوى؟', a: 'لا. هي ملخصات تعليمية للتعلم. وللقضايا الحقيقية استشر علماء مؤهلين.' },
+    ],
+    hubH1: 'الأدلة الإسلامية', hubSub: 'تعلم الصلاة والصيام والزواج والعقيدة — خطوة بخطوة بالأدلة.',
+    searchPh: 'ابحث في الأدلة - مثل: الوضوء، الصلاة، الصوم...', badgeN: 'دليلا', badgeC: 'تصنيفات', badgeS: 'خطوة بخطوة',
+    secCats: 'تصفح حسب التصنيف', secAll: 'كل دليل', secAllSub: 'جميع المواضيع في قائمة واحدة.',
+    catSuffix: 'أدلة', catMeta: '{n} أدلة', catSub: 'خطوات + أدلة + أسئلة', readL: 'اقرأ الدليل',
+    catFaqWhich: 'ما مواضيع {c} المشمولة؟', catFaqAuth: 'هل هذه الأدلة صحيحة؟',
+    catFaqAuthA: 'كل دليل يذكر أساسه من القرآن أو الحديث دون تفاصيل مخترعة. وتعلم الأحكام الشخصية من معلم مؤهل.',
+    detPrefix: 'دليل', alsoSearched: 'يُبحث عنه أيضا باسم:', stepsL: 'الخطوات مرتبة', detSuffix: ' - خطوة بخطوة بالأدلة',
+    relDua: 'أدعية ذات صلة', relDuaLink: 'جميع الأدعية', relMore: 'المزيد من الأدلة', relMoreLink: 'جميع الأدلة',
+    printL: '🖨 طباعة / PDF', moreCats: 'جميع تصنيفات الأدلة', moreCatsLink: 'جميع الأدلة',
+  },
+};
+
+export const NAMES_UI: Record<string, any> = {
+  en: {
+    crumbAllah: 'Names of Allah', crumbMuhammad: 'Names of Muhammad ﷺ',
+    hubTitleAllah: '99 Names of Allah — Asma ul Husna with Meanings',
+    hubTitleMuhammad: '99 Names of Muhammad ﷺ with Meanings',
+    hubSub: 'Arabic, transliteration and meaning. Tap any name to filter.',
+    filterPhAllah: 'Filter names — e.g. rahman…', filterPhMuhammad: 'Filter names — e.g. ahmad…',
+    badgeN: '99 names', badgeA: 'Arabic + meaning',
+    faqTitle: 'Frequently asked questions',
+    relTitle: 'Keep learning', relAllah: 'Arabic, transliteration and meaning', relDuas: 'Duas for everyday life',
+    namesCount: '{n} names',
+  },
+  ur: {
+    crumbAllah: 'اسمائے الٰہی', crumbMuhammad: 'اسمائے محمد ﷺ',
+    hubTitleAllah: 'اللہ کے 99 نام — معانی کے ساتھ',
+    hubTitleMuhammad: 'محمد ﷺ کے 99 نام — معانی کے ساتھ',
+    hubSub: 'عربی، تلفظ اور مطلب۔ کسی بھی نام پر چھانٹو۔',
+    filterPhAllah: 'نام چھانٹیں — مثلاً رحمٰن…', filterPhMuhammad: 'نام چھانٹیں — مثلاً احمد…',
+    badgeN: '99 نام', badgeA: 'عربی + مطلب',
+    faqTitle: 'اکثر پوچھے گئے سوالات',
+    relTitle: 'سیکھتے رہو', relAllah: 'عربی، تلفظ اور مطلب', relDuas: 'روزمرہ کی دعائیں',
+    namesCount: '{n} نام',
+  },
+  hi: {
+    crumbAllah: 'Allah के नाम', crumbMuhammad: 'Muhammad ﷺ के नाम',
+    hubTitleAllah: 'Allah के 99 नाम — अर्थों सहित',
+    hubTitleMuhammad: 'Muhammad ﷺ के 99 नाम — अर्थों सहित',
+    hubSub: 'अरबी, लिप्यंतरण और अर्थ। किसी भी नाम पर छांटो।',
+    filterPhAllah: 'नाम छांटें — जैसे रहमान…', filterPhMuhammad: 'नाम छांटें — जैसे अहमद…',
+    badgeN: '99 नाम', badgeA: 'अरबी + अर्थ',
+    faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
+    relTitle: 'सीखते रहो', relAllah: 'अरबी, लिप्यंतरण और अर्थ', relDuas: 'रोज़मर्रा की दुआएं',
+    namesCount: '{n} नाम',
+  },
+  ar: {
+    crumbAllah: 'أسماء الله', crumbMuhammad: 'أسماء محمد ﷺ',
+    hubTitleAllah: 'أسماء الله الـ99 — بالمعاني',
+    hubTitleMuhammad: 'أسماء محمد ﷺ الـ99 — بالمعاني',
+    hubSub: 'بالعربية والنطق والمعنى. اضغط أي اسم للتصفية.',
+    filterPhAllah: 'صف الأسماء — مثل: الرحمن…', filterPhMuhammad: 'صف الأسماء — مثل: أحمد…',
+    badgeN: '99 اسما', badgeA: 'العربية + المعنى',
+    faqTitle: 'الأسئلة الشائعة',
+    relTitle: 'واصل التعلم', relAllah: 'العربية والنطق والمعنى', relDuas: 'أدعية الحياة اليومية',
+    namesCount: '{n} اسما',
+  },
+};
+
+/* Nav menus / footer section labels missing from dicts. */
+export const NAV_UI: Record<string, any> = {
+  en: { allah: 'Names of Allah', muhammad: 'Names of Muhammad ﷺ', seerat: 'Seerat', hadees: 'Hadees', aqeedah: 'Aqeedah', kids: 'Kids Zone', history: 'History', ramadan: 'Ramadan', hajj: 'Hajj & Umrah', eid: 'Eid & Qurbani', quiz: 'Quiz', fav: 'Favourites', learn: 'Learn', tools: 'Tools', more: 'More', search: 'Search', explore: 'Explore', resources: 'Resources', site: 'Site', skip: 'Skip to content', sahaba: 'Sahaba', women: 'Women', meanings: 'Meanings', ask: 'Ask a Question', methodology: 'Methodology', about: 'About', donate: 'Donate', contact: 'Contact', privacy: 'Privacy', terms: 'Terms', scholars: 'Scholars', calendar: 'Islamic Calendar', mosque: 'Mosque Finder' },
+  ur: { allah: 'اسمائے الٰہی', muhammad: 'اسمائے محمد ﷺ', seerat: 'سیرت', hadees: 'حدیث', aqeedah: 'عقیدہ', kids: 'بچوں کا زون', history: 'تاریخ', ramadan: 'رمضان', hajj: 'حج و عمرہ', eid: 'عید و قربانی', quiz: 'کوئز', fav: 'پسندیدہ', learn: 'سیکھیں', tools: 'ٹولز', more: 'مزید', search: 'تلاش کریں', explore: 'کھوج', resources: 'وسائل', site: 'سائٹ', skip: 'مواد پر جاؤ', sahaba: 'صحابہ', women: 'خواتین', meanings: 'معانی', ask: 'سوال پوچھیں', methodology: 'طریقہ کار', about: 'ہمارے بارے میں', donate: 'عطیہ دو', contact: 'رابطہ', privacy: 'پرائیویسی', terms: 'شرائط', scholars: 'علماء', calendar: 'اسلامی کیلنڈر', mosque: 'مسجد تلاش کریں' },
+  hi: { allah: 'Allah के नाम', muhammad: 'Muhammad ﷺ के नाम', seerat: 'सीरत', hadees: 'हदीस', aqeedah: 'अक़ीदा', kids: 'बच्चों का ज़ोन', history: 'इतिहास', ramadan: 'रमज़ान', hajj: 'Hajj व उमरा', eid: 'ईद व क़ुर्बानी', quiz: 'क्विज़', fav: 'पसंदीदा', learn: 'सीखें', tools: 'टूल्स', more: 'और', search: 'खोजें', explore: 'खोजें', resources: 'संसाधन', site: 'साइट', skip: 'सामग्री पर जाओ', sahaba: 'सहाबा', women: 'महिलाएं', meanings: 'अर्थ', ask: 'प्रश्न पूछें', methodology: 'कार्यप्रणाली', about: 'हमारे बारे में', donate: 'दान दो', contact: 'संपर्क', privacy: 'गोपनीयता', terms: 'शर्तें', scholars: 'विद्वान', calendar: 'इस्लामी कैलेंडर', mosque: 'मस्जिद खोजें' },
+  ar: { allah: 'أسماء الله', muhammad: 'أسماء محمد ﷺ', seerat: 'السيرة', hadees: 'الحديث', aqeedah: 'العقيدة', kids: 'ركن الأطفال', history: 'التاريخ', ramadan: 'رمضان', hajj: 'الحج والعمرة', eid: 'العيد والأضحية', quiz: 'الاختبار', fav: 'المفضلة', learn: 'تعلم', tools: 'الأدوات', more: 'المزيد', search: 'بحث', explore: 'استكشف', resources: 'الموارد', site: 'الموقع', skip: 'تخط إلى المحتوى', sahaba: 'الصحابة', women: 'المرأة', meanings: 'المعاني', ask: 'اطرح سؤالا', methodology: 'المنهجية', about: 'من نحن', donate: 'تبرع', contact: 'اتصل', privacy: 'الخصوصية', terms: 'الشروط', scholars: 'العلماء', calendar: 'التقويم الهجري', mosque: 'البحث عن مسجد' },
+};
+export function navUI(locale: string): any {
+  return (NAV_UI as any)[locale] ?? NAV_UI.en;
+}
+
+/* Generic tool-page chrome (ToolCalculator + tool pages). */
+export const TOOL_UI: Record<string, any> = {
+  en: { tools: 'Tools', freeNote: 'Free • No signup • With evidence', backL: '← Back', nextL: 'Next →', calcL: 'Calculate ✨', resetL: 'Reset', autoL: '✓ Updates automatically as you type', evL: '📜 Evidence & Methodology', evNote: 'Your result box shows the evidence and assumptions — verify with scholars for final rulings.', faqL: '❓ Frequently asked questions', moreL: '🧰 More {c} tools', errL: 'Could not compute — please check your inputs.', copyL: '⧉ Copy', copiedL: 'Copied ✓', copyFailL: 'Copy failed', methodL: 'Method:', currencyL: 'Currency:', fullCalcL: '🧾 See full calculation', evAssumpL: '📜 Evidence & assumptions', amtDue: '✅ Amount due', noDue: 'ℹ️ No payment due', planL: '📋 Your plan' },
+  ur: { tools: 'ٹولز', freeNote: 'مفت • بغیر اکاؤنٹ • دلیل کے ساتھ', backL: '← واپس', nextL: 'اگلا →', calcL: 'حساب کرو ✨', resetL: 'ری سیٹ', autoL: '✓ لکھتے ہی خود اپڈیٹ ہوتا ہے', evL: '📜 دلیل و طریقہ کار', evNote: 'نتیجے میں دلیل اور مفروضے دکھتے ہیں — حتمی حکم کے لیے علماء سے تصدیق کرو۔', faqL: '❓ اکثر پوچھے گئے سوالات', moreL: '🧰 مزید {c} ٹولز', errL: 'حساب نہ ہو سکا — ان پٹ چیک کرو۔', copyL: '⧉ نقل کرو', copiedL: 'نقل ہو گیا ✓', copyFailL: 'نقل ناکام', methodL: 'طریقہ:', currencyL: 'کرنسی:', fullCalcL: '🧾 مکمل حساب دیکھو', evAssumpL: '📜 دلیل و مفروضے', amtDue: '✅ واجب رقم', noDue: 'ℹ️ کوئی ادائیگی نہیں', planL: '📋 تمہارا منصوبہ' },
+  hi: { tools: 'टूल्स', freeNote: 'मुफ़्त • बिना खाते • प्रमाण सहित', backL: '← वापस', nextL: 'अगला →', calcL: 'गणना करो ✨', resetL: 'रीसेट', autoL: '✓ लिखते ही स्वतः अपडेट होता है', evL: '📜 प्रमाण व कार्यप्रणाली', evNote: 'परिणाम में प्रमाण और मान्यताएं दिखती हैं — अंतिम नियम हेतु विद्वानों से पुष्टि करो।', faqL: '❓ अक्सर पूछे जाने वाले प्रश्न', moreL: '🧰 और {c} टूल्स', errL: 'गणना न हो सकी — इनपुट जांचो।', copyL: '⧉ कॉपी करो', copiedL: 'कॉपी हो गया ✓', copyFailL: 'कॉपी विफल', methodL: 'विधि:', currencyL: 'मुद्रा:', fullCalcL: '🧾 पूर्ण गणना देखो', evAssumpL: '📜 प्रमाण व मान्यताएं', amtDue: '✅ देय राशि', noDue: 'ℹ️ कोई भुगतान नहीं', planL: '📋 तुम्हारी योजना' },
+  ar: { tools: 'الأدوات', freeNote: 'مجاني • بلا حساب • بالأدلة', backL: '← رجوع', nextL: 'التالي →', calcL: 'احسب ✨', resetL: 'إعادة', autoL: '✓ يتحدث تلقائيا أثناء الكتابة', evL: '📜 الأدلة والمنهجية', evNote: 'يعرض مربع النتيجة الأدلة والافتراضات — تحقق مع العلماء للأحكام النهائية.', faqL: '❓ الأسئلة الشائعة', moreL: '🧰 المزيد من أدوات {c}', errL: 'تعذر الحساب — تحقق من المدخلات.', copyL: '⧉ نسخ', copiedL: 'تم النسخ ✓', copyFailL: 'فشل النسخ', methodL: 'الطريقة:', currencyL: 'العملة:', fullCalcL: '🧾 انظر الحساب الكامل', evAssumpL: '📜 الأدلة والافتراضات', amtDue: '✅ المبلغ المستحق', noDue: 'ℹ️ لا دفعة مستحقة', planL: '📋 خطتك' },
+};
+export function toolUI(locale: string): any {
+  return (TOOL_UI as any)[locale] ?? TOOL_UI.en;
+}

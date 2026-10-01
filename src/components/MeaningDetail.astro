@@ -4,44 +4,49 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import MeaningArt from './MeaningArt.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { MEANINGS } from '../data/meanings';
+import { localizeMeaning } from '../lib/content-i18n';
+import { secUI2, MEANING_UI } from '../lib/site-ui-2';
 
 interface Props { meaning: any; locale: string; }
-const { meaning, locale } = Astro.props;
+const { locale } = Astro.props;
+const meaning = localizeMeaning((Astro.props as any).meaning, locale);
+const dict = getDict(locale);
+const T = secUI2(locale, MEANING_UI);
 const L = (p: string) => localizedPath(locale, p);
 const meaningPath = `/meanings/${meaning.slug}/`;
 
-const title = `${meaning.term} Meaning in Islam — ${meaning.translit}`;
-let description = `What does ${meaning.term.toLowerCase()} mean? ${meaning.definition} Proof: ${meaning.proofRef}.`;
+const title = `${meaning.term} — ${meaning.translit}`;
+let description = `${meaning.term}: ${meaning.definition}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${meaning.term.toLowerCase()} meaning, ${meaning.translit.toLowerCase()}, ${meaning.term.toLowerCase()} in islam, ${meaning.term.toLowerCase()} in quran${meaning.aliases?.length ? `, ${meaning.aliases.join(', ')}` : ''}`;
+const keywords = `${meaning.term.toLowerCase()} meaning, ${meaning.translit.toLowerCase()}${meaning.aliases?.length ? `, ${meaning.aliases.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `What is the meaning of ${meaning.term}?`, a: meaning.definition },
-  { q: `What is the proof for ${meaning.term}?`, a: `${meaning.proofRef}${meaning.hadithRef ? ` and ${meaning.hadithRef}` : ''}. ${meaning.misconception}` },
-  { q: `How do I practice ${meaning.term} daily?`, a: meaning.practice.map((p: string, i: number) => `${i + 1}. ${p}`).join(' ') },
+  { q: T.detFaqDef.replace('{t}', meaning.term), a: meaning.definition },
+  { q: T.detFaqSrc.replace('{t}', meaning.term), a: `${meaning.proofRef}${meaning.hadithRef ? `, ${meaning.hadithRef}` : ''}. ${meaning.misconception}` },
+  { q: T.detFaqPrac.replace('{t}', meaning.term), a: meaning.practice.map((p: string, i: number) => `${i + 1}. ${p}`).join(' ') },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Meanings', path: '/meanings/' },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/meanings/' },
   { name: meaning.term, path: meaningPath },
 ];
-const others = MEANINGS.filter((m) => m.slug !== meaning.slug).slice(0, 4);
+const others = MEANINGS.filter((m) => m.slug !== meaning.slug).slice(0, 4).map((x) => localizeMeaning(x, locale));
 const sIdx = MEANINGS.findIndex((m) => m.slug === meaning.slug);
-const prevM = sIdx > 0 ? MEANINGS[sIdx - 1] : null;
-const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : null;
+const prevM = sIdx > 0 ? localizeMeaning(MEANINGS[sIdx - 1], locale) : null;
+const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? localizeMeaning(MEANINGS[sIdx + 1], locale) : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={meaningPath}>
   <div class="hn-article hn-section">
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <span class="hn-badge hn-badge-primary">Meaning</span>
+      <span class="hn-badge hn-badge-primary">{T.detPrefix}</span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{meaning.term} <span class="font-bold" style="color:var(--hn-muted)">— {meaning.translit}</span></h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{meaning.definition}</p>
     {meaning.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {meaning.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {meaning.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
@@ -51,12 +56,12 @@ const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : nul
     </div>
 
     <div class="hn-reading-card">
-      <p class="hn-block-label">Proof • {meaning.proofRef}</p>
+      <p class="hn-block-label">{T.proofL} • {meaning.proofRef}</p>
       <p class="arabic-block" lang="ar" dir="rtl">{meaning.proofArabic}</p>
       {meaning.hadithArabic && (
         <>
           <hr class="hn-divider" />
-          <p class="hn-block-label">Hadith • {meaning.hadithRef}</p>
+          <p class="hn-block-label">{T.hadithL} • {meaning.hadithRef}</p>
           <p class="arabic-block" lang="ar" dir="rtl">{meaning.hadithArabic}</p>
         </>
       )}
@@ -64,21 +69,21 @@ const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : nul
 
     <div class="grid gap-3 mt-3">
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">Common misconception</p>
+        <p class="hn-block-label">{T.misL}</p>
         <p class="leading-7 text-[15px]">{meaning.misconception}</p>
       </div>
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">Practice in 3 steps</p>
+        <p class="hn-block-label">{T.pracL}</p>
         <ol class="list-decimal ms-5 space-y-1.5 leading-7 text-[15px]">
           {meaning.practice.map((p: string) => <li>{p}</li>)}
         </ol>
       </div>
     </div>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Proof: <strong style="color:var(--hn-ink)">{meaning.proofRef}</strong>{meaning.hadithRef && <span> • <strong style="color:var(--hn-ink)">{meaning.hadithRef}</strong></span>}</p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Learn details from a teacher; consult scholars for rulings.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.proofL}: <strong style="color:var(--hn-ink)">{meaning.proofRef}</strong>{meaning.hadithRef && <span> • <strong style="color:var(--hn-ink)">{meaning.hadithRef}</strong></span>}</p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">{T.srcNote}</p>
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -89,8 +94,8 @@ const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : nul
       </div>
     </section>
 
-    <section class="mt-8" aria-label="More meanings">
-      <SectionHeader eyebrow="Learn" title="More meanings" href={L('/meanings/')} linkLabel="All meanings" />
+    <section class="mt-8" aria-label={T.moreTitle}>
+      <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/meanings/')} linkLabel={T.moreLink} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/meanings/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
@@ -108,13 +113,13 @@ const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? MEANINGS[sIdx + 1] : nul
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More meanings">
         {prevM ? (
           <a href={L(`/meanings/${prevM.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevM.term}</span>
           </a>
         ) : <span />}
         {nextM && (
           <a href={L(`/meanings/${nextM.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextM.term}</span>
           </a>
         )}

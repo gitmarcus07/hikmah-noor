@@ -4,28 +4,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { HADEES, HADEES_CATS } from '../data/hadees';
 import { NAWAWI } from '../data/hadees-nawawi';
 import { SAHIH, SAHIH_CATS } from '../data/hadees-sahih';
+import { localizeHadees, localizeHadeesCat, localizeSahihCat } from '../lib/content-i18n';
+import { gradeLabel as gradeLabelL } from '../lib/dua-ui-i18n';
+import { secUI2, HADEES_UI } from '../lib/site-ui-2';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI2(locale, HADEES_UI);
 const L = (p: string) => localizedPath(locale, p);
+const HC = HADEES_CATS.map((c) => localizeHadeesCat(c, locale));
+const SC = SAHIH_CATS.map((c) => localizeSahihCat(c, locale));
 
-const title = `Hadees Library — 40 for Children + 40 of Imam Nawawi + 40 Sahih Selections in Arabic, Urdu & English`;
-const description = `All 120 hadees: 40 short hadees for kids, the 40 Hadith of Imam Nawawi, plus 40 Sahih selections on worship, Quran, family and character — Arabic, Urdu tarjuma, English meaning, lesson and source. Each hadees has its own page.`;
-const keywords = 'hadees library, 40 hadees for children, 40 hadith nawawi, sahih bukhari muslim hadees, nawawi arbaeen in urdu, choti hadees in urdu, hadees in urdu, hadees in english, short hadith, arbaeen lil atfal, bachon ki hadees, niyat wali hadees';
-const faq = [
-  { q: 'How many hadees are in this library?', a: '120 total: 40 short sahih hadees for children in 8 sabaq (from Mufradat min Ahadith al-Arbaeen lil Atfal), the 40 Hadith of Imam Nawawi for adults, plus 40 Sahih selections on worship, Quran, family, finance, character and hope. Open any hadees for Arabic, Urdu, English, lesson and source.' },
-  { q: 'Does every hadees have its own page?', a: 'Yes — each of the 120 hadees has a separate SEO page with Arabic text, transliteration, Urdu tarjuma, English meaning, lesson, narrator, grade, FAQ and its own keywords.' },
-  { q: 'Are these hadees authentic?', a: 'Yes — only famous wordings from Sahih al-Bukhari and Sahih Muslim (Muttafaq Alayh) or Hasan (Tirmidhi, Abu Dawud, Nasai, Ibn Majah and others). Each page names its collection without invented numbers.' },
-  { q: 'What is the 40 Hadith of Nawawi?', a: 'Imam Yahya al-Nawawi’s world-famous collection of 40 foundational hadith — intention, pillars, sincerity, worship and character. Start with hadees 1 (intentions) and read in order.' },
-  { q: 'What are the Sahih Selections?', a: '40 famous Bukhari/Muslim hadees for adults in 3 parts — worship & prayer, Quran/dhikr/dua, and character & society — each with Arabic, Urdu, English, lesson and source.' },
-];
+const title = T.hubTitle;
+const description = T.hubDesc;
+const keywords = T.hubKw;
+const faq = T.hubFaq;
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Hadees', path: '/hadees/' },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/hadees/' },
 ];
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/hadees/">
@@ -33,30 +34,30 @@ const crumbs = [
     <Breadcrumbs locale={locale} items={crumbs} />
     <div class="mt-3 max-w-2xl">
       <div class="flex flex-wrap gap-2">
-        <span class="hn-badge hn-badge-primary">{HADEES.length + NAWAWI.length + SAHIH.length} hadees</span>
-        <span class="hn-badge">Kids + Nawawi + Sahih</span>
-        <span class="hn-badge">Arabic + Urdu + English</span>
+        <span class="hn-badge hn-badge-primary">{HADEES.length + NAWAWI.length + SAHIH.length} {T.badgeN}</span>
+        <span class="hn-badge">{T.badge2}</span>
+        <span class="hn-badge">{T.badge3}</span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Hadees Library</h1>
-      <p class="mt-2 leading-7" style="color:var(--hn-muted)">40 short hadees for children, the 40 Hadith of Imam Nawawi, plus 40 Sahih selections — Arabic, Urdu tarjuma, English meaning and lessons. Tap any hadees for its own page.</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
       <form action={L('/search/')} method="get" class="mt-4" role="search">
         <div class="hn-searchwrap max-w-xl">
           <Icon name="search" size={19} />
-          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search hadees — e.g. niyat, roza, gussa, saf…" aria-label="Search hadees" />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
           <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
         </div>
       </form>
     </div>
 
     <div class="mt-6 max-w-3xl">
-      <input id="hadeesfilter" class="hn-input" placeholder="Filter 120 hadees — e.g. niyat, nawawi, roza, gussa…" aria-label="Filter hadees" />
+      <input id="hadeesfilter" class="hn-input" placeholder={T.filterPh} aria-label={T.filterPh} />
     </div>
 
-    {HADEES_CATS.map((c) => {
-      const list = HADEES.filter((h) => h.sabaq === c.num);
+    {HC.map((c) => {
+      const list = HADEES.filter((h) => h.sabaq === c.num).map((h) => localizeHadees(h, locale, 'kids'));
       return (
         <div class="mt-8">
-          <SectionHeader eyebrow={`Sabaq ${c.num}`} title={c.title} sub={c.desc} />
+          <SectionHeader eyebrow={T.sabaqL.replace('{n}', String(c.num))} title={c.title} sub={c.desc} />
           <div class="grid gap-3 md:grid-cols-2" data-sabaq={c.num}>
             {list.map((h) => (
               <a href={L(`/hadees/${h.slug}/`)} data-search={`${h.num} ${h.title} ${h.urdu} ${h.translation} ${h.arabic} ${(h.aliases || []).join(' ')}`.toLowerCase()} class="hadeesrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
@@ -66,7 +67,7 @@ const crumbs = [
                   <span class="font-extrabold block leading-6 mt-1">{h.title}</span>
                   <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">{h.urdu}</span>
                   <span class="mt-1.5 flex flex-wrap gap-1.5">
-                    <span class="hn-badge hn-badge-primary">{h.grade}</span>
+                    <span class="hn-badge hn-badge-primary">{gradeLabelL(h.grade, locale) ?? h.grade}</span>
                     <span class="hn-badge">{h.source.split(',')[0]}</span>
                   </span>
                 </span>
@@ -78,9 +79,9 @@ const crumbs = [
     })}
 
     <div class="mt-8">
-      <SectionHeader eyebrow="Nawawi" title="40 Hadith of Imam Nawawi" sub="Foundations of faith, worship and character — for adults, in order." />
+      <SectionHeader eyebrow="Nawawi" title={T.secNawawi} sub={T.secNawawiSub} />
       <div class="grid gap-3 md:grid-cols-2">
-        {NAWAWI.map((h) => (
+        {NAWAWI.map((hx) => { const h = localizeHadees(hx, locale, 'nawawi'); return (
           <a href={L(`/hadees/${h.slug}/`)} data-search={`${h.num} ${h.title} ${h.urdu} ${h.translation} ${h.arabic} ${(h.aliases || []).join(' ')}`.toLowerCase()} class="hadeesrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
             <span class="hn-verse-num shrink-0">{h.num}</span>
             <span class="min-w-0">
@@ -88,20 +89,20 @@ const crumbs = [
               <span class="font-extrabold block leading-6 mt-1">{h.title}</span>
               <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">{h.urdu}</span>
               <span class="mt-1.5 flex flex-wrap gap-1.5">
-                <span class="hn-badge hn-badge-primary">{h.grade}</span>
+                <span class="hn-badge hn-badge-primary">{gradeLabelL(h.grade, locale) ?? h.grade}</span>
                 <span class="hn-badge">{h.source.split(',')[0]}</span>
               </span>
             </span>
           </a>
-        ))}
+        ); })}
       </div>
     </div>
 
-    {SAHIH_CATS.map((c) => {
-      const list = SAHIH.filter((h) => h.sabaq === c.num);
+    {SC.map((c) => {
+      const list = SAHIH.filter((h) => h.sabaq === c.num).map((h) => localizeHadees(h, locale, 'sahih'));
       return (
         <div class="mt-8">
-          <SectionHeader eyebrow={`Part ${c.num}`} title={c.title} sub={c.desc} />
+          <SectionHeader eyebrow={T.partL.replace('{n}', String(c.num))} title={c.title} sub={c.desc} />
           <div class="grid gap-3 md:grid-cols-2">
             {list.map((h) => (
               <a href={L(`/hadees/${h.slug}/`)} data-search={`${h.num} ${h.title} ${h.urdu} ${h.translation} ${h.arabic} ${(h.aliases || []).join(' ')}`.toLowerCase()} class="hadeesrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
@@ -111,7 +112,7 @@ const crumbs = [
                   <span class="font-extrabold block leading-6 mt-1">{h.title}</span>
                   <span class="text-sm leading-6 block mt-0.5" style="color:var(--hn-muted)">{h.urdu}</span>
                   <span class="mt-1.5 flex flex-wrap gap-1.5">
-                    <span class="hn-badge hn-badge-primary">{h.grade}</span>
+                    <span class="hn-badge hn-badge-primary">{gradeLabelL(h.grade, locale) ?? h.grade}</span>
                     <span class="hn-badge">{h.source.split(',')[0]}</span>
                   </span>
                 </span>
@@ -133,8 +134,8 @@ const crumbs = [
       })();
     </script>
 
-    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">

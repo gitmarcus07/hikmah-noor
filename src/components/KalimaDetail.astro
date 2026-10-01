@@ -4,34 +4,41 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
-import { localizedPath } from '../i18n/utils';
-import { KALIMAS, KALIMA_ORIGIN_LABEL } from '../data/kalimas';
+import { getDict, localizedPath } from '../i18n/utils';
+import { KALIMAS } from '../data/kalimas';
+import { localizeKalima, localizeKalimaList } from '../lib/content-i18n';
+import { gradeLabel as gradeLabelL, originLabel as originLabelL } from '../lib/dua-ui-i18n';
+import { secUI, KALIMA_UI } from '../lib/site-ui-1';
 
 interface Props { kalima: any; locale: string; }
-const { kalima, locale } = Astro.props;
+const { locale } = Astro.props;
+const kalima = localizeKalima((Astro.props as any).kalima, locale);
+const dict = getDict(locale);
+const T = secUI(locale, KALIMA_UI);
 const L = (p: string) => localizedPath(locale, p);
 const kalimaPath = `/kalimas/${kalima.slug}/`;
-const originLabel = (KALIMA_ORIGIN_LABEL as any)[kalima.origin] ?? null;
+const originLabel = originLabelL(kalima.origin, locale) ?? (kalima.origin as string);
+const gradeL = gradeLabelL(kalima.grade, locale) ?? kalima.grade;
 
-const title = `${kalima.title} in Arabic with Transliteration & Meaning`;
-let description = `${kalima.title}: Arabic text, transliteration, English meaning and virtue. Basis: ${kalima.source}.`;
+const title = T.detTitle.replace('{t}', kalima.title);
+let description = `${kalima.title}: ${kalima.use}. ${kalima.virtue}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `${kalima.title.toLowerCase()}, kalima in arabic, transliteration, english meaning, ${kalima.source.toLowerCase()}${kalima.aliases?.length ? `, ${kalima.aliases.join(', ')}` : ''}`;
+const keywords = `${kalima.title.toLowerCase()}, ${kalima.source.toLowerCase()}${kalima.aliases?.length ? `, ${kalima.aliases.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `What is the ${kalima.title}?`, a: `${kalima.translation} (${kalima.use}.)` },
-  { q: `What is the virtue of ${kalima.title}?`, a: kalima.virtue },
-  { q: `Where is ${kalima.title} from?`, a: `Basis: ${kalima.source}${kalima.narrator ? ` (narrated by ${kalima.narrator})` : ''}. Grade: ${kalima.grade}. As always, learn the wording from a teacher and consult scholars for rulings.` },
+  { q: T.detFaqWhat.replace('{t}', kalima.title), a: `${kalima.translation} (${kalima.use}.)` },
+  { q: T.detFaqVirtue.replace('{t}', kalima.title), a: kalima.virtue },
+  { q: T.detFaqSrc.replace('{t}', kalima.title), a: `${kalima.source}${kalima.narrator ? ` (${kalima.narrator})` : ''}. ${gradeL}.` },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Kalimas', path: '/kalimas/' },
+  { name: dict.nav.home, path: '/' },
+  { name: dict.nav.kalimas ?? 'Kalimas', path: '/kalimas/' },
   { name: kalima.title, path: kalimaPath },
 ];
-const others = KALIMAS.filter((k) => k.slug !== kalima.slug);
+const others = localizeKalimaList(KALIMAS.filter((k) => k.slug !== kalima.slug), locale);
 const sIdx = KALIMAS.findIndex((k) => k.slug === kalima.slug);
-const prevK = sIdx > 0 ? KALIMAS[sIdx - 1] : null;
-const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? KALIMAS[sIdx + 1] : null;
+const prevK = sIdx > 0 ? localizeKalima(KALIMAS[sIdx - 1], locale) : null;
+const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? localizeKalima(KALIMAS[sIdx + 1], locale) : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={kalimaPath}>
   <div class="hn-read hn-section">
@@ -39,35 +46,35 @@ const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? KALIMAS[sIdx + 1] : null;
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{kalima.num} of 6</span>
       {originLabel && <span class="hn-badge hn-badge-gold">{originLabel}</span>}
-      <span class="hn-badge">{kalima.grade}</span>
+      <span class="hn-badge">{gradeL}</span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{kalima.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{kalima.use}</p>
     {kalima.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {kalima.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {kalima.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
 
     <div class="mt-5">
-      <ReadingCard arabic={kalima.arabic} translit={kalima.translit} translation={kalima.translation} reference={kalima.source} />
+      <ReadingCard arabic={kalima.arabic} translit={kalima.translit} translation={kalima.translation} reference={kalima.source} locale={locale} />
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2 mt-3">
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">When</p>
+        <p class="hn-block-label">{T.whenL}</p>
         <p class="text-[15px] font-semibold leading-6">{kalima.when}{kalima.repeat ? ` • ${kalima.repeat}` : ''}</p>
       </div>
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">Virtue</p>
+        <p class="hn-block-label">{T.virtueL}</p>
         <p class="text-[15px] leading-6" style="color:var(--hn-muted)">{kalima.virtue}</p>
       </div>
     </div>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Basis: <strong style="color:var(--hn-ink)">{kalima.source}</strong>{kalima.narrator && <span> • Narrated by <strong style="color:var(--hn-ink)">{kalima.narrator}</strong></span>} • Grade: <strong style="color:var(--hn-ink)">{kalima.grade}</strong></p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Verify wording with a teacher; rulings differ — consult scholars.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.basisL} <strong style="color:var(--hn-ink)">{kalima.source}</strong>{kalima.narrator && <span> • {kalima.narrator}</span>} • <strong style="color:var(--hn-ink)">{gradeL}</strong></p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">{T.verifyL}</p>
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -78,8 +85,8 @@ const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? KALIMAS[sIdx + 1] : null;
       </div>
     </section>
 
-    <section class="mt-8" aria-label="Other kalimas">
-      <SectionHeader eyebrow="Learn" title="The other kalimas" href={L('/kalimas/')} linkLabel="All 6 kalimas" />
+    <section class="mt-8" aria-label={T.relTitle}>
+      <SectionHeader eyebrow={T.relTitle} title={T.relTitle} href={L('/kalimas/')} linkLabel={T.relLink} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/kalimas/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
@@ -94,13 +101,13 @@ const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? KALIMAS[sIdx + 1] : null;
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More kalimas">
         {prevK ? (
           <a href={L(`/kalimas/${prevK.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous kalima</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevK.title}</span>
           </a>
         ) : <span />}
         {nextK && (
           <a href={L(`/kalimas/${nextK.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next kalima →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextK.title}</span>
           </a>
         )}

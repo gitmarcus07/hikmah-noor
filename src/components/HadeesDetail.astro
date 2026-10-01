@@ -4,86 +4,94 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { HADEES, HADEES_CATS } from '../data/hadees';
 import { NAWAWI } from '../data/hadees-nawawi';
 import { SAHIH, SAHIH_CATS } from '../data/hadees-sahih';
+import { localizeHadees, localizeHadeesCat, localizeSahihCat } from '../lib/content-i18n';
+import { gradeLabel as gradeLabelL } from '../lib/dua-ui-i18n';
+import { secUI2, HADEES_UI } from '../lib/site-ui-2';
 
 interface Props { hadees: any; locale: string; collection?: string; }
-const { hadees, locale } = Astro.props;
-const coll = (Astro.props as any).collection ?? (hadees.sabaq === 0 ? 'nawawi' : 'kids');
+const { locale } = Astro.props;
+const coll = (Astro.props as any).collection ?? ((Astro.props as any).hadees.sabaq === 0 ? 'nawawi' : 'kids');
+const hadees = localizeHadees((Astro.props as any).hadees, locale, coll);
+const dict = getDict(locale);
+const T = secUI2(locale, HADEES_UI);
 const isNawawi = coll === 'nawawi';
 const isSahih = coll === 'sahih';
 const POOL = isNawawi ? NAWAWI : isSahih ? SAHIH : HADEES;
 const L = (p: string) => localizedPath(locale, p);
 const hadeesPath = `/hadees/${hadees.slug}/`;
-const cat = isSahih
+const catRaw = isSahih
   ? SAHIH_CATS.find((c) => c.num === hadees.sabaq) ?? { num: 0, title: 'Sahih Selections', desc: 'Famous Bukhari/Muslim hadees for adults.' }
   : HADEES_CATS.find((c) => c.num === hadees.sabaq) ?? { num: 0, title: '40 Hadith of Imam Nawawi', desc: 'Foundations of faith, worship and character.' };
-const collLabel = isNawawi ? '40 Hadith of Nawawi' : isSahih ? 'Sahih Selections' : '40 Hadees for Children';
+const cat = isSahih ? localizeSahihCat(catRaw, locale) : localizeHadeesCat(catRaw, locale);
+const collLabel = isNawawi ? T.secNawawi : isSahih ? T.partL.replace('{n}', String(hadees.sabaq || '')) : T.sabaqL.replace('{n}', String(hadees.sabaq || ''));
 const collFrom = isNawawi ? 'Al-Arba’in al-Nawawiyyah (Imam Yahya al-Nawawi)' : isSahih ? 'Sahih al-Bukhari and Sahih Muslim selections (plus Tirmidhi, Abu Dawud, Nasai, Ibn Majah where graded Hasan)' : 'Mufradat min Ahadith al-Arbaeen lil Atfal (Abu Ghazi al-Islam)';
 
-const title = `${hadees.title} — Arabic, Urdu & English`;
-let description = `${hadees.arabic} — ${hadees.urdu} ${hadees.translation} Lesson: ${hadees.lesson} Source: ${hadees.source}.`;
+const title = `${hadees.title}${T.detTitleSuffix}`;
+let description = `${hadees.title}: ${hadees.translation} ${hadees.lesson}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
 const keywords = hadees.keywords;
 
 const faq = [
-  { q: `What does "${hadees.arabic}" mean?`, a: `${hadees.translation} Urdu: ${hadees.urdu}` },
-  { q: `What is the lesson of this hadees${isNawawi || isSahih ? '' : ' for children'}?`, a: hadees.lesson },
-  { q: `Where is this hadees from?`, a: `Source: ${hadees.source}${hadees.narrator ? ` (narrated by ${hadees.narrator})` : ''}. Grade: ${hadees.grade}. From: ${collFrom}. Learn wording from a teacher; consult scholars for rulings.` },
+  { q: T.detFaqMean.replace('{a}', hadees.arabic), a: `${hadees.translation} (${hadees.urdu})` },
+  { q: T.detFaqLes.replace('{kids}', isNawawi || isSahih ? '' : ' (' + T.lessonKids + ')'), a: hadees.lesson },
+  { q: T.detFaqSrc, a: `${hadees.source}${hadees.narrator ? ` (${hadees.narrator})` : ''}. ${hadees.grade}.` },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Hadees', path: '/hadees/' },
-  { name: `Hadees ${hadees.num}`, path: hadeesPath },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/hadees/' },
+  { name: `${T.badgeHadees.replace('{n}', String(hadees.num))}`, path: hadeesPath },
 ];
+const gradeL = gradeLabelL(hadees.grade, locale) ?? hadees.grade;
 const sIdx = POOL.findIndex((h) => h.slug === hadees.slug);
-const prevH = sIdx > 0 ? POOL[sIdx - 1] : null;
-const nextH = sIdx >= 0 && sIdx < POOL.length - 1 ? POOL[sIdx + 1] : null;
-const siblings = POOL.filter((h) => h.sabaq === hadees.sabaq && h.slug !== hadees.slug);
-const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
+const prevH = sIdx > 0 ? localizeHadees(POOL[sIdx - 1], locale, coll) : null;
+const nextH = sIdx >= 0 && sIdx < POOL.length - 1 ? localizeHadees(POOL[sIdx + 1], locale, coll) : null;
+const siblings = POOL.filter((h) => h.sabaq === hadees.sabaq && h.slug !== hadees.slug).map((h) => localizeHadees(h, locale, coll));
+const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4).map((h) => localizeHadees(h, locale, coll));
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={hadeesPath}>
   <div class="hn-read hn-section">
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <span class="hn-badge hn-badge-primary">Hadees {hadees.num} of 40</span>
+      <span class="hn-badge hn-badge-primary">{T.badgeHadees.replace('{n}', String(hadees.num))}</span>
       {cat && <span class="hn-badge hn-badge-gold">{cat.title}</span>}
-      <span class="hn-badge">{hadees.grade}</span>
+      <span class="hn-badge">{gradeL}</span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{hadees.title}</h1>
-    <p class="mt-2 leading-7 font-semibold" lang="ur" dir="rtl" style="color:var(--hn-ink)">{hadees.urdu}</p>
+    <p class="mt-2 leading-7 font-semibold" lang={locale === 'en' ? 'ur' : locale} dir={locale === 'hi' ? undefined : 'rtl'} style="color:var(--hn-ink)">{hadees.urdu}</p>
     <p class="mt-1 leading-7" style="color:var(--hn-muted)">{hadees.translation}</p>
     {hadees.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {hadees.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {hadees.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
 
     <div class="mt-5">
-      <ReadingCard arabic={hadees.arabic} translit={hadees.translit} translation={`${hadees.translation} | Urdu: ${hadees.urdu}`} reference={hadees.source} />
+      <ReadingCard arabic={hadees.arabic} translit={hadees.translit} translation={`${hadees.translation} | ${hadees.urdu}`} reference={hadees.source} locale={locale} />
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2 mt-3">
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">{isNawawi || isSahih ? 'Lesson' : 'Kids lesson'}</p>
+        <p class="hn-block-label">{isNawawi || isSahih ? T.lessonL : T.lessonKids}</p>
         <p class="text-[15px] leading-6" style="color:var(--hn-muted)">{hadees.lesson}</p>
       </div>
       <div class="hn-card hn-card-pad">
-        <p class="hn-block-label">Source & grade</p>
+        <p class="hn-block-label">{T.srcGradeL}</p>
         <p class="text-[15px] font-semibold leading-6">{hadees.source}</p>
-        {hadees.narrator && <p class="text-[14px] leading-6 mt-1" style="color:var(--hn-muted)">Narrated by {hadees.narrator}</p>}
+        {hadees.narrator && <p class="text-[14px] leading-6 mt-1" style="color:var(--hn-muted)">{hadees.narrator}</p>}
         <p class="mt-1.5 flex flex-wrap gap-1.5">
-          <span class="hn-badge hn-badge-primary">{hadees.grade}</span>
+          <span class="hn-badge hn-badge-primary">{gradeL}</span>
           <span class="hn-badge">{collLabel}</span>
         </p>
       </div>
     </div>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">From: <strong style="color:var(--hn-ink)">{collFrom}</strong> • Hadees {hadees.num} of 40 • Verify wording with a teacher; rulings differ — consult scholars.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.fromL} <strong style="color:var(--hn-ink)">{collFrom}</strong> • {T.badgeHadees.replace('{n}', String(hadees.num))} • {T.verifyL}</p>
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -95,8 +103,8 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
     </section>
 
     {siblings.length > 0 && coll !== 'nawawi' && (
-      <section class="mt-8" aria-label="Same lesson">
-        <SectionHeader eyebrow={isSahih ? `Part ${hadees.sabaq}` : `Sabaq ${hadees.sabaq}`} title={cat?.title ?? 'Same lesson'} href={L('/hadees/')} linkLabel="All hadees" />
+      <section class="mt-8" aria-label={T.relSame}>
+        <SectionHeader eyebrow={isSahih ? T.partL.replace('{n}', String(hadees.sabaq)) : T.sabaqL.replace('{n}', String(hadees.sabaq))} title={cat?.title ?? T.relSame} href={L('/hadees/')} linkLabel={T.allHadees} />
         <div class="grid gap-3 sm:grid-cols-2">
           {siblings.map((r) => (
             <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
@@ -108,8 +116,8 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
       </section>
     )}
 
-    <section class="mt-8" aria-label="More hadees">
-      <SectionHeader eyebrow="Learn" title="More hadees" href={L('/hadees/')} linkLabel={collLabel} />
+    <section class="mt-8" aria-label={T.relMore}>
+      <SectionHeader eyebrow={T.relMore} title={T.relMore} href={L('/hadees/')} linkLabel={collLabel} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/hadees/${r.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
@@ -124,13 +132,13 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4);
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More hadees">
         {prevH ? (
           <a href={L(`/hadees/${prevH.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Previous hadees</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevH.num}. {prevH.title}</span>
           </a>
         ) : <span />}
         {nextH && (
           <a href={L(`/hadees/${nextH.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Next hadees →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextH.num}. {nextH.title}</span>
           </a>
         )}

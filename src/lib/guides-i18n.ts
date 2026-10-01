@@ -4,8 +4,7 @@
  */
 import { GUIDES_UR_1 } from '../data/i18n/guides-ur-1';
 import { GUIDES_UR_2 } from '../data/i18n/guides-ur-2';
-import { GUIDES_UR_3, GUIDE_CATS_UR } from '../data/i18n/guides-ur-3';
-import { GUIDES_UR_4 } from '../data/i18n/guides-ur-4';
+import { GUIDES_UR_3, GUIDE_CATS_UR } from '../data/i18n/guides-ur-3';import { GUIDES_UR_4 } from '../data/i18n/guides-ur-4';
 import { GUIDES_UR_5 } from '../data/i18n/guides-ur-5';
 import { GUIDES_UR_6 } from '../data/i18n/guides-ur-6';
 import { GUIDES_UR_7 } from '../data/i18n/guides-ur-7';
@@ -21,6 +20,7 @@ import { GUIDES_AR_2 } from '../data/i18n/guides-ar-2';
 import { GUIDES_AR_3 } from '../data/i18n/guides-ar-3';
 import { GUIDES_AR_4 } from '../data/i18n/guides-ar-4';
 import { GUIDES_AR_5 } from '../data/i18n/guides-ar-5';
+import { GUIDE_CATS_HI, GUIDE_CATS_AR } from '../data/i18n/guide-cats-extra';
 
 export interface GuideOverlay {
   title?: string;
@@ -64,8 +64,14 @@ export function localizeGuideList(list: any[], locale: string): any[] {
 }
 
 export function localizeGuideCat(cat: any, locale: string): any {
-  if (locale !== 'ur' || !cat) return cat;
-  const ov = (GUIDE_CATS_UR as any)?.[cat.slug];
+  if (locale === 'en' || !cat) return cat;
+  if (locale === 'ur') {
+    const ov = (GUIDE_CATS_UR as any)?.[cat.slug];
+    if (!ov) return cat;
+    return { ...cat, ...(ov.title ? { title: ov.title } : {}), ...(ov.desc ? { desc: ov.desc } : {}) };
+  }
+  const maps: any = { hi: GUIDE_CATS_HI, ar: GUIDE_CATS_AR };
+  const ov = maps[locale]?.[cat.slug];
   if (!ov) return cat;
   return { ...cat, ...(ov.title ? { title: ov.title } : {}), ...(ov.desc ? { desc: ov.desc } : {}) };
 }

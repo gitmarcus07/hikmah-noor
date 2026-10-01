@@ -6,15 +6,19 @@ import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import SourcesBlock from './hn/SourcesBlock.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { guidesByCat, GUIDES } from '../data/guides';
 import { localizeGuide, localizeGuideList, localizeGuideCat } from '../lib/guides-i18n';
+import { localizeDua } from '../lib/duas-i18n';
+import { secUI3, GUIDE_UI } from '../lib/site-ui-3';
 import { getDua, duaCat } from '../data/duas';
 
 interface Props { guide: any; cat: any; locale: string; }
 const { locale } = Astro.props;
 const guide = localizeGuide((Astro.props as any).guide, locale);
 const cat = localizeGuideCat((Astro.props as any).cat, locale);
+const dict = getDict(locale);
+const T = secUI3(locale, GUIDE_UI);
 const L = (p: string) => localizedPath(locale, p);
 const guidePath = '/learn/' + guide.cat + '/' + guide.slug + '/';
 const catPath = '/learn/' + guide.cat + '/';
@@ -123,18 +127,18 @@ const duaLinks = (RELATED_DUAS[guide.slug] || [])
   .map((s) => {
     const hit = (['morning-evening','salah-prayer','travel-journey','food-drink','home-family','sleep-rest','health-protection','forgiveness','hardship-rizq','purity-cleanliness','worship-knowledge','hajj-umrah','daily-life','ramadan-fasting','prophets-duas','marriage','children','death-funeral','hereafter','protection','rabbana-duas'] as string[])
       .map((c) => getDua(c, s)).find(Boolean);
-    return hit;
+    return hit ? localizeDua(hit, locale) : null;
   })
   .filter(Boolean)
   .slice(0, 3);
 
-const title = guide.title + ' - Step by Step with Evidence';
+const title = guide.title + T.detSuffix;
 let description = guide.intro;
 if (description.length > 160) description = description.slice(0, 157) + '...';
 const keywords = guide.title.toLowerCase() + ', ' + (guide.aliases || []).join(', ');
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Learn', path: '/learn/' },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/learn/' },
   { name: cat.title, path: catPath },
   { name: guide.title, path: guidePath },
 ];
@@ -145,21 +149,21 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
   <div class="hn-article hn-section">
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 3)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <span class="hn-badge hn-badge-primary">Guide</span>
+      <span class="hn-badge hn-badge-primary">{T.detPrefix}</span>
       <span class="hn-badge">{cat.title}</span>
-      <span class="ms-auto flex gap-2 items-center no-print"><button onclick="window.print()" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-3.5 text-sm">🖨 Print / PDF</button><ShareButtons title={guide.title} path={guidePath} locale={locale} /></span>
+      <span class="ms-auto flex gap-2 items-center no-print"><button onclick="window.print()" class="hn-btn hn-btn-secondary !min-h-[40px] !py-2 !px-3.5 text-sm">{T.printL}</button><ShareButtons title={guide.title} path={guidePath} locale={locale} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{guide.title}</h1>
     <p class="mt-2 text-[16px] leading-8" style="color:var(--hn-muted)">{guide.intro}</p>
     {(guide.aliases || []).length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {(guide.aliases || []).map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {(guide.aliases || []).map((a: string, i: number) => (
         <span>{i > 0 && ' | '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
 
     {guide.steps && guide.steps.length > 0 && (
-      <section class="mt-6" aria-label="Steps">
-        <SectionHeader eyebrow="How to" title="Steps in order" />
+      <section class="mt-6" aria-label={T.stepsL}>
+        <SectionHeader eyebrow={T.stepsL} title={T.stepsL} />
         <ol class="space-y-3">
           {guide.steps.map((s: string, i: number) => (
             <li class="hn-card hn-card-pad flex gap-3">
@@ -183,8 +187,8 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
     <SourcesBlock locale={locale} source={guide.ref} reviewedDate="2026-01-01" />
 
     {guide.faq && guide.faq.length > 0 && (
-      <section class="mt-8" aria-label="Frequently asked questions">
-        <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <section class="mt-8" aria-label={dict.article.faq}>
+        <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
         <div class="space-y-3">
           {guide.faq.map((f: any) => (
             <details class="hn-faq">
@@ -197,8 +201,8 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
     )}
 
     {duaLinks.length > 0 && (
-      <section class="mt-8" aria-label="Related duas">
-        <SectionHeader eyebrow="Duas" title="Related duas" href={L('/duas/')} linkLabel="All duas" />
+      <section class="mt-8" aria-label={T.relDua}>
+        <SectionHeader eyebrow={T.relDua} title={T.relDua} href={L('/duas/')} linkLabel={T.relDuaLink} />
         <div class="grid gap-3 sm:grid-cols-2">
           {duaLinks.map((d: any) => (
             <a href={L('/duas/' + d.cat + '/' + d.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
@@ -211,8 +215,8 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
     )}
 
     {moreGuides.length > 0 && (
-      <section class="mt-8" aria-label="More guides">
-        <SectionHeader eyebrow="Learn" title="More guides" href={L('/learn/')} linkLabel="All guides" />
+      <section class="mt-8" aria-label={T.relMore}>
+        <SectionHeader eyebrow={T.relMore} title={T.relMore} href={L('/learn/')} linkLabel={T.relMoreLink} />
         <div class="grid gap-3 sm:grid-cols-2">
           {moreGuides.map((g: any) => (
             <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">

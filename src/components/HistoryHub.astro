@@ -5,55 +5,50 @@ import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import Icon from './Icon.astro';
 import HistoryArt from './HistoryArt.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { HISTORY, historyByEra } from '../data/history';
+import { localizeHistoryList } from '../lib/content-i18n';
+import { secUI2, HISTORY_UI } from '../lib/site-ui-2';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI2(locale, HISTORY_UI);
 const L = (p: string) => localizedPath(locale, p);
 
-const title = `Islamic History — 20 Landmark Events in Order (${HISTORY.length} events)`;
-const description = `All ${HISTORY.length} landmark events in order — Hijrah, Badr, Hudaybiyyah, Yarmuk, Cordoba, Baghdad, Hattin, Constantinople and more — with timelines, lessons and references. Each event has its own page.`;
-const keywords = 'islamic history, muslim history timeline, hijrah, badr, yarmuk, cordoba, baghdad house of wisdom, salahuddin, constantinople 1453, mughals, tarikh islam';
-const faq = [
-  { q: 'Which events are covered here?', a: '20 landmarks in chronological order: 5 prophetic-era, 5 Rashidun-era, 5 classical (Umayyad to Ayyubid), and 5 later (Mongols to the modern age). Open any event for the full story.' },
-  { q: 'Where do these accounts come from?', a: 'Widely transmitted histories (Ibn Hisham and Tabari traditions) and Sahih collections — named qualitatively. Sensitive episodes like the first fitna and Karbala are told factually and without partisanship; consult scholars for deeper study.' },
-  { q: 'How is this different from Seerat?', a: 'Seerat tells the Prophet’s ﷺ own life in 16 chapters. History continues the story: caliphs, empires, scholarship and revival across fourteen centuries.' },
-];
+const title = T.hubTitle;
+const description = T.hubDesc;
+const keywords = T.hubKw;
+const faq = T.hubFaq;
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'History', path: '/history/' },
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/history/' },
 ];
-const ERAS = [
-  { era: 'Prophetic', eyebrow: 'Era 1 — Prophetic', title: 'The Foundation', sub: 'Hijrah to the passing — the community is born.' },
-  { era: 'Rashidun', eyebrow: 'Era 2 — Rashidun', title: 'The First Generation', sub: 'Caliphs, compilation and conquests — the deen is secured.' },
-  { era: 'Classical', eyebrow: 'Era 3 — Classical', title: 'Empires & Scholarship', sub: 'Damascus to Jerusalem — dynasties rise, knowledge flowers.' },
-  { era: 'Later', eyebrow: 'Era 4 — Later', title: 'Trial & Renewal', sub: 'Mongols to the modern age — catastrophe survived, revival seeded.' },
-] as const;
+const ERAS = T.hubEras;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/history/">
   <div class="hn-discover hn-section">
     <Breadcrumbs locale={locale} items={crumbs} />
     <div class="mt-3 max-w-2xl">
       <div class="flex flex-wrap gap-2">
-        <span class="hn-badge hn-badge-primary">{HISTORY.length} events</span>
-        <span class="hn-badge">Hijrah to the modern age</span>
-        <span class="hn-badge">Timelines + lessons</span>
+        <span class="hn-badge hn-badge-primary">{HISTORY.length} {T.badgeN}</span>
+        <span class="hn-badge">{T.badge2}</span>
+        <span class="hn-badge">{T.badge3}</span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Islamic History — Tarikh</h1>
-      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Fourteen centuries in twenty landmarks — victories, trials, libraries and revivals. Tap any event for its own page.</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
       <form action={L('/search/')} method="get" class="mt-4" role="search">
         <div class="hn-searchwrap max-w-xl">
           <Icon name="search" size={19} />
-          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search history — e.g. badr, cordoba, 1453…" aria-label="Search history" />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
           <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
         </div>
       </form>
-      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">For the prophetic life, see the <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">16-chapter Seerat →</a></p>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.seeratLine} <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">{T.seeratLink}</a></p>
     </div>
 
-    {ERAS.map((e) => {
-      const list = historyByEra(e.era);
+    {ERAS.map((e: any) => {
+      const list = localizeHistoryList(historyByEra(e.era), locale);
       return (
         <div class="mt-8">
           <SectionHeader eyebrow={e.eyebrow} title={e.title} sub={e.sub} />
@@ -75,8 +70,8 @@ const ERAS = [
         </div>
       );
     })}
-    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
-      <h2 class="text-xl md:text-2xl font-extrabold mb-3">Frequently asked questions</h2>
+    <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
+      <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">

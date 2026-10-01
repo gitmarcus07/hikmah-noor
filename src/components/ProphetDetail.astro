@@ -7,29 +7,33 @@ import SectionHeader from './hn/SectionHeader.astro';
 import ProphetArt from './ProphetArt.astro';
 import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
-import { localizedPath } from '../i18n/utils';
+import { getDict, localizedPath } from '../i18n/utils';
 import { PROPHETS, prevProphet, nextProphet } from '../data/prophets';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
+import { secUI, secE, PROPHET_UI } from '../lib/site-ui-1';
 
 interface Props { prophet: any; locale: string; }
 const { locale } = Astro.props;
 const prophet = localizeStory((Astro.props as any).prophet, 'prophets', locale);
+const dict = getDict(locale);
+const T = secUI(locale, PROPHET_UI);
+const E = secE(locale);
 const L = (p: string) => localizedPath(locale, p);
 const prophetPath = `/prophets/${prophet.slug}/`;
 
-const title = `${prophet.title} — Story & Lessons`;
-let description = `${prophet.title}: ${prophet.summary} References: ${prophet.quranRef}.`;
+const title = `${prophet.title}${T.detSuffix}`;
+let description = `${prophet.title}: ${prophet.summary}`;
 if (description.length > 160) description = description.slice(0, 157) + '…';
 const keywords = `${prophet.title.toLowerCase()}, prophet ${prophet.name.toLowerCase()} islam, ${prophet.order} prophet story${prophet.aliases?.length ? `, ${prophet.aliases.join(', ')}` : ''}`;
 
 const faq = [
-  { q: `Who was Prophet ${prophet.name}?`, a: prophet.summary },
-  { q: `What are the lessons from ${prophet.name}’s story?`, a: prophet.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
-  { q: `Where is this story in the Quran?`, a: `References: ${prophet.quranRef}. Read the verses with translation; consult scholars for deeper rulings.` },
+  { q: T.detFaqWho.replace('{p}', prophet.name), a: prophet.summary },
+  { q: T.detFaqLes.replace('{p}', prophet.name), a: prophet.lessons.map((l: string, i: number) => `${i + 1}. ${l}`).join(' ') },
+  { q: T.detFaqWhere, a: `${prophet.quranRef}.` },
 ];
 const crumbs = [
-  { name: 'Home', path: '/' },
-  { name: 'Prophets', path: '/prophets/' },
+  { name: dict.nav.home, path: '/' },
+  { name: dict.nav.prophets ?? 'Prophets', path: '/prophets/' },
   { name: prophet.title, path: prophetPath },
 ];
 const WAQIAT_LINK: Record<string, string> = {
@@ -51,16 +55,16 @@ const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
   <div class="hn-article hn-section">
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
-      <span class="hn-badge hn-badge-primary">Prophet {prophet.order} of 25</span>
+      <span class="hn-badge hn-badge-primary">{T.badgeProphet.replace('{o}', String(prophet.order))}</span>
       <span class="hn-badge">{prophet.era}</span>
       <span class="hn-badge hn-badge-gold">{prophet.name}</span>
-      <span class="ms-auto"><BookmarkButton kind="prophet" bmRef={prophetPath} title={prophet.title} /></span>
+      <span class="ms-auto"><BookmarkButton kind="prophet" bmRef={prophetPath} title={prophet.title} locale={locale} /></span>
       <ShareButtons title={prophet.title} path={prophetPath} locale={locale} />
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{prophet.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{prophet.summary}</p>
     {prophet.aliases?.length > 0 && (
-      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">Also searched as: {prophet.aliases.map((a: string, i: number) => (
+      <p class="mt-2 text-[13px] leading-6" style="color:var(--hn-muted)">{T.alsoSearched} {prophet.aliases.map((a: string, i: number) => (
         <span>{i > 0 && ' • '}<em class="not-italic font-semibold" style="color:var(--hn-ink)">{a}</em></span>
       ))}</p>
     )}
@@ -70,29 +74,29 @@ const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
     </div>
 
     <div class="hn-reading-card">
-      <p class="hn-block-label">Emblematic verse</p>
+      <p class="hn-block-label">{T.emblemL}</p>
       <p class="arabic-block" lang="ar" dir="rtl">{prophet.arabic}</p>
       {prophet.translit && (
         <>
           <hr class="hn-divider" />
-          <p class="hn-block-label">Transliteration</p>
+          <p class="hn-block-label">{T.translitL}</p>
           <p class="translit-block">{prophet.translit}</p>
         </>
       )}
     </div>
 
-    <section class="mt-8" aria-label="The full story">
-      <SectionHeader eyebrow="Story" title="The full story" />
+    <section class="mt-8" aria-label={T.secStory}>
+      <SectionHeader eyebrow={E.story} title={T.secStory} />
       <div class="space-y-4">
         {(prophet.narrative || []).map((p: string) => (
           <p class="hn-card hn-card-pad leading-8 text-[15px]">{p}</p>
         ))}
       </div>
-      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">Narrated strictly from the Quran ({prophet.quranRef}) without invented details.</p>
+      <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.narratedL.replace('{r}', prophet.quranRef)}</p>
     </section>
 
-    <section class="mt-8" aria-label="The story in order">
-      <SectionHeader eyebrow="Timeline" title="The story in order" />
+    <section class="mt-8" aria-label={T.timelineL}>
+      <SectionHeader eyebrow={E.time} title={T.timelineL} />
       <ol class="space-y-3">
         {prophet.events.map((e: string, i: number) => (
           <li class="hn-card hn-card-pad flex gap-3">
@@ -103,22 +107,22 @@ const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
       </ol>
     </section>
 
-    <section class="mt-8" aria-label="Lessons">
-      <SectionHeader eyebrow="Reflect" title="Lessons" />
+    <section class="mt-8" aria-label={T.reflectL}>
+      <SectionHeader eyebrow={E.refl} title={T.reflectL} />
       <div class="hn-card hn-card-pad">
         <ul class="space-y-2.5 leading-7 text-[15px]">
           {prophet.lessons.map((l: string) => <li class="flex items-start gap-2.5"><span style="color:var(--hn-gold)" class="font-extrabold">✦</span><span>{l}</span></li>)}
         </ul>
       </div>
     </section>
-    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">References: <strong style="color:var(--hn-ink)">{prophet.quranRef}</strong></p>
-    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">Narrated from the Quran without invented details; consult scholars for rulings.</p>
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.refL} <strong style="color:var(--hn-ink)">{prophet.quranRef}</strong></p>
+    <p class="mt-1 text-[13px]" style="color:var(--hn-muted)">{T.consultL}</p>
     {waqiatSlug && (
-      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">Want the event-focused telling? <a href={L(`/waqiat/${waqiatSlug}/`)} class="font-bold" style="color:var(--hn-primary)">Read the Waqiat narrative →</a></p>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.waqiatQ} <a href={L(`/waqiat/${waqiatSlug}/`)} class="font-bold" style="color:var(--hn-primary)">{T.waqiatA}</a></p>
     )}
 
-    <section class="mt-8" aria-label="Frequently asked questions">
-      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+    <section class="mt-8" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
       <div class="space-y-3">
         {faq.map((f) => (
           <details class="hn-faq">
@@ -129,8 +133,8 @@ const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
       </div>
     </section>
 
-    <section class="mt-8" aria-label="More prophets">
-      <SectionHeader eyebrow="Prophets" title="More prophets" href={L('/prophets/')} linkLabel="All 25 prophets" />
+    <section class="mt-8" aria-label={T.moreTitle}>
+      <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/prophets/')} linkLabel={T.moreLink} />
       <div class="grid gap-3 sm:grid-cols-2">
         {others.map((r) => (
           <a href={L(`/prophets/${r.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
@@ -148,13 +152,13 @@ const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More prophets">
         {prevP ? (
           <a href={L(`/prophets/${prevP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">← Prophet {prevP.order}</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL.replace('{o}', String(prevP.order))}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{prevP.title}</span>
           </a>
         ) : <span />}
         {nextP && (
           <a href={L(`/prophets/${nextP.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
-            <span class="text-xs font-bold" style="color:var(--hn-muted)">Prophet {nextP.order} →</span>
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL.replace('{o}', String(nextP.order))}</span>
             <span class="font-bold block text-[15px] leading-6 mt-0.5">{nextP.title}</span>
           </a>
         )}
