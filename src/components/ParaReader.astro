@@ -335,7 +335,11 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
 
       let icon = '▶', label = 'Play para', aria = 'Play para';
       if (sameQueue(st)) {
-        if (st.status === 'playing') {
+        if (st.status === 'loading') {
+          icon = '⏳';
+          label = `Preparing… ${Math.round(st.progress * 100)}%`;
+          aria = 'Preparing audio';
+        } else if (st.status === 'playing') {
           icon = '⏸';
           label = st.phase === 'translation' ? 'Translation…' : 'Playing…';
           aria = 'Pause para';
@@ -354,13 +358,15 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
       playAll.setAttribute('aria-label', aria);
       if (statusEl) {
         statusEl.textContent = sameQueue(st) && st.current
-          ? st.status === 'playing'
-            ? `Playing ${st.current.surah}:${st.current.verse}`
-            : st.status === 'paused'
-              ? `Paused ${st.current.surah}:${st.current.verse}`
-              : st.status === 'ended'
-                ? 'Playback complete'
-                : ''
+          ? st.status === 'loading'
+            ? `Preparing audio… ${Math.round(st.progress * 100)}%`
+            : st.status === 'playing'
+              ? `Playing ${st.current.surah}:${st.current.verse}`
+              : st.status === 'paused'
+                ? `Paused ${st.current.surah}:${st.current.verse}`
+                : st.status === 'ended'
+                  ? 'Playback complete'
+                  : ''
           : '';
       }
     }
