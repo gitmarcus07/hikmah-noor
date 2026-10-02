@@ -29,8 +29,24 @@ const kalimasTxt = await read('src/data/kalimas.ts');
 const womenTxt = await read('src/data/women.ts');
 const quizzesTxt = await read('src/data/quizzes.ts');
 const toolsTxt = await read('src/lib/finance/tools.js');
+const namesAllahTxt = await read('src/data/names-allah.ts');
+const namesProphetTxt = await read('src/data/names-prophet.ts');
 const relationsTxt = await read('src/data/relations.ts');
 const surahsMeta = JSON.parse(await read('src/data/surahs-meta.json'));
+
+/** Slugify mirror of src/data/names.ts nameSlug (+ Majid overrides). */
+const nameSlugify = (s) => s.toLowerCase().replace(/[’‘'`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const parseNames = (txt, overrides = {}) => {
+  const rows = [...txt.matchAll(/\{ n: (\d+), arabic: ('[^']*'|"[^"]*"), translit: ('[^']*'|"[^"]*"), meaning: ('[^']*'|"[^"]*") \}/g)]
+    .map((m) => ({ n: +m[1], translit: m[3].slice(1, -1) }));
+  const seen = new Set();
+  return new Set(rows.map((r) => {
+    let slug = overrides[r.n] ?? nameSlugify(r.translit);
+    if (seen.has(slug)) slug = `${r.n}-${slug}`;
+    seen.add(slug);
+    return slug;
+  }));
+};
 
 /** slug sets per content type */
 const S = {
@@ -52,6 +68,8 @@ const S = {
   quiz: new Set([...quizzesTxt.matchAll(/\{ slug: '([^']+)', cat: '([^']+)'/g)].map((m) => m[1])),
   tool: new Set([...toolsTxt.matchAll(/\bslug: '([^']+)', cat: '([^']+)'/g)].map((m) => m[1])),
   surah: new Set(surahsMeta.map((s) => s.slug)),
+  'allah-name': parseNames(namesAllahTxt, { 49: '49-al-majid', 66: '66-al-majid' }),
+  'prophet-name': parseNames(namesProphetTxt),
 };
 
 for (const [t, set] of Object.entries(S)) {
@@ -108,6 +126,18 @@ for (const m of (relationsTxt.match(/const GUIDE_TOOLS[\s\S]*?^};/m)?.[0] ?? '')
   if (!S.guide.has(m[1])) fail(`GUIDE_TOOLS source guide not found: ${m[1]}`);
   for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
     if (!S.tool.has(s[1])) fail(`GUIDE_TOOLS target tool not found: ${s[1]} (from guide ${m[1]})`);
+  }
+}
+for (const m of (relationsTxt.match(/const ALLAH_MEANINGS[\s\S]*?^};/m)?.[0] ?? '').matchAll(/'([\w-]+)': \[([^\]]*)\]/g)) {
+  if (!S['allah-name'].has(m[1])) fail(`ALLAH_MEANINGS source name not found: ${m[1]}`);
+  for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
+    if (!S.meaning.has(s[1])) fail(`ALLAH_MEANINGS target meaning not found: ${s[1]} (from ${m[1]})`);
+  }
+}
+for (const m of (relationsTxt.match(/const PROPHET_NAME_SURAHS[\s\S]*?^};/m)?.[0] ?? '').matchAll(/'([\w-]+)': \[([^\]]*)\]/g)) {
+  if (!S['prophet-name'].has(m[1])) fail(`PROPHET_NAME_SURAHS source name not found: ${m[1]}`);
+  for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
+    if (!S.surah.has(s[1])) fail(`PROPHET_NAME_SURAHS target surah not found: ${s[1]} (from ${m[1]})`);
   }
 }
 

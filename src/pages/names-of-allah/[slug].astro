@@ -1,0 +1,11 @@
+---
+import AllahNameDetail from '../../components/AllahNameDetail.astro';
+import { ALLAH, allahBySlug } from '../../data/names';
+
+export async function getStaticPaths() {
+  return ALLAH.map((e) => ({ params: { slug: e.slug } }));
+}
+const entry = allahBySlug(Astro.params.slug as string);
+const locale = 'en';
+---
+<AllahNameDetail entry={entry} locale={locale} />

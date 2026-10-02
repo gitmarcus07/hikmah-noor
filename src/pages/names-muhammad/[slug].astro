@@ -1,0 +1,11 @@
+---
+import ProphetNameDetail from '../../components/ProphetNameDetail.astro';
+import { PROPHET, prophetNameBySlug } from '../../data/names';
+
+export async function getStaticPaths() {
+  return PROPHET.map((e) => ({ params: { slug: e.slug } }));
+}
+const entry = prophetNameBySlug(Astro.params.slug as string);
+const locale = 'en';
+---
+<ProphetNameDetail entry={entry} locale={locale} />

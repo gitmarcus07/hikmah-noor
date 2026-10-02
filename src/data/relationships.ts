@@ -26,7 +26,9 @@ export type ContentType =
   | 'tool'
   | 'quiz'
   | 'article'
-  | 'women';
+  | 'women'
+  | 'allah-name'
+  | 'prophet-name';
 
 export type RelationshipKind =
   | 'related-duas'
@@ -43,7 +45,9 @@ export type RelationshipKind =
   | 'related-kalimas'
   | 'related-quizzes'
   | 'related-women'
-  | 'related-articles';
+  | 'related-articles'
+  | 'related-allah-names'
+  | 'related-prophet-names';
 
 /** A single directed edge: source entity -> target entity. */
 export interface Relationship {
@@ -103,6 +107,8 @@ export function kindForType(type: ContentType): RelationshipKind {
     case 'quiz': return 'related-quizzes';
     case 'women': return 'related-women';
     case 'article': return 'related-articles';
+    case 'allah-name': return 'related-allah-names';
+    case 'prophet-name': return 'related-prophet-names';
     default: return 'related-articles';
   }
 }
@@ -201,6 +207,10 @@ export function resolveRelationshipUrl(locale: string, rel: Relationship): strin
       return `${base}/articles/${rel.category ?? 'general'}/${rel.slug}/`;
     case 'women':
       return `${base}/women/${rel.slug}/`;
+    case 'allah-name':
+      return `${base}/names-of-allah/${rel.slug}/`;
+    case 'prophet-name':
+      return `${base}/names-muhammad/${rel.slug}/`;
     default:
       return `${base}/`;
   }
@@ -228,6 +238,8 @@ export const RELATIONSHIP_KIND_LABELS: Record<RelationshipKind, string> = {
   'related-quizzes': 'Quizzes',
   'related-women': 'Noble Women',
   'related-articles': 'Articles',
+  'related-allah-names': 'Names of Allah',
+  'related-prophet-names': 'Names of Muhammad ﷺ',
 };
 
 /** Hub URL per relationship kind (for "view all" links). */
@@ -248,6 +260,8 @@ export function hubUrlForKind(kind: RelationshipKind): string {
     case 'related-quizzes': return '/quiz/';
     case 'related-women': return '/women/';
     case 'related-articles': return '/articles/';
+    case 'related-allah-names': return '/names-of-allah/';
+    case 'related-prophet-names': return '/names-muhammad/';
     default: return '/';
   }
 }
@@ -295,6 +309,7 @@ export function validateRelationships(): ValidationIssue[] {
   const validTypes: ContentType[] = [
     'dua', 'waqiah', 'prophet', 'guide', 'seerah', 'sahaba', 'hadees',
     'meaning', 'history', 'kalima', 'surah', 'tool', 'quiz', 'article', 'women',
+    'allah-name', 'prophet-name',
   ];
   const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article'];
 

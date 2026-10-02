@@ -1,0 +1,93 @@
+---
+/* Allah-name detail — one SEO page per name: Arabic + transliteration +
+ * localized meaning, shared Tirmidhi-enumeration source, related resources.
+ * Only verified data is rendered: no invented explanations or references. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import ShareButtons from './hn/ShareButtons.astro';
+import RelatedContent from './RelatedContent.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { secUI } from '../lib/site-ui-1';
+import { ALLAH_UI } from '../lib/site-ui-1';
+import { prevAllah, nextAllah } from '../data/names';
+import { localizeAllahName } from '../lib/content-i18n';
+
+interface Props { entry: any; locale: string; }
+const { locale } = Astro.props;
+const raw = (Astro.props as any).entry;
+const entry = localizeAllahName(raw, locale);
+const dict = getDict(locale);
+const T = secUI(locale, ALLAH_UI);
+const L = (p: string) => localizedPath(locale, p);
+const entryPath = `/names-of-allah/${entry.slug}/`;
+
+const title = T.detTitle.replace('{t}', entry.translit);
+let description = T.detDesc.replace('{t}', entry.translit).replace('{m}', entry.meaning);
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${entry.translit.toLowerCase()}, ${entry.meaning.toLowerCase()}, names of allah, asma ul husna, name ${entry.n} of 99`;
+
+const faq = [
+  { q: T.faqMeaningQ.replace('{t}', entry.translit), a: `${entry.meaning} — ${T.badgeDet.replace('{n}', String(entry.n))}.` },
+  { q: T.faqSrcQ, a: T.srcNote },
+  { q: T.faqUseQ, a: T.faqUseA },
+];
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/names-of-allah/' },
+  { name: entry.translit, path: entryPath },
+];
+const prev = prevAllah(entry.n) ? localizeAllahName(prevAllah(entry.n), locale) : null;
+const next = nextAllah(entry.n) ? localizeAllahName(nextAllah(entry.n), locale) : null;
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={entryPath}>
+  <div class="hn-read hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">{T.badgeDet.replace('{n}', String(entry.n))}</span>
+      <span class="hn-badge hn-badge-gold">{entry.n} / 99</span>
+      <span class="ms-auto"><ShareButtons title={entry.translit} path={entryPath} locale={locale} /></span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{entry.translit}</h1>
+
+    <div class="hn-reading-card mt-5">
+      <p class="arabic-block" lang="ar" dir="rtl">{entry.arabic}</p>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">{T.meaningL}</p>
+      <p class="text-[17px] font-bold leading-8">{entry.meaning}</p>
+    </div>
+
+    <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.srcL}: <strong style="color:var(--hn-ink)">{T.srcNote}</strong></p>
+
+    <RelatedContent type="allah-name" slug={entry.slug} locale={locale} />
+
+    <section class="mt-8" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    {(prev || next) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More names">
+        {prev ? (
+          <a href={L(`/names-of-allah/${prev.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{prev.n}. {prev.translit}</span>
+          </a>
+        ) : <span />}
+        {next && (
+          <a href={L(`/names-of-allah/${next.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{next.n}. {next.translit}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>

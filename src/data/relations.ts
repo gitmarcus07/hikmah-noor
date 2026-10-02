@@ -40,6 +40,7 @@ import { WOMEN } from './women';
 import { QUIZZES, QUIZ_CATS } from './quizzes';
 import { TOOLS, CATS as TOOL_CATS } from '../lib/finance/tools.js';
 import surahsMeta from './surahs-meta.json';
+import { ALLAH, PROPHET } from './names';
 
 /* ------------------------------------------------------------------ */
 /* 1. Entity registration (single central place; no per-module edits)  */
@@ -65,6 +66,8 @@ for (const c of QUIZ_CATS) registerEntity('quiz', c.slug);
 for (const t of TOOLS as any[]) registerEntity('tool', t.slug, t.cat);
 for (const c of TOOL_CATS as any[]) registerEntity('tool', c.slug);
 for (const s of surahsMeta as any[]) registerEntity('surah', s.slug);
+for (const e of ALLAH) registerEntity('allah-name', e.slug);
+for (const e of PROPHET) registerEntity('prophet-name', e.slug);
 
 /* ------------------------------------------------------------------ */
 /* 2. Target lookup (enrichment from source of truth)                  */
@@ -88,6 +91,8 @@ const KALIMA_BY_SLUG = new Map(KALIMAS.map((k) => [k.slug, k]));
 const WOMAN_BY_SLUG = new Map(WOMEN.map((w) => [w.slug, w]));
 const QUIZ_BY_SLUG = new Map(QUIZZES.map((q) => [q.slug, q]));
 const TOOL_BY_SLUG = new Map((TOOLS as any[]).map((t) => [t.slug, t]));
+const ALLAH_BY_SLUG = new Map(ALLAH.map((e) => [e.slug, e]));
+const PROPHET_NAME_BY_SLUG = new Map(PROPHET.map((e) => [e.slug, e]));
 const SURAH_BY_SLUG = new Map((surahsMeta as any[]).map((s) => [s.slug, s]));
 const SURAH_BY_NUM = new Map((surahsMeta as any[]).map((s) => [s.num, s]));
 
@@ -149,6 +154,14 @@ export function lookupTarget(type: ContentType, slug: string): TargetInfo | null
     case 'women': {
       const w = WOMAN_BY_SLUG.get(slug);
       return w ? { title: w.title } : null;
+    }
+    case 'allah-name': {
+      const e = ALLAH_BY_SLUG.get(slug);
+      return e ? { title: e.translit } : null;
+    }
+    case 'prophet-name': {
+      const e = PROPHET_NAME_BY_SLUG.get(slug);
+      return e ? { title: e.translit } : null;
     }
     default:
       return null;
@@ -640,6 +653,33 @@ const HADEES_LINKS: Record<string, RelationshipDecl[]> = {
   ],
 };
 
+/** 5i. Allah-name -> meaning (same divine attribute; verified by shared root concept). */
+const ALLAH_MEANINGS: Record<string, string[]> = {
+  'ar-rahman': ['rahmah'],
+  'ar-rahim': ['rahmah'],
+  'al-mumin': ['iman'],
+  'al-ghaffar': ['tawbah'],
+  'al-ghafur': ['tawbah'],
+  'at-tawwab': ['tawbah'],
+  'al-afuww': ['tawbah'],
+  'ar-razzaq': ['rizq'],
+  'al-hakam': ['adl'],
+  'al-adl': ['adl'],
+  'al-muqsit': ['adl'],
+  'ash-shakur': ['shukr'],
+  'as-sabur': ['sabr'],
+};
+
+/** 5j. Prophet-name (Quranic address) -> surah named by / containing the address. */
+const PROPHET_NAME_SURAHS: Record<string, string[]> = {
+  'taha': ['20-taa-haa'],
+  'yasin': ['36-yaseen'],
+  'muhammad': ['47-muhammad'],
+  'ahmad': ['61-as-saff'],
+  'muzammil': ['73-al-muzzammil'],
+  'mudaththir': ['74-al-muddaththir'],
+};
+
 /* ------------------------------------------------------------------ */
 /* 6. Assembly                                                         */
 /* ------------------------------------------------------------------ */
@@ -730,6 +770,12 @@ for (const [slug, decls] of Object.entries(HISTORY_LINKS)) addEntry('history', s
 for (const [slug, decls] of Object.entries(SAHABA_LINKS)) addEntry('sahaba', slug, decls);
 for (const [slug, decls] of Object.entries(WOMEN_LINKS)) addEntry('women', slug, decls);
 for (const [slug, decls] of Object.entries(HADEES_LINKS)) addEntry('hadees', slug, decls);
+for (const [slug, meanings] of Object.entries(ALLAH_MEANINGS)) {
+  addEntry('allah-name', slug, meanings.map((s) => ({ type: 'meaning' as ContentType, slug: s, reason: 'Shares this divine attribute' })));
+}
+for (const [slug, surahs] of Object.entries(PROPHET_NAME_SURAHS)) {
+  addEntry('prophet-name', slug, surahs.map((s) => ({ type: 'surah' as ContentType, slug: s, reason: 'Quranic address in this surah' })));
+}
 for (const [slug, decls] of Object.entries(QUIZ_LINKS)) addEntry('quiz', slug, decls);
 for (const [tSlug, gSlugs] of Object.entries(TOOL_GUIDES)) {
   const t = TOOL_BY_SLUG.get(tSlug);

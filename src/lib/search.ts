@@ -557,6 +557,54 @@ export function seerahIndexItems(locale: string): IndexItem[] {
 import { GUIDES, GUIDE_CATS } from '../data/guides';
 import { localizeGuide, localizeGuideCat } from './guides-i18n';
 import { HISTORY } from '../data/history';
+import { ALLAH, PROPHET } from '../data/names';
+import { localizeAllahName, localizeProphetName } from './content-i18n';
+
+/** Names hubs + individual name entries for a locale. */
+export function namesIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [
+    {
+      title: '99 Names of Allah (Asma-ul-Husna) with Meaning',
+      description: 'All 99 names of Allah in Arabic with transliteration and meaning — from Ar-Rahman to As-Sabur. Each name has its own page.',
+      category: 'names',
+      url: prefix + '/names-of-allah/',
+      tags: ['names', 'allah', 'asma ul husna', '99 names', 'ar rahman', 'asmaul husna'],
+      locale,
+    },
+    {
+      title: '99 Names of Prophet Muhammad ﷺ with Meaning',
+      description: 'All 99 names and titles of Prophet Muhammad ﷺ in Arabic with transliteration and meaning — Muhammad, Ahmad, Mustafa and more.',
+      category: 'names',
+      url: prefix + '/names-muhammad/',
+      tags: ['names', 'prophet', 'muhammad', 'asma un nabi', '99 names', 'ahmad', 'mustafa'],
+      locale,
+    },
+  ];
+  for (const e of ALLAH) {
+    const m: string = locale === 'en' ? e.meaning : (localizeAllahName(e, locale).meaning ?? e.meaning);
+    items.push({
+      title: `${e.translit} — Name ${e.n} of Allah`,
+      description: `${m} Arabic: ${e.arabic}. One of the 99 names of Allah (Asma-ul-Husna).`,
+      category: 'names',
+      url: `${prefix}/names-of-allah/${e.slug}/`,
+      tags: [...new Set(['names', 'allah', 'asma ul husna', `name ${e.n}`, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      locale,
+    });
+  }
+  for (const e of PROPHET) {
+    const m: string = locale === 'en' ? e.meaning : (localizeProphetName(e, locale).meaning ?? e.meaning);
+    items.push({
+      title: `${e.translit} — Name of Prophet Muhammad ﷺ`,
+      description: `${m} Arabic: ${e.arabic}. One of the 99 names and titles of Prophet Muhammad ﷺ.`,
+      category: 'names',
+      url: `${prefix}/names-muhammad/${e.slug}/`,
+      tags: [...new Set(['names', 'prophet', 'muhammad', 'asma un nabi', `name ${e.n}`, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
 
 /** History hub + individual event entries for a locale. */
 export function historyIndexItems(locale: string): IndexItem[] {
