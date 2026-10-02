@@ -324,8 +324,10 @@ const mobileGroups = [
 
   {/* ============ GLOBAL QURAN AUDIO MINI-PLAYER ============ */}
   {/* Persistent host: the single <audio> element lives here and is carried
-      across client-side navigation by Astro's transition:persist. */}
-  <div id="hn-audio-host" transition:persist="hn-audio-host" hidden></div>
+      across client-side navigation by Astro's transition:persist. Kept in the
+      render tree (offscreen 1px, NOT display:none) so the browser always treats
+      the media element as active. */}
+  <div id="hn-audio-host" transition:persist="hn-audio-host" aria-hidden="true" style="position:fixed;width:1px;height:1px;left:-9999px;top:0;overflow:hidden;pointer-events:none"></div>
   <div id="hnPlayer" transition:persist="hn-player" class="hidden fixed inset-x-0 z-40 px-3" role="region" aria-label="Quran audio player">
     <div class="hn-card mx-auto max-w-2xl px-2.5 py-2 flex items-center gap-2" style="box-shadow:var(--hn-shadow-lg)">
       <button type="button" data-hp-prev class="hn-icon-btn !w-10 !h-10 !rounded-full" aria-label="Previous verse">⏮</button>

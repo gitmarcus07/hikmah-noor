@@ -168,7 +168,9 @@ export const setTextResolver = (fn: TextResolver | null): void => {
 /* ------------------------------- elements --------------------------------- */
 
 const AR = document.createElement('audio');
-AR.preload = 'metadata';
+// 'auto' lets the browser keep more of the current verse buffered. This matters
+// when Android throttles the network while the screen is locked.
+AR.preload = 'auto';
 AR.setAttribute('playsinline', '');
 AR.setAttribute('aria-hidden', 'true');
 AR.id = 'hn-quran-audio';
@@ -177,6 +179,14 @@ const TR = document.createElement('audio');
 TR.preload = 'none';
 TR.setAttribute('aria-hidden', 'true');
 TR.id = 'hn-quran-tr-audio';
+
+// Warms the HTTP cache for the NEXT Arabic verse so the verse boundary does not
+// have to hit the network (Android can throttle it while the screen is locked).
+// One extra element reused for every verse — never hundreds.
+const PRE = document.createElement('audio');
+PRE.preload = 'auto';
+PRE.setAttribute('aria-hidden', 'true');
+PRE.id = 'hn-quran-preload';
 
 /** The persistent host keeps the audio across client-side navigation. */
 function audioHost(): HTMLElement {
@@ -190,6 +200,7 @@ function ensureMounted(): void {
   if (!host) return;
   if (AR.parentNode !== host) host.appendChild(AR);
   if (TR.parentNode !== host) host.appendChild(TR);
+  if (PRE.parentNode !== host) host.appendChild(PRE);
 }
 
 if (typeof document !== 'undefined') {
@@ -208,9 +219,119 @@ let pendingSeek: number | null = null;
 let hasSaved = false;
 /** True while we swap the audio source, so the transient pause event is ignored. */
 let switching = false;
+/** True only when the user explicitly paused — blocks auto-recovery from resuming. */
+let userPaused = false;
+/** Bounded retries for a transient (usually network) audio error on one verse. */
+let errorRetries = 0;
 
 const subs = new Set<(state: PlayerState) => void>();
 let saveTimer = 0;
+
+/* ------------------------------- diagnostics ------------------------------ */
+/* Opt-in only, so production stays quiet. Enable with ?hnaudio=1 on the URL, or
+   localStorage.setItem('hn.audioDebug','1'). Logs go to the console and are
+   also kept on window.__hnAudioDebug (last 250 entries) for remote debugging. */
+const DEBUG_ENABLED = (() => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('hnaudio') === '1') sessionStorage.setItem('hn.audioDebug', '1');
+    if (params.get('hnaudio') === '0') sessionStorage.removeItem('hn.audioDebug');
+    return sessionStorage.getItem('hn.audioDebug') === '1' || localStorage.getItem('hn.audioDebug') === '1';
+  } catch {
+    return false;
+  }
+})();
+
+function audioSnapshot(extra?: Record<string, unknown>): Record<string, unknown> {
+  const ms = mediaSession();
+  return {
+    at: new Date().toISOString(),
+    visibility: document.visibilityState,
+    hidden: document.hidden,
+    paused: AR.paused,
+    ended: AR.ended,
+    readyState: AR.readyState,
+    networkState: AR.networkState,
+    currentTime: Math.round(AR.currentTime * 1000) / 1000,
+    duration: Number.isFinite(AR.duration) ? Math.round(AR.duration * 1000) / 1000 : null,
+    src: AR.currentSrc || AR.src || null,
+    error: AR.error ? { code: AR.error.code, message: AR.error.message } : null,
+    appStatus: status,
+    phase,
+    index,
+    total: items.length,
+    reciter,
+    userPaused,
+    mediaSession: ms ? ms.playbackState : 'unsupported',
+    ...extra,
+  };
+}
+
+function debugLog(event: string, extra?: Record<string, unknown>): void {
+  if (!DEBUG_ENABLED) return;
+  const entry = { event, ...audioSnapshot(extra) };
+  try {
+    const w = window as unknown as { __hnAudioDebug?: Record<string, unknown>[] };
+    if (!w.__hnAudioDebug) w.__hnAudioDebug = [];
+    w.__hnAudioDebug.push(entry);
+    if (w.__hnAudioDebug.length > 250) w.__hnAudioDebug.splice(0, w.__hnAudioDebug.length - 250);
+  } catch {
+    /* ignore */
+  }
+  console.info('[QURAN AUDIO DEBUG]', event, entry);
+}
+
+function startDiagnostics(): void {
+  if (!DEBUG_ENABLED) return;
+  // Read the captured log with window.__hnAudioDump() over chrome://inspect.
+  (window as unknown as { __hnAudioDump?: () => string }).__hnAudioDump = () =>
+    JSON.stringify((window as unknown as { __hnAudioDebug?: unknown[] }).__hnAudioDebug || [], null, 2);
+  const arEvents = [
+    'loadstart', 'durationchange', 'loadedmetadata', 'loadeddata', 'canplay', 'canplaythrough',
+    'play', 'playing', 'pause', 'ended', 'error', 'stalled', 'waiting', 'suspend', 'abort',
+    'emptied', 'seeking', 'seeked', 'ratechange', 'volumechange',
+  ];
+  for (const ev of arEvents) AR.addEventListener(ev, () => debugLog(`ar:${ev}`));
+  let lastProgressLog = 0;
+  AR.addEventListener('timeupdate', () => {
+    const now = Date.now();
+    if (now - lastProgressLog > 5000) {
+      lastProgressLog = now;
+      debugLog('ar:timeupdate');
+    }
+  });
+  TR.addEventListener('ended', () => debugLog('tr:ended'));
+  TR.addEventListener('error', () => debugLog('tr:error'));
+  document.addEventListener('visibilitychange', () => debugLog('document:visibilitychange'));
+  document.addEventListener('freeze', () => debugLog('document:freeze'));
+  document.addEventListener('resume', () => debugLog('document:resume'));
+  window.addEventListener('pagehide', () => debugLog('window:pagehide'));
+  window.addEventListener('pageshow', () => debugLog('window:pageshow'));
+  window.addEventListener('blur', () => debugLog('window:blur'));
+  window.addEventListener('focus', () => debugLog('window:focus'));
+  window.addEventListener('online', () => debugLog('window:online'));
+  window.addEventListener('offline', () => debugLog('window:offline'));
+
+  // Classify a stop: does the element still think it is playing? Is it paused,
+  // ended, or errored? A frozen currentTime while not paused/hidden points at a
+  // stall or suspended JS rather than a media-element pause.
+  let lastTime = AR.currentTime;
+  let lastChange = Date.now();
+  window.setInterval(() => {
+    if (AR.paused || AR.ended || AR.error) return;
+    if (Math.abs(AR.currentTime - lastTime) > 0.01) {
+      lastTime = AR.currentTime;
+      lastChange = Date.now();
+      return;
+    }
+    if (Date.now() - lastChange < 2500) return;
+    debugLog('UNEXPECTED STOP — currentTime frozen while the element believes it is playing', {
+      case: document.hidden ? 'B/E' : 'B',
+      hint: 'B/E: media stall or suspended page JS. Compare networkState/readyState above.',
+    });
+  }, 1000);
+}
 
 function currentItem(): QueueItem | null {
   return items[index] ?? null;
@@ -393,6 +514,46 @@ function restore(): void {
 
 /* ------------------------------- playback --------------------------------- */
 
+/** Warm the cache for the next Arabic verse (one reused element). */
+function prefetchNext(): void {
+  if (phase !== 'arabic') return;
+  const next = items[index + 1];
+  if (!next) return;
+  const url = verseAudioUrl(reciter, next.surah, next.verse);
+  try {
+    if (PRE.getAttribute('src') !== url) {
+      PRE.setAttribute('src', url);
+      PRE.load();
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * If the page was suspended while audio was expected to keep playing, the file
+ * may have ended (or been paused by the browser) without our JS running. When
+ * the page is active again, continue from the right place instead of staying
+ * stuck. Never resumes after a deliberate user pause.
+ */
+function recoverIfNeeded(why: string): void {
+  if (!items.length || userPaused) return;
+  if (status === 'idle' || status === 'ended') return;
+  if (AR.ended) {
+    debugLog('recover:advance', { why });
+    advance(1);
+    return;
+  }
+  if (AR.paused) {
+    debugLog('recover:play', { why });
+    AR.play().catch(() => {});
+    return;
+  }
+  if (AR.readyState < 3 && document.visibilityState === 'visible') {
+    AR.play().catch(() => {});
+  }
+}
+
 function playIndex(i: number, autoplay: boolean): void {
   if (!items.length) {
     finish();
@@ -405,15 +566,21 @@ function playIndex(i: number, autoplay: boolean): void {
   switching = true;
   AR.src = verseAudioUrl(reciter, it.surah, it.verse);
   status = autoplay ? 'playing' : 'paused';
+  if (autoplay) userPaused = false;
+  errorRetries = 0;
   hasSaved = true;
   emit();
+  prefetchNext();
   if (autoplay) {
     AR.play().then(
       () => {
         status = 'playing';
         emit();
       },
-      () => {
+      (err: unknown) => {
+        debugLog('play-rejected', {
+          reason: err instanceof Error ? `${err.name}: ${err.message}` : String(err),
+        });
         status = 'paused';
         emit();
       },
@@ -524,6 +691,7 @@ function startQueue(newItems: QueueItem[], startIndex: number, newMeta: QueueMet
 
 function pause(): void {
   if (status !== 'playing') return;
+  userPaused = true;
   try {
     if (phase === 'translation') {
       if (trMode === 'hi') {
@@ -544,6 +712,7 @@ function pause(): void {
 
 function play(): void {
   if (!items.length) return;
+  userPaused = false;
   if (status === 'ended') {
     playIndex(0, true);
     return;
@@ -708,12 +877,29 @@ AR.addEventListener('ended', () => {
 
 AR.addEventListener('error', () => {
   if (!items.length) return;
+  debugLog('ar:error-handler', { code: AR.error ? AR.error.code : null, retries: errorRetries });
+  // A transient network failure must NOT consume the whole queue and end
+  // playback. Retry the SAME verse a few times before moving on.
+  const it = currentItem();
+  if (!it) return;
+  if (errorRetries < 3 && navigator.onLine !== false) {
+    errorRetries += 1;
+    window.setTimeout(() => {
+      switching = true;
+      AR.src = verseAudioUrl(reciter, it.surah, it.verse);
+      AR.play().catch(() => {});
+    }, 800 * errorRetries);
+    return;
+  }
+  errorRetries = 0;
   if (status === 'paused') return;
-  // A single broken file must not kill the queue — move on.
+  // Give up on this file and move on — a single broken file must not kill the queue.
   advance(1);
 });
 
 AR.addEventListener('play', () => {
+  errorRetries = 0;
+  userPaused = false;
   status = 'playing';
   emit();
 });
@@ -743,9 +929,17 @@ TR.addEventListener('error', () => {
    keep playing when the tab is hidden, Chrome is minimised or the phone locks.
    We only persist the position when the page goes away. */
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) saveNow();
+  if (document.hidden) {
+    saveNow();
+    return;
+  }
+  // Back in the foreground: self-heal if the lock/interruption stopped us.
+  recoverIfNeeded('visible');
 });
 window.addEventListener('pagehide', saveNow);
+window.addEventListener('pageshow', () => recoverIfNeeded('pageshow'));
+document.addEventListener('resume', () => recoverIfNeeded('resume'));
+window.addEventListener('online', () => recoverIfNeeded('online'));
 
 /* ------------------------------ mini-player ------------------------------- */
 
@@ -871,6 +1065,7 @@ document.addEventListener('astro:page-load', onPageLifecycle);
 /* --------------------------------- init ----------------------------------- */
 
 registerMediaHandlers();
+startDiagnostics();
 forceReloadOutsideQuran();
 restore();
 if (document.readyState === 'loading') {
