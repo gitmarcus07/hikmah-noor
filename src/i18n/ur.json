@@ -93,6 +93,24 @@
     "share": "شیئر کریں",
     "toc": "اس صفحے پر"
   },
+  "relViewAll": "سب دیکھیں",
+  "relGroups": {
+    "related-duas": "متعلقہ دعائیں",
+    "related-quran": "قرآن",
+    "related-hadith": "متعلقہ حدیث",
+    "related-prophets": "متعلقہ انبیاء",
+    "related-waqiat": "انبیاء کے واقعات",
+    "related-seerah": "سیرت کے ابواب",
+    "related-guides": "متعلقہ رہنما",
+    "related-tools": "متعلقہ اوزار",
+    "related-meanings": "متعلقہ مفاہیم",
+    "related-history": "تاریخی واقعات",
+    "related-sahaba": "صحابہ",
+    "related-kalimas": "کلمے",
+    "related-quizzes": "کوئز",
+    "related-women": "عظیم خواتین",
+    "related-articles": "مضامین"
+  },
   "footer": {
     "about": "Hikmah Noor مستند اور آسان اسلامی علم کے لیے ہے — قرآن، تلفظ کے ساتھ دعائیں، کلمات اور واقعات۔",
     "pages": "صفحات",

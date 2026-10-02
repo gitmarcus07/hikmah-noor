@@ -2,6 +2,7 @@
 /* Dedicated Quran reading layout — calm, focused, same design language as Juz. */
 import Icon from './Icon.astro';
 import ReviewedBadge from './hn/ReviewedBadge.astro';
+import RelatedContent from './RelatedContent.astro';
 import { VERSE_TAFSIR } from '../data/tafsir';
 interface Verse { v: number; ar: string; ur: string; en: string; hi: string; tr: string }
 interface SurahMeta { num: number; slug: string; name: string; englishName: string; arabicName: string; revelation: string; verseCount: number }
@@ -118,6 +119,8 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
     <a href={L(`/surahs/${next.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right"><span class="text-xs font-bold" style="color:var(--hn-muted)">Next</span> →<span class="font-bold block">{next.num}. Surah {next.name}</span></a>
   ) : <span />}
 </div>
+
+<RelatedContent type="surah" slug={surah.slug} locale={locale} />
 
 <script>
   import {

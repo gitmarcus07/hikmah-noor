@@ -1,0 +1,201 @@
+---
+/* Related Content — reusable cross-entity relationship renderer.
+ * Data comes from src/data/relations.ts (explicit + derived edges);
+ * this component only resolves localized titles/URLs and renders
+ * grouped hn-cards. Same-type "more" blocks stay in page components.
+ */
+import { getDict, localizedPath } from '../i18n/utils';
+import { getRelatedEntities } from '../data/relations';
+import {
+  groupRelationshipsByKind,
+  resolveRelationshipUrl,
+  hubUrlForKind,
+  RELATIONSHIP_KIND_LABELS,
+} from '../data/relationships';
+import type { ContentType, RelationshipKind } from '../data/relationships';
+import { getDua } from '../data/duas';
+import { localizeDua } from '../lib/duas-i18n';
+import { getGuide } from '../data/guides';
+import { localizeGuide } from '../lib/guides-i18n';
+import { WAQIAT } from '../data/waqiat';
+import { PROPHETS } from '../data/prophets';
+import { SAHABA } from '../data/sahaba';
+import { WOMEN } from '../data/women';
+import { localizeStory } from '../lib/stories-i18n';
+import { seerahBySlug } from '../data/seerah';
+import { hadeesBySlug } from '../data/hadees';
+import { nawawiBySlug } from '../data/hadees-nawawi';
+import { sahihBySlug } from '../data/hadees-sahih';
+import { meaningBySlug } from '../data/meanings';
+import { historyBySlug } from '../data/history';
+import { kalimaBySlug } from '../data/kalimas';
+import { quizBySlug } from '../data/quizzes';
+import { getToolBySlug } from '../lib/finance/tools.js';
+import { localizeSeerah, localizeHadees, localizeMeaning, localizeHistory, localizeKalima, localizeQuiz } from '../lib/content-i18n';
+
+interface Props {
+  type: ContentType;
+  slug: string;
+  category?: string;
+  locale: string;
+  /** Relationship kinds already rendered by the page (avoid duplicates). */
+  exclude?: RelationshipKind[];
+  maxPerGroup?: number;
+}
+
+const { type, slug, category, locale, exclude = [], maxPerGroup = 4 } = Astro.props;
+const dict = getDict(locale);
+const L = (p: string) => localizedPath(locale, p);
+const groupLabels = (dict as any).relGroups ?? {};
+
+/** Canonical display order: Tier-1 content first. */
+const KIND_ORDER: RelationshipKind[] = [
+  'related-duas', 'related-quran', 'related-hadith', 'related-prophets',
+  'related-waqiat', 'related-seerah', 'related-guides', 'related-tools',
+  'related-meanings', 'related-history', 'related-sahaba', 'related-kalimas',
+  'related-quizzes', 'related-women', 'related-articles',
+];
+
+/** Localized card title + subtitle for a related entity. */
+function cardFor(rel: { type: ContentType; slug: string; category?: string; title?: string }): { title: string; sub: string } {
+  const fallback = rel.title ?? rel.slug;
+  try {
+    switch (rel.type) {
+      case 'dua': {
+        const hit = rel.category ? getDua(rel.category, rel.slug) : null;
+        if (!hit) return { title: fallback, sub: '' };
+        const d: any = localizeDua(hit, locale);
+        return { title: d.title, sub: d.use ?? '' };
+      }
+      case 'guide': {
+        const hit = rel.category ? getGuide(rel.category, rel.slug) : null;
+        if (!hit) return { title: fallback, sub: '' };
+        const g: any = localizeGuide(hit, locale);
+        return { title: g.title, sub: '' };
+      }
+      case 'waqiah': {
+        const hit = WAQIAT.find((w) => w.slug === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const w: any = localizeStory(hit, 'waqiat', locale);
+        return { title: w.title, sub: w.summary ?? '' };
+      }
+      case 'prophet': {
+        const hit = PROPHETS.find((p) => p.slug === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const p: any = localizeStory(hit, 'prophets', locale);
+        return { title: p.title, sub: p.summary ?? '' };
+      }
+      case 'seerah': {
+        const hit = seerahBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const s: any = localizeSeerah(hit, locale);
+        return { title: s.title, sub: s.summary ?? '' };
+      }
+      case 'sahaba': {
+        const hit = SAHABA.find((s) => s.slug === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const s: any = localizeStory(hit, 'sahaba', locale);
+        return { title: s.title, sub: s.summary ?? '' };
+      }
+      case 'hadees': {
+        const hit = hadeesBySlug(rel.slug) ?? nawawiBySlug(rel.slug) ?? sahihBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const coll = nawawiBySlug(rel.slug) ? 'nawawi' : sahihBySlug(rel.slug) ? 'sahih' : 'kids';
+        const h: any = localizeHadees(hit, locale, coll);
+        return { title: h.title, sub: h.translation ?? '' };
+      }
+      case 'meaning': {
+        const hit = meaningBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const loc: any = localizeMeaning(hit, locale);
+        return { title: loc.term, sub: loc.definition ?? '' };
+      }
+      case 'history': {
+        const hit = historyBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const h: any = localizeHistory(hit, locale);
+        return { title: h.title, sub: h.summary ?? '' };
+      }
+      case 'kalima': {
+        const hit = kalimaBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const k: any = localizeKalima(hit, locale);
+        return { title: k.title, sub: k.use ?? '' };
+      }
+      case 'quiz': {
+        const hit = quizBySlug(rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const q: any = localizeQuiz(hit, locale);
+        return { title: q.title, sub: q.desc ?? '' };
+      }
+      case 'women': {
+        const hit = WOMEN.find((w) => w.slug === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const w: any = localizeStory(hit, 'women', locale);
+        return { title: w.title, sub: w.summary ?? '' };
+      }
+      case 'tool': {
+        const hit = getToolBySlug ? getToolBySlug(rel.slug) : null;
+        if (!hit) return { title: fallback, sub: '' };
+        return { title: String(hit.title).split('—')[0].trim(), sub: hit.desc ?? '' };
+      }
+      case 'surah': {
+        return { title: fallback, sub: '' };
+      }
+      default:
+        return { title: fallback, sub: '' };
+    }
+  } catch {
+    return { title: fallback, sub: '' };
+  }
+}
+
+const all = getRelatedEntities(type, slug, category).filter((r) => !exclude.includes(r.kind));
+const grouped = groupRelationshipsByKind(all);
+const orderedKinds = KIND_ORDER.filter((k) => grouped.has(k));
+const viewAllLabel = (dict as any).relViewAll ?? 'View all';
+---
+
+{orderedKinds.length > 0 && (
+  <section class="hn-related hn-section mt-10" aria-label={dict.article.related}>
+    <h2 class="text-xl font-extrabold mb-4 text-white">🔗 {dict.article.related}</h2>
+    {orderedKinds.map((kind) => {
+      const rels = (grouped.get(kind) ?? []).slice(0, maxPerGroup);
+      const label = groupLabels[kind] ?? RELATIONSHIP_KIND_LABELS[kind] ?? kind;
+      return (
+        <div class="hn-related-group">
+          <header class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+              <span class="w-8 h-8 grid place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-400 text-white text-base shadow-sm">✦</span>
+              {label}
+            </h3>
+            <a href={L(hubUrlForKind(kind))} class="text-sm font-bold text-brand-300 hover:text-brand-200 flex items-center gap-1">
+              {viewAllLabel}
+              <span aria-hidden="true">→</span>
+            </a>
+          </header>
+          <div class="grid gap-3 sm:grid-cols-2">
+            {rels.map((rel) => {
+              const url = resolveRelationshipUrl(locale, rel);
+              const card = cardFor(rel);
+              return (
+                <a href={url} class="hn-card hn-card-hover hn-card-pad block group" data-rel-type={rel.type} data-rel-slug={rel.slug}>
+                  <span class="font-bold block text-[15px] leading-6 group-hover:text-brand-300 transition-colors">{card.title}</span>
+                  {card.sub && <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{card.sub}</span>}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      );
+    })}
+  </section>
+)}
+
+<style>
+  .hn-related-group:not(:last-child) {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+</style>

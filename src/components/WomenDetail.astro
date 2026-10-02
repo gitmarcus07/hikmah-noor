@@ -10,6 +10,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { WOMEN, prevWoman, nextWoman } from '../data/women';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { secUI, secE, WOMEN_UI } from '../lib/site-ui-1';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { woman: any; locale: string; }
 const { locale } = Astro.props;
@@ -117,6 +118,8 @@ const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
         ))}
       </div>
     </section>
+
+    <RelatedContent type="women" slug={woman.slug} locale={locale} />
 
     <section class="mt-8" aria-label={T.moreTitle}>
       <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/women/')} linkLabel={T.moreLink} />

@@ -12,6 +12,7 @@ import { HISTORY, prevHistory, nextHistory } from '../data/history';
 import { localizeHistory } from '../lib/content-i18n';
 import { secUI2, HISTORY_UI } from '../lib/site-ui-2';
 import { secE } from '../lib/site-ui-1';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { event: any; locale: string; }
 const { locale } = Astro.props;
@@ -115,6 +116,8 @@ const nextP = localizeHistory(nextHistory(event.order), locale);
         ))}
       </div>
     </section>
+
+    <RelatedContent type="history" slug={event.slug} locale={locale} />
 
     <section class="mt-8" aria-label={T.moreTitle}>
       <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/history/')} linkLabel={T.moreLink} />

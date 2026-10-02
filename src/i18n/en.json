@@ -93,6 +93,24 @@
     "share": "Share",
     "toc": "On this page"
   },
+  "relViewAll": "View all",
+  "relGroups": {
+    "related-duas": "Related Duas",
+    "related-quran": "Quran",
+    "related-hadith": "Related Hadith",
+    "related-prophets": "Related Prophets",
+    "related-waqiat": "Prophet Stories",
+    "related-seerah": "Seerah Chapters",
+    "related-guides": "Related Guides",
+    "related-tools": "Related Tools",
+    "related-meanings": "Related Concepts",
+    "related-history": "Historical Events",
+    "related-sahaba": "Companions",
+    "related-kalimas": "Kalimas",
+    "related-quizzes": "Quizzes",
+    "related-women": "Noble Women",
+    "related-articles": "Articles"
+  },
   "footer": {
     "about": "Hikmah Noor is dedicated to authentic, easy-to-read Islamic knowledge — Quran explanations, duas with transliteration, kalimas and stories.",
     "pages": "Pages",

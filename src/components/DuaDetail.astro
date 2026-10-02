@@ -7,6 +7,7 @@ import ReadingCard from './hn/ReadingCard.astro';
 import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import SourcesBlock from './hn/SourcesBlock.astro';
+import RelatedContent from './RelatedContent.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat } from '../data/duas';
 import { localizeDua, localizeList } from '../lib/duas-i18n';
@@ -106,6 +107,8 @@ const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : n
         ))}
       </div>
     </section>
+
+    <RelatedContent type="dua" slug={dua.slug} category={dua.cat} locale={locale} />
 
     {related.length > 0 && (
       <section class="mt-8" aria-label={T.relatedEyebrow}>

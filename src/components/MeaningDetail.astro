@@ -8,6 +8,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { MEANINGS } from '../data/meanings';
 import { localizeMeaning } from '../lib/content-i18n';
 import { secUI2, MEANING_UI } from '../lib/site-ui-2';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { meaning: any; locale: string; }
 const { locale } = Astro.props;
@@ -93,6 +94,8 @@ const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? localizeMeaning(MEANINGS
         ))}
       </div>
     </section>
+
+    <RelatedContent type="meaning" slug={meaning.slug} locale={locale} />
 
     <section class="mt-8" aria-label={T.moreTitle}>
       <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/meanings/')} linkLabel={T.moreLink} />

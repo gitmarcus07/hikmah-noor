@@ -11,6 +11,7 @@ import { SAHIH, SAHIH_CATS } from '../data/hadees-sahih';
 import { localizeHadees, localizeHadeesCat, localizeSahihCat } from '../lib/content-i18n';
 import { gradeLabel as gradeLabelL } from '../lib/dua-ui-i18n';
 import { secUI2, HADEES_UI } from '../lib/site-ui-2';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { hadees: any; locale: string; collection?: string; }
 const { locale } = Astro.props;
@@ -101,6 +102,8 @@ const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4).map((h) =>
         ))}
       </div>
     </section>
+
+    <RelatedContent type="hadees" slug={hadees.slug} locale={locale} />
 
     {siblings.length > 0 && coll !== 'nawawi' && (
       <section class="mt-8" aria-label={T.relSame}>

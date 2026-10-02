@@ -93,6 +93,24 @@
     "share": "शेयर करें",
     "toc": "इस पेज पर"
   },
+  "relViewAll": "सभी देखें",
+  "relGroups": {
+    "related-duas": "संबंधित दुआएं",
+    "related-quran": "क़ुरआन",
+    "related-hadith": "संबंधित हदीस",
+    "related-prophets": "संबंधित नबी",
+    "related-waqiat": "नबियों के क़िस्से",
+    "related-seerah": "सीरत अध्याय",
+    "related-guides": "संबंधित गाइड",
+    "related-tools": "संबंधित टूल्स",
+    "related-meanings": "संबंधित मायने",
+    "related-history": "ऐतिहासिक घटनाएं",
+    "related-sahaba": "सहाबा",
+    "related-kalimas": "कलिमे",
+    "related-quizzes": "क्विज़",
+    "related-women": "महान महिलाएं",
+    "related-articles": "मज़ामीन"
+  },
   "footer": {
     "about": "Hikmah Noor प्रामाणिक और आसान इस्लामी ज्ञान के लिए है — क़ुरान, लिप्यंतरण सहित दुआएं, कलिमे और कहानियां।",
     "pages": "पेज",

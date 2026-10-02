@@ -10,6 +10,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { WAQIAT } from '../data/waqiat';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { storyUI } from '../lib/dua-ui-i18n';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { waqiah: any; locale: string; }
 const { locale } = Astro.props;
@@ -118,6 +119,8 @@ const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
         ))}
       </div>
     </section>
+
+    <RelatedContent type="waqiah" slug={waqiah.slug} locale={locale} />
 
     <section class="mt-8" aria-label={S.moreTitle}>
       <SectionHeader eyebrow={S.secStories2} title={S.moreTitle} href={L('/waqiat/')} linkLabel={S.moreLink} />

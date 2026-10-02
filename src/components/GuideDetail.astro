@@ -12,6 +12,8 @@ import { localizeGuide, localizeGuideList, localizeGuideCat } from '../lib/guide
 import { localizeDua } from '../lib/duas-i18n';
 import { secUI3, GUIDE_UI } from '../lib/site-ui-3';
 import { getDua, duaCat } from '../data/duas';
+import { getRelatedEntities } from '../data/relations';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { guide: any; cat: any; locale: string; }
 const { locale } = Astro.props;
@@ -23,114 +25,17 @@ const L = (p: string) => localizedPath(locale, p);
 const guidePath = '/learn/' + guide.cat + '/' + guide.slug + '/';
 const catPath = '/learn/' + guide.cat + '/';
 
-/* Closely related dua pages for internal linking (verified slugs). */
-const RELATED_DUAS: Record<string, string[]> = {
-  'how-to-pray-namaz': ['sana-opening', 'dua-qunoot', 'after-salam'],
-  'wudu-ablution': ['before-wudu', 'after-wudu'],
-  'ghusl-bath': ['before-wudu', 'after-wudu'],
-  'tayammum-dry-ablution': ['before-wudu'],
-  'adhan-iqamah': ['after-salam'],
-  'janaza-prayer': ['for-the-deceased', 'burial-bismillah-millah'],
-  'roza-fasting': ['breaking-fast', 'laylatul-qadr', 'sehri-intention'],
-  'moon-sighting-hilal': ['new-moon-sighting'],
-  'itikaf-rules': ['afiyah-pardon-wellbeing', 'mercy-comprehensive-dua'],
-  'laylatul-qadr': ['laylatul-qadr', 'afiyah-pardon-wellbeing', 'third-ashra-dua'],
-  'last-ten-nights-plan': ['afiyah-pardon-wellbeing', 'third-ashra-dua', 'laylatul-qadr'],
-  'what-breaks-fast': ['while-fasting-insulted', 'breaking-fast'],
-  'fidyah-kaffarah-fasts': ['ibrahim-taqabbal-minna'],
-  'quran-khatm-ramadan': ['khatm-quran-dua', 'taraweeh-ki-dua'],
-  'zakat-al-fitr': ['ibrahim-taqabbal-minna'],
-  'eid-day-sunnahs': ['new-clothes', 'eid-greeting-taqabbal', 'eid-takbir'],
-  'eid-takbeer-wording': ['eid-takbir', 'eid-greeting-taqabbal'],
-  'eid-khutbah-rulings': ['eid-greeting-taqabbal', 'gathering-expiation-dua'],
-  'shawwal-six-fasts': ['shawwal-intention', 'ibrahim-taqabbal-minna'],
-  'qurbani-rules': ['qurbani-slaughter-dua', 'qurbani-intention', 'eid-takbir'],
-  'qurbani-shares-who': ['qurbani-intention', 'qurbani-slaughter-dua'],
-  'qurbani-meat-distribution': ['eat-feed-qurbani-verse', 'qurbani-slaughter-dua'],
-  'tashriq-days-takbeer': ['eid-takbir', 'rami-takbir'],
-  'qurbani-mistakes': ['qurbani-intention', 'eat-feed-qurbani-verse'],
-  'istikhara-method': ['istikhara'],
-  'witr-method': ['witr-qunut-hasan', 'dua-qunoot'],
-  'jumuah-complete': ['sayyidul-istighfar', 'morning-remembrance'],
-  'dua-acceptance-guide': ['sayyidul-istighfar', 'laylatul-qadr', 'gathering-expiation-dua'],
-  'surah-yaseen-spotlight': ['istighfar-azim', 'baqarah-last-verses-dua'],
-  'surah-kahf-spotlight': ['evening-protection', 'afwa-afiyah'],
-  'surah-mulk-spotlight': ['ajirni-minan-nar-7x'],
-  'surah-waqiah-spotlight': ['ask-jannah-refuge-hell'],
-  'dhuha-chasht-prayer': ['dhuha-glorification'],
-  'salat-al-hajah': ['hajah-need-dua', 'mercy-comprehensive-dua'],
-  'salat-al-tawbah': ['istighfar-azim', 'sayyidul-istighfar'],
-  'ashura-muharram-fasting': ['hijri-new-year-dua'],
-  'shaban-shab-e-barat': ['shaban-blessing-dua'],
-  'rajab-virtues': ['shaban-blessing-dua', 'hijri-new-year-dua'],
-  'zakat-essentials': [],
-  'hajj-umrah-basics': ['talbiyah', 'arafah-dua', 'tawaf-corner'],
-  'nikah-marriage': ['wedding-dua', 'righteous-family'],
-  'aqeeqah-newborn': ['ruqyah-children', 'righteous-children-salihin'],
-  'self-ruqyah-manzil-method': ['jibril-ruqyah', 'muawwidhat-thrice', 'baqarah-last-verses-dua'],
-  'evil-eye-nazar-treatment': ['masha-allah-evil-eye', 'ruqyah-children', 'jibril-ruqyah'],
-  'sihr-black-magic-jinn-response': ['jibril-ruqyah', 'muawwidhat-thrice', 'baqarah-last-two-sleep'],
-  'fake-raqi-amulet-red-flags': ['amantu-billah-doubts', 'hasbunallah', 'jibril-ruqyah'],
-  'qada-missed-prayers-how-to': ['after-salam', 'tasbih-after-fard', 'sayyidul-istighfar'],
-  'haiz-nifas-purity-guide': ['before-wudu', 'after-wudu', 'laylatul-qadr'],
-  'talaq-khula-iddah-rules': ['righteous-family', 'wedding-dua', 'at-calamity-ajurni'],
-  'new-muslim-starter-guide': ['after-wudu', 'morning-remembrance', 'seeking-knowledge'],
-  'muslim-death-checklist-wasiyyah': ['for-the-deceased', 'burial-bismillah-millah', 'condolence'],
-  'riba-interest-modern-money': ['debt-freedom', 'rizq-blessing', 'urgent-help'],
-  'after-salah-adhkar-routine': ['after-salam', 'tasbih-after-fard', 'la-mania-after-salah'],
-  'dreams-in-islam-guide': ['bad-dream-protection', 'before-sleeping', 'waking-up'],
-  'halal-food-guide': ['before-eating', 'after-eating', 'guest-for-host'],
-  'sujood-as-sahw-guide': ['after-salam', 'tasbih-after-fard', 'refuge-four-after-tashahhud'],
-  'prayer-mistakes-common': ['after-salam', 'before-wudu', 'khinzab-waswasah'],
-  'waswasa-doubts-worship': ['khinzab-waswasah', 'amantu-billah-doubts', 'morning-remembrance'],
-  'qasr-jama-travel-sick-prayer': ['starting-journey', 'returning-from-travel', 'for-sick'],
-  'daily-sunnah-rawatib': ['after-salam', 'tasbih-after-fard', 'morning-remembrance'],
-  'six-pillars-iman-explained': ['amantu-billah-doubts', 'steadfast-heart', 'sayyidul-istighfar'],
-  'shirk-types-explained': ['refuge-hidden-shirk', 'amantu-billah-doubts', 'sayyidul-istighfar'],
-  'signs-day-of-judgment': ['kahf-mercy-guidance', 'ajirni-minan-nar-7x', 'ask-jannah-refuge-hell'],
-  'grave-barzakh-after-death': ['visiting-graves', 'for-the-deceased', 'husn-al-khatima'],
-  'music-singing-ruling': ['gathering-expiation-dua', 'seeking-knowledge', 'morning-remembrance'],
-  'gaming-movies-entertainment': ['controlling-anger', 'gathering-expiation-dua', 'seeking-knowledge'],
-  'crypto-forex-trading-halal': ['rizq-blessing', 'debt-freedom', 'musa-in-need'],
-  'dogs-pets-in-islam': ['morning-remembrance', 'evening-protection', 'seeking-knowledge'],
-  'tattoos-piercing-ruling': ['adam-repentance', 'sayyidul-istighfar', 'after-wudu'],
-  'hijab-ruling-evidence': ['new-clothes', 'seeing-mirror', 'morning-remembrance'],
-  'marital-rights-conflict': ['wedding-dua', 'righteous-family', 'allif-hearts'],
-  'parenting-tarbiyah-guide': ['righteous-children-salihin', 'prayerful-offspring', 'zakariya-righteous-offspring'],
-  'pregnancy-nursing-fasting': ['righteous-children-salihin', 'breaking-fast', 'sehri-intention'],
-  'how-to-understand-quran-tafsir': ['khatm-quran-dua', 'seeking-knowledge', 'steadfast-heart'],
-  'how-to-memorize-quran-plan': ['khatm-quran-dua', 'seeking-knowledge', 'rabbi-yassir'],
-  'how-to-study-hadith-guide': ['seeking-knowledge', 'infani-knowledge', 'steadfast-heart'],
-  'esal-e-sawab-proofs': ['for-the-deceased', 'visiting-graves', 'khatm-quran-dua'],
-  'chaliswan-teeja-barsi-ruling': ['condolence', 'for-the-deceased', 'at-calamity-ajurni'],
-  'hajj-umrah-badal-deceased': ['talbiyah', 'arafah-dua', 'for-the-deceased'],
-  'organ-blood-donation-islam': ['for-sick', 'asalullahal-azim-7x', 'pain-relief'],
-  'ivf-contraception-abortion-islam': ['righteous-children-salihin', 'zakariya-righteous-offspring', 'righteous-family'],
-  'alcohol-medicine-perfume-ruling': ['for-sick', 'before-eating', 'new-clothes'],
-  'insurance-takaful-ruling': ['debt-freedom', 'rizq-blessing', 'musa-in-need'],
-  'halal-investing-pension-guide': ['rizq-blessing', 'debt-freedom', 'urgent-help'],
-  'gelatin-enzymes-additives-guide': ['before-eating', 'after-eating', 'guest-for-host'],
-  'madhab-differences-explained': ['seeking-knowledge', 'steadfast-heart', 'infani-knowledge'],
-  'baby-names-rules-list': ['righteous-children-salihin', 'ruqyah-children', 'wedding-dua'],
-  'dawah-answering-atheism': ['seeking-knowledge', 'musa-clarity-speech', 'steadfast-heart'],
-  'umrah-kids-elderly-nusuk': ['talbiyah', 'tawaf-corner', 'starting-journey'],
-  'what-is-aqeedah-basics': ['amantu-billah-doubts', 'steadfast-heart', 'sayyidul-istighfar'],
-  'tawhid-three-categories': ['refuge-hidden-shirk', 'sayyidul-istighfar', 'steadfast-heart'],
-  'belief-angels-books': ['seeking-knowledge', 'steadfast-heart', 'morning-remembrance'],
-  'belief-in-messengers': ['darood-ibrahimi', 'seeking-knowledge', 'steadfast-heart'],
-  'belief-in-qadr-decree': ['hasbunallah', 'amantu-billah-doubts', 'afiyah-pardon-wellbeing'],
-  'bidah-vs-sunnah': ['seeking-knowledge', 'steadfast-heart', 'morning-remembrance'],
-  'tawakkul-trust-balance': ['hasbunallah', 'musa-in-need', 'rizq-blessing'],
-  'names-attributes-course': ['seeking-knowledge', 'steadfast-heart', 'sayyidul-istighfar'],
-};
-const duaLinks = (RELATED_DUAS[guide.slug] || [])
-  .map((s) => {
-    const hit = (['morning-evening','salah-prayer','travel-journey','food-drink','home-family','sleep-rest','health-protection','forgiveness','hardship-rizq','purity-cleanliness','worship-knowledge','hajj-umrah','daily-life','ramadan-fasting','prophets-duas','marriage','children','death-funeral','hereafter','protection','rabbana-duas'] as string[])
-      .map((c) => getDua(c, s)).find(Boolean);
+/* Guide -> dua links now live in the relationship data layer
+ * (src/data/relations.ts, migrated from the map that was here).
+ * Rendered below with the same cards; other kinds via RelatedContent. */
+const duaLinks = getRelatedEntities('guide', guide.slug, guide.cat)
+  .filter((r) => r.kind === 'related-duas')
+  .slice(0, 3)
+  .map((r) => {
+    const hit = r.category ? getDua(r.category, r.slug) : null;
     return hit ? localizeDua(hit, locale) : null;
   })
-  .filter(Boolean)
-  .slice(0, 3);
+  .filter(Boolean);
 
 const title = guide.title + T.detSuffix;
 let description = guide.intro;
@@ -213,6 +118,8 @@ const moreGuides = localizeGuideList([...relatedRaw, ...GUIDES.filter((g) => g.c
         </div>
       </section>
     )}
+
+    <RelatedContent type="guide" slug={guide.slug} category={guide.cat} locale={locale} exclude={['related-duas']} />
 
     {moreGuides.length > 0 && (
       <section class="mt-8" aria-label={T.relMore}>

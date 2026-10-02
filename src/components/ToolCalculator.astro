@@ -8,6 +8,7 @@ import AppHeader from './AppHeader.astro';
 import Icon from './Icon.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { CATS, toolsByCat, getToolBySlug } from '../lib/finance/tools.js';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { tool: any; locale: string; }
 const { tool, locale } = Astro.props;
@@ -194,6 +195,7 @@ const crumbs = [
         </div>
       </section>
     )}
+    <RelatedContent type="tool" slug={tool.slug} category={tool.cat} locale={locale} />
     </div>
   </div>
 

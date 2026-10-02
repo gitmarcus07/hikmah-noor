@@ -93,6 +93,24 @@
     "share": "مشاركة",
     "toc": "في هذه الصفحة"
   },
+  "relViewAll": "عرض الكل",
+  "relGroups": {
+    "related-duas": "أدعية ذات صلة",
+    "related-quran": "القرآن",
+    "related-hadith": "أحاديث ذات صلة",
+    "related-prophets": "أنبياء ذوو صلة",
+    "related-waqiat": "قصص الأنبياء",
+    "related-seerah": "فصول السيرة",
+    "related-guides": "أدلة ذات صلة",
+    "related-tools": "أدوات ذات صلة",
+    "related-meanings": "مفاهيم ذات صلة",
+    "related-history": "أحداث تاريخية",
+    "related-sahaba": "الصحابة",
+    "related-kalimas": "الكلمات",
+    "related-quizzes": "اختبارات",
+    "related-women": "نساء عظيمات",
+    "related-articles": "مقالات"
+  },
   "footer": {
     "about": "Hikmah Noor معرفة إسلامية موثوقة وسهلة — شروح القرآن والأدعية مع النطق والكلمات والقصص.",
     "pages": "الصفحات",

@@ -11,6 +11,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { SAHABA, prevSahabi, nextSahabi } from '../data/sahaba';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { secUI, secE, SAHABA_UI } from '../lib/site-ui-1';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { sahabi: any; locale: string; }
 const { locale } = Astro.props;
@@ -118,6 +119,8 @@ const nextP = localizeStory(nextSahabi(sahabi.order), 'sahaba', locale);
         ))}
       </div>
     </section>
+
+    <RelatedContent type="sahaba" slug={sahabi.slug} locale={locale} />
 
     <section class="mt-8" aria-label={T.moreTitle}>
       <SectionHeader eyebrow={T.moreTitle} title={T.moreTitle} href={L('/sahaba/')} linkLabel={T.moreLink} />

@@ -8,6 +8,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { QUIZZES, QUIZ_CATS } from '../data/quizzes';
 import { localizeQuiz, localizeQuizList, localizeQuizCat } from '../lib/content-i18n';
 import { secUI3, QUIZ_UI } from '../lib/site-ui-3';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { quiz: any; locale: string; }
 const { locale } = Astro.props;
@@ -98,6 +99,10 @@ const others = localizeQuizList(QUIZZES.filter((q) => q.slug !== quiz.slug), loc
         ))}
       </div>
     </section>
+
+    <div class="mt-8 max-w-2xl">
+      <RelatedContent type="quiz" slug={quiz.slug} locale={locale} />
+    </div>
 
     {others.length > 0 && (
       <section class="mt-8 max-w-2xl" aria-label="More quizzes">

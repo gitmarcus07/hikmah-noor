@@ -33,6 +33,7 @@
     "content:guides:hi": "node scripts/validate-guides-hi.mjs",
     "content:guides:ar": "node scripts/validate-guides-ar.mjs",
     "content:links": "node scripts/check-links.mjs",
+    "content:relationships": "node scripts/validate-relationships.mjs",
     "content:surahs": "node scripts/build-surahs.mjs",
     "content:tafsir": "node scripts/validate-tafsir.mjs",
     "content:qr": "node scripts/build-donate-qr.mjs"

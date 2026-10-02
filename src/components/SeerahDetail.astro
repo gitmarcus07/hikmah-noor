@@ -9,6 +9,7 @@ import { getDict, localizedPath } from '../i18n/utils';
 import { SEERAH } from '../data/seerah';
 import { localizeSeerah } from '../lib/content-i18n';
 import { secUI2, SEERAH_UI } from '../lib/site-ui-2';
+import RelatedContent from './RelatedContent.astro';
 
 interface Props { chapter: any; locale: string; }
 const { locale } = Astro.props;
@@ -103,6 +104,8 @@ const eraL = chapter.era === 'Makkah' ? T.eraM : T.eraD;
         ))}
       </div>
     </section>
+
+    <RelatedContent type="seerah" slug={chapter.slug} locale={locale} />
 
     {sameEra.length > 0 && (
       <section class="mt-8" aria-label={eraL}>
