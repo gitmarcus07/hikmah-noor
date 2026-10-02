@@ -11,7 +11,7 @@
 // JavaScript, and Astro's default scoped styles never match runtime-created
 // elements (that bug once rendered the popup as unstyled inline content).
 ---
-<div id="hn-notice-root" hidden></div>
+<div id="hn-notice-root" transition:persist="hn-notice" hidden></div>
 
 <style is:global>
   #hn-notice-root {

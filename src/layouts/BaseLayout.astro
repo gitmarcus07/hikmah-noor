@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import { isRTL, localeNames, locales, getDict, localizedPath } from '../i18n/utils';
+import { isQuranRoute } from '../lib/quran-routes';
 import Icon from '../components/Icon.astro';
 import NoticePopup from '../components/NoticePopup.astro';
 
@@ -52,6 +54,10 @@ const crumbLd = crumbs.length ? {
 } : null;
 
 const L = (p: string) => localizedPath(locale, p);
+// Client-side navigation is enabled ONLY for the Quran reading routes so the
+// global audio player survives Para/Surah navigation. Every other route keeps
+// normal full page loads (a client guard forces reloads when leaving Quran).
+const useClientRouter = isQuranRoute(Astro.url.pathname);
 const moreLinks = [
   { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
   { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
@@ -142,6 +148,7 @@ const mobileGroups = [
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <meta name="theme-color" content="#FAF8F2" />
+  {useClientRouter && <ClientRouter />}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
@@ -160,7 +167,7 @@ const mobileGroups = [
   <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-2 focus:rounded-lg" style="background:var(--hn-primary);color:#fff">Skip to content</a>
 
   {/* ============ HEADER ============ */}
-  <header class="sticky top-0 z-50 border-b" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border)">
+  <header id="hnHeader" class="sticky top-0 z-50 border-b" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border)">
     <div class="hn-container flex items-center gap-1.5 sm:gap-2" style="height:3.75rem">
       <a href={L('/')} class="flex items-center gap-2 font-extrabold text-[17px] shrink-0 min-w-0" style="color:var(--hn-ink)" aria-label="Hikmah Noor home">
         <img src="/favicon.svg" alt="" width="28" height="28" class="w-7 h-7 shrink-0" />
@@ -255,52 +262,87 @@ const mobileGroups = [
 
   <script is:inline>
     (() => {
-      const langBtn = document.getElementById('langBtn');
-      const langMenu = document.getElementById('langMenu');
-      const moreBtn = document.getElementById('moreBtn');
-      const moreMenu = document.getElementById('moreMenu');
-      const moreChevron = document.getElementById('moreChevron');
-      const menuBtn = document.getElementById('menuBtn');
-      const mobileMenu = document.getElementById('mobileMenu');
-      const icoOpen = document.getElementById('menuIcoOpen');
-      const icoClose = document.getElementById('menuIcoClose');
+      const $ = (id) => document.getElementById(id);
       const setLang = (open) => {
-        if (!langMenu || !langBtn) return;
-        langMenu.classList.toggle('hidden', !open);
-        langBtn.setAttribute('aria-expanded', String(open));
+        const menu = $('langMenu'), btn = $('langBtn');
+        if (!menu || !btn) return;
+        menu.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
       };
       const setMore = (open) => {
-        if (!moreMenu || !moreBtn) return;
-        moreMenu.classList.toggle('hidden', !open);
-        moreBtn.setAttribute('aria-expanded', String(open));
-        moreChevron?.classList.toggle('rotate-180', open);
+        const menu = $('moreMenu'), btn = $('moreBtn'), chev = $('moreChevron');
+        if (!menu || !btn) return;
+        menu.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
+        chev?.classList.toggle('rotate-180', open);
       };
       const setMenu = (open) => {
-        if (!mobileMenu || !menuBtn) return;
-        mobileMenu.classList.toggle('hidden', !open);
-        menuBtn.setAttribute('aria-expanded', String(open));
+        const menu = $('mobileMenu'), btn = $('menuBtn'), icoOpen = $('menuIcoOpen'), icoClose = $('menuIcoClose');
+        if (!menu || !btn) return;
+        menu.classList.toggle('hidden', !open);
+        btn.setAttribute('aria-expanded', String(open));
         icoOpen?.classList.toggle('hidden', open);
         icoClose?.classList.toggle('hidden', !open);
       };
-      langBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = langMenu?.classList.contains('hidden'); setMenu(false); setMore(false); setLang(!!w); });
-      moreBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = moreMenu?.classList.contains('hidden'); setLang(false); setMenu(false); setMore(!!w); });
-      menuBtn?.addEventListener('click', (e) => { e.stopPropagation(); const w = mobileMenu?.classList.contains('hidden'); setLang(false); setMore(false); setMenu(!!w); });
-      document.addEventListener('click', (e) => {
-        if (!document.getElementById('langWrap')?.contains(e.target)) setLang(false);
-        if (!document.getElementById('moreWrap')?.contains(e.target)) setMore(false);
-        const menu = document.getElementById('mobileMenu');
-        const wrap = document.getElementById('menuWrap');
-        if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !wrap?.contains(e.target)) setMenu(false);
-      });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setLang(false); setMore(false); setMenu(false); } });
-      document.querySelectorAll('[data-more-link]').forEach(a => a.addEventListener('click', () => { setMenu(false); setMore(false); }));
-      window.addEventListener('resize', () => { if (window.innerWidth >= 1024) setMenu(false); });
+
+      // Re-wires the header DOM. Runs on first load and after every client-side
+      // navigation (the header is recreated, so this must run again).
+      const wireHeader = () => {
+        const header = $('hnHeader');
+        if (!header || header.dataset.wired === '1') return;
+        header.dataset.wired = '1';
+        $('langBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('langMenu')?.classList.contains('hidden'); setMenu(false); setMore(false); setLang(!!w); });
+        $('moreBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('moreMenu')?.classList.contains('hidden'); setLang(false); setMenu(false); setMore(!!w); });
+        $('menuBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('mobileMenu')?.classList.contains('hidden'); setLang(false); setMore(false); setMenu(!!w); });
+        document.querySelectorAll('[data-more-link]').forEach(a => a.addEventListener('click', () => { setMenu(false); setMore(false); }));
+      };
+
+      // Global listeners are registered exactly once and resolve elements at
+      // event time, so repeated navigations never duplicate handlers.
+      if (!window.__hnHeaderGlobal) {
+        window.__hnHeaderGlobal = true;
+        document.addEventListener('click', (e) => {
+          if (!$('langWrap')?.contains(e.target)) setLang(false);
+          if (!$('moreWrap')?.contains(e.target)) setMore(false);
+          const menu = $('mobileMenu');
+          const wrap = $('menuWrap');
+          if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !wrap?.contains(e.target)) setMenu(false);
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setLang(false); setMore(false); setMenu(false); } });
+        window.addEventListener('resize', () => { if (window.innerWidth >= 1024) setMenu(false); });
+      }
+
+      wireHeader();
+      document.addEventListener('astro:page-load', wireHeader);
+      document.addEventListener('astro:after-swap', wireHeader);
     })();
   </script>
 
   <main id="content" class="flex-1 w-full">
     <slot />
   </main>
+
+  {/* ============ GLOBAL QURAN AUDIO MINI-PLAYER ============ */}
+  {/* Persistent host: the single <audio> element lives here and is carried
+      across client-side navigation by Astro's transition:persist. */}
+  <div id="hn-audio-host" transition:persist="hn-audio-host" hidden></div>
+  <div id="hnPlayer" transition:persist="hn-player" class="hidden fixed inset-x-0 z-40 px-3" role="region" aria-label="Quran audio player">
+    <div class="hn-card mx-auto max-w-2xl px-2.5 py-2 flex items-center gap-2" style="box-shadow:var(--hn-shadow-lg)">
+      <button type="button" data-hp-prev class="hn-icon-btn !w-10 !h-10 !rounded-full" aria-label="Previous verse">⏮</button>
+      <button type="button" data-hp-toggle class="hn-icon-btn !w-11 !h-11 !rounded-full" aria-label="Play" style="background:var(--hn-primary);color:#fff;border-color:var(--hn-primary)">▶</button>
+      <button type="button" data-hp-next class="hn-icon-btn !w-10 !h-10 !rounded-full" aria-label="Next verse">⏭</button>
+      <div class="min-w-0 flex-1">
+        <div data-hp-title class="text-sm font-bold truncate" style="color:var(--hn-ink)">Quran</div>
+        <div data-hp-sub class="text-xs truncate" style="color:var(--hn-muted)">Ready</div>
+      </div>
+      <a data-hp-open href="#" class="hidden text-xs font-bold whitespace-nowrap" style="color:var(--hn-primary)">Open</a>
+      <button type="button" data-hp-close class="hn-icon-btn !w-9 !h-9 !rounded-full" aria-label="Close player">✕</button>
+    </div>
+  </div>
+  <style>
+    #hnPlayer { bottom: calc(4.75rem + env(safe-area-inset-bottom)); }
+    @media (min-width: 768px) { #hnPlayer { bottom: 1rem; } }
+  </style>
 
   {/* ============ MOBILE BOTTOM NAV ============ */}
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-50 border-t" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border);padding-bottom:env(safe-area-inset-bottom)" aria-label="Quick">
@@ -395,5 +437,10 @@ const mobileGroups = [
   </footer>
   )}
   <NoticePopup />
+
+  {/* One persistent Quran audio player for the whole document. */}
+  <script>
+    import '../scripts/quran-audio';
+  </script>
 </body>
 </html>
