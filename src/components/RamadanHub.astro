@@ -1,0 +1,145 @@
+---
+/* Ramadan hub — aggregator over guides, duas, quiz and tools (EN + locale).
+ * Chrome localized via RAMADAN_UI; cards resolve localized titles. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+import { DUAS } from '../data/duas';
+import { quizBySlug } from '../data/quizzes';
+import { localizeGuide } from '../lib/guides-i18n';
+import { localizeDua } from '../lib/duas-i18n';
+import { localizeQuiz } from '../lib/content-i18n';
+import { secUI } from '../lib/site-ui-1';
+import { RAMADAN_UI } from '../lib/site-ui-4';
+import { monthDesc } from '../lib/site-ui-4';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI(locale, RAMADAN_UI);
+const L = (p: string) => localizedPath(locale, p);
+
+const guideSlugs = ['roza-fasting', 'moon-sighting-hilal', 'what-breaks-fast', 'taraweeh-night-prayer', 'itikaf-rules', 'laylatul-qadr', 'last-ten-nights-plan', 'quran-khatm-ramadan', 'fidyah-kaffarah-fasts', 'zakat-al-fitr', 'zakat-essentials', 'eid-prayer-method'];
+const guides = guideSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+const duas = DUAS.filter((d) => d.cat === 'ramadan-fasting').slice(0, 12).map((d: any) => localizeDua(d, locale));
+const keyDuas = ['sehri-intention', 'breaking-fast', 'laylatul-qadr'].map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean).map((d: any) => localizeDua(d, locale));
+const quiz = (() => { const q = quizBySlug('ramadan-quiz'); return q ? localizeQuiz(q, locale) : null; })();
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/ramadan/' },
+];
+---
+<BaseLayout title={T.hubTitle} description={T.hubDesc} keywords={T.hubKw} locale={locale} type="article" faq={T.hubFaq} crumbs={crumbs} canonicalPath="/ramadan/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{T.badge1}</span>
+        <span class="hn-badge">{T.badge2}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.crossL} <a href={L('/hajj/')} class="font-bold" style="color:var(--hn-primary)">{T.crossHajj}</a> {T.crossMid} <a href={L('/eid/')} class="font-bold" style="color:var(--hn-primary)">{T.crossEid}</a></p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/tools/ramadan-countdown/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">{T.btnCountdown}</a>
+        <a href={L('/tools/prayer-times/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">{T.btnTimes}</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secGuides} title={T.secGuidesT} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {guides.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secDuas} title={T.secDuasT} href={L('/duas/ramadan-fasting/')} linkLabel={T.allDuas} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {duas.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    {keyDuas.length > 0 && (
+      <div class="mt-8">
+        <SectionHeader eyebrow={T.secKeyDuas} title={T.secKeyDuasT} href={L('/duas/')} linkLabel={T.allDuas} />
+        <div class="grid gap-3 sm:grid-cols-2">
+          {keyDuas.map((d: any) => (
+            <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+              <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {quiz && (
+      <div class="mt-8">
+        <SectionHeader eyebrow={T.secQuiz} title={T.secQuizT} href={L('/quiz/')} linkLabel={T.quizLink} />
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a href={L(`/quiz/${quiz.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{quiz.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{quiz.desc}</span>
+          </a>
+        </div>
+      </div>
+    )}
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secTools} title={T.secToolsT} href={L('/tools/')} linkLabel={T.allTools} />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { t: 'Ramadan Countdown', d: 'Days left with Hijri date', h: '/tools/ramadan-countdown/', i: 'moon' },
+          { t: 'Prayer Times', d: 'Sehri end & iftar start for your city', h: '/tools/prayer-times/', i: 'sun' },
+          { t: 'Zakat al-Fitr', d: 'Fitrana per-person amount', h: '/tools/zakat/zakat-al-fitr/', i: 'tools' },
+          { t: 'Fidyah Calculator', d: 'Missed fasts: food & cost', h: '/tools/fidyah-kaffarah/fidyah/', i: 'tools' },
+          { t: 'Tasbih Counter', d: 'Dhikr with daily totals', h: '/tools/tasbih/', i: 'tools' },
+        ].map((c) => (
+          <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.i as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.t}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.d}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secMonth} title={T.secMonthT} href={L('/calendar/')} linkLabel={T.secMonth} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/calendar/ramadan/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-bold block text-[15px] leading-6">{T.monthLink}</span>
+          <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{monthDesc('ramadan', locale)}</span>
+        </a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
+      <div class="space-y-3">
+        {T.hubFaq.map((f: any) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

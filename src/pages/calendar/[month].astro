@@ -1,0 +1,11 @@
+---
+import MonthDetail from '../../components/MonthDetail.astro';
+import { MONTHS, monthBySlug } from '../../data/months';
+
+export async function getStaticPaths() {
+  return MONTHS.map((m) => ({ params: { month: m.slug } }));
+}
+const month = monthBySlug(Astro.params.month as string);
+const locale = 'en';
+---
+<MonthDetail month={month} locale={locale} />

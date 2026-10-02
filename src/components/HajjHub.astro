@@ -1,0 +1,142 @@
+---
+/* Hajj hub — aggregator for Hajj & Umrah rites (EN + locale). */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+import { DUAS } from '../data/duas';
+import { quizBySlug } from '../data/quizzes';
+import { localizeGuide } from '../lib/guides-i18n';
+import { localizeDua } from '../lib/duas-i18n';
+import { localizeQuiz } from '../lib/content-i18n';
+import { secUI } from '../lib/site-ui-1';
+import { HAJJ_UI } from '../lib/site-ui-4';
+import { monthDesc } from '../lib/site-ui-4';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI(locale, HAJJ_UI);
+const L = (p: string) => localizedPath(locale, p);
+
+const riteSlugs = ['hajj-umrah-basics', 'ihram-how-to', 'tawaf-how-to', 'sai-how-to', 'mina-arafah-muzdalifah', 'hajj-day-by-day', 'umrah-day-plan'];
+const planSlugs = ['hajj-packing-checklist', 'hajj-common-mistakes', 'hajj-umrah-badal-deceased', 'umrah-kids-elderly-nusuk'];
+const rites = riteSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+const plans = planSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+const duas = ['talbiyah', 'ihram-niyyah', 'arafah-dua', 'tawaf-corner', 'safa-marwa-dhikr', 'zamzam-dua', 'kaaba-sight-dua', 'rami-takbir'].map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean).map((d: any) => localizeDua(d, locale));
+const quiz = (() => { const q = quizBySlug('hajj-quiz'); return q ? localizeQuiz(q, locale) : null; })();
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/hajj/' },
+];
+---
+<BaseLayout title={T.hubTitle} description={T.hubDesc} keywords={T.hubKw} locale={locale} type="article" faq={T.hubFaq} crumbs={crumbs} canonicalPath="/hajj/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{T.badge1}</span>
+        <span class="hn-badge">{T.badge2}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.crossEidL} <a href={L('/eid/')} class="font-bold" style="color:var(--hn-primary)">{T.crossEid}</a></p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/learn/duties/umrah-day-plan/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">{T.btnUmrah}</a>
+        <a href={L('/learn/duties/hajj-day-by-day/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">{T.btnHajj}</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secRites} title={T.secRitesT} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {rites.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secPlan} title={T.secPlanT} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {plans.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secDuas} title={T.secDuasT} href={L('/duas/hajj-umrah/')} linkLabel={T.duasLink} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {duas.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    {quiz && (
+      <div class="mt-8">
+        <SectionHeader eyebrow={T.secQuiz} title={T.secQuizT} href={L('/quiz/')} linkLabel={T.quizLink} />
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a href={L(`/quiz/${quiz.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{quiz.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{quiz.desc}</span>
+          </a>
+        </div>
+      </div>
+    )}
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secTools} title={T.secToolsT} href={L('/tools/')} linkLabel={T.allTools} />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { t: 'Qibla Finder', d: 'Face the Kaaba from anywhere', h: '/tools/qibla/', i: 'quran' },
+          { t: 'Prayer Times', d: 'Prayer times for Makkah & Madinah', h: '/tools/prayer-times/', i: 'sun' },
+          { t: 'Hijri Converter', d: 'Dhul-Hijjah dates & Hajj days', h: '/tools/hijri-converter/', i: 'moon' },
+          { t: 'Tasbih Counter', d: 'Talbiyah & dhikr counts', h: '/tools/tasbih/', i: 'tools' },
+        ].map((c) => (
+          <a href={L(c.h)} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3.5">
+            <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={c.i as any} size={22} /></span>
+            <span class="min-w-0">
+              <span class="block font-extrabold text-[16px] leading-6">{c.t}</span>
+              <span class="block mt-0.5 text-[13.5px] leading-5" style="color:var(--hn-muted)">{c.d}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secMonth} title={T.secMonthT} href={L('/calendar/')} linkLabel={T.secMonth} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/calendar/dhul-hijjah/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-bold block text-[15px] leading-6">{T.monthLink}</span>
+          <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{monthDesc('dhul-hijjah', locale)}</span>
+        </a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
+      <div class="space-y-3">
+        {T.hubFaq.map((f: any) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

@@ -41,6 +41,7 @@ import { QUIZZES, QUIZ_CATS } from './quizzes';
 import { TOOLS, CATS as TOOL_CATS } from '../lib/finance/tools.js';
 import surahsMeta from './surahs-meta.json';
 import { ALLAH, PROPHET } from './names';
+import { MONTHS } from './months';
 
 /* ------------------------------------------------------------------ */
 /* 1. Entity registration (single central place; no per-module edits)  */
@@ -68,6 +69,7 @@ for (const c of TOOL_CATS as any[]) registerEntity('tool', c.slug);
 for (const s of surahsMeta as any[]) registerEntity('surah', s.slug);
 for (const e of ALLAH) registerEntity('allah-name', e.slug);
 for (const e of PROPHET) registerEntity('prophet-name', e.slug);
+for (const m of MONTHS) registerEntity('month', m.slug);
 
 /* ------------------------------------------------------------------ */
 /* 2. Target lookup (enrichment from source of truth)                  */
@@ -93,6 +95,7 @@ const QUIZ_BY_SLUG = new Map(QUIZZES.map((q) => [q.slug, q]));
 const TOOL_BY_SLUG = new Map((TOOLS as any[]).map((t) => [t.slug, t]));
 const ALLAH_BY_SLUG = new Map(ALLAH.map((e) => [e.slug, e]));
 const PROPHET_NAME_BY_SLUG = new Map(PROPHET.map((e) => [e.slug, e]));
+const MONTH_BY_SLUG = new Map(MONTHS.map((m) => [m.slug, m]));
 const SURAH_BY_SLUG = new Map((surahsMeta as any[]).map((s) => [s.slug, s]));
 const SURAH_BY_NUM = new Map((surahsMeta as any[]).map((s) => [s.num, s]));
 
@@ -162,6 +165,10 @@ export function lookupTarget(type: ContentType, slug: string): TargetInfo | null
     case 'prophet-name': {
       const e = PROPHET_NAME_BY_SLUG.get(slug);
       return e ? { title: e.translit } : null;
+    }
+    case 'month': {
+      const m = MONTH_BY_SLUG.get(slug);
+      return m ? { title: m.name } : null;
     }
     default:
       return null;
@@ -775,6 +782,65 @@ for (const [slug, meanings] of Object.entries(ALLAH_MEANINGS)) {
 }
 for (const [slug, surahs] of Object.entries(PROPHET_NAME_SURAHS)) {
   addEntry('prophet-name', slug, surahs.map((s) => ({ type: 'surah' as ContentType, slug: s, reason: 'Quranic address in this surah' })));
+}
+const MONTH_LINKS: Record<string, RelationshipDecl[]> = {
+  'muharram': [
+    { type: 'guide', slug: 'moon-sighting-hilal', reason: 'New year begins by sighting' },
+    { type: 'guide', slug: 'ashura-muharram-fasting', reason: 'Tasua and Ashura fasts' },
+    { type: 'history', slug: 'karbala-61', reason: 'Karbala (61 AH)' },
+  ],
+  'rabi-al-awwal': [
+    { type: 'seerah', slug: 'birth-noble-lineage-year-of-elephant', reason: 'Birth in Rabi al-Awwal' },
+    { type: 'prophet', slug: 'muhammad-final-messenger', reason: 'Birth month of the Prophet ﷺ' },
+  ],
+  'rajab': [
+    { type: 'guide', slug: 'rajab-virtues', reason: 'Sacred month guide' },
+    { type: 'seerah', slug: 'isra-miraj-aqabah-pledges', reason: 'The Night Journey' },
+    { type: 'waqiah', slug: 'isra-miraj-night', reason: 'The Night Journey' },
+  ],
+  'shaban': [
+    { type: 'guide', slug: 'shaban-shab-e-barat', reason: '15th night guide' },
+  ],
+  'ramadan': [
+    { type: 'guide', slug: 'roza-fasting', reason: 'Fasting rules' },
+    { type: 'guide', slug: 'laylatul-qadr', reason: 'The odd nights' },
+    { type: 'guide', slug: 'taraweeh-night-prayer', reason: 'Night prayer' },
+    { type: 'dua', slug: 'laylatul-qadr', reason: 'Dua of the odd nights' },
+    { type: 'tool', slug: 'fidyah', reason: 'Missed fasts calculator' },
+    { type: 'quiz', slug: 'ramadan-quiz', reason: 'Test your Ramadan knowledge' },
+  ],
+  'shawwal': [
+    { type: 'guide', slug: 'shawwal-six-fasts', reason: 'Six fasts of Shawwal' },
+    { type: 'guide', slug: 'eid-day-sunnahs', reason: 'Eid al-Fitr sunnahs' },
+    { type: 'guide', slug: 'eid-prayer-method', reason: 'Eid prayer' },
+  ],
+  'dhul-hijjah': [
+    { type: 'guide', slug: 'hajj-day-by-day', reason: 'Hajj timeline' },
+    { type: 'guide', slug: 'mina-arafah-muzdalifah', reason: 'Arafah and the stations' },
+    { type: 'guide', slug: 'qurbani-rules', reason: 'Qurbani rules' },
+    { type: 'guide', slug: 'tashriq-days-takbeer', reason: 'Tashriq days' },
+    { type: 'tool', slug: 'qurbani-splitter', reason: 'Qurbani share splitter' },
+    { type: 'quiz', slug: 'hajj-quiz', reason: 'Test your Hajj knowledge' },
+    { type: 'dua', slug: 'arafah-dua', reason: 'Dua of Arafah day' },
+  ],
+};
+
+/** 5l. Guide -> month (reverse of the strongest month associations). */
+const GUIDE_MONTHS: Record<string, string[]> = {
+  'ashura-muharram-fasting': ['muharram'],
+  'rajab-virtues': ['rajab'],
+  'shaban-shab-e-barat': ['shaban'],
+  'laylatul-qadr': ['ramadan'],
+  'roza-fasting': ['ramadan'],
+  'shawwal-six-fasts': ['shawwal'],
+  'hajj-day-by-day': ['dhul-hijjah'],
+  'qurbani-rules': ['dhul-hijjah'],
+};
+for (const [slug, decls] of Object.entries(MONTH_LINKS)) addEntry('month', slug, decls);
+for (const [gSlug, mSlugs] of Object.entries(GUIDE_MONTHS)) {
+  const g = GUIDE_BY_SLUG.get(gSlug);
+  if (!g) continue;
+  addEntry('guide', gSlug, mSlugs.map((s) => ({ type: 'month' as ContentType, slug: s, reason: 'Month of this topic' })), g.cat);
 }
 for (const [slug, decls] of Object.entries(QUIZ_LINKS)) addEntry('quiz', slug, decls);
 for (const [tSlug, gSlugs] of Object.entries(TOOL_GUIDES)) {

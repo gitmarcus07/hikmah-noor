@@ -1,7 +1,7 @@
 ---
-import EidHub from '../../components/EidHub.astro';
+import UmrahHub from '../../components/UmrahHub.astro';
 import { nonDefaultLocales } from '../../i18n/utils';
 export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
 const { locale } = Astro.params;
 ---
-<EidHub locale={locale} />
+<UmrahHub locale={locale} />

@@ -1,0 +1,28 @@
+---
+/* 12-month grid for the Islamic calendar hub (EN + locale shells). */
+import SectionHeader from './hn/SectionHeader.astro';
+import { localizedPath } from '../i18n/utils';
+import { MONTHS } from '../data/months';
+import { secUI } from '../lib/site-ui-1';
+import { CALENDAR_UI, monthDesc } from '../lib/site-ui-4';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const T = secUI(locale, CALENDAR_UI);
+const L = (p: string) => localizedPath(locale, p);
+---
+<div class="mt-8">
+  <SectionHeader eyebrow={T.gridEyebrow} title={T.gridTitle} href={L('/calendar/')} linkLabel={T.gridLink} />
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
+    {MONTHS.map((m) => (
+      <a href={L(`/calendar/${m.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+        <span class="flex items-center gap-2.5">
+          <span class="hn-verse-num shrink-0">{m.num}</span>
+          <span class="font-arabic text-xl" lang="ar" dir="rtl">{m.arabic}</span>
+        </span>
+        <span class="font-bold block text-[15px] leading-6 mt-2">{m.name}</span>
+        <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{monthDesc(m.slug, locale)}</span>
+      </a>
+    ))}
+  </div>
+</div>

@@ -1,0 +1,139 @@
+---
+/* Hijri month detail — identity (names, number, sacred status), key dates
+ * from the repo calendar table, related resources, prev/next navigation.
+ * Only verified data: no invented virtues, dates or rulings. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import RelatedContent from './RelatedContent.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { secUI } from '../lib/site-ui-1';
+import { MONTH_UI, monthDesc, monthNote, monthEvent } from '../lib/site-ui-4';
+import { monthBySlug, prevMonth, nextMonth } from '../data/months';
+import { GUIDES } from '../data/guides';
+import { seerahBySlug } from '../data/seerah';
+import { historyBySlug } from '../data/history';
+import { localizeGuide } from '../lib/guides-i18n';
+import { localizeSeerah, localizeHistory } from '../lib/content-i18n';
+
+interface Props { month: any; locale: string; }
+const { locale } = Astro.props;
+const m = (Astro.props as any).month;
+const dict = getDict(locale);
+const T = secUI(locale, MONTH_UI);
+const L = (p: string) => localizedPath(locale, p);
+const monthPath = `/calendar/${m.slug}/`;
+const desc = monthDesc(m.slug, locale);
+const note = monthNote(m.slug, locale);
+
+function targetOf(ev: any): { url: string; title: string } | null {
+  try {
+    if (ev.target.type === 'guide') {
+      const g: any = GUIDES.find((x) => x.slug === ev.target.slug);
+      if (!g) return null;
+      const loc: any = localizeGuide(g, locale);
+      return { url: `/learn/${g.cat}/${g.slug}/`, title: loc.title };
+    }
+    if (ev.target.type === 'seerah') {
+      const s: any = seerahBySlug(ev.target.slug);
+      if (!s) return null;
+      const loc: any = localizeSeerah(s, locale);
+      return { url: `/seerat/${s.slug}/`, title: loc.title };
+    }
+    if (ev.target.type === 'history') {
+      const h: any = historyBySlug(ev.target.slug);
+      if (!h) return null;
+      const loc: any = localizeHistory(h, locale);
+      return { url: `/history/${h.slug}/`, title: loc.title };
+    }
+  } catch { /* fall through */ }
+  return null;
+}
+
+const title = T.detTitle.replace('{m}', m.name).replace('{n}', String(m.num));
+let description = `${m.name} (${m.arabic}) — ${desc}`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `${m.name.toLowerCase()}, ${m.arabic}, hijri month ${m.num}, islamic month, ${m.slug.replace(/-/g, ' ')}`;
+
+const faq: any[] = [
+  { q: T.faqWhichQ.replace('{m}', m.name), a: `${m.name} (${m.arabic}) — ${desc}${m.sacred ? ` ${T.sacredL}.` : ''}` },
+];
+if (m.events.length > 0) {
+  faq.push({
+    q: T.faqEventsQ.replace('{m}', m.name),
+    a: m.events.map((ev: any) => { const e = monthEvent(ev.key, locale); return `${ev.d ? `Day ${ev.d}: ` : ''}${e.name} — ${e.note}.`; }).join(' '),
+  });
+}
+faq.push({ q: T.faqMoreQ, a: T.faqMoreA });
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumbCal, path: '/calendar/' },
+  { name: m.name, path: monthPath },
+];
+const prev = prevMonth(m.num);
+const next = nextMonth(m.num);
+const prevL = T.prevL.replace('{m}', prev.name);
+const nextL = T.nextL.replace('{m}', next.name);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={monthPath}>
+  <div class="hn-read hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">{T.badgeN.replace('{n}', String(m.num))}</span>
+      <span class="hn-badge">{T.badgeMonth}</span>
+      {m.sacred && <span class="hn-badge hn-badge-gold">{T.sacredL}</span>}
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{m.name}</h1>
+    <p class="font-arabic text-3xl md:text-4xl mt-3" lang="ar" dir="rtl">{m.arabic}</p>
+    <p class="mt-3 leading-7" style="color:var(--hn-muted)">{desc}</p>
+    {note && <p class="mt-2 leading-7 font-semibold">{note}</p>}
+
+    {m.events.length > 0 && (
+      <section class="mt-8" aria-label={T.keyDatesL}>
+        <SectionHeader eyebrow={T.keyDatesL} title={T.keyDatesL} />
+        <div class="grid gap-3 sm:grid-cols-2 mt-3">
+          {m.events.map((ev: any) => {
+            const e = monthEvent(ev.key, locale);
+            const tgt = targetOf(ev);
+            const body = (
+              <>
+                <span class="font-bold block text-[15px] leading-6">{ev.d ? `${ev.d} ${m.name} — ` : ''}{e.name}</span>
+                <span class="text-[13px]" style="color:var(--hn-muted)">{e.note}{tgt ? ` — ${tgt.title}` : ''}</span>
+              </>
+            );
+            return tgt ? (
+              <a href={L(tgt.url)} class="hn-card hn-card-hover hn-card-pad block">{body}</a>
+            ) : (
+              <div class="hn-card hn-card-pad">{body}</div>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
+    <RelatedContent type="month" slug={m.slug} locale={locale} />
+
+    <section class="mt-8" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More months">
+      <a href={L(`/calendar/${prev.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+        <span class="text-xs font-bold" style="color:var(--hn-muted)">{prevL}</span>
+        <span class="font-bold block text-[15px] leading-6 mt-0.5">{prev.num}. {prev.name}</span>
+      </a>
+      <a href={L(`/calendar/${next.slug}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+        <span class="text-xs font-bold" style="color:var(--hn-muted)">{nextL}</span>
+        <span class="font-bold block text-[15px] leading-6 mt-0.5">{next.num}. {next.name}</span>
+      </a>
+    </nav>
+  </div>
+</BaseLayout>

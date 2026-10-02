@@ -31,6 +31,8 @@ import { historyBySlug } from '../data/history';
 import { kalimaBySlug } from '../data/kalimas';
 import { quizBySlug } from '../data/quizzes';
 import { ALLAH as ALLAH_LIST, PROPHET as PROPHET_LIST } from '../data/names';
+import { MONTHS as MONTH_LIST } from '../data/months';
+import { monthDesc } from '../lib/site-ui-4';
 import { getToolBySlug } from '../lib/finance/tools.js';
 import { localizeSeerah, localizeHadees, localizeMeaning, localizeHistory, localizeKalima, localizeQuiz } from '../lib/content-i18n';
 import { localizeAllahName, localizeProphetName } from '../lib/content-i18n';
@@ -53,7 +55,7 @@ const groupLabels = (dict as any).relGroups ?? {};
 /** Canonical display order: Tier-1 content first. */
 const KIND_ORDER: RelationshipKind[] = [
   'related-duas', 'related-quran', 'related-allah-names', 'related-prophet-names',
-  'related-hadith', 'related-prophets',
+  'related-months', 'related-hadith', 'related-prophets',
   'related-waqiat', 'related-seerah', 'related-guides', 'related-tools',
   'related-meanings', 'related-history', 'related-sahaba', 'related-kalimas',
   'related-quizzes', 'related-women', 'related-articles',
@@ -156,6 +158,11 @@ function cardFor(rel: { type: ContentType; slug: string; category?: string; titl
         if (!hit) return { title: fallback, sub: '' };
         const loc: any = localizeProphetName(hit, locale);
         return { title: loc.translit, sub: loc.meaning ?? '' };
+      }
+      case 'month': {
+        const hit = MONTH_LIST.find((m) => m.slug === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        return { title: hit.name, sub: monthDesc(hit.slug, locale) };
       }
       default:
         return { title: fallback, sub: '' };

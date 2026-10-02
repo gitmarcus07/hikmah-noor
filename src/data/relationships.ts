@@ -28,7 +28,8 @@ export type ContentType =
   | 'article'
   | 'women'
   | 'allah-name'
-  | 'prophet-name';
+  | 'prophet-name'
+  | 'month';
 
 export type RelationshipKind =
   | 'related-duas'
@@ -47,7 +48,8 @@ export type RelationshipKind =
   | 'related-women'
   | 'related-articles'
   | 'related-allah-names'
-  | 'related-prophet-names';
+  | 'related-prophet-names'
+  | 'related-months';
 
 /** A single directed edge: source entity -> target entity. */
 export interface Relationship {
@@ -109,6 +111,7 @@ export function kindForType(type: ContentType): RelationshipKind {
     case 'article': return 'related-articles';
     case 'allah-name': return 'related-allah-names';
     case 'prophet-name': return 'related-prophet-names';
+    case 'month': return 'related-months';
     default: return 'related-articles';
   }
 }
@@ -211,6 +214,8 @@ export function resolveRelationshipUrl(locale: string, rel: Relationship): strin
       return `${base}/names-of-allah/${rel.slug}/`;
     case 'prophet-name':
       return `${base}/names-muhammad/${rel.slug}/`;
+    case 'month':
+      return `${base}/calendar/${rel.slug}/`;
     default:
       return `${base}/`;
   }
@@ -240,6 +245,7 @@ export const RELATIONSHIP_KIND_LABELS: Record<RelationshipKind, string> = {
   'related-articles': 'Articles',
   'related-allah-names': 'Names of Allah',
   'related-prophet-names': 'Names of Muhammad ﷺ',
+  'related-months': 'Islamic Months',
 };
 
 /** Hub URL per relationship kind (for "view all" links). */
@@ -262,6 +268,7 @@ export function hubUrlForKind(kind: RelationshipKind): string {
     case 'related-articles': return '/articles/';
     case 'related-allah-names': return '/names-of-allah/';
     case 'related-prophet-names': return '/names-muhammad/';
+    case 'related-months': return '/calendar/';
     default: return '/';
   }
 }
@@ -309,7 +316,7 @@ export function validateRelationships(): ValidationIssue[] {
   const validTypes: ContentType[] = [
     'dua', 'waqiah', 'prophet', 'guide', 'seerah', 'sahaba', 'hadees',
     'meaning', 'history', 'kalima', 'surah', 'tool', 'quiz', 'article', 'women',
-    'allah-name', 'prophet-name',
+    'allah-name', 'prophet-name', 'month',
   ];
   const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article'];
 

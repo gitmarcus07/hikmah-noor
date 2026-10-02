@@ -31,6 +31,7 @@ const quizzesTxt = await read('src/data/quizzes.ts');
 const toolsTxt = await read('src/lib/finance/tools.js');
 const namesAllahTxt = await read('src/data/names-allah.ts');
 const namesProphetTxt = await read('src/data/names-prophet.ts');
+const monthsTxt = await read('src/data/months.ts');
 const relationsTxt = await read('src/data/relations.ts');
 const surahsMeta = JSON.parse(await read('src/data/surahs-meta.json'));
 
@@ -70,6 +71,7 @@ const S = {
   surah: new Set(surahsMeta.map((s) => s.slug)),
   'allah-name': parseNames(namesAllahTxt, { 49: '49-al-majid', 66: '66-al-majid' }),
   'prophet-name': parseNames(namesProphetTxt),
+  month: new Set([...monthsTxt.matchAll(/\{ slug: '([^']+)', num: \d+/g)].map((m) => m[1])),
 };
 
 for (const [t, set] of Object.entries(S)) {
@@ -138,6 +140,18 @@ for (const m of (relationsTxt.match(/const PROPHET_NAME_SURAHS[\s\S]*?^};/m)?.[0
   if (!S['prophet-name'].has(m[1])) fail(`PROPHET_NAME_SURAHS source name not found: ${m[1]}`);
   for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
     if (!S.surah.has(s[1])) fail(`PROPHET_NAME_SURAHS target surah not found: ${s[1]} (from ${m[1]})`);
+  }
+}
+{
+  const body = relationsTxt.match(/const MONTH_LINKS[\s\S]*?^};/m)?.[0] ?? '';
+  for (const m of body.matchAll(/'([\w-]+)': \[/g)) {
+    if (!S.month.has(m[1])) fail(`MONTH_LINKS source month not found: ${m[1]}`);
+  }
+}
+for (const m of (relationsTxt.match(/const GUIDE_MONTHS[\s\S]*?^};/m)?.[0] ?? '').matchAll(/'([\w-]+)': \[([^\]]*)\]/g)) {
+  if (!S.guide.has(m[1])) fail(`GUIDE_MONTHS source guide not found: ${m[1]}`);
+  for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
+    if (!S.month.has(s[1])) fail(`GUIDE_MONTHS target month not found: ${s[1]} (from guide ${m[1]})`);
   }
 }
 

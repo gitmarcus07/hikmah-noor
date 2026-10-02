@@ -1,0 +1,14 @@
+---
+import MonthDetail from '../../../components/MonthDetail.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+import { MONTHS, monthBySlug } from '../../../data/months';
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales) for (const m of MONTHS) paths.push({ params: { locale, month: m.slug } });
+  return paths;
+}
+const { locale, month: slug } = Astro.params;
+const month = monthBySlug(slug as string);
+---
+<MonthDetail month={month} locale={locale} />

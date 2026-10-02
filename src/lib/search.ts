@@ -559,6 +559,43 @@ import { localizeGuide, localizeGuideCat } from './guides-i18n';
 import { HISTORY } from '../data/history';
 import { ALLAH, PROPHET } from '../data/names';
 import { localizeAllahName, localizeProphetName } from './content-i18n';
+import { MONTHS } from '../data/months';
+import { monthDesc } from './site-ui-4';
+
+/** Islamic months + Umrah hub entries for a locale. */
+export function topicsIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [
+    {
+      title: 'Umrah Guide — Step by Step with Duas',
+      description: 'How to perform Umrah in order: ihram, tawaf, sai and haircut — with timings, crowd tips, kids and elderly guidance, and essential duas.',
+      category: 'hajj',
+      url: prefix + '/umrah/',
+      tags: ['umrah', 'umrah guide', 'umrah ka tarika', 'how to do umrah', 'ihram', 'tawaf', 'talbiyah'],
+      locale,
+    },
+    {
+      title: 'Islamic Calendar — 12 Hijri Months',
+      description: 'All 12 Hijri months with key dates and resources — Muharram, Ramadan, Dhul-Hijjah and more.',
+      category: 'calendar',
+      url: prefix + '/calendar/',
+      tags: ['calendar', 'hijri months', 'islamic months', 'muharram', 'ramadan', 'dhul hijjah'],
+      locale,
+    },
+  ];
+  for (const m of MONTHS) {
+    const desc = monthDesc(m.slug, locale);
+    items.push({
+      title: `${m.name} — Hijri Month ${m.num}`,
+      description: `${desc} Arabic: ${m.arabic}.`,
+      category: 'calendar',
+      url: `${prefix}/calendar/${m.slug}/`,
+      tags: [...new Set(['calendar', 'hijri', 'month', `month ${m.num}`, m.name.toLowerCase(), ...m.name.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      locale,
+    });
+  }
+  return items;
+}
 
 /** Names hubs + individual name entries for a locale. */
 export function namesIndexItems(locale: string): IndexItem[] {
