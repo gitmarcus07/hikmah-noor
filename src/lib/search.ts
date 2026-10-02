@@ -561,6 +561,28 @@ import { ALLAH, PROPHET } from '../data/names';
 import { localizeAllahName, localizeProphetName } from './content-i18n';
 import { MONTHS } from '../data/months';
 import { monthDesc } from './site-ui-4';
+import surahsMeta from '../data/surahs-meta.json';
+
+/** Compact per-ayah entries (reference-focused; no verse text duplication).
+ *  Keeps the client-side index small while making every ayah discoverable
+ *  by reference (`2:255`), surah name or ayah number. */
+export function ayahIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [];
+  for (const s of surahsMeta as any[]) {
+    for (let v = 1; v <= s.verseCount; v++) {
+      items.push({
+        title: `${s.name} ${s.num}:${v}`,
+        description: `Quran ${s.num}:${v} · Surah ${s.name} (${s.englishName}), ayah ${v} of ${s.verseCount}.`,
+        category: 'quran',
+        url: `${prefix}/quran/${s.slug}/${v}/`,
+        tags: [`${s.num}:${v}`, `quran ${s.num}:${v}`, s.name.toLowerCase(), s.englishName.toLowerCase(), `surah ${s.num}`, `ayah ${v}`, 'ayah', 'verse'],
+        locale,
+      });
+    }
+  }
+  return items;
+}
 
 /** Islamic months + Umrah hub entries for a locale. */
 export function topicsIndexItems(locale: string): IndexItem[] {

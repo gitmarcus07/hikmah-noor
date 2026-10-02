@@ -29,7 +29,8 @@ export type ContentType =
   | 'women'
   | 'allah-name'
   | 'prophet-name'
-  | 'month';
+  | 'month'
+  | 'ayah';
 
 export type RelationshipKind =
   | 'related-duas'
@@ -49,7 +50,8 @@ export type RelationshipKind =
   | 'related-articles'
   | 'related-allah-names'
   | 'related-prophet-names'
-  | 'related-months';
+  | 'related-months'
+  | 'related-ayahs';
 
 /** A single directed edge: source entity -> target entity. */
 export interface Relationship {
@@ -112,6 +114,7 @@ export function kindForType(type: ContentType): RelationshipKind {
     case 'allah-name': return 'related-allah-names';
     case 'prophet-name': return 'related-prophet-names';
     case 'month': return 'related-months';
+    case 'ayah': return 'related-ayahs';
     default: return 'related-articles';
   }
 }
@@ -140,11 +143,13 @@ export function registerEntity(type: ContentType, slug: string, category?: strin
 
 /** Check if a (type, slug) pair exists (category-agnostic for targets). */
 export function entityExists(type: ContentType, slug: string): boolean {
+  if (entityRegistry.has(`${type}:${slug}`)) return true;
   const prefix = `${type}:`;
+  const suffix = `:${slug}`;
   for (const key of entityRegistry.keys()) {
-    if (key === `${type}:${slug}` || key.startsWith(`${prefix}`) && key.endsWith(`:${slug}`)) return true;
+    if (key.startsWith(prefix) && key.endsWith(suffix)) return true;
   }
-  return entityRegistry.has(`${type}:${slug}`);
+  return false;
 }
 
 /** Count registered entities (for reports). */
@@ -216,6 +221,8 @@ export function resolveRelationshipUrl(locale: string, rel: Relationship): strin
       return `${base}/names-muhammad/${rel.slug}/`;
     case 'month':
       return `${base}/calendar/${rel.slug}/`;
+    case 'ayah':
+      return `${base}/quran/${rel.category ?? ''}/${rel.slug}/`;
     default:
       return `${base}/`;
   }
@@ -246,6 +253,7 @@ export const RELATIONSHIP_KIND_LABELS: Record<RelationshipKind, string> = {
   'related-allah-names': 'Names of Allah',
   'related-prophet-names': 'Names of Muhammad ﷺ',
   'related-months': 'Islamic Months',
+  'related-ayahs': 'Quran Ayahs',
 };
 
 /** Hub URL per relationship kind (for "view all" links). */
@@ -269,6 +277,7 @@ export function hubUrlForKind(kind: RelationshipKind): string {
     case 'related-allah-names': return '/names-of-allah/';
     case 'related-prophet-names': return '/names-muhammad/';
     case 'related-months': return '/calendar/';
+    case 'related-ayahs': return '/quran/';
     default: return '/';
   }
 }
@@ -316,9 +325,9 @@ export function validateRelationships(): ValidationIssue[] {
   const validTypes: ContentType[] = [
     'dua', 'waqiah', 'prophet', 'guide', 'seerah', 'sahaba', 'hadees',
     'meaning', 'history', 'kalima', 'surah', 'tool', 'quiz', 'article', 'women',
-    'allah-name', 'prophet-name', 'month',
+    'allah-name', 'prophet-name', 'month', 'ayah',
   ];
-  const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article'];
+  const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article', 'ayah'];
 
   for (const entity of ENTITY_RELATIONSHIPS) {
     const sourceKey = registryKey(entity.type, entity.slug, entity.category);

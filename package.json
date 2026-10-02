@@ -36,6 +36,7 @@
     "content:relationships": "node scripts/validate-relationships.mjs",
     "content:names": "node scripts/validate-names.mjs",
     "content:topics": "node scripts/validate-topics.mjs",
+    "content:quran": "node scripts/validate-quran.mjs",
     "content:surahs": "node scripts/build-surahs.mjs",
     "content:tafsir": "node scripts/validate-tafsir.mjs",
     "content:qr": "node scripts/build-donate-qr.mjs"

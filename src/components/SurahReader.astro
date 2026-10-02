@@ -85,6 +85,7 @@ const BISMILLAH = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَ
         <button class="vplay hn-icon-btn !w-10 !h-10 !rounded-full" data-v={verse.v} aria-label={`Play verse ${verse.v}`}>
           <Icon name="play" size={15} />
         </button>
+        <a class="hn-icon-btn !w-10 !h-10 !rounded-full grid place-items-center no-underline" href={L(`/quran/${surah.slug}/${verse.v}/`)} aria-label={`Open Ayah ${verse.v}`} title={`Open Ayah ${verse.v}`}>↗</a>
       </div>
       <p class="hn-verse-ar" lang="ar" dir="rtl">{verse.ar} <span style="color:var(--hn-gold);font-size:0.8em">﴿{verse.v}﴾</span></p>
       <p class="m-tr translit-block mt-2 hidden" data-trtext>{verse.tr}</p>

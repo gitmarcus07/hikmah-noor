@@ -72,6 +72,11 @@ const S = {
   'allah-name': parseNames(namesAllahTxt, { 49: '49-al-majid', 66: '66-al-majid' }),
   'prophet-name': parseNames(namesProphetTxt),
   month: new Set([...monthsTxt.matchAll(/\{ slug: '([^']+)', num: \d+/g)].map((m) => m[1])),
+  ayah: (() => {
+    const set = new Set();
+    for (const s of surahsMeta) for (let v = 1; v <= s.verseCount; v++) set.add(`${s.num}:${v}`);
+    return set;
+  })(),
 };
 
 for (const [t, set] of Object.entries(S)) {

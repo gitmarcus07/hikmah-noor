@@ -70,6 +70,10 @@ for (const s of surahsMeta as any[]) registerEntity('surah', s.slug);
 for (const e of ALLAH) registerEntity('allah-name', e.slug);
 for (const e of PROPHET) registerEntity('prophet-name', e.slug);
 for (const m of MONTHS) registerEntity('month', m.slug);
+/* Ayah entities: synthesized from canonical verse counts (no verse-file IO). */
+for (const s of surahsMeta as any[]) {
+  for (let v = 1; v <= s.verseCount; v++) registerEntity('ayah', `${s.num}:${v}`);
+}
 
 /* ------------------------------------------------------------------ */
 /* 2. Target lookup (enrichment from source of truth)                  */
@@ -170,6 +174,14 @@ export function lookupTarget(type: ContentType, slug: string): TargetInfo | null
       const m = MONTH_BY_SLUG.get(slug);
       return m ? { title: m.name } : null;
     }
+    case 'ayah': {
+      const m = /^(\d+):(\d+)$/.exec(slug);
+      if (!m) return null;
+      const s = SURAH_BY_NUM.get(parseInt(m[1], 10));
+      const v = parseInt(m[2], 10);
+      if (!s || v < 1 || v > s.verseCount) return null;
+      return { category: s.slug, title: `${s.name} ${s.num}:${v}` };
+    }
     default:
       return null;
   }
@@ -226,6 +238,34 @@ function surahDeclsFromTexts(...texts: string[]): RelationshipDecl[] {
       const meta = SURAH_BY_NUM.get(n);
       if (!meta) continue;
       out.push({ type: 'surah', slug: meta.slug, reason: `Cited: Quran ${n}` });
+    }
+  }
+  return out;
+}
+
+/** Extract SINGLE-verse citations (`N:M` not followed by a range dash).
+ *  Ranges (e.g. `7:11–25`) stay surah-level; only exact ayahs become edges. */
+export function ayahRefsFromText(text: string): string[] {
+  const out: string[] = [];
+  const re = /(\d+)\s*:\s*(\d+)(?!\d)(?!\s*[–—-])/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    const id = `${parseInt(m[1], 10)}:${parseInt(m[2], 10)}`;
+    if (!out.includes(id)) out.push(id);
+    if (out.length >= 4) break;
+  }
+  return out;
+}
+
+function ayahDeclsFromTexts(...texts: string[]): RelationshipDecl[] {
+  const seen = new Set<string>();
+  const out: RelationshipDecl[] = [];
+  for (const t of texts) {
+    if (!t) continue;
+    for (const id of ayahRefsFromText(t)) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      out.push({ type: 'ayah', slug: id, reason: `Cited: ${id}` });
     }
   }
   return out;
@@ -722,37 +762,37 @@ function addEntry(type: ContentType, slug: string, decls: RelationshipDecl[], ca
   }
 }
 
-/* 6a. Derived: Quran citations -> surahs */
+/* 6a. Derived: Quran citations -> surahs + exact ayahs */
 for (const d of DUAS) {
-  const decls = surahDeclsFromTexts(d.source);
+  const decls = [...surahDeclsFromTexts(d.source), ...ayahDeclsFromTexts(d.source)];
   if (decls.length) addEntry('dua', d.slug, decls, d.cat);
 }
 for (const w of WAQIAT) {
-  const decls = surahDeclsFromTexts(w.quranRef);
+  const decls = [...surahDeclsFromTexts(w.quranRef), ...ayahDeclsFromTexts(w.quranRef)];
   const ps = prophetSlugForField(w.prophet);
   if (ps) decls.push({ type: 'prophet', slug: ps, reason: `About Prophet ${w.prophet.replace(/\(.*?\)/g, '').trim()}` });
   if (decls.length) addEntry('waqiah', w.slug, decls);
 }
 for (const p of PROPHETS) {
-  const decls = surahDeclsFromTexts(p.quranRef);
+  const decls = [...surahDeclsFromTexts(p.quranRef), ...ayahDeclsFromTexts(p.quranRef)];
   const mine = WAQIAT.filter((w) => prophetSlugForField(w.prophet) === p.slug);
   for (const w of mine) decls.push({ type: 'waqiah', slug: w.slug, reason: 'Story of this prophet' });
   if (decls.length) addEntry('prophet', p.slug, decls);
 }
 for (const s of SEERAH) {
-  const decls = surahDeclsFromTexts(s.references);
+  const decls = [...surahDeclsFromTexts(s.references), ...ayahDeclsFromTexts(s.references)];
   if (decls.length) addEntry('seerah', s.slug, decls);
 }
 for (const s of SAHABA) {
-  const decls = surahDeclsFromTexts(s.references);
+  const decls = [...surahDeclsFromTexts(s.references), ...ayahDeclsFromTexts(s.references)];
   if (decls.length) addEntry('sahaba', s.slug, decls);
 }
 for (const h of HISTORY) {
-  const decls = surahDeclsFromTexts(h.references);
+  const decls = [...surahDeclsFromTexts(h.references), ...ayahDeclsFromTexts(h.references)];
   if (decls.length) addEntry('history', h.slug, decls);
 }
 for (const m of MEANINGS) {
-  const decls = surahDeclsFromTexts(m.proofRef);
+  const decls = [...surahDeclsFromTexts(m.proofRef), ...ayahDeclsFromTexts(m.proofRef)];
   if (decls.length) addEntry('meaning', m.slug, decls);
 }
 

@@ -54,7 +54,7 @@ const groupLabels = (dict as any).relGroups ?? {};
 
 /** Canonical display order: Tier-1 content first. */
 const KIND_ORDER: RelationshipKind[] = [
-  'related-duas', 'related-quran', 'related-allah-names', 'related-prophet-names',
+  'related-duas', 'related-quran', 'related-ayahs', 'related-allah-names', 'related-prophet-names',
   'related-months', 'related-hadith', 'related-prophets',
   'related-waqiat', 'related-seerah', 'related-guides', 'related-tools',
   'related-meanings', 'related-history', 'related-sahaba', 'related-kalimas',
@@ -163,6 +163,10 @@ function cardFor(rel: { type: ContentType; slug: string; category?: string; titl
         const hit = MONTH_LIST.find((m) => m.slug === rel.slug);
         if (!hit) return { title: fallback, sub: '' };
         return { title: hit.name, sub: monthDesc(hit.slug, locale) };
+      }
+      case 'ayah': {
+        // Title-only card (enriched as `Name N:M`); no verse-file imports here.
+        return { title: fallback, sub: '' };
       }
       default:
         return { title: fallback, sub: '' };

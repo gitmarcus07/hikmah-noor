@@ -1,0 +1,30 @@
+---
+import AyahDetail from '../../../../components/AyahDetail.astro';
+import { nonDefaultLocales } from '../../../../i18n/utils';
+import { SURAHS, surahBySlug, prevAyah, nextAyah, paraForAyah } from '../../../../lib/quran';
+import { TAFSIR } from '../../../../data/tafsir';
+
+const surahFiles = import.meta.glob('../../../../data/surahs/*.json');
+
+export async function getStaticPaths() {
+  const paths: any[] = [];
+  for (const locale of nonDefaultLocales)
+    for (const s of SURAHS)
+      for (let v = 1; v <= s.verseCount; v++)
+        paths.push({ params: { locale, surah: s.slug, ayah: String(v) } });
+  return paths;
+}
+const { locale, surah: surahSlug, ayah: ayahStr } = Astro.params;
+const meta = surahBySlug(surahSlug as string)!;
+const v = parseInt(ayahStr as string, 10);
+const loader = (surahFiles as any)[`../../../../data/surahs/${meta.num}.json`];
+const mod = await loader();
+const data = (mod as any).default ?? mod;
+const verse = data.verses[v - 1];
+const prev = prevAyah(meta.num, v);
+const next = nextAyah(meta.num, v);
+const para = paraForAyah(meta.num, v);
+const keyVerses = (TAFSIR as any)[meta.num]?.keyVerses ?? [];
+const tafsirNote = keyVerses.find((k: any) => k.v === v)?.note ?? null;
+---
+<AyahDetail surah={meta} verse={verse} prev={prev} next={next} para={para} tafsirNote={tafsirNote} locale={locale} />

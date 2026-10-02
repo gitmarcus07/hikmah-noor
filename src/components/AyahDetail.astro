@@ -1,0 +1,155 @@
+---
+/* Individual Ayah page — canonical reference page, no invented tafsir.
+ * Arabic + verified translations + transliteration from the existing
+ * surah JSONs; tafsir note only when the repo has a matching key verse;
+ * audio via the existing global Quran player (single-verse queue). */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import RelatedContent from './RelatedContent.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { secUI } from '../lib/site-ui-1';
+import { AYAH_UI } from '../lib/site-ui-4';
+
+interface Props {
+  surah: any;
+  verse: any;
+  prev: any | null;
+  next: any | null;
+  para: any | null;
+  tafsirNote: string | null;
+  locale: string;
+}
+const { surah, verse, prev, next, para, tafsirNote, locale } = Astro.props as Props;
+const dict = getDict(locale);
+const T = secUI(locale, AYAH_UI);
+const L = (p: string) => localizedPath(locale, p);
+const ref = `${surah.num}:${verse.v}`;
+const ayahPath = `/quran/${surah.slug}/${verse.v}/`;
+const trans = locale === 'hi' ? verse.hi : locale === 'ur' || locale === 'ar' ? verse.ur : verse.en;
+const makki = String(surah.revelation).toLowerCase().startsWith('mecca');
+
+const title = `Quran ${ref} — Surah ${surah.name} with Translation & Audio`;
+let description = `Read Quran ${ref} — Surah ${surah.name} (${surah.englishName}), ayah ${verse.v} of ${surah.verseCount} (${makki ? 'Makki' : 'Madani'}) — in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation.`;
+if (description.length > 160) description = description.slice(0, 157) + '…';
+const keywords = `quran ${ref}, ${ref}, surah ${surah.name.toLowerCase()} ayah ${verse.v}, ${surah.name.toLowerCase()} ${verse.v}, quran verse ${surah.num} ${verse.v}, ayah ${verse.v}`;
+
+const faq = [
+  { q: T.faqWhatQ.replace('{ref}', ref), a: `${ref} — ${T.ayahWord} ${verse.v} ${T.ofL} ${surah.verseCount} ${dict.nav.surahs ?? 'Surahs'} ${surah.name} (${surah.englishName}).` },
+  { q: T.faqWhichQ.replace('{ref}', ref), a: `Surah ${surah.name} (${surah.englishName}), ${makki ? 'Makki' : 'Madani'}. ${T.openSurah}.` },
+  { q: T.faqListenQ.replace('{ref}', ref), a: `${T.listenL}.` },
+];
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumbQuran, path: '/quran/' },
+  { name: `Surah ${surah.name}`, path: `/surahs/${surah.slug}/` },
+  { name: `${T.ayahWord} ${verse.v}`, path: ayahPath },
+];
+const refLabel = (r: any) => r ? `${r.surah.name} ${r.surahNum}:${r.ayahNum}` : '';
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={ayahPath}>
+  <div class="hn-read hn-section">
+    <Breadcrumbs locale={locale} items={crumbs.slice(0, 3)} />
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="hn-badge hn-badge-primary">{T.badgeRef.replace('{ref}', ref)}</span>
+      <span class="hn-badge">{makki ? 'Makki' : 'Madani'}</span>
+      {para && <a href={L(`/quran/${para.slug}/`)} class="hn-badge hn-badge-gold">{T.paraL} {para.num} • {para.name}</a>}
+      <span class="ms-auto">
+        <button id="ayahplay" type="button" class="hn-btn hn-btn-primary !min-h-[44px] !py-2 !px-4 text-sm"
+          data-surah={surah.num} data-verse={verse.v}
+          data-label={`Quran ${ref} — Surah ${surah.name}`}
+          data-surahname={surah.name}
+          aria-label={T.listenL}>▶ {T.listenL}</button>
+      </span>
+    </div>
+
+    <p class="mt-4 text-[13px] font-bold" style="color:var(--hn-muted)">{T.refL}: <strong style="color:var(--hn-ink)">Surah {surah.name} ({surah.englishName}), {ref}</strong> — {T.ayahWord} {verse.v} {T.ofL} {surah.verseCount}</p>
+
+    <div class="hn-reading-card mt-4">
+      <p class="arabic-block text-[22px] md:text-[26px]" lang="ar" dir="rtl">{verse.ar} <span style="color:var(--hn-gold);font-size:0.8em">﴿{verse.v}﴾</span></p>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">{T.translitL}</p>
+      <p class="translit-block">{verse.tr}</p>
+      <hr class="hn-divider" />
+      <p class="hn-block-label">{dict.article.meaning}</p>
+      <p class="leading-8 text-[16px]" lang={locale === 'hi' ? 'hi' : locale === 'ur' || locale === 'ar' ? 'ur' : 'en'} dir={locale === 'ur' || locale === 'ar' ? 'rtl' : undefined}>{trans}</p>
+    </div>
+
+    {tafsirNote && (
+      <div class="hn-card hn-card-pad mt-3">
+        <p class="hn-block-label">{T.tafsirTitle}</p>
+        <p class="text-[15px] leading-7">{tafsirNote}</p>
+        <p class="mt-2 text-[12px] leading-6" style="color:var(--hn-muted)">{T.tafsirSrc}</p>
+      </div>
+    )}
+
+    <div class="grid gap-3 sm:grid-cols-2 mt-3">
+      <a href={L(`/surahs/${surah.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+        <span class="font-bold block text-[15px] leading-6">{T.backSurah.replace('{s}', surah.name)}</span>
+        <span class="text-[13px]" style="color:var(--hn-muted)">{surah.englishName} • {surah.verseCount} verses</span>
+      </a>
+      {para && (
+        <a href={L(`/quran/${para.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-bold block text-[15px] leading-6">{T.paraL} {para.num} — {para.name}</span>
+          <span class="text-[13px]" style="color:var(--hn-muted)">{para.range ?? ''}</span>
+        </a>
+      )}
+    </div>
+
+    <RelatedContent type="ayah" slug={ref} locale={locale} />
+
+    <section class="mt-8" aria-label={T.faqTitle}>
+      <SectionHeader eyebrow="FAQ" title={T.faqTitle} />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    {(prev || next) && (
+      <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More ayahs">
+        {prev ? (
+          <a href={L(`/quran/${prev.surah.slug}/${prev.ayahNum}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.prevL}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{refLabel(prev)}</span>
+          </a>
+        ) : <span />}
+        {next && (
+          <a href={L(`/quran/${next.surah.slug}/${next.ayahNum}/`)} class="hn-card hn-card-hover hn-card-pad block text-right">
+            <span class="text-xs font-bold" style="color:var(--hn-muted)">{T.nextL}</span>
+            <span class="font-bold block text-[15px] leading-6 mt-0.5">{refLabel(next)}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  import { getQuranAudio } from '../scripts/quran-audio';
+
+  function initAyahPlayer() {
+    const btn = document.getElementById('ayahplay') as HTMLButtonElement | null;
+    if (!btn || btn.dataset.hnWired === '1') return;
+    btn.dataset.hnWired = '1';
+    btn.addEventListener('click', () => {
+      const player = getQuranAudio();
+      const surah = Number(btn.dataset.surah);
+      const verse = Number(btn.dataset.verse);
+      const label = btn.dataset.label || `Quran ${surah}:${verse}`;
+      const surahName = btn.dataset.surahname || String(surah);
+      player.playQueue(
+        [{ surah, verse }],
+        0,
+        { type: 'single', surah, label, href: window.location.pathname, surahNames: { [String(surah)]: surahName } },
+      );
+    });
+  }
+
+  initAyahPlayer();
+  document.addEventListener('astro:page-load', initAyahPlayer);
+</script>

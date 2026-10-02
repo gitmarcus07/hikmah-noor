@@ -570,3 +570,54 @@ export function monthNote(slug: string, locale: string): string {
 export function monthEvent(key: string, locale: string): { name: string; note: string } {
   return (MONTH_UI as any)[locale]?.events?.[key] ?? MONTH_UI.en.events[key] ?? { name: key, note: '' };
 }
+
+export const AYAH_UI: Record<string, any> = {
+  en: {
+    ayahWord: 'Ayah', badgeRef: 'Quran {ref}', ofL: 'of',
+    prevL: '← Previous ayah', nextL: 'Next ayah →',
+    backSurah: 'Back to Surah {s}', paraL: 'Para',
+    listenL: 'Listen to this ayah', translitL: 'Transliteration',
+    tafsirTitle: 'Tafsir note',
+    tafsirSrc: 'Tafsir summary (Hikmah Noor editorial). For rulings and detail see classical tafsir (Ibn Kathir, Jalalayn) and consult scholars.',
+    refL: 'Reference', crumbQuran: 'Quran',
+    faqTitle: 'Frequently asked questions',
+    faqWhatQ: 'What is {ref}?', faqWhichQ: 'Which surah contains {ref}?', faqListenQ: 'How can I listen to {ref}?',
+    openSurah: 'Read full Surah',
+  },
+  ur: {
+    ayahWord: 'آیت', badgeRef: 'قرآن {ref}', ofL: 'از',
+    prevL: '← پچھلی آیت', nextL: 'اگلی آیت →',
+    backSurah: 'سورۃ {s} پر واپس', paraL: 'پارہ',
+    listenL: 'اس آیت کو سنو', translitL: 'تلفظ',
+    tafsirTitle: 'تفسیری نوٹ',
+    tafsirSrc: 'تفسیری خلاصہ (حکمۃ نور ادارتی)۔ احکام و تفصیل کے لیے کلاسیکی تفاسیر (ابن کثیر، جلالین) دیکھو اور علماء سے رجوع کرو۔',
+    refL: 'حوالہ', crumbQuran: 'قرآن',
+    faqTitle: 'اکثر پوچھے گئے سوالات',
+    faqWhatQ: '{ref} کیا ہے؟', faqWhichQ: '{ref} کس سورۃ میں ہے؟', faqListenQ: '{ref} کیسے سنوں؟',
+    openSurah: 'مکمل سورۃ پڑھو',
+  },
+  hi: {
+    ayahWord: 'आयत', badgeRef: 'क़ुरान {ref}', ofL: 'का',
+    prevL: '← पिछली आयत', nextL: 'अगली आयत →',
+    backSurah: 'सूरह {s} पर वापस', paraL: 'पारा',
+    listenL: 'यह आयत सुनो', translitL: 'लिप्यंतरण',
+    tafsirTitle: 'तफ़सीर नोट',
+    tafsirSrc: 'तफ़सीर सारांश (हिक्मह नूर संपादकीय)। नियमों व विस्तार हेतु शास्त्रीय तफ़सीर (इब्ने कसीर, जलालैन) देखो और विद्वानों से पूछो।',
+    refL: 'संदर्भ', crumbQuran: 'क़ुरान',
+    faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
+    faqWhatQ: '{ref} क्या है?', faqWhichQ: '{ref} किस सूरत में है?', faqListenQ: '{ref} कैसे सुनूं?',
+    openSurah: 'पूरी सूरत पढ़ो',
+  },
+  ar: {
+    ayahWord: 'آية', badgeRef: 'القرآن {ref}', ofL: 'من',
+    prevL: '← الآية السابقة', nextL: 'الآية التالية →',
+    backSurah: 'عودة إلى سورة {s}', paraL: 'الجزء',
+    listenL: 'استمع إلى هذه الآية', translitL: 'النطق',
+    tafsirTitle: 'ملاحظة تفسيرية',
+    tafsirSrc: 'خلاصة تفسيرية (تحرير حكمة نور). للأحكام والتفصيل انظر التفاسير الكلاسيكية (ابن كثير والجلالين) واستشر العلماء.',
+    refL: 'المرجع', crumbQuran: 'القرآن',
+    faqTitle: 'الأسئلة الشائعة',
+    faqWhatQ: 'ما هي {ref}؟', faqWhichQ: 'في أي سورة {ref}؟', faqListenQ: 'كيف أستمع إلى {ref}؟',
+    openSurah: 'اقرأ السورة كاملة',
+  },
+};
