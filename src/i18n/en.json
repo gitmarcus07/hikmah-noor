@@ -115,6 +115,28 @@
     "related-months": "Islamic Months",
     "related-ayahs": "Quran Ayahs"
   },
+  "search": {
+    "resultsFor": "{n} results for “{q}”",
+    "resultFor": "1 result for “{q}”",
+    "typeToFilter": "{n} guides — type to filter",
+    "noResults": "No results for “{q}”.",
+    "tryDefault": "dua, quran, zakat, fitrana, surah yaseen, mahr",
+    "orBrowse": "or browse:",
+    "allTools": "All tools",
+    "surahs114": "114 Surahs",
+    "quranParas": "Quran 30 paras",
+    "didYouMean": "Did you mean: {q}?",
+    "fAll": "All",
+    "fQuran": "Quran",
+    "fDuas": "Duas",
+    "fHadith": "Hadith",
+    "fGuides": "Guides",
+    "fNames": "Names",
+    "fTools": "Tools",
+    "fKalimas": "Kalimas",
+    "viewAll": "See all {n} results →",
+    "noMatches": "No matches — press Enter to search anyway."
+  },
   "footer": {
     "about": "Hikmah Noor is dedicated to authentic, easy-to-read Islamic knowledge — Quran explanations, duas with transliteration, kalimas and stories.",
     "pages": "Pages",

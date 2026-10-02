@@ -115,6 +115,28 @@
     "related-months": "الأشهر الهجرية",
     "related-ayahs": "آيات القرآن"
   },
+  "search": {
+    "resultsFor": "{n} نتائج عن “{q}”",
+    "resultFor": "نتيجة واحدة عن “{q}”",
+    "typeToFilter": "{n} دليلا — اكتب للتصفية",
+    "noResults": "لا نتائج عن “{q}”.",
+    "tryDefault": "دعاء، قرآن، زكاة، فطرة، سورة يس",
+    "orBrowse": "أو تصفح:",
+    "allTools": "جميع الأدوات",
+    "surahs114": "114 سورة",
+    "quranParas": "القرآن 30 جزءا",
+    "didYouMean": "هل تقصد: {q}؟",
+    "fAll": "الكل",
+    "fQuran": "القرآن",
+    "fDuas": "الأدعية",
+    "fHadith": "الحديث",
+    "fGuides": "الأدلة",
+    "fNames": "الأسماء",
+    "fTools": "الأدوات",
+    "fKalimas": "الكلمات",
+    "viewAll": "عرض جميع النتائج ({n}) ←",
+    "noMatches": "لا تطابق — اضغط Enter للبحث على أي حال."
+  },
   "footer": {
     "about": "Hikmah Noor معرفة إسلامية موثوقة وسهلة — شروح القرآن والأدعية مع النطق والكلمات والقصص.",
     "pages": "الصفحات",

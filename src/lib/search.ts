@@ -561,6 +561,8 @@ import { ALLAH, PROPHET } from '../data/names';
 import { localizeAllahName, localizeProphetName } from './content-i18n';
 import { MONTHS } from '../data/months';
 import { monthDesc } from './site-ui-4';
+import { secUI } from './site-ui-1';
+import { RAMADAN_UI, EID_UI, HAJJ_UI, UMRAH_UI } from './site-ui-4';
 import surahsMeta from '../data/surahs-meta.json';
 
 /** Compact per-ayah entries (reference-focused; no verse text duplication).
@@ -589,19 +591,35 @@ export function topicsIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : '/' + locale;
   const items: IndexItem[] = [
     {
-      title: 'Umrah Guide — Step by Step with Duas',
-      description: 'How to perform Umrah in order: ihram, tawaf, sai and haircut — with timings, crowd tips, kids and elderly guidance, and essential duas.',
-      category: 'hajj',
-      url: prefix + '/umrah/',
-      tags: ['umrah', 'umrah guide', 'umrah ka tarika', 'how to do umrah', 'ihram', 'tawaf', 'talbiyah'],
+      title: (secUI(locale, RAMADAN_UI) as any).hubH1,
+      description: 'Everything for Ramadan: moon sighting, fasting rules, itikaf, Laylatul Qadr, Taraweeh, fitrana, countdown and prayer times.',
+      category: 'ramadan',
+      url: prefix + '/ramadan/',
+      tags: ['ramadan', 'ramzan', 'roza', 'رمضان', 'रमज़ान', 'fasting', 'sehri', 'iftar', 'taraweeh', 'laylatul qadr', 'shab e qadr', 'fitrana', 'itikaf'],
       locale,
     },
     {
-      title: 'Islamic Calendar — 12 Hijri Months',
-      description: 'All 12 Hijri months with key dates and resources — Muharram, Ramadan, Dhul-Hijjah and more.',
-      category: 'calendar',
-      url: prefix + '/calendar/',
-      tags: ['calendar', 'hijri months', 'islamic months', 'muharram', 'ramadan', 'dhul hijjah'],
+      title: (secUI(locale, EID_UI) as any).hubH1,
+      description: 'Both Eids in one place: Eid prayer method, day sunnahs, takbeer wording, khutbah rulings, Zakat al-Fitr, Qurbani rules and Eid duas.',
+      category: 'eid',
+      url: prefix + '/eid/',
+      tags: ['eid', 'عید', 'ईद', 'eid ul fitr', 'eid ul adha', 'eid namaz', 'takbeer', 'qurbani', 'bakra eid', 'eid mubarak', 'fitrana'],
+      locale,
+    },
+    {
+      title: (secUI(locale, HAJJ_UI) as any).hubH1,
+      description: 'Complete Hajj & Umrah guide: ihram, tawaf, sai, Mina, Arafah, Muzdalifah, stoning, sacrifice, day-by-day timeline and essential duas.',
+      category: 'hajj',
+      url: prefix + '/hajj/',
+      tags: ['hajj', 'حج', 'हज', 'haj', 'umrah', 'عمرہ', 'ihram', 'tawaf', 'arafah', 'arafat', 'mina', 'muzdalifah', 'rami', 'stoning', 'talbiyah'],
+      locale,
+    },
+    {
+      title: (secUI(locale, UMRAH_UI) as any).hubH1,
+      description: 'How to perform Umrah in order: ihram, tawaf, sai and haircut — with timings, crowd tips, kids and elderly guidance, and essential duas.',
+      category: 'hajj',
+      url: prefix + '/umrah/',
+      tags: ['umrah', 'عمرہ', 'उमरा', 'umrah guide', 'umrah ka tarika', 'how to do umrah', 'ihram', 'tawaf', 'talbiyah'],
       locale,
     },
   ];
@@ -612,7 +630,7 @@ export function topicsIndexItems(locale: string): IndexItem[] {
       description: `${desc} Arabic: ${m.arabic}.`,
       category: 'calendar',
       url: `${prefix}/calendar/${m.slug}/`,
-      tags: [...new Set(['calendar', 'hijri', 'month', `month ${m.num}`, m.name.toLowerCase(), ...m.name.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      tags: [...new Set(['calendar', 'hijri', 'month', `month ${m.num}`, m.arabic, m.name.toLowerCase(), ...m.name.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
       locale,
     });
   }
@@ -647,7 +665,7 @@ export function namesIndexItems(locale: string): IndexItem[] {
       description: `${m} Arabic: ${e.arabic}. One of the 99 names of Allah (Asma-ul-Husna).`,
       category: 'names',
       url: `${prefix}/names-of-allah/${e.slug}/`,
-      tags: [...new Set(['names', 'allah', 'asma ul husna', `name ${e.n}`, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      tags: [...new Set(['names', 'allah', 'asma ul husna', `name ${e.n}`, e.arabic, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
       locale,
     });
   }
@@ -658,7 +676,7 @@ export function namesIndexItems(locale: string): IndexItem[] {
       description: `${m} Arabic: ${e.arabic}. One of the 99 names and titles of Prophet Muhammad ﷺ.`,
       category: 'names',
       url: `${prefix}/names-muhammad/${e.slug}/`,
-      tags: [...new Set(['names', 'prophet', 'muhammad', 'asma un nabi', `name ${e.n}`, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
+      tags: [...new Set(['names', 'prophet', 'muhammad', 'asma un nabi', `name ${e.n}`, e.arabic, e.translit.toLowerCase(), m.toLowerCase(), ...e.translit.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2)])].filter(Boolean),
       locale,
     });
   }
@@ -726,4 +744,165 @@ export function guideIndexItems(locale: string): IndexItem[] {
     });
   }
   return items;
+}
+
+/* ------------------------------------------------------------------ */
+/* Phase 5: consolidated builder + compact static payloads             */
+/*                                                                     */
+/* One builder (`buildSearchIndex`) feeds every search payload so the   */
+/* EN + locale endpoints cannot drift. Payloads are compact arrays      */
+/* (documented below) to keep the initial download small; the browser  */
+/* builds token/posting structures in memory (see search-engine.js).    */
+/* ------------------------------------------------------------------ */
+import { getCollection } from 'astro:content';
+import surahsMetaJson from '../data/surahs-meta.json';
+import parasMetaJson from '../data/paras-meta.json';
+import { TAFSIR } from '../data/tafsir';
+
+export interface SearchDoc {
+  /** Stable id (canonical URL). */
+  id: string;
+  type: string;
+  title: string;
+  url: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  aliases?: string[];
+  /** Canonical Quran ref for ayah docs (`S:V`). */
+  reference?: string;
+  /** Hub/landing pages (demoted within equal ranking tiers). */
+  hub?: boolean;
+  /** Item locale for mixed-locale indexes (EN fill-in badge). */
+  docLocale?: string;
+}
+
+/** Verified famous-epithet aliases → ayah ref, with repo evidence.
+ *  Only unambiguous single-verse mappings backed by an existing dua whose
+ *  title/alias contains the epithet and whose source cites the verse. */
+export const AYAH_ALIASES: Record<string, { ref: string; evidence: string }> = {
+  'ayatul kursi': { ref: '2:255', evidence: 'dua:ayatul-kursi-salah' },
+  'ayat al kursi': { ref: '2:255', evidence: 'dua:ayatul-kursi-salah' },
+  'ayat ul kursi': { ref: '2:255', evidence: 'dua:ayatul-kursi-salah' },
+};
+
+/** Hub URLs (locale-agnostic path) demoted within equal ranking tiers. */
+const HUB_URLS = new Set([
+  '/tools/', '/duas/', '/kalimas/', '/meanings/', '/waqiat/', '/prophets/',
+  '/quran/', '/hadees/', '/seerat/', '/learn/', '/history/', '/quiz/',
+  '/surahs/', '/ramadan/', '/eid/', '/hajj/', '/umrah/', '/calendar/',
+  '/names-of-allah/', '/names-muhammad/', '/sahaba/', '/women/',
+]);
+
+const slugOfId = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
+const stripLocale = (url: string) => url.replace(/^\/(hi|ur|ar)(?=\/|$)/, '') || '/';
+
+/** Consolidated document builder for every locale (articles + data). */
+export async function buildSearchIndex(locale: string): Promise<SearchDoc[]> {
+  const docs: SearchDoc[] = [];
+  const push = (d: SearchDoc) => {
+    if (!d.title || !d.url || !d.type) return;
+    d.hub = HUB_URLS.has(stripLocale(d.url));
+    docs.push(d);
+  };
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const item = (it: IndexItem): SearchDoc => ({
+    id: it.url, type: it.category, title: it.title, url: it.url,
+    description: it.description, category: it.category, tags: it.tags,
+  });
+  for (const fn of [toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems,
+    waqiahIndexItems, prophetIndexItems, sahabaIndexItems, womenIndexItems, quizIndexItems,
+    hadeesIndexItems, seerahIndexItems, guideIndexItems, historyIndexItems,
+    namesIndexItems, topicsIndexItems]) {
+    for (const it of fn(locale)) push(item(it));
+  }
+  for (const a of ayahIndexItems(locale)) {
+    const m = /^(\d+):(\d+)$/.exec(a.tags.find((t) => /^\d+:\d+$/.test(t)) ?? '');
+    push({ id: a.url, type: 'quran-ayah', title: a.title, url: a.url, description: a.description, category: a.category, tags: a.tags, reference: m ? `${m[1]}:${m[2]}` : undefined });
+  }
+  // Surah + para docs (moved here from the endpoints so all locales share logic).
+  for (const s of surahsMetaJson as any[]) {
+    push(tagSurah({
+      id: `${prefix}/surahs/${s.slug}/`, type: 'surahs',
+      title: `Surah ${s.name} (${s.englishName})`,
+      description: `Surah ${s.num} — ${s.verseCount} verses, ${s.revelation === 'Mecca' ? 'Makki' : 'Madani'}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.${(TAFSIR as any)[s.num] ? ` ${(TAFSIR as any)[s.num].intro}` : ''}`,
+      category: 'surahs',
+      url: `${prefix}/surahs/${s.slug}/`,
+      tags: ['quran', 'surah', 'juz', 'para', 'tafsir', s.name.toLowerCase(), s.englishName.toLowerCase(), s.arabicName, String(s.num), ...(((TAFSIR as any)[s.num]?.themes || []) as string[]).map((t: string) => t.toLowerCase())],
+      locale,
+    } as any) as SearchDoc);
+  }
+  for (const p of parasMetaJson as any[]) {
+    push({
+      id: `${prefix}/quran/${p.slug}/`, type: 'quran', title: `Quran Para ${p.num} (${p.name})`,
+      description: `Para ${p.num} (${p.name}) — ${p.range}. Read in Arabic with Urdu, English & Hindi meaning, transliteration and audio.`,
+      category: 'quran', url: `${prefix}/quran/${p.slug}/`,
+      tags: ['quran', 'para', 'parah', 'juz', `para ${p.num}`, `juz ${p.num}`, p.name.toLowerCase(), String(p.num)],
+    });
+  }
+  // Articles: native locale first, then EN fill-ins (same policy as before).
+  const all = await getCollection('articles', ({ data }) => !data.draft && (locale === 'en' ? data.locale === 'en' : true));
+  const withLocale = locale === 'en'
+    ? all.filter((e) => e.data.locale === 'en')
+    : (() => {
+      const native = all.filter((e) => e.data.locale === locale);
+      const seen = new Set(native.map((e) => slugOfId(e.id)));
+      return [...native, ...all.filter((e) => e.data.locale === 'en' && !seen.has(slugOfId(e.id)))];
+    })();
+  for (const e of withLocale) {
+    const slug = slugOfId(e.id);
+    push({
+      id: `/${e.data.category}/${slug}/`, type: e.data.category,
+      title: e.data.title, url: e.data.locale === 'en' && locale !== 'en' ? `/${e.data.category}/${slug}/` : `${prefix}/${e.data.category}/${slug}/`,
+      description: e.data.description, category: e.data.category, tags: e.data.tags, docLocale: e.data.locale,
+    });
+  }
+  return docs;
+}
+
+/** Compact core payload: [title, url, catIdx, desc, tags, flags, docLocale].
+ *  flags bit0 = hub. Ayah docs excluded (separate lazy chunk). */
+export interface SearchCorePayload {
+  v: 1;
+  locale: string;
+  cats: string[];
+  docs: Array<[string, string, number, string, string[], number, string?]>;
+  surahs: Array<[number, string, string, string, number, string[]]>;
+  aliases: Record<string, string>;
+}
+
+/** Compact ayah payload: [ref, surahNum, ayahNum, title, url]. */
+export interface SearchAyahPayload {
+  v: 1;
+  locale: string;
+  docs: Array<[string, number, number, string, string]>;
+}
+
+export function toCorePayload(docs: SearchDoc[], locale: string): SearchCorePayload {
+  const cats: string[] = [];
+  const catIdx = (c: string) => {
+    let i = cats.indexOf(c);
+    if (i < 0) { cats.push(c); i = cats.length - 1; }
+    return i;
+  };
+  const out: SearchCorePayload['docs'] = [];
+  for (const d of docs) {
+    if (d.type === 'quran-ayah') continue;
+    out.push([d.title, d.url, catIdx(d.category || d.type), d.description || '', d.tags || [], d.hub ? 1 : 0, d.docLocale]);
+  }
+  return {
+    v: 1, locale, cats, docs: out,
+    surahs: (surahsMetaJson as any[]).map((s) => [s.num, s.slug, s.name, s.englishName, s.verseCount, SURAH_ALIASES[s.slug.replace(/^\d+-/, '')] || []]),
+    aliases: Object.fromEntries(Object.entries(AYAH_ALIASES).map(([k, v]) => [k, v.ref])),
+  };
+}
+
+export function toAyahPayload(docs: SearchDoc[], locale: string): SearchAyahPayload {
+  const out: SearchAyahPayload['docs'] = [];
+  for (const d of docs) {
+    if (d.type !== 'quran-ayah' || !d.reference) continue;
+    const [s, v] = d.reference.split(':').map(Number);
+    out.push([d.reference, s, v, d.title, d.url]);
+  }
+  return { v: 1, locale, docs: out };
 }

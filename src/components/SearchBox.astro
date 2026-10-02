@@ -1,6 +1,7 @@
 ---
-/* Unified search box with live suggestions. Logic preserved; chrome unified. */
+/* Unified search box with live suggestions. Engine-powered (deterministic tiers). */
 import Icon from './Icon.astro';
+import { getDict } from '../i18n/utils';
 interface Props {
   locale: string;
   /** e.g. `/search-index.json` or `/hi/search-index.json` */
@@ -13,54 +14,58 @@ interface Props {
   mobileSuggest?: boolean;
 }
 const { locale, indexUrl, searchUrl, placeholder, id = 'q', mobileSuggest = false } = Astro.props;
+const S = (getDict(locale) as any).search || {};
+const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatches || 'No matches — press Enter to search anyway.' };
 ---
-<div class="relative min-w-0 flex-1" data-searchbox>
+<div class="relative min-w-0 flex-1" data-searchbox data-locale={locale} data-t={JSON.stringify(T)}>
   <form action={searchUrl} method="get" class="hn-searchwrap" role="search">
     <Icon name="search" size={19} />
     <input id={id} name="q" placeholder={placeholder} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" role="combobox" aria-expanded="false" aria-controls={`${id}-suggest`} aria-autocomplete="list" />
     <button class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
   </form>
-  <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 hn-card overflow-hidden" role="listbox"></div>
+  <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 hn-card overflow-hidden max-h-[60vh] overflow-y-auto" role="listbox"></div>
 </div>
 <script define:vars={{ indexUrl, searchUrl, inputId: id, mobileSuggest }}>
+  import { createIndex, search, suggest, ayahNeeded, escHtml, highlight } from '../lib/search-engine.js';
   (() => {
     const box = document.querySelector(`[data-searchbox] #${CSS.escape(inputId)}`);
     if (!box) return;
+    const host = box.closest('[data-searchbox]');
+    const ayahUrl = String(indexUrl).replace('search-index.json', 'search-ayahs.json');
+    const T = JSON.parse(host?.dataset.t || '{}');
     const panel = document.getElementById(`${inputId}-suggest`);
     const form = box.closest('form');
-    let items = null;
+    let corePayload = null;
+    let core = null;
+    let ayahsLoaded = false;
+    let ayahsLoading = null;
     let active = -1;
     let rows = [];
-    const load = async () => {
-      if (items) return items;
-      try { items = await (await fetch(indexUrl)).json(); }
-      catch { items = []; }
-      return items;
-    };
-    const score = (it, q) => {
-      const t = (it.title || '').toLowerCase();
-      const d = (it.description || '').toLowerCase();
-      const tags = (it.tags || []).join(' ').toLowerCase();
-      const c = (it.category || '').toLowerCase();
-      let s = 0;
-      if (t.startsWith(q)) s += 100;
-      else if (t.includes(q)) s += 60;
-      if (c === q || c.startsWith(q)) s += 25;
-      if ((it.tags || []).some(t => String(t).toLowerCase() === q)) s += 40;
-      for (const tag of (it.tags || [])) {
-        const tl = String(tag).toLowerCase();
-        if (tl.startsWith(q)) { s += 30; break; }
-        if (tl.includes(q)) { s += 12; break; }
+    const loadCore = async () => {
+      if (!core) {
+        try { corePayload = await (await fetch(indexUrl)).json(); }
+        catch { corePayload = null; }
+        if (!corePayload) corePayload = { v: 1, locale: 'en', cats: [], docs: [], surahs: [], aliases: {} };
+        core = createIndex(corePayload, null);
       }
-      if (d.includes(q)) s += 8;
-      void tags;
-      return s;
+      return core;
     };
-    const hi = (text, q) => {
-      const i = text.toLowerCase().indexOf(q);
-      if (i < 0) return text.length > 60 ? text.slice(0, 60) + '…' : text;
-      return text.slice(0, i) + '<mark>' + text.slice(i, i + q.length) + '</mark>' + text.slice(i + q.length);
+    const ensureAyahs = async (q) => {
+      const idx = await loadCore();
+      if (ayahsLoaded || !ayahNeeded(idx, q)) return;
+      if (!ayahsLoading) {
+        ayahsLoading = (async () => {
+          try {
+            const payload = await (await fetch(ayahUrl)).json();
+            core = createIndex(corePayload, payload);
+          } catch { /* keep core-only */ }
+          ayahsLoaded = true;
+          ayahsLoading = null;
+        })();
+      }
+      await ayahsLoading;
     };
+    const fill = (tpl, m) => String(tpl || '').replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
     const close = () => {
       panel.classList.add('hidden');
       box.setAttribute('aria-expanded', 'false');
@@ -72,15 +77,15 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q', mobileSuggest = fals
     const render = (list, q, total) => {
       rows = list;
       if (!list.length) {
-        panel.innerHTML = '<p class="px-4 py-3.5 text-sm">No matches — press Enter to search anyway.</p>';
+        panel.innerHTML = `<p class="px-4 py-3.5 text-sm">${escHtml(T.noMatches)}</p>`;
       } else {
         panel.innerHTML = list.map((it, i) =>
-          `<a href="${it.url}" role="option" data-i="${i}" class="sugrow flex items-center gap-3 px-3.5 py-2.5 hover:opacity-80 ${i > 0 ? 'border-t' : ''}" style="border-color:var(--hn-border)">` +
-          `<span class="hn-badge hn-badge-primary">${it.category}</span>` +
-          `<span class="min-w-0"><span class="font-semibold text-[14px] leading-5 block truncate">${hi(it.title, q)}</span></span>` +
+          `<a href="${escHtml(it.u)}" role="option" data-i="${i}" class="sugrow flex items-center gap-3 px-3.5 py-2.5 hover:opacity-80 ${i > 0 ? 'border-t' : ''}" style="border-color:var(--hn-border)">` +
+          `<span class="hn-badge hn-badge-primary">${escHtml(it.c)}</span>` +
+          `<span class="min-w-0"><span class="font-semibold text-[14px] leading-5 block truncate">${highlight(it.t, q)}</span></span>` +
           `</a>`
         ).join('') + (total > list.length
-          ? `<a href="${searchUrl}?q=${encodeURIComponent(q)}" class="block px-3.5 py-3 text-sm font-bold" style="color:var(--hn-primary);border-top:1px solid var(--hn-border)">See all ${total} results →</a>`
+          ? `<a href="${searchUrl}?q=${encodeURIComponent(q)}" class="block px-3.5 py-3 text-sm font-bold" style="color:var(--hn-primary);border-top:1px solid var(--hn-border)">${escHtml(fill(T.viewAll, { n: total }))}</a>`
           : '');
       }
       panel.classList.remove('hidden');
@@ -90,12 +95,12 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q', mobileSuggest = fals
     box.addEventListener('input', () => {
       clearTimeout(t);
       t = setTimeout(async () => {
-        const q = box.value.toLowerCase().trim();
+        const q = box.value.trim();
         if (q.length < 1 || (!allowSuggest() && !mobileSuggest)) { close(); return; }
-        const all = await load();
-        const ranked = all.map(it => ({ it, s: score(it, q) })).filter(r => r.s > 0)
-          .sort((a, b) => b.s - a.s || a.it.title.localeCompare(b.it.title));
-        render(ranked.slice(0, 6).map(r => r.it), q, ranked.length);
+        await loadCore();
+        await ensureAyahs(q);
+        const ranked = search(core, q, { limit: 60 });
+        render(ranked.slice(0, 6).map((r) => r.d), q, ranked.length);
       }, 120);
     });
     box.addEventListener('focus', async () => {
