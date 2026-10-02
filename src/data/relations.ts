@@ -17,11 +17,13 @@ import {
   kindForType,
   printValidationReport,
   registerEntity,
+  registrySnapshot,
   validateRelationships,
   type ContentType,
   type EntityRelationships,
   type Relationship,
   type RelationshipDecl,
+  type RelationshipProvenance,
   type ValidationIssue,
 } from './relationships';
 import { DUAS, DUA_CATS } from './duas';
@@ -40,6 +42,7 @@ import { WOMEN } from './women';
 import { QUIZZES, QUIZ_CATS } from './quizzes';
 import { TOOLS, CATS as TOOL_CATS } from '../lib/finance/tools.js';
 import surahsMeta from './surahs-meta.json';
+import parasMeta from './paras-meta.json';
 import { ALLAH, PROPHET } from './names';
 import { MONTHS } from './months';
 
@@ -70,6 +73,7 @@ for (const s of surahsMeta as any[]) registerEntity('surah', s.slug);
 for (const e of ALLAH) registerEntity('allah-name', e.slug);
 for (const e of PROPHET) registerEntity('prophet-name', e.slug);
 for (const m of MONTHS) registerEntity('month', m.slug);
+for (const p of parasMeta as any[]) registerEntity('para', p.slug);
 /* Ayah entities: synthesized from canonical verse counts (no verse-file IO). */
 for (const s of surahsMeta as any[]) {
   for (let v = 1; v <= s.verseCount; v++) registerEntity('ayah', `${s.num}:${v}`);
@@ -102,6 +106,7 @@ const PROPHET_NAME_BY_SLUG = new Map(PROPHET.map((e) => [e.slug, e]));
 const MONTH_BY_SLUG = new Map(MONTHS.map((m) => [m.slug, m]));
 const SURAH_BY_SLUG = new Map((surahsMeta as any[]).map((s) => [s.slug, s]));
 const SURAH_BY_NUM = new Map((surahsMeta as any[]).map((s) => [s.num, s]));
+const PARA_BY_SLUG = new Map((parasMeta as any[]).map((p) => [p.slug, p]));
 
 /** Resolve (type, slug) -> { category, title } or null when unknown. */
 export function lookupTarget(type: ContentType, slug: string): TargetInfo | null {
@@ -182,6 +187,10 @@ export function lookupTarget(type: ContentType, slug: string): TargetInfo | null
       if (!s || v < 1 || v > s.verseCount) return null;
       return { category: s.slug, title: `${s.name} ${s.num}:${v}` };
     }
+    case 'para': {
+      const p = PARA_BY_SLUG.get(slug);
+      return p ? { title: `Para ${p.num} (${p.name})` } : null;
+    }
     default:
       return null;
   }
@@ -237,7 +246,7 @@ function surahDeclsFromTexts(...texts: string[]): RelationshipDecl[] {
       seen.add(n);
       const meta = SURAH_BY_NUM.get(n);
       if (!meta) continue;
-      out.push({ type: 'surah', slug: meta.slug, reason: `Cited: Quran ${n}` });
+      out.push({ type: 'surah', slug: meta.slug, reason: `Cited: Quran ${n}`, prov: 'quran-citation' });
     }
   }
   return out;
@@ -265,7 +274,7 @@ function ayahDeclsFromTexts(...texts: string[]): RelationshipDecl[] {
     for (const id of ayahRefsFromText(t)) {
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push({ type: 'ayah', slug: id, reason: `Cited: ${id}` });
+      out.push({ type: 'ayah', slug: id, reason: `Cited: ${id}`, prov: 'quran-citation' });
     }
   }
   return out;
@@ -731,7 +740,7 @@ const PROPHET_NAME_SURAHS: Record<string, string[]> = {
 /* 6. Assembly                                                         */
 /* ------------------------------------------------------------------ */
 
-function enrich(decl: RelationshipDecl): Relationship {
+function enrich(decl: RelationshipDecl, batchProv: RelationshipProvenance = 'explicit'): Relationship {
   const info = lookupTarget(decl.type, decl.slug);
   return {
     type: decl.type,
@@ -740,17 +749,18 @@ function enrich(decl: RelationshipDecl): Relationship {
     category: info?.category,
     title: info?.title,
     reason: decl.reason,
+    prov: decl.prov ?? batchProv,
   };
 }
 
-function addEntry(type: ContentType, slug: string, decls: RelationshipDecl[], category?: string): void {
+function addEntry(type: ContentType, slug: string, decls: RelationshipDecl[], category?: string, prov: RelationshipProvenance = 'explicit'): void {
   const seen = new Set<string>();
   const relationships: Relationship[] = [];
   for (const d of decls) {
     const key = `${d.type}:${d.slug}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    relationships.push(enrich(d));
+    relationships.push(enrich(d, prov));
   }
   const existing = ENTITY_RELATIONSHIPS.find((e) => e.slug === slug && e.type === type && (e.category ?? undefined) === (category ?? undefined));
   if (existing) {
@@ -770,13 +780,13 @@ for (const d of DUAS) {
 for (const w of WAQIAT) {
   const decls = [...surahDeclsFromTexts(w.quranRef), ...ayahDeclsFromTexts(w.quranRef)];
   const ps = prophetSlugForField(w.prophet);
-  if (ps) decls.push({ type: 'prophet', slug: ps, reason: `About Prophet ${w.prophet.replace(/\(.*?\)/g, '').trim()}` });
+  if (ps) decls.push({ type: 'prophet', slug: ps, reason: `About Prophet ${w.prophet.replace(/\(.*?\)/g, '').trim()}`, prov: 'structured-field' });
   if (decls.length) addEntry('waqiah', w.slug, decls);
 }
 for (const p of PROPHETS) {
   const decls = [...surahDeclsFromTexts(p.quranRef), ...ayahDeclsFromTexts(p.quranRef)];
   const mine = WAQIAT.filter((w) => prophetSlugForField(w.prophet) === p.slug);
-  for (const w of mine) decls.push({ type: 'waqiah', slug: w.slug, reason: 'Story of this prophet' });
+  for (const w of mine) decls.push({ type: 'waqiah', slug: w.slug, reason: 'Story of this prophet', prov: 'structured-field' });
   if (decls.length) addEntry('prophet', p.slug, decls);
 }
 for (const s of SEERAH) {
@@ -822,6 +832,34 @@ for (const [slug, meanings] of Object.entries(ALLAH_MEANINGS)) {
 }
 for (const [slug, surahs] of Object.entries(PROPHET_NAME_SURAHS)) {
   addEntry('prophet-name', slug, surahs.map((s) => ({ type: 'surah' as ContentType, slug: s, reason: 'Quranic address in this surah' })));
+}
+/* Inverted: surah -> prophet-name (same verified address map, reverse direction). */
+for (const [nameSlug, surahs] of Object.entries(PROPHET_NAME_SURAHS)) {
+  for (const s of surahs) {
+    addEntry('surah', s, [{ type: 'prophet-name' as ContentType, slug: nameSlug, reason: 'Quranic address linked to this surah' }], undefined, 'structured-field');
+  }
+}
+
+/** 5k. Surah -> para (canonical Juz ranges from paras-meta; at most 3 per surah). */
+for (const s of surahsMeta as any[]) {
+  const containing = (parasMeta as any[]).filter((p) => p.start.surah <= s.num && s.num <= p.end.surah);
+  if (containing.length) {
+    addEntry('surah', s.slug, containing.map((p) => ({
+      type: 'para' as ContentType,
+      slug: p.slug,
+      reason: `Read this surah in Para ${p.num} (${p.name})`,
+    })), undefined, 'canonical-dataset');
+  }
+}
+
+/** 5m. Seerah -> month (reverse of the verified MONTH_LINKS associations). */
+const SEERAH_MONTHS: Record<string, string[]> = {
+  'birth-noble-lineage-year-of-elephant': ['rabi-al-awwal'],
+  'isra-miraj-aqabah-pledges': ['rajab'],
+};
+for (const [sSlug, mSlugs] of Object.entries(SEERAH_MONTHS)) {
+  if (!SEERAH_BY_SLUG.has(sSlug)) continue;
+  addEntry('seerah', sSlug, mSlugs.map((m) => ({ type: 'month' as ContentType, slug: m, reason: m === 'rajab' ? 'The Night Journey (Rajab)' : 'Birth month (Rabi al-Awwal)' })));
 }
 const MONTH_LINKS: Record<string, RelationshipDecl[]> = {
   'muharram': [
@@ -933,6 +971,7 @@ export function getRelatedEntities(type: ContentType, slug: string, category?: s
         kind: kindForType(e.type),
         category: back.category,
         title: back.title,
+        prov: r.prov,
         from: { type: e.type, slug: e.slug, category: e.category },
       });
     }
@@ -970,6 +1009,65 @@ export function validateAll(): ValidationIssue[] {
   return validateRelationships();
 }
 
+export interface GraphReport {
+  entities: number;
+  edges: number;
+  usable: number;
+  byKind: Record<string, number>;
+  byProv: Record<string, number>;
+  /** Entities with no outgoing entry (reached via incoming edges only). */
+  entryless: number;
+  /** Entities with neither incoming nor outgoing usable edges. */
+  orphans: number;
+  orphanSample: string[];
+  maxOut: { key: string; n: number };
+  maxIn: { key: string; n: number };
+  avgOut: number;
+}
+
+/** Full graph audit: coverage, provenance split, orphans, degree extremes. */
+export function graphReport(): GraphReport {
+  const byKind: Record<string, number> = {};
+  const byProv: Record<string, number> = {};
+  const outCount = new Map<string, number>();
+  const inCount = new Map<string, number>();
+  let edges = 0;
+  let usable = 0;
+  for (const e of ENTITY_RELATIONSHIPS) {
+    const fromKey = `${e.type}:${e.slug}`;
+    for (const r of e.relationships) {
+      edges++;
+      if (!isUsable(r)) continue;
+      usable++;
+      byKind[r.kind] = (byKind[r.kind] ?? 0) + 1;
+      byProv[r.prov ?? 'undefined'] = (byProv[r.prov ?? 'undefined'] ?? 0) + 1;
+      outCount.set(fromKey, (outCount.get(fromKey) ?? 0) + 1);
+      const toKey = `${r.type}:${r.slug}`;
+      inCount.set(toKey, (inCount.get(toKey) ?? 0) + 1);
+    }
+  }
+  // All known entities (registered) vs those with outgoing entries.
+  const { registeredKeys } = registrySnapshot();
+  let orphans = 0;
+  const orphanSample: string[] = [];
+  for (const key of registeredKeys) {
+    if (!outCount.has(key) && !inCount.has(key)) {
+      orphans++;
+      if (orphanSample.length < 12) orphanSample.push(key);
+    }
+  }
+  let maxOut = { key: '-', n: 0 };
+  for (const [k, n] of outCount) if (n > maxOut.n) maxOut = { key: k, n };
+  let maxIn = { key: '-', n: 0 };
+  for (const [k, n] of inCount) if (n > maxIn.n) maxIn = { key: k, n };
+  const entryless = registeredKeys.size - outCount.size;
+  return {
+    entities: ENTITY_RELATIONSHIPS.length,
+    edges, usable, byKind, byProv, entryless, orphans, orphanSample,
+    maxOut, maxIn, avgOut: outCount.size ? usable / outCount.size : 0,
+  };
+}
+
 const g = globalThis as any;
 if (!g.__hn_relations_reported) {
   g.__hn_relations_reported = true;
@@ -978,5 +1076,10 @@ if (!g.__hn_relations_reported) {
   const warnings = issues.filter((i) => i.severity === 'warning');
   const stats = relationshipStats();
   console.log(`[relationships] ${stats.entities} entities, ${stats.usable}/${stats.edges} usable edges, ${errors.length} error(s), ${warnings.length} warning(s)`);
+  try {
+    const rep = graphReport();
+    console.log(`[graph] byProv=${JSON.stringify(rep.byProv)} orphans=${rep.orphans} entryless=${rep.entryless} maxOut=${rep.maxOut.key}x${rep.maxOut.n} maxIn=${rep.maxIn.key}x${rep.maxIn.n} avgOut=${rep.avgOut.toFixed(2)}`);
+    if (rep.orphanSample.length) console.log(`[graph] orphanSample=${rep.orphanSample.join(',')}`);
+  } catch { /* audit must never break the build */ }
   printValidationReport();
 }

@@ -10,6 +10,7 @@ import {
   groupRelationshipsByKind,
   resolveRelationshipUrl,
   hubUrlForKind,
+  compareEdges,
   RELATIONSHIP_KIND_LABELS,
 } from '../data/relationships';
 import type { ContentType, RelationshipKind } from '../data/relationships';
@@ -32,6 +33,7 @@ import { kalimaBySlug } from '../data/kalimas';
 import { quizBySlug } from '../data/quizzes';
 import { ALLAH as ALLAH_LIST, PROPHET as PROPHET_LIST } from '../data/names';
 import { MONTHS as MONTH_LIST } from '../data/months';
+import { paras } from '../lib/paras';
 import { monthDesc } from '../lib/site-ui-4';
 import { getToolBySlug } from '../lib/finance/tools.js';
 import { localizeSeerah, localizeHadees, localizeMeaning, localizeHistory, localizeKalima, localizeQuiz } from '../lib/content-i18n';
@@ -54,7 +56,7 @@ const groupLabels = (dict as any).relGroups ?? {};
 
 /** Canonical display order: Tier-1 content first. */
 const KIND_ORDER: RelationshipKind[] = [
-  'related-duas', 'related-quran', 'related-ayahs', 'related-allah-names', 'related-prophet-names',
+  'related-duas', 'related-quran', 'related-ayahs', 'related-paras', 'related-allah-names', 'related-prophet-names',
   'related-months', 'related-hadith', 'related-prophets',
   'related-waqiat', 'related-seerah', 'related-guides', 'related-tools',
   'related-meanings', 'related-history', 'related-sahaba', 'related-kalimas',
@@ -168,6 +170,10 @@ function cardFor(rel: { type: ContentType; slug: string; category?: string; titl
         // Title-only card (enriched as `Name N:M`); no verse-file imports here.
         return { title: fallback, sub: '' };
       }
+      case 'para': {
+        const hit = paras.find((p) => p.slug === rel.slug);
+        return hit ? { title: `Para ${hit.num} (${hit.name})`, sub: hit.range ?? '' } : { title: fallback, sub: '' };
+      }
       default:
         return { title: fallback, sub: '' };
     }
@@ -178,6 +184,8 @@ function cardFor(rel: { type: ContentType; slug: string; category?: string; titl
 
 const all = getRelatedEntities(type, slug, category).filter((r) => !exclude.includes(r.kind));
 const grouped = groupRelationshipsByKind(all);
+/* Rank within each group (explicit > ayah > surah/structured > canonical); ties keep build order. */
+for (const rels of grouped.values()) rels.sort(compareEdges);
 const orderedKinds = KIND_ORDER.filter((k) => grouped.has(k));
 const viewAllLabel = (dict as any).relViewAll ?? 'View all';
 ---

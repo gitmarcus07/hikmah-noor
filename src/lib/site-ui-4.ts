@@ -397,6 +397,7 @@ export const MONTH_UI: Record<string, any> = {
     faqTitle: 'Frequently asked questions',
     faqWhichQ: 'Which Hijri month is {m}?', faqEventsQ: 'What happens in {m}?', faqMoreQ: 'Where do I learn more?',
     faqMoreA: 'Open any linked guide, dua or resource above — or browse the Islamic calendar for dates and the full month list.',
+    hubs: { 'ramadan': 'Ramadan hub', 'shawwal': 'Shawwal hub', 'dhul-hijjah': 'Dhul-Hijjah hub' },
     months: {
       'muharram': { desc: 'The first month of the Hijri year.', note: 'A sacred month. The 10th day, Ashura, is a recommended fast (with the 9th); the new year begins by moon sighting.' },
       'safar': { desc: 'The second month of the Hijri year.' },
@@ -439,6 +440,7 @@ export const MONTH_UI: Record<string, any> = {
     faqTitle: 'اکثر پوچھے گئے سوالات',
     faqWhichQ: '{m} ہجری کا کونسا مہینہ ہے؟', faqEventsQ: '{m} میں کیا ہوتا ہے؟', faqMoreQ: 'مزید کہاں سیکھوں؟',
     faqMoreA: 'اوپر کوئی بھی منسلک رہنما، دعا یا وسیلہ کھولو — یا تاریخوں اور مکمل فہرست کے لیے اسلامی کیلنڈر دیکھو۔',
+    hubs: { 'ramadan': 'رمضان مرکز', 'shawwal': 'شوال مرکز', 'dhul-hijjah': 'ذوالحجہ مرکز' },
     months: {
       'muharram': { desc: 'ہجری سال کا پہلا مہینہ۔', note: 'حرمت والا مہینہ۔ 10 تاریخ عاشورہ مسنون روزہ ہے (9 کے ساتھ)؛ نیا سال چاند دیکھ کر شروع ہوتا ہے۔' },
       'safar': { desc: 'ہجری سال کا دوسرا مہینہ۔' },
@@ -481,6 +483,7 @@ export const MONTH_UI: Record<string, any> = {
     faqTitle: 'अक्सर पूछे जाने वाले प्रश्न',
     faqWhichQ: '{m} हिजरी का कौनसा महीना है?', faqEventsQ: '{m} में क्या होता है?', faqMoreQ: 'और कहां सीखूं?',
     faqMoreA: 'ऊपर कोई भी संबद्ध गाइड, दुआ या संसाधन खोलो — या तिथियों व पूर्ण सूची हेतु इस्लामी कैलेंडर देखो।',
+    hubs: { 'ramadan': 'रमज़ान केंद्र', 'shawwal': 'शव्वाल केंद्र', 'dhul-hijjah': 'ज़ुल-हिज्जा केंद्र' },
     months: {
       'muharram': { desc: 'हिजरी वर्ष का प्रथम माह।', note: 'पवित्र महीना। 10 तारीख़ आशूरा मसनून रोज़ा है (9 के साथ); नववर्ष चांद देखकर आरंभ होता है।' },
       'safar': { desc: 'हिजरी वर्ष का द्वितीय माह।' },
@@ -523,6 +526,7 @@ export const MONTH_UI: Record<string, any> = {
     faqTitle: 'الأسئلة الشائعة',
     faqWhichQ: 'أي شهر هجري هو {m}؟', faqEventsQ: 'ماذا يحدث في {m}؟', faqMoreQ: 'أين أتعلم المزيد؟',
     faqMoreA: 'افتح أي دليل أو دعاء أو مورد مرتبط أعلاه — أو تصفح التقويم الإسلامي للتواريخ والقائمة الكاملة.',
+    hubs: { 'ramadan': 'مركز رمضان', 'shawwal': 'مركز شوال', 'dhul-hijjah': 'مركز ذي الحجة' },
     months: {
       'muharram': { desc: 'الشهر الأول من السنة الهجرية.', note: 'شهر حرام. يوم عاشوراء (العاشر) صيام مستحب (مع التاسع)؛ وتبدأ السنة برؤية الهلال.' },
       'safar': { desc: 'الشهر الثاني من السنة الهجرية.' },
@@ -561,6 +565,11 @@ export const MONTH_UI: Record<string, any> = {
 /** Localized month description (falls back to English). */
 export function monthDesc(slug: string, locale: string): string {
   return (MONTH_UI as any)[locale]?.months?.[slug]?.desc ?? (MONTH_UI.en.months[slug]?.desc ?? '');
+}
+
+/** Localized hub title for hub months (falls back to English; '' when none). */
+export function monthHubTitle(slug: string, locale: string): string {
+  return (MONTH_UI as any)[locale]?.hubs?.[slug] ?? (MONTH_UI.en.hubs?.[slug] ?? '');
 }
 /** Localized month significance note (empty when none). */
 export function monthNote(slug: string, locale: string): string {

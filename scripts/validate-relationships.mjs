@@ -34,6 +34,7 @@ const namesProphetTxt = await read('src/data/names-prophet.ts');
 const monthsTxt = await read('src/data/months.ts');
 const relationsTxt = await read('src/data/relations.ts');
 const surahsMeta = JSON.parse(await read('src/data/surahs-meta.json'));
+const parasMeta = JSON.parse(await read('src/data/paras-meta.json'));
 
 /** Slugify mirror of src/data/names.ts nameSlug (+ Majid overrides). */
 const nameSlugify = (s) => s.toLowerCase().replace(/[’‘'`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -72,6 +73,7 @@ const S = {
   'allah-name': parseNames(namesAllahTxt, { 49: '49-al-majid', 66: '66-al-majid' }),
   'prophet-name': parseNames(namesProphetTxt),
   month: new Set([...monthsTxt.matchAll(/\{ slug: '([^']+)', num: \d+/g)].map((m) => m[1])),
+  para: new Set(parasMeta.map((p) => p.slug)),
   ayah: (() => {
     const set = new Set();
     for (const s of surahsMeta) for (let v = 1; v <= s.verseCount; v++) set.add(`${s.num}:${v}`);
@@ -113,7 +115,7 @@ for (const m of relationsTxt.match(/const DUA_LINKS[\s\S]*?^};/m)?.[0].matchAll(
 const keyChecks = [
   ['SEERAH_LINKS', 'seerah'], ['HISTORY_LINKS', 'history'], ['SAHABA_LINKS', 'sahaba'],
   ['WOMEN_LINKS', 'women'], ['QUIZ_LINKS', 'quiz'], ['HADEES_LINKS', 'hadees'],
-  ['TOOL_GUIDES', 'tool'], ['GUIDE_TOOLS', 'guide'],
+  ['TOOL_GUIDES', 'tool'], ['GUIDE_TOOLS', 'guide'], ['SEERAH_MONTHS', 'seerah'],
 ];
 for (const [block, type] of keyChecks) {
   const body = relationsTxt.match(new RegExp(`const ${block}[\\s\\S]*?^};`, 'm'))?.[0] ?? '';
@@ -127,6 +129,12 @@ for (const m of (relationsTxt.match(/const TOOL_GUIDES[\s\S]*?^};/m)?.[0] ?? '')
   if (!S.tool.has(m[1])) fail(`TOOL_GUIDES source tool not found: ${m[1]}`);
   for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
     if (s[1] !== m[1] && !S.guide.has(s[1])) fail(`TOOL_GUIDES target guide not found: ${s[1]} (from tool ${m[1]})`);
+  }
+}
+for (const m of (relationsTxt.match(/const SEERAH_MONTHS[\s\S]*?^};/m)?.[0] ?? '').matchAll(/'([\w-]+)': \[([^\]]*)\]/g)) {
+  if (!S.seerah.has(m[1])) fail(`SEERAH_MONTHS source seerah not found: ${m[1]}`);
+  for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
+    if (!S.month.has(s[1])) fail(`SEERAH_MONTHS target month not found: ${s[1]} (from seerah ${m[1]})`);
   }
 }
 for (const m of (relationsTxt.match(/const GUIDE_TOOLS[\s\S]*?^};/m)?.[0] ?? '').matchAll(/'([\w-]+)': \[([^\]]*)\]/g)) {
@@ -158,6 +166,18 @@ for (const m of (relationsTxt.match(/const GUIDE_MONTHS[\s\S]*?^};/m)?.[0] ?? ''
   for (const s of m[2].matchAll(/'([\w-]+)'/g)) {
     if (!S.month.has(s[1])) fail(`GUIDE_MONTHS target month not found: ${s[1]} (from guide ${m[1]})`);
   }
+}
+// 4b. Month `hub` arrays must be real guides (rendered as hub cards).
+for (const m of monthsTxt.matchAll(/hub: \[([^\]]*)\]/g)) {
+  for (const s of m[1].matchAll(/'([\w-]+)'/g)) {
+    if (!S.guide.has(s[1])) fail(`months.ts hub target guide not found: ${s[1]}`);
+  }
+}
+// 4c. Surah->para overlap sanity: every para slug referenced in relations must exist (covered by (1)),
+// and every surah must map to 1-3 paras via paras-meta ranges.
+for (const s of surahsMeta) {
+  const containing = parasMeta.filter((p) => p.start.surah <= s.num && s.num <= p.end.surah);
+  if (containing.length < 1 || containing.length > 3) fail(`surah ${s.num} maps to ${containing.length} paras (expected 1-3)`);
 }
 
 // 5. Quran numeric citations in source/reference fields must be 1-114.

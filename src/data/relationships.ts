@@ -30,7 +30,20 @@ export type ContentType =
   | 'allah-name'
   | 'prophet-name'
   | 'month'
-  | 'ayah';
+  | 'ayah'
+  | 'para';
+
+/** Where an edge comes from (audit + ranking). Every edge must declare one.
+ *  - explicit: hand-curated map in relations.ts (GUIDE_DUAS, DUA_LINKS, …)
+ *  - quran-citation: derived from the repo's own Quran citation fields
+ *  - structured-field: derived from a structured field (e.g. prophet-name quranCount)
+ *  - canonical-dataset: derived from a canonical range table (paras-meta, months)
+ */
+export type RelationshipProvenance =
+  | 'explicit'
+  | 'quran-citation'
+  | 'structured-field'
+  | 'canonical-dataset';
 
 export type RelationshipKind =
   | 'related-duas'
@@ -51,7 +64,8 @@ export type RelationshipKind =
   | 'related-allah-names'
   | 'related-prophet-names'
   | 'related-months'
-  | 'related-ayahs';
+  | 'related-ayahs'
+  | 'related-paras';
 
 /** A single directed edge: source entity -> target entity. */
 export interface Relationship {
@@ -70,6 +84,8 @@ export interface Relationship {
   /** Why this relationship exists (debugging/reporting; not rendered).
    *  Must cite existing repository metadata, never invented claims. */
   reason?: string;
+  /** Edge provenance (audit + ranking). Enriched at load time; defaults to 'explicit'. */
+  prov?: RelationshipProvenance;
 }
 
 /** Minimal declaration form used in relations.ts (kind/title enriched). */
@@ -77,6 +93,8 @@ export interface RelationshipDecl {
   type: ContentType;
   slug: string;
   reason?: string;
+  /** Per-edge provenance override (falls back to the addEntry batch value). */
+  prov?: RelationshipProvenance;
 }
 
 export interface EntityRelationships {
@@ -115,6 +133,7 @@ export function kindForType(type: ContentType): RelationshipKind {
     case 'prophet-name': return 'related-prophet-names';
     case 'month': return 'related-months';
     case 'ayah': return 'related-ayahs';
+    case 'para': return 'related-paras';
     default: return 'related-articles';
   }
 }
@@ -155,6 +174,11 @@ export function entityExists(type: ContentType, slug: string): boolean {
 /** Count registered entities (for reports). */
 export function registeredEntityCount(): number {
   return entityRegistry.size;
+}
+
+/** Snapshot of registered entity keys (for graph audit; read-only copy). */
+export function registrySnapshot(): { registeredKeys: Set<string> } {
+  return { registeredKeys: new Set(entityRegistry.keys()) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -223,6 +247,8 @@ export function resolveRelationshipUrl(locale: string, rel: Relationship): strin
       return `${base}/calendar/${rel.slug}/`;
     case 'ayah':
       return `${base}/quran/${rel.category ?? ''}/${rel.slug}/`;
+    case 'para':
+      return `${base}/quran/${rel.slug}/`;
     default:
       return `${base}/`;
   }
@@ -254,6 +280,7 @@ export const RELATIONSHIP_KIND_LABELS: Record<RelationshipKind, string> = {
   'related-prophet-names': 'Names of Muhammad ﷺ',
   'related-months': 'Islamic Months',
   'related-ayahs': 'Quran Ayahs',
+  'related-paras': 'Quran Paras',
 };
 
 /** Hub URL per relationship kind (for "view all" links). */
@@ -278,6 +305,7 @@ export function hubUrlForKind(kind: RelationshipKind): string {
     case 'related-prophet-names': return '/names-muhammad/';
     case 'related-months': return '/calendar/';
     case 'related-ayahs': return '/quran/';
+    case 'related-paras': return '/quran/';
     default: return '/';
   }
 }
@@ -291,6 +319,24 @@ export function groupRelationshipsByKind(rels: Relationship[]): Map<Relationship
     groups.get(kind)!.push(rel);
   }
   return groups;
+}
+
+/** Deterministic edge rank: explicit first, then exact ayahs, then surahs /
+ *  structured fields, then canonical-dataset links. Lower wins. Unknown
+ *  provenance sorts last (and is a validation error). */
+export function edgeRank(rel: Relationship): number {
+  switch (rel.prov) {
+    case 'explicit': return 0;
+    case 'quran-citation': return rel.kind === 'related-ayahs' ? 1 : 2;
+    case 'structured-field': return 3;
+    case 'canonical-dataset': return 4;
+    default: return 99;
+  }
+}
+
+/** Stable comparator for display ordering (rank only; ties keep build order). */
+export function compareEdges(a: Relationship, b: Relationship): number {
+  return edgeRank(a) - edgeRank(b);
 }
 
 /** Get relationships grouped by kind with resolved URLs for a locale. */
@@ -325,9 +371,13 @@ export function validateRelationships(): ValidationIssue[] {
   const validTypes: ContentType[] = [
     'dua', 'waqiah', 'prophet', 'guide', 'seerah', 'sahaba', 'hadees',
     'meaning', 'history', 'kalima', 'surah', 'tool', 'quiz', 'article', 'women',
-    'allah-name', 'prophet-name', 'month', 'ayah',
+    'allah-name', 'prophet-name', 'month', 'ayah', 'para',
   ];
   const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article', 'ayah'];
+  const validProv: RelationshipProvenance[] = ['explicit', 'quran-citation', 'structured-field', 'canonical-dataset'];
+  /** Explosion guards: bounded UI shows maxPerGroup=4 per kind; flags outliers. */
+  const MAX_EDGES_PER_ENTITY = 24;
+  const MAX_EDGES_PER_KIND = 16;
 
   for (const entity of ENTITY_RELATIONSHIPS) {
     const sourceKey = registryKey(entity.type, entity.slug, entity.category);
@@ -343,6 +393,7 @@ export function validateRelationships(): ValidationIssue[] {
     }
 
     const seenTargets = new Set<string>();
+    const kindCounts = new Map<string, number>();
 
     for (const rel of entity.relationships) {
       const targetKey = `${rel.type}:${rel.slug}`;
@@ -389,6 +440,43 @@ export function validateRelationships(): ValidationIssue[] {
         issues.push({
           severity: 'warning', source: src, target: tgt, code: 'MISSING_TITLE',
           message: `Relationship missing enriched title (from ${entity.type}:${entity.slug} to ${rel.type}:${rel.slug})`,
+        });
+      }
+
+      if (!rel.reason) {
+        issues.push({
+          severity: 'warning', source: src, target: tgt, code: 'MISSING_REASON',
+          message: `Relationship missing reason (from ${entity.type}:${entity.slug} to ${rel.type}:${rel.slug})`,
+        });
+      }
+
+      if (!rel.prov || !validProv.includes(rel.prov)) {
+        issues.push({
+          severity: 'error', source: src, target: tgt, code: 'INVALID_PROVENANCE',
+          message: `Relationship has invalid provenance '${rel.prov ?? 'undefined'}' (from ${entity.type}:${entity.slug} to ${rel.type}:${rel.slug})`,
+        });
+      }
+
+      kindCounts.set(rel.kind, (kindCounts.get(rel.kind) ?? 0) + 1);
+    }
+
+    if (entity.relationships.length > MAX_EDGES_PER_ENTITY) {
+      issues.push({
+        severity: 'warning',
+        source: { type: entity.type, slug: entity.slug, category: entity.category },
+        target: { type: entity.type, slug: entity.slug, category: entity.category },
+        code: 'EDGE_EXPLOSION',
+        message: `Entity has ${entity.relationships.length} outgoing edges (limit ${MAX_EDGES_PER_ENTITY}): ${entity.type}:${entity.slug}`,
+      });
+    }
+    for (const [kind, n] of kindCounts) {
+      if (n > MAX_EDGES_PER_KIND) {
+        issues.push({
+          severity: 'warning',
+          source: { type: entity.type, slug: entity.slug, category: entity.category },
+          target: { type: entity.type, slug: entity.slug, category: entity.category },
+          code: 'KIND_EXPLOSION',
+          message: `Entity has ${n} '${kind}' edges (limit ${MAX_EDGES_PER_KIND}): ${entity.type}:${entity.slug}`,
         });
       }
     }

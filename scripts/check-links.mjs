@@ -22,12 +22,15 @@ const toFile = (url) => {
 let errors = 0;
 const checked = new Set();
 
-// 1. Search indexes
+// 1. Search indexes (supports legacy [{url,title}] and v1 compact {docs} format)
 for (const locale of LOCALES) {
   const file = locale === 'en' ? join(DIST, 'search-index.json') : join(DIST, locale, 'search-index.json');
-  let items = [];
-  try { items = JSON.parse(await readFile(file, 'utf8')); }
+  let raw = [];
+  try { raw = JSON.parse(await readFile(file, 'utf8')); }
   catch { console.error(`❌ cannot read ${file} — run npm run build first`); process.exit(1); }
+  const items = Array.isArray(raw)
+    ? raw
+    : (raw.docs ?? []).map((d) => ({ url: d[1] ?? d[4], title: d[0] ?? d[3] }));
   for (const it of items) {
     if (checked.has(it.url)) continue;
     checked.add(it.url);

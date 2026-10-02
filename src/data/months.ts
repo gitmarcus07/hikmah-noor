@@ -27,6 +27,8 @@ export interface HijriMonth {
   /** One of the four sacred months (Quran 9:36). */
   sacred: boolean;
   events: MonthEvent[];
+  /** Curated hub guides (must exist in guides.ts). Rendered only on hub months. */
+  hub?: string[];
 }
 
 export const MONTHS: HijriMonth[] = [
@@ -55,17 +57,20 @@ export const MONTHS: HijriMonth[] = [
       { d: 15, key: 'barat', target: { type: 'guide', slug: 'shaban-shab-e-barat' } },
     ] },
   { slug: 'ramadan', num: 9, name: 'Ramadan', arabic: 'رمضان', sacred: false,
+    hub: ['roza-fasting', 'laylatul-qadr', 'taraweeh-night-prayer'],
     events: [
       { d: 1, key: 'ramadan-begins', target: { type: 'guide', slug: 'roza-fasting' } },
       { d: null, key: 'qadr-nights', target: { type: 'guide', slug: 'laylatul-qadr' } },
     ] },
   { slug: 'shawwal', num: 10, name: 'Shawwal', arabic: 'شوال', sacred: false,
+    hub: ['shawwal-six-fasts', 'eid-day-sunnahs', 'eid-prayer-method'],
     events: [
       { d: 1, key: 'eid-fitr', target: { type: 'guide', slug: 'eid-prayer-method' } },
       { d: null, key: 'six-fasts', target: { type: 'guide', slug: 'shawwal-six-fasts' } },
     ] },
   { slug: 'dhul-qadah', num: 11, name: 'Dhul-Qadah', arabic: 'ذو القعدة', sacred: true, events: [] },
   { slug: 'dhul-hijjah', num: 12, name: 'Dhul-Hijjah', arabic: 'ذو الحجة', sacred: true,
+    hub: ['hajj-day-by-day', 'mina-arafah-muzdalifah', 'qurbani-rules'],
     events: [
       { d: 8, key: 'tarwiyah', target: { type: 'guide', slug: 'hajj-day-by-day' } },
       { d: 9, key: 'arafah', target: { type: 'guide', slug: 'mina-arafah-muzdalifah' } },

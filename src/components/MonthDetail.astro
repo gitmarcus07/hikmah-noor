@@ -8,7 +8,7 @@ import SectionHeader from './hn/SectionHeader.astro';
 import RelatedContent from './RelatedContent.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { secUI } from '../lib/site-ui-1';
-import { MONTH_UI, monthDesc, monthNote, monthEvent } from '../lib/site-ui-4';
+import { MONTH_UI, monthDesc, monthNote, monthEvent, monthHubTitle } from '../lib/site-ui-4';
 import { monthBySlug, prevMonth, nextMonth } from '../data/months';
 import { GUIDES } from '../data/guides';
 import { seerahBySlug } from '../data/seerah';
@@ -74,6 +74,18 @@ const prev = prevMonth(m.num);
 const next = nextMonth(m.num);
 const prevL = T.prevL.replace('{m}', prev.name);
 const nextL = T.nextL.replace('{m}', next.name);
+
+/* Curated hub guides (months.ts `hub`, verified against guides.ts). */
+const hubTitle = monthHubTitle(m.slug, locale);
+const hubGuides: Array<{ url: string; title: string }> = [];
+for (const hs of (m.hub ?? []) as string[]) {
+  try {
+    const g: any = GUIDES.find((x) => x.slug === hs);
+    if (!g) continue;
+    const loc: any = localizeGuide(g, locale);
+    hubGuides.push({ url: `/learn/${g.cat}/${g.slug}/`, title: loc.title });
+  } catch { /* skip unverified hub entries */ }
+}
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={monthPath}>
   <div class="hn-read hn-section">
@@ -111,7 +123,20 @@ const nextL = T.nextL.replace('{m}', next.name);
       </section>
     )}
 
-    <RelatedContent type="month" slug={m.slug} locale={locale} />
+    {hubGuides.length > 0 && (
+      <section class="mt-8" aria-label={hubTitle}>
+        <SectionHeader eyebrow={hubTitle} title={hubTitle} />
+        <div class="grid gap-3 sm:grid-cols-2 mt-3">
+          {hubGuides.map((hg) => (
+            <a href={L(hg.url)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="font-bold block text-[15px] leading-6">{hg.title}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <RelatedContent type="month" slug={m.slug} locale={locale} exclude={hubGuides.length > 0 ? ['related-guides'] : []} />
 
     <section class="mt-8" aria-label={T.faqTitle}>
       <SectionHeader eyebrow="FAQ" title={T.faqTitle} />

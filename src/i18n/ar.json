@@ -113,7 +113,8 @@
     "related-allah-names": "أسماء الله",
     "related-prophet-names": "أسماء النبي ﷺ",
     "related-months": "الأشهر الهجرية",
-    "related-ayahs": "آيات القرآن"
+    "related-ayahs": "آيات القرآن",
+    "related-paras": "أجزاء القرآن"
   },
   "search": {
     "resultsFor": "{n} نتائج عن “{q}”",

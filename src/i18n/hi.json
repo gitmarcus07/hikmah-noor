@@ -113,7 +113,8 @@
     "related-allah-names": "अल्लाह के नाम",
     "related-prophet-names": "मुहम्मद ﷺ के नाम",
     "related-months": "इस्लामी महीने",
-    "related-ayahs": "क़ुरान आयतें"
+    "related-ayahs": "क़ुरान आयतें",
+    "related-paras": "क़ुरान पारे"
   },
   "search": {
     "resultsFor": "“{q}” हेतु {n} परिणाम",
