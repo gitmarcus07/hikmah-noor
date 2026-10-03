@@ -12,6 +12,7 @@ import { PROPHETS, prevProphet, nextProphet } from '../data/prophets';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { secUI, secE, PROPHET_UI } from '../lib/site-ui-1';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 
 interface Props { prophet: any; locale: string; }
 const { locale } = Astro.props;
@@ -42,7 +43,8 @@ const prevP = localizeStory(prevProphet(prophet.order), 'prophets', locale);
 const nextP = localizeStory(nextProphet(prophet.order), 'prophets', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={prophetPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="prophet" data-hn-ref={prophetPath} data-hn-title={prophet.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.badgeProphet.replace('{o}', String(prophet.order))}</span>

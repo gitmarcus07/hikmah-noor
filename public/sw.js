@@ -1,11 +1,37 @@
-/* Hikmah Noor service worker — offline-first reading (v3: new domain).
+/* Hikmah Noor service worker — offline-first reading (v4: bounded caches).
  * Same-origin GET requests are cached at runtime; navigations fall back
  * to /offline/ when the network fails. Third-party (fonts, audio, APIs)
  * is left alone so it never breaks the shell.
  * /api/* is NEVER cached (notices, search must always be fresh).
+ *
+ * v4 policy (intentional, not blind):
+ * - navigations: network-first, cache fallback, capped (offline fallback).
+ * - app JSON (search-index, search-ayahs, habits): network-first so fresh
+ *   content always wins when online; cached copy keeps search working
+ *   offline. Capped separately.
+ * - static assets (JS/CSS/fonts/images): cache-first, capped.
+ * - same-origin media (*.mp3/*.m4a/...) is NEVER cached: audio files are
+ *   large and often served cross-origin anyway; caching them would bloat
+ *   device storage without consent.
+ * Cache caps prevent unbounded growth on a 30k-page site. Version bump
+ * (V) invalidates older caches on update.
  */
-const V = 'hn-v3';
+const V = 'hn-v4';
 const CORE = ['/', '/offline/', '/favicon.svg'];
+const NAV_CAP = 60;
+const ASSET_CAP = 200;
+const JSON_CAP = 30;
+const MEDIA_RE = /\.(mp3|m4a|ogg|oga|wav|webm|mp4)(\?|#|$)/i;
+
+async function trim(cacheName, cap) {
+  try {
+    const c = await caches.open(cacheName);
+    const keys = await c.keys();
+    if (keys.length > cap) {
+      await Promise.all(keys.slice(0, keys.length - cap).map((k) => c.delete(k)));
+    }
+  } catch { /* storage constrained — keep serving */ }
+}
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -28,16 +54,25 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;
   // API responses must always be fresh — never serve or store them.
   if (url.pathname.startsWith('/api/')) return;
-  if (request.mode === 'navigate') {
+  // Same-origin media is never cached (large files, no consent).
+  if (MEDIA_RE.test(url.pathname)) return;
+  const isJson = url.pathname.endsWith('.json');
+  const cacheName = isJson ? `${V}-json` : V;
+  const cap = isJson ? JSON_CAP : request.mode === 'navigate' ? NAV_CAP : ASSET_CAP;
+  if (request.mode === 'navigate' || isJson) {
+    // Network-first: fresh content wins online; cache covers offline.
     e.respondWith(
       fetch(request)
         .then((r) => {
-          const copy = r.clone();
-          caches.open(V).then((c) => c.put(request, copy)).catch(() => {});
+          if (r && r.ok) {
+            const copy = r.clone();
+            caches.open(cacheName).then((c) => c.put(request, copy)).catch(() => {});
+            trim(cacheName, cap);
+          }
           return r;
         })
         .catch(() =>
-          caches.match(request).then((m) => m || caches.match('/offline/'))
+          caches.match(request, { cacheName }).then((m) => m || caches.match('/offline/'))
         )
     );
     return;
@@ -51,6 +86,7 @@ self.addEventListener('fetch', (e) => {
             if (r && r.ok) {
               const copy = r.clone();
               caches.open(V).then((c) => c.put(request, copy)).catch(() => {});
+              trim(V, ASSET_CAP);
             }
             return r;
           })

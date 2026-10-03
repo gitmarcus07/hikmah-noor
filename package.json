@@ -41,6 +41,7 @@
     "content:search:test": "node scripts/test-search.mjs",
     "content:hadith": "node scripts/validate-hadith.mjs",
     "content:seo": "node scripts/validate-seo.mjs",
+    "content:pwa": "node scripts/validate-pwa.mjs",
     "content:surahs": "node scripts/build-surahs.mjs",
     "content:tafsir": "node scripts/validate-tafsir.mjs",
     "content:qr": "node scripts/build-donate-qr.mjs"

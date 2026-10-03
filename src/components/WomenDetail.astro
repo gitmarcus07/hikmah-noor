@@ -11,6 +11,7 @@ import { WOMEN, prevWoman, nextWoman } from '../data/women';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { secUI, secE, WOMEN_UI } from '../lib/site-ui-1';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 
 interface Props { woman: any; locale: string; }
 const { locale } = Astro.props;
@@ -41,7 +42,8 @@ const prevP = localizeStory(prevWoman(woman.order), 'women', locale);
 const nextP = localizeStory(nextWoman(woman.order), 'women', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={womanPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="women" data-hn-ref={womanPath} data-hn-title={woman.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.badgeFig.replace('{o}', String(woman.order))}</span>

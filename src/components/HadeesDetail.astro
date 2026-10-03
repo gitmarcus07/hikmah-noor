@@ -12,6 +12,8 @@ import { localizeHadees, localizeHadeesCat, localizeSahihCat } from '../lib/cont
 import { gradeLabel as gradeLabelL } from '../lib/dua-ui-i18n';
 import { secUI2, HADEES_UI } from '../lib/site-ui-2';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 
 interface Props { hadees: any; locale: string; collection?: string; }
 const { locale } = Astro.props;
@@ -54,12 +56,14 @@ const siblings = POOL.filter((h) => h.sabaq === hadees.sabaq && h.slug !== hadee
 const others = POOL.filter((h) => h.slug !== hadees.slug).slice(0, 4).map((h) => localizeHadees(h, locale, coll));
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={hadeesPath}>
-  <div class="hn-read hn-section">
+  <div class="hn-read hn-section" data-hn-history data-hn-kind="hadees" data-hn-ref={hadeesPath} data-hn-title={hadees.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.badgeHadees.replace('{n}', String(hadees.num))}</span>
       {cat && <span class="hn-badge hn-badge-gold">{cat.title}</span>}
       <span class="hn-badge">{gradeL}</span>
+      <span class="ms-auto"><BookmarkButton kind="hadees" bmRef={hadeesPath} title={hadees.title} locale={locale} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{hadees.title}</h1>
     <p class="mt-2 leading-7 font-semibold" lang={locale === 'en' ? 'ur' : locale} dir={locale === 'hi' ? undefined : 'rtl'} style="color:var(--hn-ink)">{hadees.urdu}</p>

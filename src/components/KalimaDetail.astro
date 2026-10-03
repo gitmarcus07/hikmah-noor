@@ -4,7 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { KALIMAS } from '../data/kalimas';
 import { localizeKalima, localizeKalimaList } from '../lib/content-i18n';
@@ -42,12 +44,14 @@ const prevK = sIdx > 0 ? localizeKalima(KALIMAS[sIdx - 1], locale) : null;
 const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? localizeKalima(KALIMAS[sIdx + 1], locale) : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={kalimaPath}>
-  <div class="hn-read hn-section">
+  <div class="hn-read hn-section" data-hn-history data-hn-kind="kalima" data-hn-ref={kalimaPath} data-hn-title={kalima.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{kalima.num} of 6</span>
       {originLabel && <span class="hn-badge hn-badge-gold">{originLabel}</span>}
       <span class="hn-badge">{gradeL}</span>
+      <span class="ms-auto"><BookmarkButton kind="kalima" bmRef={kalimaPath} title={kalima.title} locale={locale} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{kalima.title}</h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{kalima.use}</p>

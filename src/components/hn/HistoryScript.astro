@@ -1,0 +1,57 @@
+<script is:inline>
+  /* Hikmah Noor reading history — privacy-first, device-local, no account.
+   * Detail pages opt in with data-hn-history + data-hn-kind/ref/title
+   * (canonical EN path in ref; locale prefix applied at render).
+   * Quran position is intentionally NOT recorded here: hn.progress.v1
+   * (lastSpot/perSurah) and the audio resume state already track it.
+   * Storage: hn.history.v1 (capped list), hn.prefs.v1 (opt-out/cap only).
+   * Corrupt or unavailable storage degrades to no-op — never breaks render.
+   */
+  (() => {
+    if (window.__hnHistWired) return;
+    window.__hnHistWired = 1;
+    const KEY = 'hn.history.v1';
+    const PKEY = 'hn.prefs.v1';
+    const DEF_CAP = 24;
+    const prefs = (() => {
+      try {
+        const p = JSON.parse(localStorage.getItem(PKEY) || '{}') || {};
+        return {
+          historyEnabled: p.historyEnabled !== false,
+          historyCap: Math.min(50, Math.max(8, Number(p.historyCap) || DEF_CAP)),
+        };
+      } catch { return { historyEnabled: true, historyCap: DEF_CAP }; }
+    })();
+    const load = () => {
+      try {
+        const v = JSON.parse(localStorage.getItem(KEY) || '[]');
+        return Array.isArray(v) ? v.filter((x) => x && typeof x.ref === 'string' && typeof x.kind === 'string') : [];
+      } catch { return []; }
+    };
+    const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+    window.__hnHistory = {
+      list: load,
+      clear: () => save([]),
+      prefs,
+    };
+    const record = () => {
+      try {
+        if (!prefs.historyEnabled) return;
+        if (typeof localStorage === 'undefined') return;
+        const el = document.querySelector('[data-hn-history]');
+        if (!el) return;
+        const kind = (el.getAttribute('data-hn-kind') || '').trim().slice(0, 24);
+        const ref = (el.getAttribute('data-hn-ref') || '').trim().slice(0, 200);
+        const title = (el.getAttribute('data-hn-title') || '').trim().slice(0, 200) || ref;
+        if (!kind || !ref) return;
+        if (!/^\/[A-Za-z0-9/_.\-]*\/$/.test(ref)) return;
+        const rest = load().filter((x) => !(x.kind === kind && x.ref === ref));
+        rest.unshift({ kind, ref, title, at: new Date().toISOString() });
+        save(rest.slice(0, prefs.historyCap));
+      } catch { /* never break render */ }
+    };
+    record();
+    document.addEventListener('DOMContentLoaded', record);
+    document.addEventListener('astro:page-load', record);
+  })();
+</script>

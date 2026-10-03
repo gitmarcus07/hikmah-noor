@@ -12,6 +12,7 @@ import { SAHABA, prevSahabi, nextSahabi } from '../data/sahaba';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { secUI, secE, SAHABA_UI } from '../lib/site-ui-1';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 
 interface Props { sahabi: any; locale: string; }
 const { locale } = Astro.props;
@@ -42,7 +43,8 @@ const prevP = localizeStory(prevSahabi(sahabi.order), 'sahaba', locale);
 const nextP = localizeStory(nextSahabi(sahabi.order), 'sahaba', locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={sahabiPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="sahaba" data-hn-ref={sahabiPath} data-hn-title={sahabi.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.badgeComp.replace('{o}', String(sahabi.order))}</span>

@@ -13,6 +13,7 @@ import { localizeHistory } from '../lib/content-i18n';
 import { secUI2, HISTORY_UI } from '../lib/site-ui-2';
 import { secE } from '../lib/site-ui-1';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 
 interface Props { event: any; locale: string; }
 const { locale } = Astro.props;
@@ -46,7 +47,8 @@ const prevP = localizeHistory(prevHistory(event.order), locale);
 const nextP = localizeHistory(nextHistory(event.order), locale);
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={eventPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="history" data-hn-ref={eventPath} data-hn-title={event.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.detPrefix.replace('{n}', String(event.order))}</span>

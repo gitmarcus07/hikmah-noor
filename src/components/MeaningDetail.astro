@@ -9,6 +9,8 @@ import { MEANINGS } from '../data/meanings';
 import { localizeMeaning } from '../lib/content-i18n';
 import { secUI2, MEANING_UI } from '../lib/site-ui-2';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
+import BookmarkButton from './hn/BookmarkButton.astro';
 
 interface Props { meaning: any; locale: string; }
 const { locale } = Astro.props;
@@ -39,10 +41,12 @@ const prevM = sIdx > 0 ? localizeMeaning(MEANINGS[sIdx - 1], locale) : null;
 const nextM = sIdx >= 0 && sIdx < MEANINGS.length - 1 ? localizeMeaning(MEANINGS[sIdx + 1], locale) : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={meaningPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="meaning" data-hn-ref={meaningPath} data-hn-title={meaning.term}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.detPrefix}</span>
+      <span class="ms-auto"><BookmarkButton kind="meaning" bmRef={meaningPath} title={meaning.term} locale={locale} /></span>
     </div>
     <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3">{meaning.term} <span class="font-bold" style="color:var(--hn-muted)">— {meaning.translit}</span></h1>
     <p class="mt-2 leading-7" style="color:var(--hn-muted)">{meaning.definition}</p>

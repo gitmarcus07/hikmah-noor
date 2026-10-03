@@ -8,6 +8,7 @@ import BookmarkButton from './hn/BookmarkButton.astro';
 import ShareButtons from './hn/ShareButtons.astro';
 import SourcesBlock from './hn/SourcesBlock.astro';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { duasByCat } from '../data/duas';
 import { localizeDua, localizeList } from '../lib/duas-i18n';
@@ -54,7 +55,8 @@ const prevDua = sIdx > 0 ? siblings[sIdx - 1] : null;
 const nextDua = sIdx >= 0 && sIdx < siblings.length - 1 ? siblings[sIdx + 1] : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={duaPath}>
-  <div class="hn-read hn-section">
+  <div class="hn-read hn-section" data-hn-history data-hn-kind="dua" data-hn-ref={duaPath} data-hn-title={dua.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 3)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{T.badgeDua}</span>

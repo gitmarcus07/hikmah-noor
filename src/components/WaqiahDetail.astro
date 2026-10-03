@@ -11,6 +11,7 @@ import { WAQIAT } from '../data/waqiat';
 import { localizeStory, localizeStoryList } from '../lib/stories-i18n';
 import { storyUI } from '../lib/dua-ui-i18n';
 import RelatedContent from './RelatedContent.astro';
+import HistoryScript from './hn/HistoryScript.astro';
 
 interface Props { waqiah: any; locale: string; }
 const { locale } = Astro.props;
@@ -44,7 +45,8 @@ const prevW = sIdx > 0 ? WL[sIdx - 1] : null;
 const nextW = sIdx >= 0 && sIdx < WL.length - 1 ? WL[sIdx + 1] : null;
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath={waqiahPath}>
-  <div class="hn-article hn-section">
+  <div class="hn-article hn-section" data-hn-history data-hn-kind="waqiah" data-hn-ref={waqiahPath} data-hn-title={waqiah.title}>
+    <HistoryScript />
     <Breadcrumbs locale={locale} items={crumbs.slice(0, 2)} />
     <div class="mt-3 flex flex-wrap items-center gap-2">
       <span class="hn-badge hn-badge-primary">{waqiah.prophet}</span>
