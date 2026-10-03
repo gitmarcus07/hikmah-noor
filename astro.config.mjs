@@ -30,6 +30,7 @@ export default defineConfig({
         !/\/tools\/read\/\d/.test(page) &&
         !/\/tools\/my-progress\//.test(page) &&
         !/\/al-mushrif\//.test(page) &&
+        !/\/offline\//.test(page) &&
         !/\/search\//.test(page) &&
         !/\/(profile|leaderboard|user|favourites|bookmarks|search-quran|challenges)\//.test(page),
     }),

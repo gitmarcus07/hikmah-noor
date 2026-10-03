@@ -39,6 +39,7 @@
     "content:quran": "node scripts/validate-quran.mjs",
     "content:search": "node scripts/validate-search.mjs",
     "content:search:test": "node scripts/test-search.mjs",
+    "content:seo": "node scripts/validate-seo.mjs",
     "content:surahs": "node scripts/build-surahs.mjs",
     "content:tafsir": "node scripts/validate-tafsir.mjs",
     "content:qr": "node scripts/build-donate-qr.mjs"

@@ -27,7 +27,7 @@ const startSlugs = ['wudu-ablution', 'how-to-pray-namaz', 'arabic-alphabet-makha
 const starters = startSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
 const kidDuas = ['morning-remembrance', 'before-sleeping', 'before-eating', 'ruqyah-children'].map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean);
 ---
-<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/kids/">
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/kids/">
   <div class="hn-discover hn-section">
     <Breadcrumbs locale={locale} items={crumbs} />
     <div class="mt-3 max-w-2xl">

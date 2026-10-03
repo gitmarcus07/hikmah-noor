@@ -20,7 +20,7 @@ const faq = [
   { q: 'Is Quran audio available?', a: 'Yes. Every verse has Arabic recitation audio with 5 reciters to choose from (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi), plus Urdu and English translation audio options.' },
 ];
 ---
-<BaseLayout title={title} description={description} keywords={keywords} locale={locale} canonicalPath={`/${category}/`} faq={faq}>
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" canonicalPath={`/${category}/`} faq={faq}>
   <div class="max-w-4xl mx-auto px-4 py-8">
     <nav class="text-xs text-ink-500 mb-3 text-center"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
     <p class="font-arabic text-4xl sm:text-5xl text-center text-gold-300 leading-[1.8]" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>

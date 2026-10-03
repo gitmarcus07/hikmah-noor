@@ -20,7 +20,7 @@ const faq = [
   { q: 'Which are the most searched surahs?', a: 'Surah Yaseen (36), Al-Kahf (18), Ar-Rahman (55), Al-Mulk (67), Al-Fatiha (1) and Al-Baqarah (2) are among the most read. Use the search box above to find any surah by name or number.' },
 ];
 ---
-<BaseLayout title={title} description={description} keywords={keywords} locale={locale} canonicalPath={`/${category}/`} faq={faq}>
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" canonicalPath={`/${category}/`} faq={faq}>
   <div class="max-w-4xl mx-auto px-4 py-8">
     <nav class="text-xs text-ink-500 mb-3 text-center"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
     <p class="font-arabic text-4xl sm:text-5xl text-center text-gold-300 leading-[1.8]" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>

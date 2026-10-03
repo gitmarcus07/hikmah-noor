@@ -68,7 +68,7 @@ const pageKeywords = category === 'quran'
 ) : isSeerat ? (
 <SeerahHub locale={locale} />
 ) : (
-<BaseLayout title={title} description={pageDescription} keywords={pageKeywords} locale={locale} canonicalPath={`/${category}/`}>
+<BaseLayout title={title} description={pageDescription} keywords={pageKeywords} locale={locale} type="collection" canonicalPath={`/${category}/`}>
   <div class="max-w-7xl mx-auto px-4 py-8">
     <nav class="text-xs text-ink-500 mb-3"><a href={localizedPath(locale, '/')} class="hover:text-brand-300">{dict.nav.home}</a> / <span class="capitalize">{category}</span></nav>
     <h1 class="text-3xl md:text-4xl font-extrabold capitalize mb-2 text-white">{category === 'surahs' ? 'All 114 Surahs — Read with Translation & Audio' : category === 'quran' ? 'Holy Quran — Full Quran with 30 Paras' : category}</h1>

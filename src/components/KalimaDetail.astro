@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
 import ReadingCard from './hn/ReadingCard.astro';
+import RelatedContent from './RelatedContent.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { KALIMAS } from '../data/kalimas';
 import { localizeKalima, localizeKalimaList } from '../lib/content-i18n';
@@ -96,6 +97,10 @@ const nextK = sIdx >= 0 && sIdx < KALIMAS.length - 1 ? localizeKalima(KALIMAS[sI
         ))}
       </div>
     </section>
+
+    {/* Cross-type verified relationships (e.g. quizzes referencing this kalima).
+        Same-type "other kalimas" stay above; this renders only when edges exist. */}
+    <RelatedContent type="kalima" slug={kalima.slug} locale={locale} />
 
     {(prevK || nextK) && (
       <nav class="mt-6 grid gap-3 sm:grid-cols-2" aria-label="More kalimas">

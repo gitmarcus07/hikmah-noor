@@ -8,7 +8,7 @@ import { CAL_META } from '../lib/calendar-meta';
 
 const locale = 'en';
 ---
-<BaseLayout title={CAL_META.title} description={CAL_META.description} keywords={CAL_META.keywords} locale={locale} type="article" faq={CAL_META.faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Islamic Calendar', path: '/calendar/' }]} canonicalPath="/calendar/">
+<BaseLayout title={CAL_META.title} description={CAL_META.description} keywords={CAL_META.keywords} locale={locale} type="collection" faq={CAL_META.faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Islamic Calendar', path: '/calendar/' }]} canonicalPath="/calendar/">
   <IslamicCalendar locale={locale} />
   <div class="max-w-7xl mx-auto px-4 pb-6 md:pb-8">
     <MonthGrid locale={locale} />

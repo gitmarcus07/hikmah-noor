@@ -34,7 +34,7 @@ const practices = practiceSlugs.map((s) => GUIDES.find((g) => g.slug === s)).fil
 const duaSlugs = ['amantu-billah-doubts', 'steadfast-heart', 'refuge-hidden-shirk', 'sayyidul-istighfar', 'hasbunallah', 'seeking-knowledge'];
 const duas = duaSlugs.map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean);
 ---
-<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="article" faq={faq} crumbs={crumbs} canonicalPath="/aqeedah/">
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/aqeedah/">
   <div class="hn-discover hn-section">
     <Breadcrumbs locale={locale} items={crumbs} />
     <div class="mt-3 max-w-2xl">

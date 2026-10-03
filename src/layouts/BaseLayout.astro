@@ -14,7 +14,11 @@ interface Props {
   image?: string;
   canonicalPath?: string;
   noindex?: boolean;
-  type?: 'website' | 'article';
+  /** Page shape for structured data + og:type.
+   *  - `article`: a single reading/detail page (Article schema).
+   *  - `collection`: a hub/listing page over many items (CollectionPage schema).
+   *  - `website` (default): neutral fallback; no item schema is emitted. */
+  type?: 'website' | 'article' | 'collection';
   pubDate?: string;
   faq?: { q: string; a: string }[];
   crumbs?: { name: string; path: string }[];
@@ -38,6 +42,19 @@ const articleLd = type === 'article' ? {
   inLanguage: locale,
   datePublished: pubDate,
   author: { '@type': 'Organization', name: 'Hikmah Noor' },
+  publisher: { '@type': 'Organization', name: 'Hikmah Noor' },
+} : null;
+
+/* CollectionPage for hub/listing pages. Only factual fields (name,
+ * description, URL, language, publisher) — no ratings, counts-as-claims
+ * or invented metadata. BreadcrumbList/FAQPage stay on their own props. */
+const collectionLd = type === 'collection' ? {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: title,
+  description,
+  url: canonical,
+  inLanguage: locale,
   publisher: { '@type': 'Organization', name: 'Hikmah Noor' },
 } : null;
 
@@ -130,7 +147,8 @@ const mobileGroups = [
   <link rel="canonical" href={canonical} />
   {locales.map(l => <link rel="alternate" hreflang={l} href={`${site}${localizedPath(l, canonicalPath || '/')}`} />)}
   <link rel="alternate" hreflang="x-default" href={`${site}${localizedPath('en', canonicalPath || '/')}`} />
-  <meta property="og:type" content={type} />
+  {/* og:type allowlist is website|article — CollectionPage maps to website. */}
+  <meta property="og:type" content={type === 'article' ? 'article' : 'website'} />
   <meta property="og:locale" content={locale === 'hi' ? 'hi_IN' : locale === 'ur' ? 'ur_PK' : locale === 'ar' ? 'ar_SA' : 'en_US'} />
   <meta property="og:site_name" content="Hikmah Noor" />
   <meta property="og:title" content={title} />
@@ -153,6 +171,7 @@ const mobileGroups = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
   {articleLd && <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />}
+  {collectionLd && <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />}
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
   <script is:inline>
