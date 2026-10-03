@@ -114,7 +114,8 @@
     "related-prophet-names": "أسماء النبي ﷺ",
     "related-months": "الأشهر الهجرية",
     "related-ayahs": "آيات القرآن",
-    "related-paras": "أجزاء القرآن"
+    "related-paras": "أجزاء القرآن",
+    "related-collections": "مجموعات الحديث"
   },
   "search": {
     "resultsFor": "{n} نتائج عن “{q}”",

@@ -1,0 +1,8 @@
+---
+import HadithCollection from '../../../components/HadithCollection.astro';
+import { hadithCollectionBySlug } from '../../../data/hadith-collections';
+
+const collection = hadithCollectionBySlug('nawawi')!;
+const locale = 'en';
+---
+<HadithCollection collection={collection} locale={locale} />

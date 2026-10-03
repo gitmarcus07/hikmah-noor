@@ -38,6 +38,7 @@ import { monthDesc } from '../lib/site-ui-4';
 import { getToolBySlug } from '../lib/finance/tools.js';
 import { localizeSeerah, localizeHadees, localizeMeaning, localizeHistory, localizeKalima, localizeQuiz } from '../lib/content-i18n';
 import { localizeAllahName, localizeProphetName } from '../lib/content-i18n';
+import { HADITH_COLLECTIONS, HADITH_BOOKS, HADITH_ENTRIES } from '../data/hadith-collections';
 
 interface Props {
   type: ContentType;
@@ -57,7 +58,7 @@ const groupLabels = (dict as any).relGroups ?? {};
 /** Canonical display order: Tier-1 content first. */
 const KIND_ORDER: RelationshipKind[] = [
   'related-duas', 'related-quran', 'related-ayahs', 'related-paras', 'related-allah-names', 'related-prophet-names',
-  'related-months', 'related-hadith', 'related-prophets',
+  'related-months', 'related-hadith', 'related-collections', 'related-prophets',
   'related-waqiat', 'related-seerah', 'related-guides', 'related-tools',
   'related-meanings', 'related-history', 'related-sahaba', 'related-kalimas',
   'related-quizzes', 'related-women', 'related-articles',
@@ -110,6 +111,20 @@ function cardFor(rel: { type: ContentType; slug: string; category?: string; titl
         const coll = nawawiBySlug(rel.slug) ? 'nawawi' : sahihBySlug(rel.slug) ? 'sahih' : 'kids';
         const h: any = localizeHadees(hit, locale, coll);
         return { title: h.title, sub: h.translation ?? '' };
+      }
+      case 'hadith-collection': {
+        const hit = HADITH_COLLECTIONS.find((c) => c.slug === rel.slug);
+        return hit ? { title: hit.name, sub: hit.description ?? '' } : { title: fallback, sub: '' };
+      }
+      case 'hadith-book': {
+        const hit = HADITH_BOOKS.find((b) => b.slug === rel.slug);
+        return hit ? { title: hit.title, sub: '' } : { title: fallback, sub: '' };
+      }
+      case 'hadith-entry': {
+        const hit = HADITH_ENTRIES.find((h) => String(h.num) === rel.slug);
+        if (!hit) return { title: fallback, sub: '' };
+        const coll = HADITH_COLLECTIONS.find((c) => c.id === hit.collectionId);
+        return { title: `${coll?.short ?? ''} Hadith ${hit.num}`.trim(), sub: hit.reference ?? '' };
       }
       case 'meaning': {
         const hit = meaningBySlug(rel.slug);

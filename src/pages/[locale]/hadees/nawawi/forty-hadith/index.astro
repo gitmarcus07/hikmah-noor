@@ -1,0 +1,14 @@
+---
+import HadithBook from '../../../../../components/HadithBook.astro';
+import { hadithCollectionBySlug, hadithBookBySlug } from '../../../../../data/hadith-collections';
+import { nonDefaultLocales } from '../../../../../i18n/utils';
+
+export async function getStaticPaths() {
+  return nonDefaultLocales.map((locale) => ({ params: { locale } }));
+}
+
+const collection = hadithCollectionBySlug('nawawi')!;
+const book = hadithBookBySlug('nawawi', 'forty-hadith')!;
+const { locale } = Astro.params;
+---
+<HadithBook collection={collection} book={book} locale={locale} />

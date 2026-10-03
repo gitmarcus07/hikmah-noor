@@ -114,7 +114,8 @@
     "related-prophet-names": "Names of Muhammad ﷺ",
     "related-months": "Islamic Months",
     "related-ayahs": "Quran Ayahs",
-    "related-paras": "Quran Paras"
+    "related-paras": "Quran Paras",
+    "related-collections": "Hadith Collections"
   },
   "search": {
     "resultsFor": "{n} results for “{q}”",

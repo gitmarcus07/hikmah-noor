@@ -11,6 +11,7 @@ import { SAHIH, SAHIH_CATS } from '../data/hadees-sahih';
 import { localizeHadees, localizeHadeesCat, localizeSahihCat } from '../lib/content-i18n';
 import { gradeLabel as gradeLabelL } from '../lib/dua-ui-i18n';
 import { secUI2, HADEES_UI } from '../lib/site-ui-2';
+import { HADITH_COLLECTIONS, hadithCountOf, hadithBooksOf, collectionPath } from '../data/hadith-collections';
 
 interface Props { locale: string; }
 const { locale } = Astro.props;
@@ -19,6 +20,7 @@ const T = secUI2(locale, HADEES_UI);
 const L = (p: string) => localizedPath(locale, p);
 const HC = HADEES_CATS.map((c) => localizeHadeesCat(c, locale));
 const SC = SAHIH_CATS.map((c) => localizeSahihCat(c, locale));
+const C = (secUI2(locale, HADEES_UI) as any).coll;
 
 const title = T.hubTitle;
 const description = T.hubDesc;
@@ -122,6 +124,26 @@ const crumbs = [
         </div>
       );
     })}
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={C.secT} title={C.secT} sub={C.secSub} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {HADITH_COLLECTIONS.map((coll) => {
+          const total = hadithCountOf(coll.id);
+          const nb = hadithBooksOf(coll.id).length;
+          return (
+            <a href={L(collectionPath(coll.slug))} class="hn-card hn-card-hover hn-card-pad flex gap-3.5 items-center">
+              <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="book" size={22} /></span>
+              <span class="min-w-0 flex-1">
+                <span class="font-extrabold block leading-6">{coll.name}</span>
+                <span class="text-[13px] leading-5 block mt-0.5" style="color:var(--hn-muted)">{C.countBadge.replace('{b}', String(nb)).replace('{t}', String(total))} · {C.arabicL} + {C.englishL}</span>
+              </span>
+              <Icon name="arrow" size={18} />
+            </a>
+          );
+        })}
+      </div>
+    </div>
 
     <script is:inline>
       (() => {

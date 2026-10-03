@@ -74,10 +74,15 @@ const EN = [
   check('en', 'khadija', null, { contains: 'khadija', top: 5 }),
   check('en', 'badr', null, { contains: 'badr', top: 5 }),
   check('en', 'quiz', null, { contains: 'quiz', top: 5 }),
+  check('en', 'forty hadith nawawi', '/hadees/nawawi/'),
+  check('en', 'nawawi forty', '/hadees/nawawi/'),
+  check('en', 'nawawi 42', '/hadees/nawawi/forty-hadith/42/'),
+  check('en', 'it is narrated on the authority of amirul muminin', null, { contains: '/hadees/nawawi/forty-hadith/1/', top: 3 }),
 ];
 const UR = [
   check('ur', 'رمضان', '/ur/ramadan/'),
   check('ur', '2:255', '/ur/quran/2-al-baqara/255/'),
+  check('ur', 'nawawi 42', '/ur/hadees/nawawi/forty-hadith/42/'),
 ];
 const HI = [
   check('hi', 'रमज़ान', '/hi/ramadan/'),

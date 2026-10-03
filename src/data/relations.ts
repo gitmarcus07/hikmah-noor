@@ -45,6 +45,7 @@ import surahsMeta from './surahs-meta.json';
 import parasMeta from './paras-meta.json';
 import { ALLAH, PROPHET } from './names';
 import { MONTHS } from './months';
+import { HADITH_COLLECTIONS, HADITH_BOOKS, HADITH_ENTRIES, NAWAWI_STUDY } from './hadith-collections';
 
 /* ------------------------------------------------------------------ */
 /* 1. Entity registration (single central place; no per-module edits)  */
@@ -190,6 +191,27 @@ export function lookupTarget(type: ContentType, slug: string): TargetInfo | null
     case 'para': {
       const p = PARA_BY_SLUG.get(slug);
       return p ? { title: `Para ${p.num} (${p.name})` } : null;
+    }
+    case 'hadith-collection': {
+      const c = HADITH_COLLECTIONS.find((x) => x.slug === slug);
+      return c ? { title: c.name } : null;
+    }
+    case 'hadith-book': {
+      const b = HADITH_BOOKS.find((x) => x.slug === slug);
+      if (!b) return null;
+      const coll = HADITH_COLLECTIONS.find((c) => c.id === b.collectionId);
+      return { category: coll?.slug, title: b.title };
+    }
+    case 'hadith-entry': {
+      /* Single-collection phase: bare numbers resolve within the only
+       * registered collection. Multi-collection will need a
+       * category-aware lookup (see hadith-collections.ts). */
+      const h = HADITH_ENTRIES.find((x) => String(x.num) === slug);
+      if (!h) return null;
+      const coll = HADITH_COLLECTIONS.find((c) => c.id === h.collectionId);
+      const book = HADITH_BOOKS.find((b) => b.collectionId === h.collectionId && b.num === h.bookNum);
+      if (!coll || !book) return null;
+      return { category: `${coll.slug}/${book.slug}`, title: `${coll.short} Hadith ${h.num}` };
     }
     default:
       return null;
@@ -921,7 +943,16 @@ for (const [gSlug, mSlugs] of Object.entries(GUIDE_MONTHS)) {
   addEntry('guide', gSlug, mSlugs.map((s) => ({ type: 'month' as ContentType, slug: s, reason: 'Month of this topic' })), g.cat);
 }
 for (const [slug, decls] of Object.entries(QUIZ_LINKS)) addEntry('quiz', slug, decls);
-for (const [tSlug, gSlugs] of Object.entries(TOOL_GUIDES)) {
+/** 5n. Canonical hadith entries -> curated study versions (verified
+ *  NAWAWI_STUDY number mapping) + Hadith Jibril -> Iman/Ihsan meanings
+ *  (same verified justification as the existing nawawi-jibril edges). */
+for (const [num, studySlug] of Object.entries(NAWAWI_STUDY)) {
+  addEntry('hadith-entry', num, [{ type: 'hadees', slug: studySlug, reason: 'Curated study version with lesson and translations' }], 'nawawi/forty-hadith');
+}
+addEntry('hadith-entry', '2', [
+  { type: 'meaning', slug: 'iman', reason: 'Defines Iman (Hadith Jibril)' },
+  { type: 'meaning', slug: 'ihsan', reason: 'Defines Ihsan (Hadith Jibril)' },
+], 'nawawi/forty-hadith');for (const [tSlug, gSlugs] of Object.entries(TOOL_GUIDES)) {
   const t = TOOL_BY_SLUG.get(tSlug);
   if (!t) continue;
   addEntry('tool', tSlug, gSlugs.map((s) => ({ type: 'guide' as ContentType, slug: s, reason: 'Guide for this tool' })), t.cat);

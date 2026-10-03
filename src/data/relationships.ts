@@ -31,7 +31,10 @@ export type ContentType =
   | 'prophet-name'
   | 'month'
   | 'ayah'
-  | 'para';
+  | 'para'
+  | 'hadith-collection'
+  | 'hadith-book'
+  | 'hadith-entry';
 
 /** Where an edge comes from (audit + ranking). Every edge must declare one.
  *  - explicit: hand-curated map in relations.ts (GUIDE_DUAS, DUA_LINKS, …)
@@ -65,7 +68,8 @@ export type RelationshipKind =
   | 'related-prophet-names'
   | 'related-months'
   | 'related-ayahs'
-  | 'related-paras';
+  | 'related-paras'
+  | 'related-collections';
 
 /** A single directed edge: source entity -> target entity. */
 export interface Relationship {
@@ -134,6 +138,9 @@ export function kindForType(type: ContentType): RelationshipKind {
     case 'month': return 'related-months';
     case 'ayah': return 'related-ayahs';
     case 'para': return 'related-paras';
+    case 'hadith-collection': return 'related-collections';
+    case 'hadith-book': return 'related-collections';
+    case 'hadith-entry': return 'related-hadith';
     default: return 'related-articles';
   }
 }
@@ -249,6 +256,12 @@ export function resolveRelationshipUrl(locale: string, rel: Relationship): strin
       return `${base}/quran/${rel.category ?? ''}/${rel.slug}/`;
     case 'para':
       return `${base}/quran/${rel.slug}/`;
+    case 'hadith-collection':
+      return `${base}/hadees/${rel.slug}/`;
+    case 'hadith-book':
+    case 'hadith-entry':
+      /* category carries the parent path (collection or collection/book). */
+      return `${base}/hadees/${rel.category ?? ''}/${rel.slug}/`;
     default:
       return `${base}/`;
   }
@@ -281,6 +294,7 @@ export const RELATIONSHIP_KIND_LABELS: Record<RelationshipKind, string> = {
   'related-months': 'Islamic Months',
   'related-ayahs': 'Quran Ayahs',
   'related-paras': 'Quran Paras',
+  'related-collections': 'Hadith Collections',
 };
 
 /** Hub URL per relationship kind (for "view all" links). */
@@ -306,6 +320,7 @@ export function hubUrlForKind(kind: RelationshipKind): string {
     case 'related-months': return '/calendar/';
     case 'related-ayahs': return '/quran/';
     case 'related-paras': return '/quran/';
+    case 'related-collections': return '/hadees/';
     default: return '/';
   }
 }
@@ -372,8 +387,9 @@ export function validateRelationships(): ValidationIssue[] {
     'dua', 'waqiah', 'prophet', 'guide', 'seerah', 'sahaba', 'hadees',
     'meaning', 'history', 'kalima', 'surah', 'tool', 'quiz', 'article', 'women',
     'allah-name', 'prophet-name', 'month', 'ayah', 'para',
+    'hadith-collection', 'hadith-book', 'hadith-entry',
   ];
-  const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article', 'ayah'];
+  const requiresCategory: ContentType[] = ['dua', 'guide', 'tool', 'article', 'ayah', 'hadith-book', 'hadith-entry'];
   const validProv: RelationshipProvenance[] = ['explicit', 'quran-citation', 'structured-field', 'canonical-dataset'];
   /** Explosion guards: bounded UI shows maxPerGroup=4 per kind; flags outliers. */
   const MAX_EDGES_PER_ENTITY = 24;

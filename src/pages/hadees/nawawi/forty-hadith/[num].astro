@@ -1,0 +1,16 @@
+---
+import HadithEntry from '../../../../components/HadithEntry.astro';
+import { hadithCollectionBySlug, hadithBookBySlug, hadithEntryByNum, hadithEntriesOf } from '../../../../data/hadith-collections';
+
+export async function getStaticPaths() {
+  return hadithEntriesOf('nawawi', 1).map((h) => ({ params: { num: String(h.num) } }));
+}
+
+const collection = hadithCollectionBySlug('nawawi')!;
+const book = hadithBookBySlug('nawawi', 'forty-hadith')!;
+const num = parseInt(Astro.params.num as string, 10);
+const entry = hadithEntryByNum('nawawi', 1, num);
+if (!entry) throw new Error(`Unknown Nawawi hadith number: ${Astro.params.num}`);
+const locale = 'en';
+---
+<HadithEntry collection={collection} book={book} entry={entry} locale={locale} />

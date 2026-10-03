@@ -114,7 +114,8 @@
     "related-prophet-names": "محمد ﷺ کے نام",
     "related-months": "اسلامی مہینے",
     "related-ayahs": "قرآنی آیات",
-    "related-paras": "قرآن پارے"
+    "related-paras": "قرآن پارے",
+    "related-collections": "حدیث کے مجموعے"
   },
   "search": {
     "resultsFor": "”{q}“ کے لیے {n} نتائج",

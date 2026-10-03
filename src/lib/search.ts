@@ -557,7 +557,10 @@ export function seerahIndexItems(locale: string): IndexItem[] {
 import { GUIDES, GUIDE_CATS } from '../data/guides';
 import { localizeGuide, localizeGuideCat } from './guides-i18n';
 import { HISTORY } from '../data/history';
-import { ALLAH, PROPHET } from '../data/names';
+import {
+  HADITH_COLLECTIONS, HADITH_BOOKS, hadithBooksOf, hadithEntriesOf, hadithCountOf,
+  collectionPath, bookPath, entryPath,
+} from '../data/hadith-collections';import { ALLAH, PROPHET } from '../data/names';
 import { localizeAllahName, localizeProphetName } from './content-i18n';
 import { MONTHS } from '../data/months';
 import { monthDesc } from './site-ui-4';
@@ -683,6 +686,47 @@ export function namesIndexItems(locale: string): IndexItem[] {
   return items;
 }
 
+/** Hadith collections hub + book + individual entry docs for a locale.
+ *  Compact core docs only (title/url/excerpt/tags) — full Arabic/English
+ *  matn stays on the entry pages, never in the index payload. */
+export function hadithCollectionIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const items: IndexItem[] = [];
+  for (const c of HADITH_COLLECTIONS) {
+    const total = hadithCountOf(c.id);
+    items.push({
+      title: `${c.name} — Full Collection in Arabic & English`,
+      description: `${c.description} Browse by book; ${total} hadith in order.`,
+      category: 'hadees',
+      url: `${prefix}${collectionPath(c.slug)}`,
+      tags: ['hadith', 'hadees', 'hadith collection', 'hadees collection', c.name.toLowerCase(), c.slug, c.short.toLowerCase(), 'forty hadith', 'arbaeen', `arbaeen ${c.slug}`],
+      locale,
+    });
+    for (const b of hadithBooksOf(c.id)) {
+      items.push({
+        title: `${b.title} — Read in Order`,
+        description: `${total} hadith with full Arabic matn and English translation. Open any hadith for its own page.`,
+        category: 'hadees',
+        url: `${prefix}${bookPath(c.slug, b.slug)}`,
+        tags: ['hadith', 'hadees', 'hadith book', b.title.toLowerCase(), b.slug.replace(/-/g, ' '), c.short.toLowerCase()],
+        locale,
+      });
+    }
+    for (const h of hadithEntriesOf(c.id)) {
+      const excerpt = h.english.length > 150 ? h.english.slice(0, 147) + '…' : h.english;
+      items.push({
+        title: `${c.short} Hadith ${h.num}`,
+        description: `${c.short} Hadith ${h.num} of ${total}: ${excerpt}`,
+        category: 'hadees',
+        url: `${prefix}${entryPath(c.slug, hadithBooksOf(c.id).find((b) => b.num === h.bookNum)!.slug, h.num)}`,
+        tags: [...new Set(['hadith', 'hadees', `hadith ${h.num}`, `${c.slug} ${h.num}`, `${c.short.toLowerCase()} ${h.num}`, c.name.toLowerCase(), c.short.toLowerCase(), 'forty hadith', 'arbaeen'])].filter(Boolean),
+        locale,
+      });
+    }
+  }
+  return items;
+}
+
 /** History hub + individual event entries for a locale. */
 export function historyIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : '/' + locale;
@@ -787,11 +831,19 @@ export const AYAH_ALIASES: Record<string, { ref: string; evidence: string }> = {
 };
 
 /** Hub URLs (locale-agnostic path) demoted within equal ranking tiers. */
+/** Hub URLs (locale-agnostic path) demoted within equal ranking tiers.
+ *  Hadith collection/book hubs derive from the registry so future
+ *  collections inherit the behavior with zero search changes. */
 const HUB_URLS = new Set([
   '/tools/', '/duas/', '/kalimas/', '/meanings/', '/waqiat/', '/prophets/',
   '/quran/', '/hadees/', '/seerat/', '/learn/', '/history/', '/quiz/',
   '/surahs/', '/ramadan/', '/eid/', '/hajj/', '/umrah/', '/calendar/',
   '/names-of-allah/', '/names-muhammad/', '/sahaba/', '/women/',
+  ...HADITH_COLLECTIONS.map((c) => collectionPath(c.slug)),
+  ...HADITH_BOOKS.map((b) => {
+    const coll = HADITH_COLLECTIONS.find((c) => c.id === b.collectionId)!;
+    return bookPath(coll.slug, b.slug);
+  }),
 ]);
 
 const slugOfId = (id: string) => id.split('/').pop()!.replace(/\.mdx?$/, '');
@@ -813,7 +865,7 @@ export async function buildSearchIndex(locale: string): Promise<SearchDoc[]> {
   for (const fn of [toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems,
     waqiahIndexItems, prophetIndexItems, sahabaIndexItems, womenIndexItems, quizIndexItems,
     hadeesIndexItems, seerahIndexItems, guideIndexItems, historyIndexItems,
-    namesIndexItems, topicsIndexItems]) {
+    namesIndexItems, topicsIndexItems, hadithCollectionIndexItems]) {
     for (const it of fn(locale)) push(item(it));
   }
   for (const a of ayahIndexItems(locale)) {
