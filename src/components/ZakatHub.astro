@@ -1,0 +1,111 @@
+---
+/* Zakat hub — aggregator: learn guides + derived calculator tools +
+ * charity duas + giving terms. No rulings or amounts authored here:
+ * guides carry evidence, tools carry calculations. Tool list derives
+ * from toolsByCat (never hard-coded). Slug lists verified by
+ * content:topics. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+import { localizeGuide } from '../lib/guides-i18n';
+import { DUAS } from '../data/duas';
+import { localizeDua } from '../lib/duas-i18n';
+import { meaningBySlug } from '../data/meanings';
+import { localizeMeaning } from '../lib/content-i18n';
+import { toolsByCat } from '../lib/finance/tools.js';
+import { secUI } from '../lib/site-ui-1';
+import { ZAKAT_UI } from '../lib/site-ui-4';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI(locale, ZAKAT_UI);
+const L = (p: string) => localizedPath(locale, p);
+
+const learnSlugs = ['zakat-essentials', 'zakat-al-fitr', 'fidyah-kaffarah-fasts'];
+const learn = learnSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+const tools = toolsByCat('zakat');
+const duaSlugs = ['charity-secret-shade', 'charity-never-decreases', 'charity-feeding-hungry', 'charity-water-best'];
+const duas = duaSlugs.map((s) => DUAS.find((d) => d.slug === s)).filter(Boolean).map((d: any) => localizeDua(d, locale));
+const terms = ['rizq', 'shukr'].map((s) => meaningBySlug(s)).filter(Boolean).map((m: any) => localizeMeaning(m, locale));
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/zakat/' },
+];
+---
+<BaseLayout title={T.hubTitle} description={T.hubDesc} keywords={T.hubKw} locale={locale} type="collection" faq={T.hubFaq} crumbs={crumbs} canonicalPath="/zakat/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{T.badge1}</span>
+        <span class="hn-badge">{T.badge2}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secLearn} title={T.secLearnT} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {learn.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secTools} title={T.secToolsT} href={L('/tools/')} linkLabel={T.allTools} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {tools.map((t: any) => (
+          <a href={L(`/tools/${t.cat}/${t.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{String(t.title).split('—')[0].trim()}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{t.desc}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secDuas} title={T.secDuasT} href={L('/duas/charity-zakat/')} linkLabel={T.allDuas} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {duas.map((d: any) => (
+          <a href={L(`/duas/${d.cat}/${d.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{d.title}</span>
+            <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secTerms} title={T.secTermsT} href={L('/meanings/')} linkLabel={T.allTerms} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {terms.map((m: any) => (
+          <a href={L(`/meanings/${m.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{m.term}</span>
+            <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{m.definition}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
+      <div class="space-y-3">
+        {T.hubFaq.map((f: any) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

@@ -78,6 +78,11 @@ const EN = [
   check('en', 'nawawi forty', '/hadees/nawawi/'),
   check('en', 'nawawi 42', '/hadees/nawawi/forty-hadith/42/'),
   check('en', 'it is narrated on the authority of amirul muminin', null, { contains: '/hadees/nawawi/forty-hadith/1/', top: 3 }),
+  check('en', 'is it halal', '/halal-haram/'),
+  check('en', 'halal haram', null, { contains: '/halal-haram/', top: 3 }),
+  check('en', 'islamic manners', '/adab/'),
+  check('en', 'new muslim guide', null, { contains: '/new-muslim/', top: 3 }),
+  check('en', 'zakat guide', null, { contains: '/zakat/', top: 5 }),
 ];
 const UR = [
   check('ur', 'رمضان', '/ur/ramadan/'),

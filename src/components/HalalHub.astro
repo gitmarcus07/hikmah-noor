@@ -1,0 +1,109 @@
+---
+/* Halal & Haram hub — aggregator over existing ruling guides + key terms.
+ * No rulings authored here: every card links a guide/term page that carries
+ * its own evidence. Slug lists verified by content:topics. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+import { localizeGuide } from '../lib/guides-i18n';
+import { meaningBySlug } from '../data/meanings';
+import { localizeMeaning } from '../lib/content-i18n';
+import { secUI } from '../lib/site-ui-1';
+import { HALAL_UI } from '../lib/site-ui-4';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const T = secUI(locale, HALAL_UI);
+const L = (p: string) => localizedPath(locale, p);
+
+const foodSlugs = ['halal-food-guide', 'gelatin-enzymes-additives-guide', 'alcohol-medicine-perfume-ruling', 'dogs-pets-in-islam'];
+const moneySlugs = ['riba-interest-modern-money', 'crypto-forex-trading-halal', 'insurance-takaful-ruling', 'halal-investing-pension-guide'];
+const dailySlugs = ['music-singing-ruling', 'gaming-movies-entertainment', 'tattoos-piercing-ruling', 'organ-blood-donation-islam', 'ivf-contraception-abortion-islam', 'dreams-in-islam-guide'];
+const bySlugs = (slugs: string[]) => slugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+const food = bySlugs(foodSlugs);
+const money = bySlugs(moneySlugs);
+const daily = bySlugs(dailySlugs);
+const terms = ['halal', 'haram'].map((s) => meaningBySlug(s)).filter(Boolean).map((m: any) => localizeMeaning(m, locale));
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: T.crumb, path: '/halal-haram/' },
+];
+---
+<BaseLayout title={T.hubTitle} description={T.hubDesc} keywords={T.hubKw} locale={locale} type="collection" faq={T.hubFaq} crumbs={crumbs} canonicalPath="/halal-haram/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">{T.badge1}</span>
+        <span class="hn-badge">{T.badge2}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.noteL}</p>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secFood} title={T.secFood} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {food.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secMoney} title={T.secMoney} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {money.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secDaily} title={T.secDaily} href={L('/learn/')} linkLabel={T.allGuides} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {daily.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow={T.secTerms} title={T.secTerms} href={L('/meanings/')} linkLabel={T.allTerms} />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {terms.map((m: any) => (
+          <a href={L(`/meanings/${m.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-bold block text-[15px] leading-6">{m.term}</span>
+            <span class="text-[13px] line-clamp-2" style="color:var(--hn-muted)">{m.definition}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
+      <SectionHeader eyebrow="FAQ" title={dict.article.faq} />
+      <div class="space-y-3">
+        {T.hubFaq.map((f: any) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

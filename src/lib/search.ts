@@ -790,6 +790,28 @@ export function guideIndexItems(locale: string): IndexItem[] {
   return items;
 }
 
+/* Phase 9 aggregator hubs (one compact doc each per locale; cards resolve
+ * localized titles at render — the index carries hub chrome only). */
+import { HALAL_UI, ADAB_UI, NEWMUSLIM_UI, ZAKAT_UI } from './site-ui-4';
+
+export function phase9HubIndexItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : '/' + locale;
+  const hubs = [
+    { path: '/halal-haram/', ui: secUI(locale, HALAL_UI), tags: ['halal', 'haram', 'is it halal', 'halal haram', 'halal guide', 'halal food', 'riba', 'crypto halal', 'music halal'] },
+    { path: '/adab/', ui: secUI(locale, ADAB_UI), tags: ['adab', 'akhlaq', 'manners', 'islamic manners', 'character', 'muslim manners', 'family duas'] },
+    { path: '/new-muslim/', ui: secUI(locale, NEWMUSLIM_UI), tags: ['new muslim', 'revert', 'shahada', 'convert to islam', 'new muslim guide', 'how to pray beginner', 'wudu beginner'] },
+    { path: '/zakat/', ui: secUI(locale, ZAKAT_UI), tags: ['zakat', 'zakah', 'zakat guide', 'zakat calculator', 'sadaqah', 'fitrana', 'fidyah'] },
+  ];
+  return hubs.map(({ path, ui, tags }) => ({
+    title: ui.hubTitle,
+    description: ui.hubDesc,
+    category: 'learn',
+    url: `${prefix}${path}`,
+    tags,
+    locale,
+  }));
+}
+
 /* ------------------------------------------------------------------ */
 /* Phase 5: consolidated builder + compact static payloads             */
 /*                                                                     */
@@ -865,7 +887,7 @@ export async function buildSearchIndex(locale: string): Promise<SearchDoc[]> {
   for (const fn of [toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems,
     waqiahIndexItems, prophetIndexItems, sahabaIndexItems, womenIndexItems, quizIndexItems,
     hadeesIndexItems, seerahIndexItems, guideIndexItems, historyIndexItems,
-    namesIndexItems, topicsIndexItems, hadithCollectionIndexItems]) {
+    namesIndexItems, topicsIndexItems, hadithCollectionIndexItems, phase9HubIndexItems]) {
     for (const it of fn(locale)) push(item(it));
   }
   for (const a of ayahIndexItems(locale)) {

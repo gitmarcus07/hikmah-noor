@@ -76,6 +76,13 @@ const quizzesTxt = await read('src/data/quizzes.ts');
 const quizSlugs = new Set([...quizzesTxt.matchAll(/\{ slug: '([^']+)', cat: '([^']+)'/g)].map((m) => m[1]));
 const sahihTxt = await read('src/data/hadees-sahih.ts');
 const sahihSlugs = new Set([...sahihTxt.matchAll(/\{ slug: '([^']+)', num: \d+, sabaq: \d+/g)].map((m) => m[1]));
+const meaningsTxt = await read('src/data/meanings.ts');
+const meaningSlugs = new Set([...meaningsTxt.matchAll(/\{ slug: '([^']+)', term:/g)].map((m) => m[1]));
+const kalimasTxt = await read('src/data/kalimas.ts');
+const kalimaSlugs = new Set([...kalimasTxt.matchAll(/\{ slug: '([^']+)'/g)].map((m) => m[1]));
+const duaCatSlugs = new Set([...duasTxt.matchAll(/\{ slug: '([^']+)', title:/g)].map((m) => m[1]));
+/** Every slug a hub can link: guides, duas, dua cats, meanings, hadees, kalimas. */
+const hubUnion = new Set([...guideSlugs, ...duaSlugs, ...duaCatSlugs, ...meaningSlugs, ...sahihSlugs, ...kalimaSlugs]);
 for (const hub of ['RamadanHub', 'EidHub', 'HajjHub', 'UmrahHub']) {
   const t = await read(`src/components/${hub}.astro`);
   for (const m of t.matchAll(/\['([a-z0-9-]+)'(?:,\s*'([a-z0-9-]+)')*\]/g)) {
@@ -90,6 +97,19 @@ for (const hub of ['RamadanHub', 'EidHub', 'HajjHub', 'UmrahHub']) {
   }
   for (const m of t.matchAll(/sahihBySlug\('([^']+)'\)/g)) {
     if (!sahihSlugs.has(m[1])) fail(`${hub}: sahih hadees not found: ${m[1]}`);
+  }
+}
+// 4b. Phase 9 aggregator hubs: every hard-coded content slug must resolve
+// (union check — hubs only link existing verified pages, never new data).
+for (const hub of ['HalalHub', 'AdabHub', 'NewMuslimHub', 'ZakatHub']) {
+  const t = await read(`src/components/${hub}.astro`);
+  for (const m of t.matchAll(/\['([a-z0-9-]+)'(?:,\s*'([a-z0-9-]+)')*\]/g)) {
+    for (const s of m[0].matchAll(/'([a-z0-9-]+)'/g)) {
+      if (!hubUnion.has(s[1])) fail(`${hub}: slug not found in guides/duas/cats/meanings/hadees/kalimas: ${s[1]}`);
+    }
+  }
+  for (const m of t.matchAll(/slug: '([a-z0-9-]+)'/g)) {
+    if (!hubUnion.has(m[1])) fail(`${hub}: step slug not found: ${m[1]}`);
   }
 }
 console.log('  hub slug lists resolve');
