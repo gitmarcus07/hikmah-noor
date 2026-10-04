@@ -1,0 +1,187 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'At what age can children memorize?', a: 'From ~4–5 with one short line a day (Ikhlas, Kawthar). Keep sessions under 5 minutes, always end with praise — pressure at this age backfires.' },
+  { q: 'How many repetitions per line?', a: 'Listen 3 times, repeat 3 times, then join it to the previous lines. Review yesterday\u2019s lines before adding a new one — that is the whole method.' },
+  { q: 'Whose recitation is the audio?', a: 'Mishary Alafasy via the same recitation library this site\u2019s Quran player uses. Audio streams per verse — needs internet once per line, then replays instantly.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Kids Hifz', path: '/tools/kids-hifz/' },
+];
+---
+<BaseLayout title="Kids Hifz — Memorize Short Surahs Line by Line (with Audio)" description="Kids memorization tool: 6 short surahs (Fatiha, Ikhlas, Kawthar, Asr, Nas, Falaq) broken into lines with reciter audio loop, hide-and-quiz mode and star rewards saved on this device." keywords="kids hifz, memorize short surahs, surah memorization kids, hifz for children, learn ikhlas kawthar nas falaq" locale={locale} canonicalPath="/tools/kids-hifz/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Kids Hifz" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-hifz>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Ages 4+</span>
+      <span class="hn-badge">Audio + stars</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Memorize short surahs 🌙</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">Pick a surah, play each line, repeat together. Tap the eye to hide lines and quiz. Stars are saved on this device.</p>
+
+    <div class="mt-4 flex flex-wrap gap-2" data-picker></div>
+
+    <div class="mt-4 hn-card hn-card-pad text-center" style="background:var(--hn-primary-soft)">
+      <p class="font-extrabold text-[20px]" data-title></p>
+      <p class="text-[13px] font-bold" style="color:var(--hn-muted)" data-progress></p>
+      <div class="mt-3 flex flex-wrap justify-center gap-2">
+        <button data-playall class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play all lines</button>
+        <button data-quiz class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🙈 Quiz mode</button>
+        <button data-star class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">⭐ Memorized</button>
+        <button data-stop class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">⏹ Stop</button>
+      </div>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">Audio: Mishary Alafasy • needs internet • stars save automatically</p>
+    </div>
+
+    <div class="mt-4 space-y-3" data-lines></div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a href="/tools/kids-roza-chart/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">← Back to Roza Chart</a>
+      <a href="/surahs/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Read full surahs →</a>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline define:vars={{ base: 'https://everyayah.com/data/Alafasy_128kbps/' }}>
+    (() => {
+      const root = document.querySelector('[data-hifz]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      // [surahNum, title, [arabic, meaning][]]
+      const SURAHS = [
+        [1, 'Al-Fatiha (7 lines)', [
+          ['بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'In the name of Allah, the Most Compassionate, Most Merciful.'],
+          ['الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', 'All praise belongs to Allah, Lord of the worlds.'],
+          ['الرَّحْمَٰنِ الرَّحِيمِ', 'The Most Compassionate, Most Merciful.'],
+          ['مَالِكِ يَوْمِ الدِّينِ', 'Master of the Day of Judgment.'],
+          ['إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', 'You alone we worship, and You alone we ask for help.'],
+          ['اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', 'Guide us along the Straight Path.'],
+          ['صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ', 'The path of those You blessed — not of those who earned anger, nor of those who went astray.'],
+        ]],
+        [112, 'Al-Ikhlas (4 lines)', [
+          ['قُلْ هُوَ اللَّهُ أَحَدٌ', 'Say: He is Allah, the One.'],
+          ['اللَّهُ الصَّمَدُ', 'Allah, the Eternal Refuge.'],
+          ['لَمْ يَلِدْ وَلَمْ يُولَدْ', 'He neither begets nor is born.'],
+          ['وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ', 'And none is comparable to Him.'],
+        ]],
+        [108, 'Al-Kawthar (3 lines)', [
+          ['إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ', 'Indeed, We granted you al-Kawthar.'],
+          ['فَصَلِّ لِرَبِّكَ وَانْحَرْ', 'So pray to your Lord and sacrifice.'],
+          ['إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ', 'Indeed, your enemy is the one cut off.'],
+        ]],
+        [103, 'Al-Asr (3 lines)', [
+          ['وَالْعَصْرِ', 'By time.'],
+          ['إِنَّ الْإِنسَانَ لَفِي خُسْرٍ', 'Indeed, mankind is in loss.'],
+          ['إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ', 'Except those who believe, do good, and urge one another to truth and patience.'],
+        ]],
+        [114, 'An-Nas (6 lines)', [
+          ['قُلْ أَعُوذُ بِرَبِّ النَّاسِ', 'Say: I seek refuge with the Lord of mankind.'],
+          ['مَلِكِ النَّاسِ', 'The King of mankind.'],
+          ['إِلَهِ النَّاسِ', 'The God of mankind.'],
+          ['مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ', 'From the evil of the retreating whisperer.'],
+          ['الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ', 'Who whispers into the chests of people.'],
+          ['مِنَ الْجِنَّةِ وَالنَّاسِ', 'From among jinn and mankind.'],
+        ]],
+        [113, 'Al-Falaq (5 lines)', [
+          ['قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ', 'Say: I seek refuge with the Lord of the daybreak.'],
+          ['مِن شَرِّ مَا خَلَقَ', 'From the evil of what He created.'],
+          ['وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ', 'And from the evil of darkness when it settles.'],
+          ['وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ', 'And from the evil of the blowers in knots.'],
+          ['وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ', 'And from the evil of an envier when he envies.'],
+        ]],
+      ];
+      const pad3 = (n) => String(n).padStart(3, '0');
+      const KEY = 'hn.kidshifz.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ surah: 112, stars: {}, quiz: false }, load());
+      let audio = null;
+      const stop = () => { try { if (audio) { audio.pause(); audio = null; } } catch {} };
+      const playUrl = (url, onend) => {
+        stop();
+        audio = new Audio(url);
+        audio.onended = onend || null;
+        audio.onerror = () => { stop(); };
+        audio.play().catch(() => {});
+      };
+      const url = (s, v) => base + pad3(s) + pad3(v) + '.mp3';
+      const picker = root.querySelector('[data-picker]');
+      const linesBox = root.querySelector('[data-lines]');
+      const paint = () => {
+        const cur = SURAHS.find((s) => s[0] === st.surah) || SURAHS[1];
+        picker.innerHTML = SURAHS.map((s) => `
+          <button data-s="${s[0]}" class="hn-btn !min-h-[44px] text-sm ${s[0] === cur[0] ? 'hn-btn-primary' : 'hn-btn-secondary'}">${s[1]}${st.stars[s[0]] ? ' ⭐' : ''}</button>`).join('');
+        picker.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => {
+          stop();
+          st.surah = Number(b.dataset.s);
+          st.quiz = false;
+          save(st);
+          paint();
+        }));
+        root.querySelector('[data-title]').textContent = `Surah ${cur[1]}`;
+        root.querySelector('[data-progress]').textContent = st.stars[cur[0]] ? '⭐ Memorized!' : `${cur[2].length} lines — tap a line to play it`;
+        root.querySelector('[data-star]').textContent = st.stars[cur[0]] ? '★ Memorized ✓' : '⭐ Memorized';
+        root.querySelector('[data-quiz]').textContent = st.quiz ? '👁 Show lines' : '🙈 Quiz mode';
+        linesBox.innerHTML = cur[2].map((ln, i) => `
+          <div class="hn-card hn-card-pad" data-line="${i}">
+            <div class="flex items-center gap-2">
+              <span class="hn-badge hn-badge-gold">Line ${i + 1}</span>
+              <span class="ms-auto flex gap-2">
+                <button data-say="${i}" class="hn-btn hn-btn-secondary !min-h-[44px] !px-3 text-sm" aria-label="Play line ${i + 1}">🔊</button>
+                <button data-eye="${i}" class="hn-btn hn-btn-secondary !min-h-[44px] !px-3 text-sm" aria-label="Hide line ${i + 1}">🙈</button>
+              </span>
+            </div>
+            <p class="font-arabic text-[22px] leading-[2] mt-2" lang="ar" dir="rtl" data-atext>${st.quiz ? '• • •' : ln[0]}</p>
+            <p class="text-[14px] leading-7" style="color:var(--hn-muted)">${ln[1]}</p>
+          </div>`).join('');
+        linesBox.querySelectorAll('[data-say]').forEach((b) => b.addEventListener('click', () => {
+          playUrl(url(cur[0], Number(b.dataset.say) + 1));
+        }));
+        linesBox.querySelectorAll('[data-eye]').forEach((b) => b.addEventListener('click', () => {
+          const card = b.closest('[data-line]');
+          const t = card.querySelector('[data-atext]');
+          const hidden = t.dataset.hidden === '1';
+          t.dataset.hidden = hidden ? '' : '1';
+          t.textContent = hidden ? cur[2][Number(card.dataset.line)][0] : '• • •';
+        }));
+        save(st);
+      };
+      root.querySelector('[data-playall]').addEventListener('click', () => {
+        const cur = SURAHS.find((s) => s[0] === st.surah) || SURAHS[1];
+        let i = 0;
+        const step = () => {
+          if (i >= cur[2].length) { stop(); return; }
+          playUrl(url(cur[0], i + 1), () => { i++; setTimeout(step, 700); });
+        };
+        step();
+      });
+      root.querySelector('[data-quiz]').addEventListener('click', () => {
+        stop();
+        st.quiz = !st.quiz;
+        save(st);
+        paint();
+      });
+      root.querySelector('[data-star]').addEventListener('click', () => {
+        const cur = SURAHS.find((s) => s[0] === st.surah) || SURAHS[1];
+        if (st.stars[cur[0]]) delete st.stars[cur[0]];
+        else st.stars[cur[0]] = true;
+        save(st);
+        paint();
+      });
+      root.querySelector('[data-stop]').addEventListener('click', stop);
+      paint();
+    })();
+  </script>
+</BaseLayout>

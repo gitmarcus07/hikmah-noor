@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales, localizedPath } from '../../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'How long does it take to learn?', a: 'Most beginners pray a full 2-rakah prayer within a week: Fatiha first, then one short surah, then the sitting duas.' },
+  { q: 'Must I pray in Arabic?', a: 'Yes for Fatiha, the short surah and fixed duas — with meanings alongside, as shown under every step.' },
+  { q: 'Do women pray differently?', a: 'Same sequence; Hanafi practice keeps a gathered posture. See the full namaz guide.' },
+];
+---
+<BaseLayout title="Namaz Trainer — Learn Salah Step by Step (2, 3 & 4 Rakahs)" description="Interactive namaz trainer: tap through every step of 2, 3 and 4-rakah prayers with Arabic, transliteration and meaning." keywords="namaz trainer, learn salah step by step, how to pray namaz" locale={locale} canonicalPath="/tools/namaz-trainer/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Namaz Trainer', path: '/tools/namaz-trainer/' }]}>
+  <AppHeader locale={locale} title="Namaz Trainer" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6" data-namaz>
+    <p class="text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English tools — translation coming soon. Steps work the same in every language.</p>
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Prayer length</p>
+      <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Rakahs">
+        <button data-mode="2" class="hn-btn !min-h-[48px] text-sm">2 rakahs (Fajr)</button>
+        <button data-mode="3" class="hn-btn !min-h-[48px] text-sm">3 rakahs (Maghrib)</button>
+        <button data-mode="4" class="hn-btn !min-h-[48px] text-sm">4 rakahs (Dhuhr/Asr/Isha)</button>
+      </div>
+      <div class="h-2.5 rounded-full overflow-hidden mt-4" style="background:var(--hn-border)"><div data-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      <p class="mt-1 text-[13px] font-bold" style="color:var(--hn-muted)" data-pos></p>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad" data-card>
+      <p><span class="hn-badge hn-badge-gold" data-posture></span> <span class="hn-badge" data-rakah></span></p>
+      <p class="font-arabic text-[24px] leading-[2.1] mt-3" lang="ar" dir="rtl" data-ar></p>
+      <p class="mt-2 text-[14px] italic leading-7" data-tr></p>
+      <p class="mt-1 text-[14px] leading-7" style="color:var(--hn-muted)" data-en></p>
+      <p class="mt-2 text-[13px] leading-6 rounded-2xl px-4 py-3" style="background:var(--hn-primary-soft)" data-tip></p>
+    </div>
+
+    <div class="mt-3 flex gap-2">
+      <button data-prev class="hn-btn hn-btn-secondary flex-1 !min-h-[52px]">← Back</button>
+      <button data-next class="hn-btn hn-btn-primary flex-[2] !min-h-[52px]">Next →</button>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad text-center">
+      <p class="hn-block-label">Practice streak</p>
+      <p class="font-extrabold text-[26px]" data-streak>0 days</p>
+      <button data-done class="hn-btn hn-btn-secondary !min-h-[48px] text-sm mt-2 w-full">✓ I practiced today</button>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a href={localizedPath(locale, '/learn/salah/wudu-ablution/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Wudu first →</a>
+      <a href={localizedPath(locale, '/learn/salah/how-to-pray-namaz/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Full namaz guide →</a>
+    </div>
+    <section class="mt-8"><div class="space-y-3">{faq.map((f) => (<details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}</div></section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-namaz]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const S = (posture, ar, tr, en, tip, rakah = '') => ({ posture, rakah, ar, tr, en, tip });
+      const F = {
+        niyyah: ['🤲 Intention', '', 'Make niyyah in your heart: which prayer, how many rakahs, fard or sunnah.', 'Face the qibla, feet shoulder-width, calm your mind.', 'Intention lives in the heart — silent and sincere.'],
+        takbeer: ['🙌 Takbeer', 'اللَّهُ أَكْبَرُ', 'Allahu Akbar — Allah is Greatest.', 'Raise hands to ears (men) or shoulders (women), then fold right over left.', 'Look at the place of sujood throughout qiyam.'],
+        sana: ['🧍 Qiyam', 'سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ', 'Subhanaka Allahumma wa bihamdika…', 'Glory and praise be to You, O Allah… none is worthy of worship but You.', 'First rakah only.'],
+        tawwudh: ['🧍 Qiyam', 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ • بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ', 'Aʿudhu billahi… Bismillahir-rahmanir-rahim.', 'I seek refuge with Allah… In the name of Allah, the Most Compassionate, Most Merciful.', 'First rakah only.'],
+        fatiha: ['🧍 Qiyam', 'Surah Al-Fatiha — all 7 verses (learn: بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ … وَلَا الضَّالِّينَ)', 'Al-Fatiha: praise, then “guide us along the Straight Path.”', 'Obligatory in every rakah — practice this most.', 'Learn it line by line on the surahs pages.'],
+        surah: ['🧍 Qiyam', 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ', 'Qul huwallahu ahad… (Al-Ikhlas).', 'Say: He is Allah, the One — the Eternal Refuge…', 'Any short surah works. First two rakahs only.'],
+        fatihaOnly: ['🧍 Qiyam', '', 'Surah Al-Fatiha only — no short surah after it.', 'Hanafi: rakahs 3 and 4 are Fatiha-only.', 'Keep it unhurried.'],
+        ruku: ['🙇 Ruku', 'سُبْحَانَ رَبِّيَ الْعَظِيمِ', 'Subhana Rabbiyal-Azeem (×3).', 'Glory be to my Lord, the Most Great.', 'Back flat, hands on knees, pause.'],
+        qawmah: ['🧍 Standing', 'سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ — رَبَّنَا لَكَ الْحَمْدُ', 'Samiʿallahu liman hamidah — Rabbana lakal-hamd.', 'Allah hears whoever praises Him…', 'Stand fully upright.'],
+        sajdah: ['🙇 Sajdah', 'سُبْحَانَ رَبِّيَ الْأَعْلَى', 'Subhana Rabbiyal-Aʿla (×3).', 'Glory be to my Lord, the Most High.', 'Forehead+nose, hands, knees, feet touch the ground.'],
+        jalsah: ['🪑 Sitting', 'رَبِّ اغْفِرْ لِي', 'Rabbighfirli.', 'My Lord, forgive me.', 'Sit calmly between sajdahs.'],
+        tashahhud: ['🪑 Sitting', 'التَّحِيَّاتُ لِلَّهِ… وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ', 'Attahiyyatu lillah… with the two testimonies.', 'All greetings belong to Allah… Muhammad is His servant and messenger.', 'First sitting: stop here and stand. Final sitting: continue.'],
+        durood: ['🪑 Sitting', 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ… إِنَّكَ حَمِيدٌ مَجِيدٌ', 'Durood-e-Ibrahim.', 'Blessings on Muhammad and his family as on Ibrahim and his.', 'Final sitting only.'],
+        dua: ['🤲 Sitting', 'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ', 'Rabbana atina…', 'Our Lord, give us good in both worlds and shield us from the Fire.', 'Any authentic dua works.'],
+        salam: ['👋 Salam', 'السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ — right, then left', 'Assalamu alaikum wa rahmatullah.', 'Peace and Allah’s mercy be upon you.', 'The prayer is complete.'],
+      };
+      const open2 = [S(...F.niyyah), S(...F.takbeer), S(...F.sana), S(...F.tawwudh), S(...F.fatiha), S(...F.surah)];
+      const rukuSet = [S(...F.ruku), S(...F.qawmah), S(...F.sajdah), S(...F.jalsah), S(...F.sajdah)];
+      const rakahF = [S(...F.fatiha), S(...F.surah)];
+      const rakahFOnly = [S(...F.fatihaOnly)];
+      const withR = (r, mode, arr) => arr.map((s) => ({ ...s, rakah: `Rakah ${r} of ${mode}` }));
+      const endR = (mode) => [F.tashahhud, F.durood, F.dua, F.salam].map((a) => {
+        const s = S(...a);
+        s.rakah = `Rakah ${mode} of ${mode}`;
+        return s;
+      });
+      const MODES = {
+        2: [...withR(1, 2, [...open2, ...rukuSet]), ...withR(2, 2, [...rakahF, ...rukuSet]), ...endR(2)],
+        3: [...withR(1, 3, [...open2, ...rukuSet]), ...withR(2, 3, [...rakahF, ...rukuSet, S(...F.tashahhud)]), ...withR(3, 3, [...rakahFOnly, ...rukuSet]), ...endR(3)],
+        4: [...withR(1, 4, [...open2, ...rukuSet]), ...withR(2, 4, [...rakahF, ...rukuSet, S(...F.tashahhud)]), ...withR(3, 4, [...rakahFOnly, ...rukuSet]), ...withR(4, 4, [...rakahFOnly, ...rukuSet]), ...endR(4)],
+      };
+      let mode = 2, idx = 0, steps = MODES[2];
+      const KEY = 'hn.namaz.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ days: [] }, load());
+      const today = () => new Date().toISOString().slice(0, 10);
+      const paint = () => {
+        const s = steps[idx];
+        root.querySelector('[data-posture]').textContent = s.posture;
+        root.querySelector('[data-rakah]').textContent = s.rakah;
+        const arEl = root.querySelector('[data-ar]');
+        arEl.textContent = s.ar;
+        arEl.style.display = s.ar ? '' : 'none';
+        root.querySelector('[data-tr]').textContent = s.tr;
+        root.querySelector('[data-en]').textContent = s.en;
+        root.querySelector('[data-tip]').textContent = '💡 ' + s.tip;
+        root.querySelector('[data-bar]').style.width = `${((idx + 1) / steps.length) * 100}%`;
+        root.querySelector('[data-pos]').textContent = `Step ${idx + 1} of ${steps.length} • ${mode}-rakah prayer`;
+        root.querySelector('[data-prev]').disabled = idx === 0;
+        root.querySelector('[data-next]').textContent = idx === steps.length - 1 ? 'Finish ✓' : 'Next →';
+        root.querySelectorAll('[data-mode]').forEach((b) => {
+          const on = Number(b.dataset.mode) === mode;
+          b.classList.toggle('hn-btn-primary', on);
+          b.classList.toggle('hn-btn-secondary', !on);
+        });
+        const ds = [...new Set(st.days)].sort();
+        let run = 0;
+        let d = new Date();
+        if (!ds.includes(today())) d.setDate(d.getDate() - 1);
+        while (ds.includes(d.toISOString().slice(0, 10))) { run++; d.setDate(d.getDate() - 1); }
+        root.querySelector('[data-streak]').textContent = `${run} day${run === 1 ? '' : 's'}`;
+      };
+      root.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => {
+        mode = Number(b.dataset.mode);
+        steps = MODES[mode];
+        idx = 0;
+        paint();
+      }));
+      root.querySelector('[data-prev]').addEventListener('click', () => { if (idx > 0) { idx--; paint(); } });
+      root.querySelector('[data-next]').addEventListener('click', () => {
+        if (idx < steps.length - 1) { idx++; paint(); window.scrollTo({ top: root.querySelector('[data-card]').offsetTop - 90, behavior: 'smooth' }); }
+      });
+      root.querySelector('[data-done]').addEventListener('click', (e) => {
+        if (!st.days.includes(today())) st.days.push(today());
+        save(st);
+        paint();
+        e.currentTarget.textContent = '✓ Recorded for today';
+        setTimeout(() => { e.currentTarget.textContent = '✓ I practiced today'; }, 2000);
+      });
+      paint();
+    })();
+  </script>
+</BaseLayout>
