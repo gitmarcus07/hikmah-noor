@@ -1,4 +1,5 @@
-/* Hikmah Noor service worker — offline-first reading (v4: bounded caches).
+/* Hikmah Noor service worker — offline-first reading (v5: bounded caches).
+ * v5 adds the Ramadan 2027 hub + Eid/Ramadan tools to the install precache.
  * Same-origin GET requests are cached at runtime; navigations fall back
  * to /offline/ when the network fails. Third-party (fonts, audio, APIs)
  * is left alone so it never breaks the shell.
@@ -16,8 +17,8 @@
  * Cache caps prevent unbounded growth on a 30k-page site. Version bump
  * (V) invalidates older caches on update.
  */
-const V = 'hn-v4';
-const CORE = ['/', '/offline/', '/favicon.svg'];
+const V = 'hn-v5';
+const CORE = ['/', '/offline/', '/favicon.svg', '/ramadan-2027/', '/tools/eid-takbeer/', '/tools/qurbani-dua/', '/tools/shawwal-tracker/', '/tools/qada-tracker/', '/tools/kids-roza-chart/'];
 const NAV_CAP = 60;
 const ASSET_CAP = 200;
 const JSON_CAP = 30;
