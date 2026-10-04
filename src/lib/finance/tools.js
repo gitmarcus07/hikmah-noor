@@ -183,7 +183,7 @@ export const TOOLS = [
     title: 'Zakat al-Fitr Calculator — Per-Person Sa\u2019 & Cash Rules',
     desc: 'Fitrana calculator: household size, staple food, sa\u2019 quantity and local price. Explains cash-vs-food school differences.',
     keywords: 'zakat al fitr calculator, fitrana calculator, fitra amount per person, sadaqat al fitr kg, fitrana cash allowed',
-    intro: 'One sa\u2019 of staple food per person, due before Eid prayer. Cash rules differ — read the note.',
+    intro: 'One sa\u2019 of staple food per person, due before Eid prayer. Cash rules differ — read the note. For Ramadan 2027 indicative amounts by currency (INR/PKR/BDT/USD/AED), see the Ramadan 2027 amounts table — then enter today\u2019s local price below.',
     fields: [MADH('Directly affects the cash question and sa\u2019 weight.'), CUR, { key: 'adults', label: 'Adults (including yourself)', type: 'number', def: 1 }, { key: 'children', label: 'Children / dependents', type: 'number', def: 0 }, { key: 'staple', label: 'Staple food', type: 'select', options: [{ v: 'wheat', t: 'Wheat' }, { v: 'rice', t: 'Rice' }, { v: 'dates', t: 'Dates' }, { v: 'barley', t: 'Barley' }, { v: 'other', t: 'Local staple' }], def: 'wheat' }, { key: 'kgPerPerson', label: 'Kg per person (sa\u2019 estimate)', type: 'number', def: 2.5, hint: 'Dates/barley full sa’ ≈ 2.5–3 kg; Hanafi wheat ≈ half-sa’ (~1.6–2 kg). Adjust if your scholars specify.' }, { key: 'pricePerKg', label: 'Local price per kg', type: 'number', def: 0 }, { key: 'payCash', label: 'Paying in cash?', type: 'radio', options: [{ v: 'unsure', t: 'Undecided' }, { v: 'yes', t: 'Yes' }, { v: 'no', t: 'No, food' }], def: 'unsure' }],
     faq: [
       { q: 'How much is fitr per person?', a: 'One sa\u2019 of the local staple — commonly estimated around 2.5–3 kg.' },
@@ -198,7 +198,7 @@ export const TOOLS = [
     title: 'Fidyah Calculator — Missed Fasts (Eligibility First)',
     desc: 'Fidyah for missed Ramadan fasts: eligibility triage (chronic illness, old age vs qada), people to feed and total cost.',
     keywords: 'fidyah calculator, fidyah for missed fasts, fidyah amount per fast, kaffarah vs fidyah',
-    intro: 'First the tool checks whether fidyah even applies to you — many cases require making up fasts instead.',
+    intro: 'First the tool checks whether fidyah even applies to you — many cases require making up fasts instead. For 2027 indicative per-day values by currency, see the Ramadan 2027 amounts table — then enter your local meal cost below.',
     fields: [MADH(), CUR, { key: 'missedFasts', label: 'Number of missed fasts', type: 'number', def: 0 }, { key: 'reason', label: 'Why were the fasts missed?', type: 'select', options: [{ v: 'chronic', t: 'Chronic illness — cannot fast' }, { v: 'elderly', t: 'Old age / infirmity' }, { v: 'travel', t: 'Travel' }, { v: 'temporary', t: 'Temporary illness' }, { v: 'pregnancy', t: 'Pregnancy / nursing (temporary)' }, { v: 'other', t: 'Deliberately / other reason' }], def: 'chronic' }, { key: 'dailyAmount', label: 'Daily feeding cost (one poor person)', type: 'number', def: 0, hint: 'About 1.5–2 kg staple food or one full meal — use local cost.' }],
     faq: [
       { q: 'Who pays fidyah?', a: 'Those permanently unable to fast (chronic illness, old age) — Qur\u2019an 2:184.' },

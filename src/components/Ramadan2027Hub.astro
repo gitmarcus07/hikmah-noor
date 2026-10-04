@@ -1,0 +1,261 @@
+---
+/* Ramadan 2027 hub — countdown, city Sehri/Iftar timetable (on-device sun math,
+ * zero static-file explosion), odd-nights finder, 2027 fitrana/fidyah reference.
+ * EN-first body, localized chrome via getDict. All dates astronomical ±1 day. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from './hn/Breadcrumbs.astro';
+import SectionHeader from './hn/SectionHeader.astro';
+import { getDict, localizedPath } from '../i18n/utils';
+import { RAMADAN_2027, STAPLE_2027, RAMADAN_CITIES, fitranaEstimate, fidyahDayEstimate } from '../data/ramadan-2027';
+
+interface Props { locale: string; }
+const { locale } = Astro.props;
+const dict = getDict(locale);
+const L = (p: string) => localizedPath(locale, p);
+const crumbs = [
+  { name: dict.nav.home, path: '/' },
+  { name: 'Ramadan 2027', path: '/ramadan-2027/' },
+];
+
+const title = 'Ramadan 2027 — Sehri & Iftar Timetable, Odd Nights, Fitrana & Fidyah Amounts';
+const description = 'Ramadan 2027 (8 Feb–9 Mar, Eid 10 Mar): city-wise Sehri end & Iftar timetable, Laylatul Qadr odd nights (21–29), Zakat al-Fitr & fidyah amounts 2027 in INR PKR BDT USD AED, calculators and guides.';
+const keywords = 'ramadan 2027, ramadan calendar 2027, sehri time 2027, iftar time 2027, sehri iftar timetable delhi karachi dhaka, laylatul qadr 2027, odd nights ramadan 2027, fitrana amount 2027, fitra 2027 per person, fidyah per fast 2027, eid 2027 date, taraweeh dua, roza iftar dua';
+const faq = [
+  { q: 'When is Ramadan 2027?', a: 'Astronomically: first fast ~Monday 8 Feb 2027, last fast ~Tuesday 9 Mar 2027, Eid al-Fitr ~Wednesday 10 Mar 2027. The sighted moon can shift any of these ±1 day by city — confirm with your local mosque.' },
+  { q: 'What time is Sehri and Iftar in my city?', a: 'Pick your city below — the timetable computes Sehri end (Fajr) and Iftar (Maghrib) for every Ramadan day on your device. Jafari fiqh adds ~10 minutes to Maghrib; all schools should confirm with the local mosque, which may add safety margins.' },
+  { q: 'Which nights are Laylatul Qadr 2027?', a: 'Seek it in the odd nights of the last 10: 21st (eve of 28 Feb), 23rd (eve of 2 Mar), 25th (eve of 4 Mar), 27th (eve of 6 Mar), 29th (eve of 8 Mar) — for a Feb-8 start. If the moon shifts start, the odd nights shift with it.' },
+  { q: 'How much is Fitrana / Fidyah in 2027?', a: 'Fitrana is ~2.5 kg staple per person; fidyah is ~1.5 kg (or one meal) per missed fast. The table below gives Oct-2026 indicative values per currency — enter today\u2019s local price in the calculators for your exact figure. Food satisfies all schools; cash is Hanafi-permitted.' },
+  { q: 'What breaks the fast?', a: 'Deliberate eating, drinking, intercourse and (per most schools) deliberate vomiting invalidate and need makeup; injections, eye drops and unintentional vomiting generally do not. See the what-breaks-fast guide for the full list.' },
+];
+
+const dayList: { ramadanDay: number; gregorian: string }[] = [];
+{
+  const start = new Date(RAMADAN_2027.firstFast + 'T00:00:00Z');
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(start.getTime() + i * 864e5);
+    dayList.push({ ramadanDay: i + 1, gregorian: d.toISOString().slice(0, 10) });
+  }
+}
+const oddSet = new Set(RAMADAN_2027.oddNights.map((o) => o.gregorian));
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/ramadan-2027/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">Ramadan 1448 • 2027</span>
+        <span class="hn-badge">8 Feb – 9 Mar • Eid 10 Mar*</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Ramadan 2027 — timetable, odd nights & amounts</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Countdown, city-wise Sehri/Iftar for all 30 fasts, Laylatul Qadr odd-night finder, and 2027 Fitrana/Fidyah reference with calculators. <a href={L('/ramadan/')} class="font-bold" style="color:var(--hn-primary)">Full Ramadan hub →</a> • <a href={L('/eid/')} class="font-bold" style="color:var(--hn-primary)">Eid hub →</a></p>
+      <p class="mt-2 text-[12.5px] leading-5" style="color:var(--hn-muted)">* {RAMADAN_2027.disclaimer}</p>
+      <p class="mt-4 font-extrabold text-[18px]" data-r27-countdown>Loading countdown…</p>
+    </div>
+
+    <div class="mt-8" data-r27-tt>
+      <SectionHeader eyebrow="Timetable" title="Sehri & Iftar — your city, all 30 days" />
+      <div class="hn-card hn-card-pad mt-3">
+        <div class="grid gap-2 sm:grid-cols-2">
+          <select data-r27-city class="hn-input" aria-label="City"></select>
+          <select data-r27-method class="hn-input" aria-label="Calculation method">
+            <option value="auto">Method: auto (per city)</option>
+            <option value="karachi">Karachi (18°/18°)</option>
+            <option value="mwl">Muslim World League (18°/17°)</option>
+            <option value="isna">ISNA N. America (15°/15°)</option>
+          </select>
+        </div>
+        <p class="mt-2 text-[12.5px] leading-5" style="color:var(--hn-muted)">Sehri ends at Fajr start — stop eating a few minutes early (ihtiyat). Iftar at Maghrib (sunset). Jafari: add ~10 min to Iftar. Confirm with your mosque.</p>
+        <p class="mt-2 font-extrabold text-[14px]" data-r27-today></p>
+      </div>
+      <div class="hn-card mt-3 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-[13.5px]" data-r27-table>
+            <thead><tr style="background:var(--hn-primary-soft)"><th class="text-left px-3 py-2">Fast</th><th class="text-left px-3 py-2">Date</th><th class="text-left px-3 py-2">Sehri end</th><th class="text-left px-3 py-2">Iftar</th><th class="text-left px-3 py-2">Fast length</th></tr></thead>
+            <tbody><tr><td colspan="5" class="px-3 py-4">Computing…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Laylatul Qadr" title="Odd nights 2027 — 21 • 23 • 25 • 27 • 29" href={L('/learn/duties/laylatul-qadr/')} linkLabel="Qadr guide" />
+      <div class="grid gap-3 sm:grid-cols-2 mt-3">
+        {RAMADAN_2027.oddNights.map((o) => (
+          <div class="hn-card hn-card-pad">
+            <span class="hn-badge hn-badge-gold">Night {o.ramadanDay}</span>
+            <p class="font-extrabold mt-2">{o.label}</p>
+            <p class="text-[13px]" style="color:var(--hn-muted)">{o.gregorian} • Maghrib to Fajr • dua: Allahumma innaka afuwwun tuhibbul-afwa fafu anni</p>
+          </div>
+        ))}
+      </div>
+      <div class="hn-card hn-card-pad mt-3">
+        <p class="font-extrabold">Last-10-nights plan (all 10, not just odds)</p>
+        <ol class="mt-2 text-[14px] leading-7 list-decimal ps-5" style="color:var(--hn-muted)">
+          <li>Lock Isha + Taraweeh in congregation; sleep early, wake 90 min before Sehri.</li>
+          <li>Each night: 8+ rakahs tahajjud, 100x istighfar, Qadr dua 100x, one juz tilawah.</li>
+          <li>Give a small sadaqah nightly (even online) so one lands on Qadr.</li>
+          <li>Itikaf: full 10 in mosque, or home mini-itikaf blocks for women (see itikaf guide).</li>
+          <li>Phone away after Taraweeh; Sehri with dua list ready.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Amounts 2027" title="Fitrana & fidyah — indicative, verify locally" href={L('/tools/zakat/zakat-al-fitr/')} linkLabel="Fitrana calculator" />
+      <div class="hn-card mt-3 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-[13.5px]">
+            <thead><tr style="background:var(--hn-primary-soft)"><th class="text-left px-3 py-2">Currency</th><th class="text-left px-3 py-2">Fitrana/person (~2.5kg wheat)</th><th class="text-left px-3 py-2">Fidyah/day (~1.5kg wheat)</th><th class="text-left px-3 py-2">Basis</th></tr></thead>
+            <tbody>
+              {STAPLE_2027.map((s) => (
+                <tr class="border-t" style="border-color:var(--hn-border)">
+                  <td class="px-3 py-2 font-extrabold">{s.currency}</td>
+                  <td class="px-3 py-2">{fitranaEstimate(s.currency) ?? '—'} {s.currency}</td>
+                  <td class="px-3 py-2">{fidyahDayEstimate(s.currency) ?? '—'} {s.currency}</td>
+                  <td class="px-3 py-2" style="color:var(--hn-muted)">{s.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="mt-2 text-[12.5px] leading-5" style="color:var(--hn-muted)">Oct-2026 indications. Rice costs more (table uses wheat). Hanafi wheat ≈ half-sa (~1.6–2 kg) — the calculator lets you adjust kg/person. Pay Fitrana before Eid prayer; food satisfies all schools.</p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a href={L('/tools/zakat/zakat-al-fitr/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Fitrana calculator</a>
+        <a href={L('/tools/fidyah-kaffarah/fidyah/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Fidyah calculator</a>
+        <a href={L('/tools/prayer-times/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Prayer times</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Learn" title="Core Ramadan & Eid guides" href={L('/learn/')} linkLabel="All guides" />
+      <div class="grid gap-3 sm:grid-cols-2 mt-3">
+        {[
+          ['duties', 'roza-fasting', 'Roza (Fasting) — rules made simple'],
+          ['duties', 'what-breaks-fast', 'What breaks the fast?'],
+          ['salah', 'taraweeh-night-prayer', 'Taraweeh — method & 8-or-20'],
+          ['duties', 'itikaf-rules', 'Itikaf — last 10 days'],
+          ['duties', 'laylatul-qadr', 'Laylatul Qadr — better than 1000 months'],
+          ['duties', 'fidyah-kaffarah-fasts', 'Fidyah & kaffarah amounts'],
+          ['duties', 'zakat-al-fitr', 'Zakat al-Fitr — timing & rules'],
+          ['salah', 'eid-prayer-method', 'Eid prayer — step by step'],
+        ].map(([cat, slug, t]) => (
+          <a href={L(`/learn/${cat}/${slug}/`)} class="hn-card hn-card-hover hn-card-pad block"><span class="font-bold text-[15px]">{t}</span></a>
+        ))}
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Ramadan 2027 questions" />
+      <div class="space-y-3 mt-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script define:vars={{ cities: RAMADAN_CITIES, firstFast: RAMADAN_2027.firstFast, lastFast: RAMADAN_2027.lastFast, eid: RAMADAN_2027.eidAlFitr, oddNights: RAMADAN_2027.oddNights.map((o) => o.gregorian) }}>
+    (() => {
+      const root = document.querySelector('[data-r27-tt]');
+      const cd = document.querySelector('[data-r27-countdown]');
+      if (cd) {
+        const tickCd = () => {
+          const now = new Date();
+          const start = new Date(firstFast + 'T00:00:00Z');
+          const end = new Date(eid + 'T00:00:00Z');
+          if (now < start) {
+            const ms = start - now;
+            const d = Math.floor(ms / 864e5);
+            cd.textContent = `⏳ ${d} days to Ramadan 2027 (first fast ${firstFast})`;
+          } else if (now < end) {
+            cd.textContent = '🌙 Ramadan 2027 is here — taqabbal Allahu minna wa minkum. Timetable below is live.';
+          } else {
+            cd.textContent = `Eid Mubarak — Ramadan 2027 ended. See the Eid hub for Shawwal 6 fasts.`;
+          }
+        };
+        tickCd();
+        setInterval(tickCd, 60000);
+      }
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+      const METHODS = { karachi: { fajr: 18, isha: 18 }, mwl: { fajr: 18, isha: 17 }, isna: { fajr: 15, isha: 15 } };
+      const citySel = root.querySelector('[data-r27-city]');
+      const methodSel = root.querySelector('[data-r27-method]');
+      const tbody = root.querySelector('[data-r27-table] tbody');
+      const todayEl = root.querySelector('[data-r27-today]');
+      citySel.innerHTML = cities.map((c, i) => `<option value="${i}">${c.label}</option>`).join('');
+      const KEY = 'hn.r27.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ city: 6, method: 'auto' }, load());
+      const sunPos = (jd) => {
+        const D = jd - 2451545.0;
+        const g = ((357.529 + 0.98560028 * D) % 360) * D2R;
+        const q = (280.459 + 0.98564736 * D) % 360;
+        const Lw = (q + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * D2R;
+        const e = (23.439 - 0.00000036 * D) * D2R;
+        let RA = Math.atan2(Math.cos(e) * Math.sin(Lw), Math.cos(Lw)) * R2D / 15;
+        if (RA < 0) RA += 24;
+        return { dec: Math.asin(Math.sin(e) * Math.sin(Lw)) * R2D, eqt: q / 15 - RA };
+      };
+      const hourAngle = (ang, lat, dec) => {
+        const c = (Math.sin(ang * D2R) - Math.sin(lat * D2R) * Math.sin(dec * D2R)) / (Math.cos(lat * D2R) * Math.cos(dec * D2R));
+        return Math.acos(Math.min(1, Math.max(-1, c))) * R2D / 15;
+      };
+      const dayTimes = (lat, lng, method, y, m, d) => {
+        const jd = Date.UTC(y, m - 1, d, 12, 0, 0) / 864e5 + 2440587.5;
+        const { dec, eqt } = sunPos(jd);
+        const T = 12 - lng / 15 - eqt;
+        const mt = METHODS[method] || METHODS.karachi;
+        return {
+          fajr: T - hourAngle(-mt.fajr, lat, dec),
+          maghrib: T + hourAngle(-0.833, lat, dec),
+        };
+      };
+      const fmtT = (hUTC, tz, dateStr) => {
+        const base = Date.parse(dateStr + 'T00:00:00Z');
+        const dt = new Date(base + hUTC * 36e5);
+        return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).format(dt);
+      };
+      const fmtD = (dateStr, tz) => {
+        try {
+          return new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short', timeZone: tz }).format(new Date(dateStr + 'T12:00:00Z'));
+        } catch { return dateStr; }
+      };
+      const render = () => {
+        const c = cities[Number(citySel.value)] || cities[0];
+        const method = methodSel.value === 'auto' ? c.method : methodSel.value;
+        const rows = [];
+        const start = new Date(firstFast + 'T00:00:00Z');
+        for (let i = 0; i < 30; i++) {
+          const dt = new Date(start.getTime() + i * 864e5);
+          const ds = dt.toISOString().slice(0, 10);
+          const [y, mo, da] = ds.split('-').map(Number);
+          const t = dayTimes(c.lat, c.lng, method, y, mo, da);
+          let lenH = t.maghrib - t.fajr;
+          if (lenH < 0) lenH += 24;
+          const odd = oddNights.includes(ds);
+          rows.push(`<tr class="border-t" style="border-color:var(--hn-border);${odd ? 'background:var(--hn-primary-soft)' : ''}"><td class="px-3 py-2 font-extrabold">${i + 1}${odd ? ' 🌙' : ''}</td><td class="px-3 py-2">${fmtD(ds, c.tz)}</td><td class="px-3 py-2 font-bold">${fmtT(t.fajr, c.tz, ds)}</td><td class="px-3 py-2 font-bold" style="color:var(--hn-primary)">${fmtT(t.maghrib, c.tz, ds)}</td><td class="px-3 py-2">${Math.floor(lenH)}h ${Math.round((lenH % 1) * 60)}m</td></tr>`);
+        }
+        tbody.innerHTML = rows.join('');
+        try {
+          const nowDs = new Date().toISOString().slice(0, 10);
+          if (nowDs >= firstFast && nowDs <= lastFast) {
+            const idx = Math.round((Date.parse(nowDs + 'T00:00:00Z') - Date.parse(firstFast + 'T00:00:00Z')) / 864e5);
+            todayEl.textContent = `Today is fast ${idx + 1} of 30 • ${c.label} • method ${method.toUpperCase()}`;
+          } else {
+            todayEl.textContent = `${c.label} • method ${method.toUpperCase()} • 30-day preview for Ramadan 2027`;
+          }
+        } catch { todayEl.textContent = c.label; }
+        save({ city: citySel.value, method: methodSel.value });
+      };
+      citySel.value = String(st.city ?? 6);
+      methodSel.value = st.method || 'auto';
+      citySel.addEventListener('change', render);
+      methodSel.addEventListener('change', render);
+      render();
+    })();
+  </script>
+</BaseLayout>
