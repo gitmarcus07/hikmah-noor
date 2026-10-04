@@ -71,18 +71,18 @@ const shortcuts = [
 ];
 
 const libraryGroups = [
-  { id: 'read', chip: 'Read', title: 'Read the Quran', sub: 'Text, translation and meaning.', cards: [
+  { id: 'read', chip: 'Read', title: 'Read the Quran', sub: 'Text, translation and meaning.', href: quranUrl, cards: [
     { icon: 'quran', title: 'Quran', desc: '114 surahs + 30 paras with translation', href: quranUrl },
     { icon: 'surahs', title: 'Surahs', desc: 'Browse surahs by number and name', href: surahsUrl },
     { icon: 'meanings', title: 'Meanings', desc: '40 key terms explained simply', href: meaningsUrl },
   ] },
-  { id: 'worship', chip: 'Worship', title: 'Duas & worship', sub: 'Supplicate, remember, learn.', cards: [
+  { id: 'worship', chip: 'Worship', title: 'Duas & worship', sub: 'Supplicate, remember, learn.', href: duasUrl, cards: [
     { icon: 'duas', title: 'Duas', desc: 'Authentic supplications for everyday life', href: duasUrl },
     { icon: 'shield', title: 'Adhkar', desc: 'Morning and evening remembrances', href: adhkarUrl },
     { icon: 'kalimas', title: 'Kalimas', desc: 'The six kalimas with meaning', href: kalimasUrl },
     { icon: 'book', title: 'Hadees', desc: '120 hadees: kids, Nawawi + Sahih selections', href: hadeesUrl },
   ] },
-  { id: 'learn', chip: 'Learn', title: 'Stories & guides', sub: 'Lives, history and how-tos.', cards: [
+  { id: 'learn', chip: 'Learn', title: 'Stories & guides', sub: 'Lives, history and how-tos.', href: learnUrl, cards: [
     { icon: 'waqiat', title: 'Waqiat — Prophet Stories', desc: '22 Quranic stories with lessons', href: waqiatUrl },
     { icon: 'book', title: 'Learn', desc: 'Step-by-step guides: namaz, wudu, fasting', href: learnUrl },
     { icon: 'star', title: 'Aqeedah', desc: 'Six pillars, Tawhid, Qadr & Last Day', href: L('/aqeedah/') },
@@ -95,7 +95,7 @@ const libraryGroups = [
     { icon: 'star', title: 'Names of Allah', desc: 'All 99 names with meaning', href: namesAllahUrl },
     { icon: 'heart', title: 'Names of Muhammad ﷺ', desc: 'His 99 names and titles', href: namesMuhammadUrl },
   ] },
-  { id: 'seasonal', chip: 'Seasonal', title: 'Ramadan, Hajj & Eid', sub: 'Fasting, pilgrimage, festivals and sacrifice.', cards: [
+  { id: 'seasonal', chip: 'Seasonal', title: 'Ramadan, Hajj & Eid', sub: 'Fasting, pilgrimage, festivals and sacrifice.', href: ramadan2027Url, cards: [
     { icon: 'moon', title: 'Ramadan 2027', desc: 'Timetable, odd nights & 2027 amounts', href: ramadan2027Url },
     { icon: 'moon', title: 'Ramadan Guide', desc: 'Fasting rules, duas, Taraweeh & countdown', href: ramadanHubUrl },
     { icon: 'moon', title: 'Hajj & Umrah Guide', desc: 'Ihram, tawaf, sai, Arafah & day-by-day', href: hajjHubUrl },
@@ -103,17 +103,24 @@ const libraryGroups = [
   ] },
 ] as const;
 
-const tools = [
-  { icon: 'tools', name: m.zakatT ?? 'Zakat Calculator', desc: m.zakatD ?? 'Zakat on cash and gold', href: zakatUrl },
-  { icon: 'moon', name: m.ramadanT ?? 'Ramadan Countdown', desc: m.ramadanD ?? 'Days left to Ramadan', href: ramadanUrl },
-  { icon: 'clock', name: 'Tasbih Counter', desc: 'Dhikr with daily totals', href: tasbihUrl },
-  { icon: 'sun', name: 'Prayer Times', desc: 'Namaz times, Qibla & Hijri date', href: prayerUrl },
-  { icon: 'book', name: 'Islamic Quiz', desc: '10 questions with answers', href: quizUrl },
-  { icon: 'quran', name: 'Qibla Finder', desc: 'Exact Qibla direction & compass', href: qiblaUrl },
-  { icon: 'quran', name: 'Mosque Finder', desc: 'Nearby masjids & directions', href: L('/tools/mosque-finder/') },
-  { icon: 'clock', name: 'Prayer Tracker', desc: 'Daily salah log with streaks', href: trackerUrl },
-  { icon: 'heart', name: 'Mirath Calculator', desc: 'Inheritance shares (Sunni)', href: mirathUrl },
-  { icon: 'tools', name: 'All tools', desc: 'Qibla, khatm planner, Hijri & more', href: toolsUrl },
+const toolShelves = [
+  { title: 'Prayer & Quran', cards: [
+    { icon: 'sun', name: 'Prayer Times', desc: 'Namaz times, Qibla & Hijri date', href: prayerUrl },
+    { icon: 'quran', name: 'Qibla Finder', desc: 'Exact Qibla direction & compass', href: qiblaUrl },
+    { icon: 'clock', name: 'Tasbih Counter', desc: 'Dhikr with daily totals', href: tasbihUrl },
+    { icon: 'clock', name: 'Prayer Tracker', desc: 'Daily salah log with streaks', href: trackerUrl },
+  ] },
+  { title: 'Ramadan, Eid & Giving', cards: [
+    { icon: 'moon', name: 'Ramadan 2027', desc: 'Timetable, odd nights & amounts', href: ramadan2027Url },
+    { icon: 'moon', name: m.ramadanT ?? 'Ramadan Countdown', desc: m.ramadanD ?? 'Days left to Ramadan', href: ramadanUrl },
+    { icon: 'tools', name: m.zakatT ?? 'Zakat Calculator', desc: m.zakatD ?? 'Zakat on cash and gold', href: zakatUrl },
+    { icon: 'quran', name: 'Mosque Finder', desc: 'Nearby masjids & directions', href: L('/tools/mosque-finder/') },
+  ] },
+  { title: 'Learn & More', cards: [
+    { icon: 'book', name: 'Islamic Quiz', desc: '10 questions with answers', href: quizUrl },
+    { icon: 'heart', name: 'Mirath Calculator', desc: 'Inheritance shares (Sunni)', href: mirathUrl },
+    { icon: 'tools', name: 'All tools', desc: 'Khatm planner, Hijri converter, trackers & more', href: toolsUrl },
+  ] },
 ] as const;
 
 const duas = (catGroups.duas ?? []).slice(0, 4);
@@ -150,7 +157,7 @@ const recent = (latest ?? []).slice(0, 6);
       </div>
       {libraryGroups.map((g) => (
         <div id={`lib-${g.id}`} class="mt-6 scroll-mt-24" data-libgroup={g.id}>
-          <SectionHeader eyebrow={g.chip} title={g.title} sub={g.sub} />
+          <SectionHeader eyebrow={g.chip} title={g.title} sub={g.sub} href={g.href} linkLabel={m.viewAll ?? 'View all'} />
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-3">
             {g.cards.map(c => (
               <a href={c.href} class="hn-card hn-card-hover hn-card-pad flex gap-3 items-start">
@@ -240,15 +247,22 @@ const recent = (latest ?? []).slice(0, 6);
         </div>
         <div>
           <SectionHeader eyebrow="Tools" title={m.usefulTools ?? 'Islamic tools'} href={toolsUrl} linkLabel="All tools" />
-          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {tools.map(t => (
-              <a href={t.href} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3">
-                <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={t.icon as any} size={22} /></span>
-                <span class="min-w-0">
-                  <span class="block font-extrabold text-[15px]">{t.name}</span>
-                  <span class="block text-[13px]" style="color:var(--hn-muted)">{t.desc}</span>
-                </span>
-              </a>
+          <div class="space-y-5 mt-3">
+            {toolShelves.map(shelf => (
+              <div>
+                <p class="text-[13px] font-extrabold uppercase tracking-widest mb-2" style="color:var(--hn-muted)">{shelf.title}</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  {shelf.cards.map(t => (
+                    <a href={t.href} class="hn-card hn-card-hover hn-card-pad flex items-center gap-3">
+                      <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={t.icon as any} size={22} /></span>
+                      <span class="min-w-0">
+                        <span class="block font-extrabold text-[15px]">{t.name}</span>
+                        <span class="block text-[13px]" style="color:var(--hn-muted)">{t.desc}</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

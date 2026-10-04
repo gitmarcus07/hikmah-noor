@@ -23,12 +23,15 @@ const fmtDate = (d: any) => { try { return new Date(d).toLocaleDateString('en-US
 
 const GROUPS = [
   { chip: 'Read', title: 'Read the Quran', cards: [
+    { title: 'Quran', sub: '114 surahs + 30 paras with translation', href: L('/quran/'), icon: 'quran' },
     { title: t.explore.gemsT, sub: t.explore.gemsD, href: L('/tools/gems/'), icon: 'star' },
   ] },
   { chip: 'Worship', title: 'Duas & worship', cards: [
+    { title: 'Duas', sub: 'Supplications for every occasion', href: L('/duas/'), icon: 'duas' },
     { title: 'Hadees', sub: '80 hadees: 40 for children + 40 of Imam Nawawi', href: L('/hadees/'), icon: 'book' },
     { title: 'Tasbih Counter', sub: 'Dhikr with 33/100 goals and daily totals', href: L('/tools/tasbih/'), icon: 'tools' },
     { title: 'Prayer Times', sub: 'Namaz times, Qibla compass & Hijri date', href: L('/tools/prayer-times/'), icon: 'sun' },
+    { title: 'Namaz Trainer', sub: 'Learn salah step by step, 2–4 rakahs', href: L('/tools/namaz-trainer/'), icon: 'quran' },
   ] },
   { chip: 'Learn', title: 'Stories, history & guides', cards: [
     { title: 'Waqiat — Prophet Stories', sub: '22 Quranic stories: Yusuf, Ibrahim, Musa, Badr, Miraj & more', href: L('/waqiat/'), icon: 'waqiat' },
@@ -45,6 +48,7 @@ const GROUPS = [
     { title: 'Names of Allah', sub: 'All 99 names with meaning', href: L('/names-of-allah/'), icon: 'star' },
   ] },
   { chip: 'Seasonal', title: 'Ramadan, Hajj & Eid', cards: [
+    { title: 'Ramadan 2027', sub: 'Timetable, odd nights & 2027 amounts', href: L('/ramadan-2027/'), icon: 'moon' },
     { title: 'Islamic Calendar', sub: 'Hijri month view, Ramadan & Eid dates, sacred days with countdowns', href: L('/calendar/'), icon: 'moon' },
     { title: 'Ramadan Guide', sub: 'Fasting rules, duas, Taraweeh & countdown', href: L('/ramadan/'), icon: 'moon' },
     { title: 'Hajj & Umrah Guide', sub: 'Ihram, tawaf, sai, Arafah, stoning & duas', href: L('/hajj/'), icon: 'moon' },
@@ -67,20 +71,6 @@ const GROUPS = [
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Explore the library</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">Quran, duas, guides, stories and tools — every page with sources and translation. Pick a collection below and start reading.</p>
     </div>
-    {latestAll.length > 0 && (
-      <div class="mt-6">
-        <SectionHeader eyebrow="Fresh" title="Latest articles" sub="Newest first — every new article appears here automatically." />
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
-          {latestAll.map((a) => (
-            <a href={L(`/${a.data.category}/${slugOf(a.id)}/`)} class="hn-card hn-card-hover hn-card-pad block">
-              <span class="hn-badge">{a.data.category}</span>
-              <span class="block font-extrabold text-[16px] leading-6 mt-2 line-clamp-2">{a.data.title}</span>
-              <span class="block mt-1 text-[13px]" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
-            </a>
-          ))}
-        </div>
-      </div>
-    )}
     <div class="mt-6">
       {GROUPS.map((g) => (
         <div class="mt-6">
@@ -99,5 +89,19 @@ const GROUPS = [
         </div>
       ))}
     </div>
+    {latestAll.length > 0 && (
+      <div class="mt-8">
+        <SectionHeader eyebrow="Fresh" title="Latest articles" sub="Newest first — every new article appears here automatically." />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
+          {latestAll.map((a) => (
+            <a href={L(`/${a.data.category}/${slugOf(a.id)}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="hn-badge">{a.data.category}</span>
+              <span class="block font-extrabold text-[16px] leading-6 mt-2 line-clamp-2">{a.data.title}</span>
+              <span class="block mt-1 text-[13px]" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 </BaseLayout>

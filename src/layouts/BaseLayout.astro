@@ -120,6 +120,7 @@ const mobileGroups = [
     { label: 'Names of Allah', href: L('/names-of-allah/') },
   ] },
   { label: 'Seasonal', icon: 'moon', links: [
+    { label: 'Ramadan 2027', href: L('/ramadan-2027/') },
     { label: 'Ramadan', href: L('/ramadan/') },
     { label: 'Hajj & Umrah', href: L('/hajj/') },
     { label: 'Eid & Qurbani', href: L('/eid/') },
@@ -314,6 +315,13 @@ const mobileGroups = [
         $('moreBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('moreMenu')?.classList.contains('hidden'); setLang(false); setMenu(false); setMore(!!w); });
         $('menuBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('mobileMenu')?.classList.contains('hidden'); setLang(false); setMore(false); setMenu(!!w); });
         document.querySelectorAll('[data-more-link]').forEach(a => a.addEventListener('click', () => { setMenu(false); setMore(false); }));
+        // Single-open accordions: opening one group closes the others.
+        $('mobileMenu')?.addEventListener('toggle', (e) => {
+          const d = e.target;
+          if (d && d.tagName === 'DETAILS' && d.open) {
+            $('mobileMenu')?.querySelectorAll('details[open]').forEach(o => { if (o !== d) o.removeAttribute('open'); });
+          }
+        }, true);
       };
 
       // Global listeners are registered exactly once and resolve elements at

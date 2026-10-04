@@ -22,12 +22,15 @@ const fmtDate = (d: any) => { try { const tag = locale === 'hi' ? 'hi-IN' : loca
 
 const GROUPS = [
   { chip: 'Read', title: 'Read the Quran', cards: [
+    { title: 'Quran', sub: '', href: L('/quran/'), icon: 'quran' },
     { title: t.explore.gemsT, sub: t.explore.gemsD, href: L('/tools/gems/'), icon: 'star' },
   ] },
   { chip: 'Worship', title: 'Duas & worship', cards: [
+    { title: 'Duas', sub: '', href: L('/duas/'), icon: 'duas' },
     { title: 'Hadees', sub: '', href: L('/hadees/'), icon: 'book' },
     { title: 'Tasbih Counter', sub: '', href: L('/tools/tasbih/'), icon: 'tools' },
     { title: 'Prayer Times', sub: '', href: L('/tools/prayer-times/'), icon: 'sun' },
+    { title: 'Namaz Trainer', sub: '', href: L('/tools/namaz-trainer/'), icon: 'quran' },
   ] },
   { chip: 'Learn', title: 'Stories, history & guides', cards: [
     { title: 'Waqiat — Prophet Stories', sub: '', href: L('/waqiat/'), icon: 'waqiat' },
@@ -41,6 +44,7 @@ const GROUPS = [
     { title: 'Names of Allah', sub: '', href: L('/names-of-allah/'), icon: 'star' },
   ] },
   { chip: 'Seasonal', title: 'Ramadan, Hajj & Eid', cards: [
+    { title: 'Ramadan 2027', sub: '', href: L('/ramadan-2027/'), icon: 'moon' },
     { title: 'Islamic Calendar', sub: '', href: L('/calendar/'), icon: 'moon' },
     { title: 'Ramadan Guide', sub: '', href: L('/ramadan/'), icon: 'moon' },
     { title: 'Hajj & Umrah Guide', sub: '', href: L('/hajj/'), icon: 'moon' },
@@ -63,20 +67,6 @@ const GROUPS = [
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{t.tabs.explore}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">Quran, duas, guides, stories and tools — every page with sources and translation.</p>
     </div>
-    {latestAll.length > 0 && (
-      <div class="mt-6">
-        <SectionHeader eyebrow="Fresh" title="Latest articles" />
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
-          {latestAll.map((a: any) => (
-            <a href={L(`/${a.data.category}/${slugOf(a.id)}/`)} class="hn-card hn-card-hover hn-card-pad block">
-              <span class="hn-badge">{a.data.category}</span>
-              <span class="block font-extrabold text-[16px] leading-6 mt-2 line-clamp-2">{a.data.title}</span>
-              <span class="block mt-1 text-[13px]" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
-            </a>
-          ))}
-        </div>
-      </div>
-    )}
     <div class="mt-6">
       {GROUPS.map((g) => (
         <div class="mt-6">
@@ -95,5 +85,19 @@ const GROUPS = [
         </div>
       ))}
     </div>
+    {latestAll.length > 0 && (
+      <div class="mt-8">
+        <SectionHeader eyebrow="Fresh" title="Latest articles" />
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
+          {latestAll.map((a: any) => (
+            <a href={L(`/${a.data.category}/${slugOf(a.id)}/`)} class="hn-card hn-card-hover hn-card-pad block">
+              <span class="hn-badge">{a.data.category}</span>
+              <span class="block font-extrabold text-[16px] leading-6 mt-2 line-clamp-2">{a.data.title}</span>
+              <span class="block mt-1 text-[13px]" style="color:var(--hn-muted)">{fmtDate(a.data.pubDate)}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
   </div>
 </BaseLayout>
