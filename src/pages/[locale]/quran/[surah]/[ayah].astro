@@ -7,11 +7,26 @@ import { TAFSIR } from '../../../../data/tafsir';
 const surahFiles = import.meta.glob('../../../../data/surahs/*.json');
 
 export async function getStaticPaths() {
+  // Curated static prerender only (~390 pages across hi/ur/ar). Full coverage
+  // is served dynamically at the SAME URLs via functions/{hi,ur,ar}/quran
+  // (D1 verses_fts) — keeps deploys under the Pages 20k-file limit.
+  const wanted = new Set<string>([
+    '1:1', '1:2', '1:3', '1:4', '1:5', '1:6', '1:7',
+    '2:255', '2:285', '2:286',
+    '112:1', '112:2', '112:3', '112:4',
+    '113:1', '114:1',
+  ]);
+  for (const s of SURAHS) wanted.add(s.num + ':1');
+  const byNum = new Map(SURAHS.map((s) => [s.num, s]));
   const paths: any[] = [];
   for (const locale of nonDefaultLocales)
-    for (const s of SURAHS)
-      for (let v = 1; v <= s.verseCount; v++)
-        paths.push({ params: { locale, surah: s.slug, ayah: String(v) } });
+    for (const key of wanted) {
+      const [sn, vv] = key.split(':');
+      const s = byNum.get(Number(sn));
+      if (s && Number(vv) >= 1 && Number(vv) <= s.verseCount) {
+        paths.push({ params: { locale, surah: s.slug, ayah: String(vv) } });
+      }
+    }
   return paths;
 }
 const { locale, surah: surahSlug, ayah: ayahStr } = Astro.params;
