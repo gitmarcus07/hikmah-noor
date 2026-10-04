@@ -77,14 +77,16 @@ const crumbs = [
         if (metaCache) return metaCache;
         const r = await fetch('/search-index.json');
         const j = await r.json();
-        metaCache = j
-          .filter((x) => x.category === 'surahs')
-          .map((x) => {
-            const m = String(x.url || '').match(/\/(\d+)-[^/]+\/$/);
-            const v = String(x.description || '').match(/(\d+) verses/);
-            return { num: Number(m?.[1] || 0), verses: Number(v?.[1] || 0) };
-          })
-          .filter((x) => x.num > 0 && x.verses > 0);
+        // Compact index: { surahs: [[num, slug, name, en, verseCount, aliases], ...] }
+        // Legacy fallback: [{ category: 'surahs', url: '/<num>-<slug>/', description: '… N verses …' }]
+        const rows = Array.isArray(j)
+          ? j.filter((x) => x && x.category === 'surahs').map((x) => {
+              const m = String(x.url || '').match(/\/(\d+)-[^/]+\/$/);
+              const v = String(x.description || '').match(/(\d+) verses/);
+              return { num: Number(m?.[1] || 0), verses: Number(v?.[1] || 0) };
+            })
+          : (j.surahs || []).map((s) => ({ num: Number(s[0]), verses: Number(s[4]) }));
+        metaCache = rows.filter((x) => x.num > 0 && x.verses > 0);
         return metaCache;
       };
       const wrap = (c, text, max, font) => {
@@ -152,7 +154,9 @@ const crumbs = [
         const a = document.createElement('a');
         a.download = 'ayah-card.png';
         a.href = cv.toDataURL('image/png');
+        document.body.appendChild(a);
         a.click();
+        a.remove();
       });
       load(112, 1);
     })();
