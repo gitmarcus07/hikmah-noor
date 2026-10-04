@@ -28,15 +28,6 @@ const faq = [
   { q: 'What breaks the fast?', a: 'Deliberate eating, drinking, intercourse and (per most schools) deliberate vomiting invalidate and need makeup; injections, eye drops and unintentional vomiting generally do not. See the what-breaks-fast guide for the full list.' },
 ];
 
-const dayList: { ramadanDay: number; gregorian: string }[] = [];
-{
-  const start = new Date(RAMADAN_2027.firstFast + 'T00:00:00Z');
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(start.getTime() + i * 864e5);
-    dayList.push({ ramadanDay: i + 1, gregorian: d.toISOString().slice(0, 10) });
-  }
-}
-const oddSet = new Set(RAMADAN_2027.oddNights.map((o) => o.gregorian));
 ---
 <BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/ramadan-2027/">
   <div class="hn-discover hn-section">
