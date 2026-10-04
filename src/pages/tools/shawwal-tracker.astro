@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'Can I fast on Eid day itself?', a: 'No — fasting on 1 Shawwal (Eid al-Fitr) is forbidden. Start your six fasts from 2 Shawwal onward, together or separately, before the month ends.' },
+  { q: 'Do the six fasts need Ramadan makeup first?', a: 'Scholars differ. Many advise completing missed Ramadan (qada) fasts first since they are obligatory, then the voluntary six. Others permit the six first in Shawwal\u2019s window. Follow your school — the tracker below handles either order.' },
+  { q: 'What is the reward?', a: '“Whoever fasts Ramadan then follows it with six of Shawwal, it is as if they fasted a lifetime” (Sahih Muslim). The hadith counts 30 + 6 as the familiar 10:1 multiplication.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Shawwal 6 Tracker', path: '/tools/shawwal-tracker/' },
+];
+---
+<BaseLayout title="Shawwal 6 Fasts Tracker — Sunnah Fasts After Eid (2027)" description="Track the 6 fasts of Shawwal after Eid al-Fitr: check off each fast, see progress, rules (no fasting on Eid day), qada-first positions, and the lifetime-fast hadith." keywords="shawwal 6 fasts, 6 roza shawwal, shawwal fasting tracker, eid after 6 fasts, shawwal ka roza" locale={locale} canonicalPath="/tools/shawwal-tracker/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Shawwal 6 Tracker" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-shawwal>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">After Eid al-Fitr</span>
+      <span class="hn-badge">Saved on this device</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">6 fasts of Shawwal</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">Shawwal 1448 begins ~10 Mar 2027 (Eid day — no fasting). Fast any 6 days after that, together or apart. Tap each day as you complete it.</p>
+
+    <div class="mt-6 hn-card hn-card-pad text-center" style="background:var(--hn-primary-soft)">
+      <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Progress</p>
+      <p class="font-extrabold text-[30px]" data-count>0 / 6</p>
+      <div class="h-2.5 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div data-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      <p class="mt-2 font-bold text-[14px]" data-msg style="color:var(--hn-primary)"></p>
+    </div>
+
+    <div class="mt-4 grid gap-3 sm:grid-cols-2" data-grid></div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button data-reset class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ Reset tracker</button>
+      <a href="/learn/duties/shawwal-six-fasts/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">6 fasts guide →</a>
+      <a href="/tools/qada-tracker/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Missed Ramadan fasts? Track qada →</a>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-shawwal]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.shawwal.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ done: [false, false, false, false, false, false] }, load());
+      const grid = root.querySelector('[data-grid]');
+      const paint = () => {
+        const n = st.done.filter(Boolean).length;
+        root.querySelector('[data-count]').textContent = `${n} / 6`;
+        root.querySelector('[data-bar]').style.width = `${(n / 6) * 100}%`;
+        root.querySelector('[data-msg]').textContent =
+          n === 0 ? 'Make intention tonight — even one fast counts.' :
+          n < 6 ? `${6 - n} to go — keep the streak.` :
+          '🎉 Complete! May Allah accept it as a lifetime of fasting.';
+        grid.innerHTML = st.done.map((d, i) => `
+          <button data-day="${i}" class="hn-card hn-card-pad text-left ${d ? '' : 'hn-card-hover'}" style="${d ? 'background:var(--hn-primary-soft);border-color:var(--hn-primary)' : ''}">
+            <span class="font-extrabold text-[16px]">${d ? '✅' : '⭕'} Fast ${i + 1}</span>
+            <span class="block text-[13px] mt-1" style="color:var(--hn-muted)">${d ? 'Done — alhamdulillah' : 'Tap when complete'}</span>
+          </button>`).join('');
+        grid.querySelectorAll('[data-day]').forEach((b) => b.addEventListener('click', () => {
+          const i = Number(b.dataset.day);
+          st.done[i] = !st.done[i];
+          save(st);
+          paint();
+        }));
+      };
+      root.querySelector('[data-reset]')?.addEventListener('click', () => {
+        st.done = [false, false, false, false, false, false];
+        save(st);
+        paint();
+      });
+      paint();
+    })();
+  </script>
+</BaseLayout>

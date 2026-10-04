@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'At what age should children fast?', a: 'Practice from ~7 with short or half fasts; full obligation at puberty. Never force a struggling child.' },
+];
+---
+<BaseLayout title="Kids Roza Chart — 30-Day Star Chart" description="30-day kids fasting star chart for Ramadan, saved on your device." keywords="kids roza chart, children fasting chart" locale={locale} canonicalPath="/tools/kids-roza-chart/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Kids Roza Chart', path: '/tools/kids-roza-chart/' }]}>
+  <AppHeader locale={locale} title="Kids Roza Chart" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6" data-kids>
+    <p class="text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English tools — translation coming soon.</p>
+    <div class="mt-4 hn-card hn-card-pad flex flex-wrap items-center gap-2">
+      <label class="font-bold text-[15px] flex-1 min-w-[200px]">Champion\u2019s name
+        <input data-name placeholder="e.g. Fatima" maxlength="24" class="mt-2 w-full hn-input !min-h-[52px]" />
+      </label>
+      <div class="text-center px-2">
+        <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Stars</p>
+        <p class="font-extrabold text-[30px]" data-count>0 / 30</p>
+      </div>
+    </div>
+    <div class="mt-4 grid grid-cols-5 sm:grid-cols-6 gap-2" data-grid></div>
+    <p class="mt-3 font-extrabold text-center text-[16px]" data-badge style="color:var(--hn-primary)"></p>
+    <button data-reset class="mt-4 hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ New chart</button>
+    <section class="mt-8"><div class="space-y-3">{faq.map((f) => (<details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}</div></section>
+  </div>
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-kids]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.kidsroza.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ name: '', stars: Array(30).fill(false) }, load());
+      if (!Array.isArray(st.stars) || st.stars.length !== 30) st.stars = Array(30).fill(false);
+      const grid = root.querySelector('[data-grid]');
+      const nameEl = root.querySelector('[data-name]');
+      nameEl.value = st.name || '';
+      const paint = () => {
+        const n = st.stars.filter(Boolean).length;
+        root.querySelector('[data-count]').textContent = `${n} / 30`;
+        root.querySelector('[data-badge]').textContent = n >= 30 ? '🏆 Full month! Eid Mubarak!' : n >= 15 ? `🌟 Eid Champion! (${n} stars)` : '';
+        grid.innerHTML = st.stars.map((s, i) => `<button data-day="${i}" class="rounded-2xl border-2 p-2 min-h-[64px] grid place-items-center" style="${s ? 'background:var(--hn-primary-soft);border-color:var(--hn-gold)' : 'border-color:var(--hn-border);background:#fff'}"><span><span class="block text-[10px] font-extrabold" style="color:var(--hn-muted)">Day ${i + 1}</span><span class="block text-[26px]">${s ? '⭐' : '☆'}</span></span></button>`).join('');
+        grid.querySelectorAll('[data-day]').forEach((b) => b.addEventListener('click', () => { st.stars[Number(b.dataset.day)] = !st.stars[Number(b.dataset.day)]; save(st); paint(); }));
+      };
+      nameEl.addEventListener('input', () => { st.name = nameEl.value; save(st); paint(); });
+      root.querySelector('[data-reset]')?.addEventListener('click', () => { st.stars = Array(30).fill(false); save(st); paint(); });
+      paint();
+    })();
+  </script>
+</BaseLayout>

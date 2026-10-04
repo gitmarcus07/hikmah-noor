@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'What do I say at slaughter?', a: 'Bismillah is compulsory. Add “wallahu akbar — Allahumma minka wa laka, Allahumma taqabbal minni” (from You and to You; accept it from me). Facing the qibla and the Quranic verses below are recommended.' },
+  { q: 'Whose name is the Qurbani for?', a: 'Intend it for yourself (or the person/share it covers) before slaughter. One sheep covers one person; a cow/camel covers up to 7 equal shares, each with its own worship intention.' },
+  { q: 'Does the butcher share the meat as wages?', a: 'No — pay the butcher in cash, not in meat or hide. Meat divides in thirds: family, relatives/friends, the poor.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Qurbani Dua', path: '/tools/qurbani-dua/' },
+];
+---
+<BaseLayout title="Qurbani Dua — What to Say at Slaughter (Audio + Arabic)" description="Qurbani slaughter dua with Arabic, transliteration, translation and device-voice audio: bismillah, taqabbal minni, Quran 22:37 and 6:162-163. Intention rules, butcher pay rules, meat thirds." keywords="qurbani dua, qurbani slaughter dua, dua before qurbani, taqabbal minni dua, qurbani niyyat, bakra eid dua" locale={locale} canonicalPath="/tools/qurbani-dua/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Qurbani Dua" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-qdua>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Eid al-Adha</span>
+      <span class="hn-badge">With audio</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">What to say at Qurbani</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">Say it facing the qibla, animal ready. Tap play to hear each dua, then read the intention and butcher rules below.</p>
+
+    <div class="mt-6 hn-card hn-card-pad">
+      <p class="hn-block-label">At slaughter — compulsory + recommended</p>
+      <p class="font-arabic text-2xl leading-[2.2] mt-2" lang="ar" dir="rtl">بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ اللَّهُمَّ مِنْكَ وَلَكَ اللَّهُمَّ تَقَبَّلْ مِنِّي</p>
+      <p class="mt-2 text-[14px] italic leading-7">Bismillah, wallahu akbar. Allahumma minka wa laka — Allahumma taqabbal minni.</p>
+      <p class="mt-1 text-[14px] leading-7" style="color:var(--hn-muted)">With Allah\u2019s name, Allah is Greatest. O Allah, from You and to You — O Allah, accept it from me. (Bismillah is compulsory; the rest is recommended.)</p>
+      <div class="mt-3 flex gap-2">
+        <button data-play="slaughter" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play dua</button>
+        <button data-stop class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">⏹ Stop</button>
+      </div>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Quranic verses at sacrifice (recommended)</p>
+      <p class="font-arabic text-xl leading-[2.1] mt-2" lang="ar" dir="rtl">لَنْ يَنَالَ اللَّهَ لُحُومُهَا وَلَا دِمَاؤُهَا وَلَكِنْ يَنَالُهُ التَّقْوَى مِنْكُمْ</p>
+      <p class="mt-2 text-[14px] leading-7" style="color:var(--hn-muted)">“Their meat will not reach Allah, nor their blood — but piety from you reaches Him.” (22:37)</p>
+      <p class="font-arabic text-xl leading-[2.1] mt-3" lang="ar" dir="rtl">إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ</p>
+      <p class="mt-2 text-[14px] leading-7" style="color:var(--hn-muted)">“My prayer, my sacrifice, my living and my dying are for Allah, Lord of the worlds.” (6:162)</p>
+      <div class="mt-3"><button data-play="verses" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play verses</button></div>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Three rules people get wrong</p>
+      <ol class="mt-2 text-[14.5px] leading-7 list-decimal ps-5 space-y-1" style="color:var(--hn-muted)">
+        <li><b>Intention first:</b> name whose share this is (you / each of the 7) before the cut.</li>
+        <li><b>Pay the butcher in cash</b> — never in meat, hide or offal.</li>
+        <li><b>Meat in thirds:</b> family, relatives & friends, the poor — fresh, within days.</li>
+      </ol>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a href="/tools/qurbani-eid/qurbani-splitter/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">7-way share splitter →</a>
+        <a href="/learn/duties/qurbani-mistakes/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">10 Qurbani mistakes →</a>
+      </div>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-qdua]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const TEXT = {
+        slaughter: 'بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ اللَّهُمَّ مِنْكَ وَلَكَ اللَّهُمَّ تَقَبَّلْ مِنِّي',
+        verses: 'لَنْ يَنَالَ اللَّهَ لُحُومُهَا وَلَا دِمَاؤُهَا وَلَكِنْ يَنَالُهُ التَّقْوَى مِنْكُمْ. إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ',
+      };
+      const speak = (key) => {
+        try { speechSynthesis.cancel(); } catch {}
+        if (!('speechSynthesis' in window)) return;
+        const u = new SpeechSynthesisUtterance(TEXT[key]);
+        u.lang = 'ar-SA'; u.rate = 0.85;
+        const vs = speechSynthesis.getVoices().filter((v) => (v.lang || '').toLowerCase().startsWith('ar'));
+        if (vs.length) u.voice = vs[0];
+        speechSynthesis.speak(u);
+      };
+      root.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', () => speak(b.dataset.play)));
+      root.querySelector('[data-stop]')?.addEventListener('click', () => { try { speechSynthesis.cancel(); } catch {} });
+      try { speechSynthesis.getVoices(); } catch {}
+    })();
+  </script>
+</BaseLayout>

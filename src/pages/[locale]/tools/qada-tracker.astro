@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'Qada or fidyah?', a: 'Temporary excuses need qada (makeup). Fidyah is only for permanent inability — see the fidyah calculator.' },
+  { q: 'Missed prayers in menstruation?', a: 'Never made up — only the fasts are tracked here.' },
+];
+---
+<BaseLayout title="Missed Fasts (Qada) Tracker" description="Track missed Ramadan fasts makeup day-by-day, saved on your device." keywords="qada fasts tracker, missed roza makeup" locale={locale} canonicalPath="/tools/qada-tracker/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Qada Tracker', path: '/tools/qada-tracker/' }]}>
+  <AppHeader locale={locale} title="Qada Tracker" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6" data-qada>
+    <p class="text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English tools — translation coming soon. Calculations work the same in every language.</p>
+    <div class="mt-4 hn-card hn-card-pad">
+      <label class="block font-bold text-[15px]">Fasts I owe
+        <input data-total type="number" min="0" max="60" inputmode="numeric" class="mt-2 w-full hn-input !min-h-[56px] text-[18px] font-extrabold" />
+      </label>
+      <div class="mt-4 text-center rounded-2xl p-4" style="background:var(--hn-primary-soft)">
+        <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Remaining</p>
+        <p class="font-extrabold text-[40px]" data-left>0</p>
+        <div class="h-2.5 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div data-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button data-plus class="flex-1 hn-btn hn-btn-primary !min-h-[56px] text-base">+ I fasted today ✓</button>
+        <button data-minus class="hn-btn hn-btn-secondary !min-h-[56px] !px-5" title="Undo">↩</button>
+      </div>
+      <button data-reset class="mt-2 w-full hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ Reset</button>
+    </div>
+    <section class="mt-8"><div class="space-y-3">{faq.map((f) => (<details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}</div></section>
+  </div>
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-qada]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.qada.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ total: 0, done: 0 }, load());
+      const totalEl = root.querySelector('[data-total]');
+      totalEl.value = st.total || '';
+      const paint = () => {
+        const left = Math.max(0, (st.total || 0) - (st.done || 0));
+        root.querySelector('[data-left]').textContent = left;
+        root.querySelector('[data-bar]').style.width = `${st.total > 0 ? Math.min(100, (st.done / st.total) * 100) : 0}%`;
+        save(st);
+      };
+      totalEl.addEventListener('input', () => { st.total = Math.max(0, Math.min(60, Math.floor(Number(totalEl.value) || 0))); if (st.done > st.total) st.done = st.total; paint(); });
+      root.querySelector('[data-plus]')?.addEventListener('click', () => { if (st.done < st.total) { st.done++; paint(); } });
+      root.querySelector('[data-minus]')?.addEventListener('click', () => { if (st.done > 0) { st.done--; paint(); } });
+      root.querySelector('[data-reset]')?.addEventListener('click', () => { st.total = 0; st.done = 0; totalEl.value = ''; paint(); });
+      paint();
+    })();
+  </script>
+</BaseLayout>

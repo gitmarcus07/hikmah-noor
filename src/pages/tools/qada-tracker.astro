@@ -1,0 +1,107 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'Do I make up fasts or pay fidyah?', a: 'Temporary excuses (travel, short illness, menstruation, pregnancy/nursing per most schools) need qada — make up day-for-day. Fidyah (feeding one poor person per day) is for permanent inability (chronic illness, old age). Track qada below; open the fidyah calculator only if fasting is permanently impossible.' },
+  { q: 'When must qada be finished?', a: 'Before the next Ramadan where possible. Start in Shawwal\u2019s short cool days and work steadily — the tracker shows your remaining count and pace.' },
+  { q: 'Missed prayers during menstruation?', a: 'Never made up — “we were ordered to make up the fasts, not the prayers” (Bukhari/Muslim). Only the Ramadan fasts are tracked here.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Qada Tracker', path: '/tools/qada-tracker/' },
+];
+---
+<BaseLayout title="Missed Fasts (Qada) Tracker — Make Up Ramadan Before Next Year" description="Track missed Ramadan fasts: set your total, check off each makeup fast, see remaining and pace. For menstruation, travel, illness, pregnancy. Fidyah rules for permanent inability included." keywords="qada fasts tracker, missed roza makeup, qaza roza tracker, periods missed fasts makeup, pregnancy missed fasts, fidyah vs qada" locale={locale} canonicalPath="/tools/qada-tracker/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Qada Tracker" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-qada>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Qada, not fidyah</span>
+      <span class="hn-badge">Saved on this device</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Missed fasts makeup</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">For periods, travel, temporary illness, pregnancy/nursing. Set how many you owe, tap <b>+</b> each day you make one up. Permanently unable? Use the <a href="/tools/fidyah-kaffarah/fidyah/" class="font-bold underline" style="color:var(--hn-primary)">fidyah calculator</a> instead.</p>
+
+    <div class="mt-6 hn-card hn-card-pad">
+      <label class="block font-bold text-[15px]">Fasts I owe from Ramadan
+        <input data-total type="number" min="0" max="60" inputmode="numeric" class="mt-2 w-full hn-input !min-h-[56px] text-[18px] font-extrabold" />
+      </label>
+      <div class="mt-4 hn-card-pad text-center rounded-2xl" style="background:var(--hn-primary-soft)">
+        <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Remaining</p>
+        <p class="font-extrabold text-[40px]" data-left>0</p>
+        <div class="h-2.5 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div data-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+        <p class="mt-2 font-bold text-[14px]" data-msg style="color:var(--hn-primary)"></p>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button data-plus class="flex-1 hn-btn hn-btn-primary !min-h-[56px] text-base">+ I fasted today ✓</button>
+        <button data-minus class="hn-btn hn-btn-secondary !min-h-[56px] !px-5" title="Undo">↩</button>
+      </div>
+      <button data-reset class="mt-2 w-full hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ Reset (new Ramadan)</button>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Pace helper</p>
+      <p class="text-[14px] leading-7" style="color:var(--hn-muted)" data-pace></p>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-qada]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.qada.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ total: 0, done: 0 }, load());
+      const totalEl = root.querySelector('[data-total]');
+      totalEl.value = st.total || '';
+      const paint = () => {
+        const left = Math.max(0, (st.total || 0) - (st.done || 0));
+        root.querySelector('[data-left]').textContent = left;
+        const pct = st.total > 0 ? Math.min(100, (st.done / st.total) * 100) : 0;
+        root.querySelector('[data-bar]').style.width = `${pct}%`;
+        root.querySelector('[data-msg]').textContent =
+          st.total === 0 ? 'Enter your owed fasts above to begin.' :
+          left === 0 ? '🎉 All made up — may Allah accept it.' :
+          `${st.done} done • ${left} to go`;
+        const pace = root.querySelector('[data-pace]');
+        if (st.total > 0 && left > 0) {
+          const perWeek2 = Math.ceil(left / 20);
+          pace.textContent = `~${left} fasts left. At 2 per week (Mon + Thu) you finish in ~${Math.ceil(left / 2)} weeks. Start with this week\u2019s Monday.`;
+        } else if (left === 0 && st.total > 0) {
+          pace.textContent = 'Debt cleared. Consider Shawwal\u2019s 6 voluntary fasts next — see the Shawwal tracker.';
+        } else {
+          pace.textContent = 'Tip: Mondays and Thursdays are the Sunnah makeup days.';
+        }
+        save(st);
+      };
+      totalEl.addEventListener('input', () => {
+        st.total = Math.max(0, Math.min(60, Math.floor(Number(totalEl.value) || 0)));
+        if (st.done > st.total) st.done = st.total;
+        paint();
+      });
+      root.querySelector('[data-plus]')?.addEventListener('click', () => {
+        if (st.done < st.total) { st.done++; paint(); }
+      });
+      root.querySelector('[data-minus]')?.addEventListener('click', () => {
+        if (st.done > 0) { st.done--; paint(); }
+      });
+      root.querySelector('[data-reset]')?.addEventListener('click', () => {
+        st.total = 0; st.done = 0; totalEl.value = '';
+        paint();
+      });
+      paint();
+    })();
+  </script>
+</BaseLayout>

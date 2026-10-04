@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales, getDict } from '../../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'Can I fast on Eid day?', a: 'No — 1 Shawwal is haram to fast. Start the six from 2 Shawwal.' },
+  { q: 'Qada first or six first?', a: 'Many scholars advise qada (obligatory) first, others permit the six in Shawwal\u2019s window. Follow your school.' },
+];
+---
+<BaseLayout title="Shawwal 6 Fasts Tracker" description="Track the 6 fasts of Shawwal after Eid al-Fitr with a device-saved checklist." keywords="shawwal 6 fasts, shawwal tracker" locale={locale} canonicalPath="/tools/shawwal-tracker/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Shawwal 6 Tracker', path: '/tools/shawwal-tracker/' }]}>
+  <AppHeader locale={locale} title="Shawwal 6 Tracker" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6" data-shawwal>
+    <p class="text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English tools — translation coming soon. Calculations work the same in every language.</p>
+    <div class="mt-4 hn-card hn-card-pad text-center" style="background:var(--hn-primary-soft)">
+      <p class="font-extrabold text-[30px]" data-count>0 / 6</p>
+      <div class="h-2.5 rounded-full overflow-hidden mt-2" style="background:var(--hn-border)"><div data-bar class="h-full rounded-full transition-all" style="width:0%;background:var(--hn-primary)"></div></div>
+      <p class="mt-2 font-bold text-[14px]" data-msg style="color:var(--hn-primary)"></p>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2" data-grid></div>
+    <button data-reset class="mt-4 hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ Reset tracker</button>
+    <section class="mt-8"><div class="space-y-3">{faq.map((f) => (<details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}</div></section>
+  </div>
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-shawwal]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.shawwal.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ done: [false, false, false, false, false, false] }, load());
+      const grid = root.querySelector('[data-grid]');
+      const paint = () => {
+        const n = st.done.filter(Boolean).length;
+        root.querySelector('[data-count]').textContent = `${n} / 6`;
+        root.querySelector('[data-bar]').style.width = `${(n / 6) * 100}%`;
+        root.querySelector('[data-msg]').textContent = n === 6 ? '🎉 Complete!' : `${6 - n} to go.`;
+        grid.innerHTML = st.done.map((d, i) => `<button data-day="${i}" class="hn-card hn-card-pad text-left" style="${d ? 'background:var(--hn-primary-soft);border-color:var(--hn-primary)' : ''}"><span class="font-extrabold">${d ? '✅' : '⭕'} Fast ${i + 1}</span></button>`).join('');
+        grid.querySelectorAll('[data-day]').forEach((b) => b.addEventListener('click', () => { st.done[Number(b.dataset.day)] = !st.done[Number(b.dataset.day)]; save(st); paint(); }));
+      };
+      root.querySelector('[data-reset]')?.addEventListener('click', () => { st.done = [false, false, false, false, false, false]; save(st); paint(); });
+      paint();
+    })();
+  </script>
+</BaseLayout>

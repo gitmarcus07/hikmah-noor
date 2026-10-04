@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AppHeader from '../../../components/AppHeader.astro';
+import { nonDefaultLocales } from '../../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const faq = [
+  { q: 'What do I say at slaughter?', a: 'Bismillah (compulsory) plus “Allahumma minka wa laka, taqabbal minni”.' },
+  { q: 'Pay the butcher in meat?', a: 'No — cash only. Meat divides in thirds.' },
+];
+---
+<BaseLayout title="Qurbani Dua — What to Say at Slaughter (Audio)" description="Qurbani slaughter dua with Arabic and device-voice audio, intention and butcher rules." keywords="qurbani dua, dua before qurbani" locale={locale} canonicalPath="/tools/qurbani-dua/" faq={faq} crumbs={[{ name: 'Home', path: '/' }, { name: 'Tools', path: '/tools/' }, { name: 'Qurbani Dua', path: '/tools/qurbani-dua/' }]}>
+  <AppHeader locale={locale} title="Qurbani Dua" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6" data-qdua>
+    <p class="text-sm font-semibold text-night-900 bg-gold-300/95 rounded-2xl px-4 py-3">English tools — translation coming soon.</p>
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">At slaughter</p>
+      <p class="font-arabic text-2xl leading-[2.2] mt-2" lang="ar" dir="rtl">بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ اللَّهُمَّ مِنْكَ وَلَكَ اللَّهُمَّ تَقَبَّلْ مِنِّي</p>
+      <p class="mt-2 text-[14px] italic">Bismillah, wallahu akbar. Allahumma minka wa laka — taqabbal minni.</p>
+      <div class="mt-3 flex gap-2">
+        <button data-play="slaughter" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play dua</button>
+        <button data-stop class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">⏹ Stop</button>
+      </div>
+    </div>
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="font-arabic text-xl leading-[2.1]" lang="ar" dir="rtl">لَنْ يَنَالَ اللَّهَ لُحُومُهَا وَلَا دِمَاؤُهَا وَلَكِنْ يَنَالُهُ التَّقْوَى مِنْكُمْ</p>
+      <p class="mt-2 text-[14px]" style="color:var(--hn-muted)">“Their meat will not reach Allah, nor their blood — but piety from you reaches Him.” (22:37)</p>
+      <div class="mt-3"><button data-play="verses" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play verses</button></div>
+    </div>
+    <section class="mt-8"><div class="space-y-3">{faq.map((f) => (<details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}</div></section>
+  </div>
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-qdua]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const TEXT = {
+        slaughter: 'بِسْمِ اللَّهِ وَاللَّهُ أَكْبَرُ اللَّهُمَّ مِنْكَ وَلَكَ اللَّهُمَّ تَقَبَّلْ مِنِّي',
+        verses: 'لَنْ يَنَالَ اللَّهَ لُحُومُهَا وَلَا دِمَاؤُهَا وَلَكِنْ يَنَالُهُ التَّقْوَى مِنْكُمْ',
+      };
+      const speak = (key) => {
+        try { speechSynthesis.cancel(); } catch {}
+        if (!('speechSynthesis' in window)) return;
+        const u = new SpeechSynthesisUtterance(TEXT[key]);
+        u.lang = 'ar-SA'; u.rate = 0.85;
+        const vs = speechSynthesis.getVoices().filter((v) => (v.lang || '').toLowerCase().startsWith('ar'));
+        if (vs.length) u.voice = vs[0];
+        speechSynthesis.speak(u);
+      };
+      root.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', () => speak(b.dataset.play)));
+      root.querySelector('[data-stop]')?.addEventListener('click', () => { try { speechSynthesis.cancel(); } catch {} });
+    })();
+  </script>
+</BaseLayout>

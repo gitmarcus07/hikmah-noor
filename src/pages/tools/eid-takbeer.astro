@@ -1,0 +1,115 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { getDict } from '../../i18n/utils';
+
+const locale = 'en';
+const faq = [
+  { q: 'What is the Eid Takbeer?', a: 'The declaration Allahu Akbar recited on Eid. Fitr: from the Shawwal moon until the Eid prayer. Adha (Tashriq): aloud after every obligatory prayer from Fajr of 9 Dhul-Hijjah (Arafah) until Asr of 13 Dhul-Hijjah.' },
+  { q: 'How many extra takbeers in Eid prayer?', a: 'Hanafi practice (South Asia): 3 extra in the first rakah and 3 before ruku in the second. Other schools say 7+5 or 12 total. Follow your local imam — see the Eid prayer method guide.' },
+  { q: 'Does the audio need internet?', a: 'The recitation uses your device\u2019s built-in voice reader (offline on most phones once Arabic voices are installed). Nothing is uploaded anywhere.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Eid Takbeer Studio', path: '/tools/eid-takbeer/' },
+];
+---
+<BaseLayout title="Eid Takbeer — Wording, Audio & Tashriq Schedule (Fitr & Adha)" description="Eid Takbeer studio: Arabic wording with transliteration and translation for Eid al-Fitr and Eid al-Adha (Tashriq), device-voice audio loop, when it starts and ends, and the extra takbeers of Eid prayer." keywords="eid takbeer, eid takbir wording, eid takbeer audio, takbeer tashriq, eid ul fitr takbeer, eid ul adha takbeer, how many takbeer in eid namaz" locale={locale} canonicalPath="/tools/eid-takbeer/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Eid Takbeer Studio" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-takbeer>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Fitr & Adha</span>
+      <span class="hn-badge">With audio • Offline voices</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Eid Takbeer — say it right</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">Two wordings (Fitr road-to-Eidgah, Adha/Tashriq after every fard). Tap play to hear each line, loop it to memorize, then read the schedule below.</p>
+
+    <div class="mt-6 hn-card hn-card-pad">
+      <p class="hn-block-label">Eid al-Fitr (on the way to Eidgah)</p>
+      <p class="font-arabic text-2xl leading-[2.2] mt-2" lang="ar" dir="rtl">اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ لَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ</p>
+      <p class="mt-2 text-[14px] italic leading-7">Allahu Akbar, Allahu Akbar, Allahu Akbar — la ilaha illa Allah — wallahu Akbar, Allahu Akbar, wa lillahil-hamd.</p>
+      <p class="mt-1 text-[14px] leading-7" style="color:var(--hn-muted)">Allah is Greatest (×3). There is no god but Allah. Allah is Greatest (×2), and to Allah belongs all praise.</p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button data-play="fitr" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play Fitr Takbeer</button>
+        <button data-stop class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">⏹ Stop</button>
+      </div>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Eid al-Adha / Tashriq (after every fard, 9th Fajr → 13th Asr)</p>
+      <p class="font-arabic text-2xl leading-[2.2] mt-2" lang="ar" dir="rtl">اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ لَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ</p>
+      <p class="mt-2 text-[14px] italic leading-7">Allahu Akbar, Allahu Akbar — la ilaha illa Allah — wallahu Akbar, Allahu Akbar, wa lillahil-hamd.</p>
+      <p class="mt-1 text-[14px] leading-7" style="color:var(--hn-muted)">Men aloud, women softly, after each obligatory prayer — even if prayed alone. Missed it? Say it when you remember.</p>
+      <div class="mt-3 flex flex-wrap items-center gap-2">
+        <button data-play="adha" class="hn-btn hn-btn-primary !min-h-[48px] text-sm">▶ Play Tashriq Takbeer</button>
+        <label class="text-sm font-bold flex items-center gap-2">Loop
+          <select data-loop class="hn-input !w-auto !min-h-[48px]"><option value="1">×1</option><option value="3" selected>×3</option><option value="10">×10</option></select>
+        </label>
+      </div>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)" data-voice-note></p>
+    </div>
+
+    <div class="mt-4 hn-card hn-card-pad">
+      <p class="hn-block-label">Eid prayer extra takbeers — quick revision</p>
+      <ul class="mt-2 text-[14.5px] leading-7 space-y-2" style="color:var(--hn-muted)">
+        <li><b>Hanafi (South Asia):</b> 3 extra in rakah 1 (hands up, drop, fold on 3rd), Fatiha + surah, then ruku. Rakah 2: recitation first, then 3 extra before ruku.</li>
+        <li><b>Shafii/Hanbali:</b> 7 extra in rakah 1 and 5 in rakah 2 (12 total). Maliki similar with variants.</li>
+        <li><b>At home / missed congregation:</b> pray 2 rakahs alone the same way, no khutbah needed.</li>
+      </ul>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a href="/learn/salah/eid-prayer-method/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Full Eid prayer method →</a>
+        <a href="/learn/salah/eid-khutbah-rulings/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Khutbah & missed prayer →</a>
+      </div>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-takbeer]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const TEXT = {
+        fitr: 'اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ لَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ',
+        adha: 'اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ لَا إِلَهَ إِلَّا اللَّهُ وَاللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ',
+      };
+      const note = root.querySelector('[data-voice-note]');
+      const speak = (key, times) => {
+        try { speechSynthesis.cancel(); } catch {}
+        if (!('speechSynthesis' in window)) {
+          if (note) note.textContent = 'Voice reader unavailable on this device — read the transliteration aloud instead.';
+          return;
+        }
+        let n = 0;
+        const one = () => {
+          const u = new SpeechSynthesisUtterance(TEXT[key]);
+          u.lang = 'ar-SA';
+          u.rate = 0.85;
+          const vs = speechSynthesis.getVoices().filter((v) => (v.lang || '').toLowerCase().startsWith('ar'));
+          if (vs.length) u.voice = vs[0];
+          u.onend = () => { n++; if (n < times) setTimeout(one, 600); };
+          speechSynthesis.speak(u);
+        };
+        if (note) {
+          const hasAr = speechSynthesis.getVoices().some((v) => (v.lang || '').toLowerCase().startsWith('ar'));
+          note.textContent = hasAr ? '' : 'Tip: install an Arabic voice in your phone\u2019s TTS settings for the clearest recitation.';
+        }
+        one();
+      };
+      root.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', () => {
+        const loop = Number(root.querySelector('[data-loop]')?.value || 3);
+        speak(b.dataset.play, Math.min(10, Math.max(1, loop)));
+      }));
+      root.querySelector('[data-stop]')?.addEventListener('click', () => { try { speechSynthesis.cancel(); } catch {} });
+      try { speechSynthesis.getVoices(); } catch {}
+    })();
+  </script>
+</BaseLayout>

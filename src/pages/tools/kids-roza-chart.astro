@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+
+const locale = 'en';
+const faq = [
+  { q: 'At what age should children fast?', a: 'Practice from ~7 with short or half fasts, full obligation at puberty. Never force a struggling child — praise every attempt and let them break the fast whenever they need to.' },
+  { q: 'What counts as a star?', a: 'Whatever you agree: a full fast, a half fast (sehri to noon), or good taraweeh/quran effort. Consistency beats strictness at this age.' },
+  { q: 'Sehri and iftar duas?', a: 'Sehri intention: “I intend to fast tomorrow” from the heart — no fixed Arabic wording is required. Iftar: break with dates/water and make any personal dua; the fasting person\u2019s dua at iftar is answered.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Kids Roza Chart', path: '/tools/kids-roza-chart/' },
+];
+---
+<BaseLayout title="Kids Roza Chart — 30-Day Ramadan Star Chart for Children" description="Printable-style 30-day kids fasting chart: tap a star for each fast, half-fast or taraweeh effort. Encouragement-first routine for ages 7+, with sehri/iftar dua links." keywords="kids roza chart, children fasting chart ramadan, kids roza reward chart, half fast kids, taraweeh kids" locale={locale} canonicalPath="/tools/kids-roza-chart/" faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Kids Roza Chart" backHref="/tools/" />
+  <div class="max-w-3xl mx-auto px-4 py-6 md:py-8" data-kids>
+    <div class="flex flex-wrap gap-2">
+      <span class="hn-badge hn-badge-primary">Ages 7+</span>
+      <span class="hn-badge">Saved on this device</span>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">My Ramadan stars 🌙</h1>
+    <p class="mt-2 leading-7" style="color:var(--hn-muted)">One star per day — full fast, half fast, or great effort. Parents: let the child tap their own star at iftar. 15+ stars earns the Eid champion badge.</p>
+
+    <div class="mt-4 hn-card hn-card-pad flex flex-wrap items-center gap-2">
+      <label class="font-bold text-[15px] flex-1 min-w-[200px]">Champion\u2019s name
+        <input data-name placeholder="e.g. Fatima" maxlength="24" class="mt-2 w-full hn-input !min-h-[52px]" />
+      </label>
+      <div class="text-center px-2">
+        <p class="text-xs font-bold uppercase tracking-widest" style="color:var(--hn-muted)">Stars</p>
+        <p class="font-extrabold text-[30px]" data-count>0 / 30</p>
+      </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-5 sm:grid-cols-6 gap-2" data-grid></div>
+
+    <p class="mt-3 font-extrabold text-center text-[16px]" data-badge style="color:var(--hn-primary)"></p>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+      <button data-reset class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">↺ New chart</button>
+      <a href="/learn/duties/roza-fasting/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Fasting rules →</a>
+      <a href="/duas/ramadan-fasting/" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Ramadan duas →</a>
+    </div>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq"><summary>{f.q}</summary><p>{f.a}</p></details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-kids]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const KEY = 'hn.kidsroza.v1';
+      const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+      const save = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+      const st = Object.assign({ name: '', stars: Array(30).fill(false) }, load());
+      if (!Array.isArray(st.stars) || st.stars.length !== 30) st.stars = Array(30).fill(false);
+      const grid = root.querySelector('[data-grid]');
+      const nameEl = root.querySelector('[data-name]');
+      nameEl.value = st.name || '';
+      const paint = () => {
+        const n = st.stars.filter(Boolean).length;
+        root.querySelector('[data-count]').textContent = `${n} / 30`;
+        root.querySelector('[data-badge]').textContent =
+          n >= 30 ? `🏆 ${st.name || 'Champion'} — full month! Eid Mubarak!` :
+          n >= 15 ? `🌟 ${st.name || 'Champion'} is an Eid Champion! (${n} stars)` :
+          n > 0 ? `${30 - n} days left to become Eid Champion (15 stars).` : '';
+        grid.innerHTML = st.stars.map((s, i) => `
+          <button data-day="${i}" class="rounded-2xl border-2 p-2 min-h-[64px] grid place-items-center transition ${s ? '' : 'hn-card-hover'}" style="${s ? 'background:var(--hn-primary-soft);border-color:var(--hn-gold)' : 'border-color:var(--hn-border);background:#fff'}" aria-label="Day ${i + 1}${s ? ' done' : ''}">
+            <span><span class="block text-[10px] font-extrabold" style="color:var(--hn-muted)">Day ${i + 1}</span><span class="block text-[26px]">${s ? '⭐' : '☆'}</span></span>
+          </button>`).join('');
+        grid.querySelectorAll('[data-day]').forEach((b) => b.addEventListener('click', () => {
+          const i = Number(b.dataset.day);
+          st.stars[i] = !st.stars[i];
+          save(st);
+          paint();
+        }));
+      };
+      nameEl.addEventListener('input', () => { st.name = nameEl.value; save(st); paint(); });
+      root.querySelector('[data-reset]')?.addEventListener('click', () => {
+        st.stars = Array(30).fill(false);
+        save(st);
+        paint();
+      });
+      paint();
+    })();
+  </script>
+</BaseLayout>
