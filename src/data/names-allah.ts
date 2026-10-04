@@ -70,7 +70,7 @@ export const ALLAH_NAMES: AllahName[] = [
   { n: 63, arabic: 'الْحَيُّ', translit: 'Al-Hayy', meaning: 'The Ever-Living' },
   { n: 64, arabic: 'الْقَيُّومُ', translit: 'Al-Qayyum', meaning: 'The Self-Subsisting Sustainer' },
   { n: 65, arabic: 'الْوَاجِدُ', translit: 'Al-Wajid', meaning: 'The All-Perceiving' },
-  { n: 66, arabic: 'الْمَاجِدُ', translit: 'Al-Majid', meaning: 'The Illustrious' },
+  { n: 66, arabic: 'الْمَاجِدُ', translit: 'Al-Maajid', meaning: 'The Illustrious' },
   { n: 67, arabic: 'الْوَاحِدُ', translit: 'Al-Wahid', meaning: 'The One' },
   { n: 68, arabic: 'الصَّمَدُ', translit: 'As-Samad', meaning: 'The Eternal Refuge' },
   { n: 69, arabic: 'الْقَادِرُ', translit: 'Al-Qadir', meaning: 'The All-Capable' },
