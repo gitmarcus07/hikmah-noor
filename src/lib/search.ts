@@ -202,6 +202,7 @@ export function staticPageItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
   const defs: Array<[string, string, string, string, string[]]> = [
     ['/explore/', 'learn', 'Explore the Library — Quran, Duas, Guides, Stories & Tools', 'Browse the full library: Quran, duas, guides, stories, tools and quizzes.', ['explore', 'library', 'browse', 'sitemap', 'all content']],
+    ['/surah-virtues/', 'learn', 'Surah Virtues (Fazail) — Which Surah to Read & When', 'Ayatul Kursi after salah, Kahf on Friday, Mulk at night, Waqiah for rizq, 3 Quls morning and evening — every virtue with hadith and grading.', ['surah virtues', 'fazail', 'fazilat', 'which surah to read', 'surah benefits', 'occasion surah', 'kursi', 'kahf friday', 'mulk night', 'waqiah rizq', '3 qul', 'sajda tilawat']],
     ['/aqeedah/', 'learn', 'Aqeedah — Six Pillars, Tawhid, Qadr & Last Day', 'Islamic creed: the six pillars of iman, Tawhid, Qadr and the Last Day.', ['aqeedah', 'aqida', 'creed', 'iman', 'tawhid', 'pillars of faith']],
     ['/kids/', 'learn', 'Kids Zone — Short Hadees, Prayer Steps & Quiz', 'Islamic learning for children: short hadees, prayer steps and quizzes.', ['kids', 'children', 'bachon', 'kids zone', 'islam for kids']],
     ['/ask/', 'learn', 'Ask a Question — Sourcing, Rulings & Corrections', 'Ask about sourcing, rulings or corrections on any page.', ['ask', 'question', 'fatwa', 'sawal', 'contact scholar']],
