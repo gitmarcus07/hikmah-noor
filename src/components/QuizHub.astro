@@ -36,15 +36,25 @@ const crumbs = [
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={dict.nav.search} aria-label={dict.nav.search} />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
     </div>
 
     <div class="mt-8">
       <SectionHeader eyebrow={T.secPick} title={T.secPick} />
+      <div class="mt-4 mb-3 max-w-3xl">
+        <input id="quizfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={dict.nav.search} aria-label={dict.nav.search} />
+      </div>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {QL.map((q) => {
           const cat = localizeQuizCat(QUIZ_CATS.find((c) => c.slug === q.cat), locale);
           return (
-          <a href={L(`/quiz/${q.slug}/`)} class="hn-card hn-card-hover hn-card-pad flex flex-col gap-3 min-h-[190px]">
+          <a href={L(`/quiz/${q.slug}/`)} data-search={`${q.title} ${q.desc} ${cat?.title ?? ''} ${q.keywords}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover hn-card-pad flex flex-col gap-3 min-h-[190px]">
             <span class="flex items-center gap-3">
               <span class="w-11 h-11 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={q.icon as any || 'star'} size={22} /></span>
               <span class="min-w-0 flex-1">
@@ -59,6 +69,16 @@ const crumbs = [
         })}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('quizfilter');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          rows.forEach((r) => r.classList.toggle('hidden', !!q && !(r.dataset.search || '').includes(q)));
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">

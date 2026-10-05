@@ -75,25 +75,38 @@ const L = (p: string) => localizedPath(locale, p);
 // global audio player survives Para/Surah navigation. Every other route keeps
 // normal full page loads (a client guard forces reloads when leaving Quran).
 const useClientRouter = isQuranRoute(Astro.url.pathname);
-const moreLinks = [
-  { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
-  { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
-  { label: 'Names of Allah', href: L('/names-of-allah/'), icon: 'star' },
-  { label: 'Names of Muhammad ﷺ', href: L('/names-muhammad/'), icon: 'heart' },
-  { label: 'Seerat', href: L('/seerat/'), icon: 'star' },
-  { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
-  { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
-  { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
-  { label: 'Aqeedah', href: L('/aqeedah/'), icon: 'star' },
-  { label: 'Kids Zone', href: L('/kids/'), icon: 'heart' },
-  { label: 'History', href: L('/history/'), icon: 'book' },
-  { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
-  { label: 'Hajj & Umrah', href: L('/hajj/'), icon: 'moon' },
-  { label: 'Eid & Qurbani', href: L('/eid/'), icon: 'moon' },
-  { label: 'Quiz', href: L('/quiz/'), icon: 'book' },
-  { label: 'Favourites', href: L('/favourites/'), icon: 'heart' },
-  { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
-  { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
+const moreGroups = [
+  { label: 'Read', links: [
+    { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
+    { label: dict.nav.meanings ?? 'Meanings', href: L('/meanings/'), icon: 'meanings' },
+    { label: 'Names of Allah', href: L('/names-of-allah/'), icon: 'star' },
+    { label: 'Names of Muhammad ﷺ', href: L('/names-muhammad/'), icon: 'heart' },
+  ] },
+  { label: 'Worship', links: [
+    { label: dict.nav.kalimas ?? 'Kalimas', href: L('/kalimas/'), icon: 'kalimas' },
+    { label: 'Hadees', href: L('/hadees/'), icon: 'book' },
+    { label: 'Aqeedah', href: L('/aqeedah/'), icon: 'star' },
+  ] },
+  { label: 'Learn', links: [
+    { label: 'Seerat', href: L('/seerat/'), icon: 'star' },
+    { label: dict.nav.waqiat ?? 'Stories', href: L('/waqiat/'), icon: 'waqiat' },
+    { label: (dict.nav as any).prophets ?? 'Prophets', href: L('/prophets/'), icon: 'star' },
+    { label: 'Sahaba', href: L('/sahaba/'), icon: 'book' },
+    { label: 'Women', href: L('/women/'), icon: 'heart' },
+    { label: 'History', href: L('/history/'), icon: 'book' },
+    { label: 'Kids Zone', href: L('/kids/'), icon: 'heart' },
+  ] },
+  { label: 'Seasonal', links: [
+    { label: 'Ramadan', href: L('/ramadan/'), icon: 'moon' },
+    { label: 'Hajj & Umrah', href: L('/hajj/'), icon: 'moon' },
+    { label: 'Eid & Qurbani', href: L('/eid/'), icon: 'moon' },
+  ] },
+  { label: 'More', links: [
+    { label: 'Quiz', href: L('/quiz/'), icon: 'book' },
+    { label: 'Favourites', href: L('/favourites/'), icon: 'heart' },
+    { label: 'Ask a Question', href: L('/ask/'), icon: 'book' },
+    { label: dict.nav.about ?? 'About', href: L('/about/'), icon: 'about' },
+  ] },
 ] as const;
 const mobileGroups = [
   { label: 'Quran', icon: 'quran', links: [
@@ -204,12 +217,17 @@ const mobileGroups = [
             More <span id="moreChevron" class="text-[11px] opacity-70 inline-block transition-transform">▾</span>
           </button>
           <div id="moreMenu" class="hidden absolute start-0 top-full pt-2 z-50">
-            <div class="hn-card w-60 py-1.5 overflow-hidden" style="box-shadow:var(--hn-shadow-lg)">
-              {moreLinks.map(m => (
-                <a href={m.href} class="flex items-center gap-3 px-4 py-2.5 min-h-[48px] text-[15px] font-medium transition hover:opacity-100" style="color:var(--hn-ink)" data-more-link>
-                  <Icon name={m.icon as any} size={18} />
-                  {m.label}
-                </a>
+            <div class="hn-card w-[21rem] py-2 overflow-hidden max-h-[70vh] overflow-y-auto" style="box-shadow:var(--hn-shadow-lg)">
+              {moreGroups.map(g => (
+                <div class="px-2 py-1">
+                  <p class="px-2.5 pt-1.5 pb-1 text-[11px] font-extrabold uppercase tracking-widest" style="color:var(--hn-muted)">{g.label}</p>
+                  {g.links.map(m => (
+                    <a href={m.href} class="flex items-center gap-3 px-2.5 py-2 min-h-[44px] rounded-[10px] text-[14.5px] font-medium transition hover:opacity-100" style="color:var(--hn-ink)" data-more-link>
+                      <span class="w-8 h-8 shrink-0 grid place-items-center rounded-[8px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={m.icon as any} size={16} /></span>
+                      {m.label}
+                    </a>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
@@ -242,21 +260,45 @@ const mobileGroups = [
           </button>
         </div>
       </div>
-      {/* Mobile dropdown (tablet) */}
-      <div id="mobileMenu" class="hidden lg:hidden absolute inset-x-3 top-full z-50">
-        <nav class="hn-card overflow-hidden p-2 max-h-[70vh] overflow-y-auto" style="box-shadow:var(--hn-shadow-lg)" aria-label="Mobile">
-          <div class="grid grid-cols-2 gap-2 p-1">
-            <a href={L('/quran/')} class="hn-card hn-card-pad flex items-center gap-2.5 font-bold" style="color:var(--hn-ink)" data-more-link>
+      {/* Mobile drawer */}
+      <div id="mobileBackdrop" class="hidden lg:hidden fixed inset-0 z-[60]" style="background:rgba(23,32,27,0.45)" data-menu-close></div>
+      <aside id="mobileMenu" class="hidden lg:hidden fixed top-0 bottom-0 end-0 z-[61] w-[min(22rem,88vw)] flex flex-col" style="background:var(--hn-card);border-inline-start:1px solid var(--hn-border);box-shadow:var(--hn-shadow-lg);padding-bottom:env(safe-area-inset-bottom)" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="flex items-center gap-2 px-4" style="height:3.75rem;border-bottom:1px solid var(--hn-border)">
+          <img src="/favicon.svg" alt="" width="24" height="24" class="w-6 h-6 shrink-0" />
+          <span class="font-extrabold text-[16px]" style="color:var(--hn-ink)">Hikmah Noor</span>
+          <button id="menuCloseBtn" class="hn-icon-btn !w-10 !h-10 ms-auto" aria-label="Close menu"><Icon name="close" size={20} /></button>
+        </div>
+        <div class="px-4 pt-3">
+          <form action={L('/search/')} method="get" role="search">
+            <div class="hn-searchwrap">
+              <Icon name="search" size={19} />
+              <input name="q" placeholder={dict.nav.search ?? 'Search duas, surahs, topics...'} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" aria-label="Search" />
+              <button class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
+            </div>
+          </form>
+        </div>
+        <nav class="flex-1 overflow-y-auto px-3 py-3" aria-label="Mobile">
+          <div class="grid grid-cols-2 gap-2 px-1">
+            <a href={L('/quran/')} class="hn-card hn-card-pad !p-3 flex items-center gap-2 font-bold" style="color:var(--hn-ink)" data-more-link>
               <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="quran" size={19} /></span>
-              <span class="text-[15px]">Quran</span>
+              <span class="text-[14px]">Quran</span>
             </a>
-            <a href={L('/duas/')} class="hn-card hn-card-pad flex items-center gap-2.5 font-bold" style="color:var(--hn-ink)" data-more-link>
+            <a href={L('/duas/')} class="hn-card hn-card-pad !p-3 flex items-center gap-2 font-bold" style="color:var(--hn-ink)" data-more-link>
               <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="duas" size={19} /></span>
-              <span class="text-[15px]">Duas</span>
+              <span class="text-[14px]">Duas</span>
+            </a>
+            <a href={L('/learn/')} class="hn-card hn-card-pad !p-3 flex items-center gap-2 font-bold" style="color:var(--hn-ink)" data-more-link>
+              <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="book" size={19} /></span>
+              <span class="text-[14px]">Learn</span>
+            </a>
+            <a href={L('/tools/')} class="hn-card hn-card-pad !p-3 flex items-center gap-2 font-bold" style="color:var(--hn-ink)" data-more-link>
+              <span class="w-9 h-9 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name="tools" size={19} /></span>
+              <span class="text-[14px]">{dict.nav.tools ?? 'Tools'}</span>
             </a>
           </div>
-          {mobileGroups.map((g) => (
-            <details class="mobile-nav-group rounded-[10px]">
+          <div class="mt-2">
+          {mobileGroups.map((g, gi) => (
+            <details class="mobile-nav-group rounded-[10px]" open={gi === 0 ? true : undefined}>
               <summary class="flex items-center gap-3 px-2.5 py-2 rounded-[10px] min-h-[52px] font-semibold cursor-pointer list-none">
                 <span class="w-10 h-10 shrink-0 grid place-items-center rounded-[10px]" style="background:var(--hn-primary-soft);color:var(--hn-primary)"><Icon name={g.icon as any} size={20} /></span>
                 <span class="text-[16px]" style="color:var(--hn-ink)">{g.label}</span>
@@ -269,8 +311,15 @@ const mobileGroups = [
               </div>
             </details>
           ))}
+          </div>
+          <div class="mt-2 px-2.5 py-2 flex flex-wrap gap-x-4 gap-y-2 text-[13px] font-semibold" style="color:var(--hn-muted)">
+            <a href={L('/about/')} class="hover:underline min-h-[44px] inline-flex items-center" data-more-link>{dict.nav.about ?? 'About'}</a>
+            <a href={L('/ask/')} class="hover:underline min-h-[44px] inline-flex items-center" data-more-link>Ask</a>
+            <a href={L('/favourites/')} class="hover:underline min-h-[44px] inline-flex items-center" data-more-link>Favourites</a>
+            <a href={L('/methodology/')} class="hover:underline min-h-[44px] inline-flex items-center" data-more-link>Methodology</a>
+          </div>
         </nav>
-      </div>
+      </aside>
 <style>
   #mobileMenu details.mobile-nav-group summary::-webkit-details-marker { display: none; }
   #mobileMenu details.mobile-nav-group summary::marker { content: ''; }
@@ -298,11 +347,18 @@ const mobileGroups = [
       };
       const setMenu = (open) => {
         const menu = $('mobileMenu'), btn = $('menuBtn'), icoOpen = $('menuIcoOpen'), icoClose = $('menuIcoClose');
+        const backdrop = $('mobileBackdrop');
         if (!menu || !btn) return;
         menu.classList.toggle('hidden', !open);
+        backdrop?.classList.toggle('hidden', !open);
         btn.setAttribute('aria-expanded', String(open));
         icoOpen?.classList.toggle('hidden', open);
         icoClose?.classList.toggle('hidden', !open);
+        try { document.body.style.overflow = open ? 'hidden' : ''; } catch {}
+        if (open) {
+          const first = menu.querySelector('input[name="q"]');
+          if (first && window.matchMedia('(min-width: 1024px)').matches) first.focus();
+        }
       };
 
       // Re-wires the header DOM. Runs on first load and after every client-side
@@ -314,6 +370,8 @@ const mobileGroups = [
         $('langBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('langMenu')?.classList.contains('hidden'); setMenu(false); setMore(false); setLang(!!w); });
         $('moreBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('moreMenu')?.classList.contains('hidden'); setLang(false); setMenu(false); setMore(!!w); });
         $('menuBtn')?.addEventListener('click', (e) => { e.stopPropagation(); const w = $('mobileMenu')?.classList.contains('hidden'); setLang(false); setMore(false); setMenu(!!w); });
+        $('menuCloseBtn')?.addEventListener('click', () => setMenu(false));
+        document.querySelectorAll('[data-menu-close]').forEach(el => el.addEventListener('click', () => setMenu(false)));
         document.querySelectorAll('[data-more-link]').forEach(a => a.addEventListener('click', () => { setMenu(false); setMore(false); }));
         // Single-open accordions: opening one group closes the others.
         $('mobileMenu')?.addEventListener('toggle', (e) => {

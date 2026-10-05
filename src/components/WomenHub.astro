@@ -49,14 +49,19 @@ const eraTitle: Record<string, string> = {
       </form>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="womenfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+    <p id="womencount" class="text-sm mt-4" style="color:var(--hn-muted)"></p>
+
     {eras.map((era) => {
       const list = localizeStoryList(womenByEra(era), 'women', locale);
       return (
-      <div class="mt-8">
+      <div class="mt-8" data-era-block>
         <SectionHeader eyebrow={era} title={eraTitle[era]} />
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((w) => (
-            <a href={L(`/women/${w.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <a href={L(`/women/${w.slug}/`)} data-search={`${w.order} ${w.title} ${w.name} ${w.summary} ${(w.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
               <span class="block overflow-hidden"><WomenArt motif={w.motif} arabic={w.arabic} prophet={w.name} accent={w.accent} /></span>
               <span class="block hn-card-pad">
                 <span class="flex items-center gap-1.5">
@@ -72,6 +77,29 @@ const eraTitle: Record<string, string> = {
       </div>
       );
     })}
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('womenfilter');
+        const count = document.getElementById('womencount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        const blocks = [...document.querySelectorAll('[data-era-block]')];
+        if (count) count.textContent = `${rows.length} figures`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          blocks.forEach((b) => {
+            const visible = [...b.querySelectorAll('.hn-filterrow')].some((r) => !r.classList.contains('hidden'));
+            b.classList.toggle('hidden', !visible);
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'figure' : 'figures'}`;
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">

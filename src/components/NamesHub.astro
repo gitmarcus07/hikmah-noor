@@ -4,6 +4,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
+import Icon from './Icon.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { ALLAH, PROPHET } from '../data/names';
 import { localizeAllahName, localizeProphetName } from '../lib/content-i18n';
@@ -39,6 +40,13 @@ const loc = (nm: any) => isAllah ? localizeAllahName(nm, locale) : localizeProph
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={dict.nav.search} aria-label={dict.nav.search} />
+          <button class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
       <div class="mt-4 max-w-xl">
         <input id="namefilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search"
           placeholder={T.filterPh} aria-label={T.filterPh} />

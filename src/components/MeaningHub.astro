@@ -44,11 +44,16 @@ const crumbs = [
       </form>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="meaningfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+
     <div class="mt-8">
       <SectionHeader eyebrow={T.secTerms} title={T.secTerms} />
+      <p id="meaningcount" class="text-sm mb-3" style="color:var(--hn-muted)"></p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {ML.map((m) => (
-          <a href={localizedPath(locale, `/meanings/${m.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+          <a href={localizedPath(locale, `/meanings/${m.slug}/`)} data-search={`${m.term} ${m.translit} ${m.definition} ${(m.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
             <span class="block overflow-hidden"><MeaningArt motif={m.motif} arabic={m.arabic} term={m.term} translit={m.translit} accent={m.accent} /></span>
             <span class="block hn-card-pad">
               <span class="font-extrabold block text-[17px] leading-7">{m.term} <span class="text-xs font-extrabold" style="color:var(--hn-muted)">• {m.translit}</span></span>
@@ -58,6 +63,24 @@ const crumbs = [
         ))}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('meaningfilter');
+        const count = document.getElementById('meaningcount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        if (count) count.textContent = `${rows.length} terms`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          if (count) count.textContent = `${n} term${n === 1 ? '' : 's'}`;
+        });
+      })();
+    </script>
 
     {guides.length > 0 && (
       <div class="mt-8">

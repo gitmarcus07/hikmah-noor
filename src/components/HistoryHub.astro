@@ -47,14 +47,19 @@ const ERAS = T.hubEras;
       <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.seeratLine} <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">{T.seeratLink}</a></p>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="historyfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+    <p id="historycount" class="text-sm mt-4" style="color:var(--hn-muted)"></p>
+
     {ERAS.map((e: any) => {
       const list = localizeHistoryList(historyByEra(e.era), locale);
       return (
-        <div class="mt-8">
+        <div class="mt-8" data-era-block>
           <SectionHeader eyebrow={e.eyebrow} title={e.title} sub={e.sub} />
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {list.map((h) => (
-              <a href={L(`/history/${h.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+              <a href={L(`/history/${h.slug}/`)} data-search={`${h.order} ${h.title} ${h.name} ${h.year} ${h.summary} ${(h.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
                 <span class="block overflow-hidden"><HistoryArt motif={h.motif} arabic={h.arabic} name={h.name} accent={h.accent} /></span>
                 <span class="block hn-card-pad">
                   <span class="flex items-center gap-1.5">
@@ -70,6 +75,29 @@ const ERAS = T.hubEras;
         </div>
       );
     })}
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('historyfilter');
+        const count = document.getElementById('historycount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        const blocks = [...document.querySelectorAll('[data-era-block]')];
+        if (count) count.textContent = `${rows.length} events`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          blocks.forEach((b) => {
+            const visible = [...b.querySelectorAll('.hn-filterrow')].some((r) => !r.classList.contains('hidden'));
+            b.classList.toggle('hidden', !visible);
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'event' : 'events'}`;
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">

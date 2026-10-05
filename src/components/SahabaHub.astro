@@ -48,11 +48,16 @@ const madinah = localizeStoryList(sahabaByEra('Madinah'), 'sahaba', locale);
       <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.seeratLine} <a href={L('/seerat/')} class="font-bold" style="color:var(--hn-primary)">{T.seeratLink}</a></p>
     </div>
 
-    <div class="mt-8">
+    <div class="mt-6 max-w-3xl">
+      <input id="sahabafilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+    <p id="sahabacount" class="text-sm mt-4" style="color:var(--hn-muted)"></p>
+
+    <div class="mt-8" data-era-block>
       <SectionHeader eyebrow={T.era1} title={T.era1T} sub={T.era1S} />
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {makkah.map((s) => (
-          <a href={L(`/sahaba/${s.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+          <a href={L(`/sahaba/${s.slug}/`)} data-search={`${s.order} ${s.title} ${s.name} ${s.summary} ${(s.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
             <span class="block overflow-hidden"><SahabaArt motif={s.motif} arabic={s.arabic} prophet={s.name} accent={s.accent} /></span>
             <span class="block hn-card-pad">
               <span class="flex items-center gap-1.5">
@@ -67,11 +72,11 @@ const madinah = localizeStoryList(sahabaByEra('Madinah'), 'sahaba', locale);
       </div>
     </div>
 
-    <div class="mt-8">
+    <div class="mt-8" data-era-block>
       <SectionHeader eyebrow={T.era2} title={T.era2T} sub={T.era2S} />
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {madinah.map((s) => (
-          <a href={L(`/sahaba/${s.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+          <a href={L(`/sahaba/${s.slug}/`)} data-search={`${s.order} ${s.title} ${s.name} ${s.summary} ${(s.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
             <span class="block overflow-hidden"><SahabaArt motif={s.motif} arabic={s.arabic} prophet={s.name} accent={s.accent} /></span>
             <span class="block hn-card-pad">
               <span class="flex items-center gap-1.5">
@@ -85,6 +90,29 @@ const madinah = localizeStoryList(sahabaByEra('Madinah'), 'sahaba', locale);
         ))}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('sahabafilter');
+        const count = document.getElementById('sahabacount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        const blocks = [...document.querySelectorAll('[data-era-block]')];
+        if (count) count.textContent = `${rows.length} companions`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          blocks.forEach((b) => {
+            const visible = [...b.querySelectorAll('.hn-filterrow')].some((r) => !r.classList.contains('hidden'));
+            b.classList.toggle('hidden', !visible);
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'companion' : 'companions'}`;
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">

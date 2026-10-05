@@ -45,11 +45,15 @@ const crumbs = [
       </form>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="kalimafilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+
     <div class="mt-8">
       <SectionHeader eyebrow={T.secList} title={T.secList} />
       <div class="grid gap-3 md:grid-cols-2">
         {KL.map((k) => (
-          <a href={L(`/kalimas/${k.slug}/`)} class="hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
+          <a href={L(`/kalimas/${k.slug}/`)} data-search={`${k.num} ${k.title} ${k.use} ${k.short}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover hn-card-pad flex gap-3.5 items-start">
             <span class="hn-verse-num shrink-0">{k.num}</span>
             <span class="min-w-0">
               <span class="font-extrabold block leading-6">{k.title}</span>
@@ -62,6 +66,16 @@ const crumbs = [
         ))}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('kalimafilter');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          rows.forEach((r) => r.classList.toggle('hidden', !!q && !(r.dataset.search || '').includes(q)));
+        });
+      })();
+    </script>
 
     <section class="mt-8 max-w-3xl" aria-label={T.faqTitle}>
       <SectionHeader eyebrow="FAQ" title={T.faqTitle} />

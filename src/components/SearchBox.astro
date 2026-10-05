@@ -28,8 +28,10 @@ const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatc
 <script define:vars={{ indexUrl, searchUrl, inputId: id, mobileSuggest }}>
   import { createIndex, search, suggest, ayahNeeded, escHtml, highlight } from '../lib/search-engine.js';
   (() => {
-    const box = document.querySelector(`[data-searchbox] #${CSS.escape(inputId)}`);
-    if (!box) return;
+    const boxes = [...document.querySelectorAll(`[data-searchbox] #${CSS.escape(inputId)}`)];
+    const box = boxes[0];
+    if (!box || box.dataset.wired === '1') return;
+    box.dataset.wired = '1';
     const host = box.closest('[data-searchbox]');
     const ayahUrl = String(indexUrl).replace('search-index.json', 'search-ayahs.json');
     const T = JSON.parse(host?.dataset.t || '{}');
@@ -71,9 +73,10 @@ const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatc
       box.setAttribute('aria-expanded', 'false');
       active = -1;
     };
-    /* On phones the suggest popup would cover the live results below —
-       so suggestions only appear on larger screens. */
-    const allowSuggest = () => window.matchMedia('(min-width: 768px)').matches;
+    /* Suggestions work on every screen size — the popup is absolutely
+       positioned, capped in height, and dismisses on scroll, so it stays
+       usable on phones as well as desktops. */
+    const allowSuggest = () => true;
     const render = (list, q, total) => {
       rows = list;
       if (!list.length) {
@@ -96,7 +99,7 @@ const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatc
       clearTimeout(t);
       t = setTimeout(async () => {
         const q = box.value.trim();
-        if (q.length < 1 || (!allowSuggest() && !mobileSuggest)) { close(); return; }
+        if (q.length < 1 || !allowSuggest()) { close(); return; }
         await loadCore();
         await ensureAyahs(q);
         const ranked = search(core, q, { limit: 60 });
@@ -105,7 +108,7 @@ const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatc
     });
     box.addEventListener('focus', async () => {
       if (box.value.trim().length >= 1) box.dispatchEvent(new Event('input'));
-      else load();
+      else loadCore();
     });
     box.addEventListener('keydown', (e) => {
       const links = [...panel.querySelectorAll('.sugrow')];

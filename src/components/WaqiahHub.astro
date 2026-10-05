@@ -51,11 +51,16 @@ const crumbs = [
       </form>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="waqiahfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={S.hubSearchPh} aria-label={S.hubSearchPh} />
+    </div>
+
     <div class="mt-8">
       <SectionHeader eyebrow={S.secStories} title={S.secStories} />
+      <p id="waqiahcount" class="text-sm mb-3" style="color:var(--hn-muted)"></p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {localizeStoryList(WAQIAT, 'waqiat', locale).map((w) => (
-          <a href={localizedPath(locale, `/waqiat/${w.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+          <a href={localizedPath(locale, `/waqiat/${w.slug}/`)} data-search={`${w.title} ${w.prophet} ${w.summary} ${(w.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
             <span class="block overflow-hidden"><WaqiahArt motif={w.motif} arabic={w.arabic} prophet={w.prophet} accent={w.accent} /></span>
             <span class="block hn-card-pad">
               <span class="hn-badge hn-badge-primary">{w.prophet}</span>
@@ -66,6 +71,24 @@ const crumbs = [
         ))}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('waqiahfilter');
+        const count = document.getElementById('waqiahcount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        if (count) count.textContent = `${rows.length} stories`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'story' : 'stories'}`;
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={S.faqTitle}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{S.faqTitle}</h2>
       <div class="space-y-3">

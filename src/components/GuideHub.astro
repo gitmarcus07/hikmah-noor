@@ -64,15 +64,37 @@ const crumbs = [
 
     <div class="mt-8">
       <SectionHeader eyebrow={T.secAll} title={T.secAll} sub={T.secAllSub} />
+      <div class="mt-4 mb-3 max-w-3xl">
+        <input id="guidefilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+      </div>
+      <p id="guidecount" class="text-sm mb-3" style="color:var(--hn-muted)"></p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {localizeGuideList(GUIDES, locale).map((g: any) => (
-          <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} class="hn-card hn-card-hover hn-card-pad block">
+          <a href={L('/learn/' + g.cat + '/' + g.slug + '/')} data-search={`${g.title} ${g.intro} ${(g.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover hn-card-pad block">
             <span class="font-bold block text-[15px] leading-6">{g.title}</span>
             <span class="text-[13px] line-clamp-2 mt-0.5" style="color:var(--hn-muted)">{g.intro}</span>
           </a>
         ))}
       </div>
     </div>
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('guidefilter');
+        const count = document.getElementById('guidecount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        if (count) count.textContent = `${rows.length} guides`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'guide' : 'guides'}`;
+        });
+      })();
+    </script>
 
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <SectionHeader eyebrow="FAQ" title={dict.article.faq} />

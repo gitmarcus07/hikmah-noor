@@ -207,6 +207,36 @@ svg { height: auto; }
   color: var(--hn-primary);
 }
 
+/* ---------- Library rails (homepage shelves) ----------
+   Mobile: horizontal snap-scroll shelf — one swipeable row per
+   collection, so the home page reads like a library, not a wall.
+   Tablet/desktop: regular responsive grids. */
+.hn-rail { display: grid; gap: 0.75rem; grid-template-columns: 1fr; }
+@media (max-width: 639px) {
+  .hn-rail {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(230px, 76vw);
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    padding-bottom: 0.35rem;
+  }
+  .hn-rail > * { scroll-snap-align: start; min-height: 100%; }
+}
+@media (min-width: 640px) {
+  .hn-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .hn-rail[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hn-rail[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hn-rail[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* ---------- Mobile drawer nav ---------- */
 /* ---------- Buttons (ONE system) ---------- */
 .hn-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;

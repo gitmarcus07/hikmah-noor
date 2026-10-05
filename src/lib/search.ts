@@ -172,6 +172,54 @@ export interface IndexItem {
   locale: string;
 }
 
+/** Standalone worship/utility tools (not part of the finance registry).
+ *  Every tool page must be reachable from global search. */
+export function standaloneToolItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const defs: Array<[string, string, string, string[]]> = [
+    ['/tools/mosque-finder/', 'Mosque Finder — Nearby Masjids with Distance & Directions', 'Find nearby mosques with distance and directions from your location.', ['mosque finder', 'masjid', 'masjid near me', 'mosque near me', 'mosque locator', 'prayer place']],
+    ['/tools/ayah-card/', 'Ayah Card Maker — Verse Images to Share & Download', 'Create beautiful ayah images to share and download.', ['ayah card', 'verse image', 'share ayah', 'quran image', 'ayah wallpaper']],
+    ['/tools/daily-reminder/', 'Daily Reminder — One Ayah Notification Every Day', 'Get one ayah notification every day on your device.', ['daily reminder', 'ayah reminder', 'daily ayah', 'notification', 'reminder']],
+    ['/tools/eid-takbeer/', 'Eid Takbeer Studio — Wording, Audio & Tashriq Schedule', 'Eid takbeer wording with audio and the Tashriq schedule.', ['eid takbeer', 'takbeer', 'takbir', 'tashriq', 'eid audio']],
+    ['/tools/qurbani-dua/', 'Qurbani Dua — What to Say at Slaughter, with Audio', 'What to say at the time of Qurbani slaughter, with Arabic audio.', ['qurbani dua', 'qurbani', 'slaughter dua', 'udhia dua', 'bakra eid dua']],
+    ['/tools/shawwal-tracker/', 'Shawwal 6 Tracker — Check Off the 6 Fasts After Eid', 'Track the 6 fasts of Shawwal after Eid al-Fitr and check them off.', ['shawwal', 'shawwal fasts', '6 fasts', 'shawwal tracker', 'fast tracker']],
+    ['/tools/qada-tracker/', 'Qada Tracker — Make Up Missed Ramadan Fasts', 'Log and complete missed (qada) Ramadan fasts.', ['qada', 'qaza', 'missed fasts', 'qada roza', 'make up fasts']],
+    ['/tools/kids-roza-chart/', 'Kids Roza Chart — 30-Day Star Chart for Children', 'A 30-day star chart to encourage children to fast in Ramadan.', ['kids roza', 'roza chart', 'kids fasting chart', 'ramadan kids', 'star chart']],
+    ['/tools/namaz-trainer/', 'Namaz Trainer — Learn Salah Step by Step', 'Learn salah step by step, from 2 to 4 rakahs, with guidance.', ['namaz trainer', 'learn namaz', 'salah trainer', 'how to pray', 'namaz ka tarika']],
+    ['/tools/kids-hifz/', 'Kids Hifz — Memorize Short Surahs with Audio', 'Help children memorize short surahs with recitation audio.', ['kids hifz', 'hifz', 'memorize quran', 'kids memorization', 'short surahs audio']],
+    ['/tools/gems/', 'Quranic Gems — Short Reflections from the Quran', 'Short Quranic gems and reflections with references.', ['gems', 'quranic gems', 'reflections', 'gems of quran']],
+    ['/tools/my-progress/', 'My Progress — Streak, Hasanat and Challenges', 'Track your streak, hasanat points and learning challenges.', ['my progress', 'streak', 'hasanat', 'challenges', 'progress tracker']],
+    ['/tools/search-quran/', 'Search Quran — Translation & Arabic Text Search', 'Search the Quran by translation words or Arabic text.', ['search quran', 'quran search', 'find verse', 'quran word search']],
+    ['/tools/read/', 'Read Quran — All Surahs with Translation & Audio', 'Read all 114 surahs in Arabic with translation, transliteration and audio.', ['read quran', 'quran reader', 'read surah', 'quran with audio']],
+  ];
+  return defs.map(([path, title, description, tags]) => ({
+    title, description, category: 'tools', url: `${prefix}${path}`, tags: [...tags, 'tools', 'tool'], locale,
+  }));
+}
+
+/** Static/info pages so everything on the site is navigable via search. */
+export function staticPageItems(locale: string): IndexItem[] {
+  const prefix = locale === 'en' ? '' : `/${locale}`;
+  const defs: Array<[string, string, string, string, string[]]> = [
+    ['/explore/', 'learn', 'Explore the Library — Quran, Duas, Guides, Stories & Tools', 'Browse the full library: Quran, duas, guides, stories, tools and quizzes.', ['explore', 'library', 'browse', 'sitemap', 'all content']],
+    ['/aqeedah/', 'learn', 'Aqeedah — Six Pillars, Tawhid, Qadr & Last Day', 'Islamic creed: the six pillars of iman, Tawhid, Qadr and the Last Day.', ['aqeedah', 'aqida', 'creed', 'iman', 'tawhid', 'pillars of faith']],
+    ['/kids/', 'learn', 'Kids Zone — Short Hadees, Prayer Steps & Quiz', 'Islamic learning for children: short hadees, prayer steps and quizzes.', ['kids', 'children', 'bachon', 'kids zone', 'islam for kids']],
+    ['/ask/', 'learn', 'Ask a Question — Sourcing, Rulings & Corrections', 'Ask about sourcing, rulings or corrections on any page.', ['ask', 'question', 'fatwa', 'sawal', 'contact scholar']],
+    ['/about/', 'learn', 'About Hikmah Noor — Sources & Method', 'What Hikmah Noor is, its sources and editorial method.', ['about', 'about us', 'methodology', 'sources']],
+    ['/methodology/', 'learn', 'Methodology — How Content Is Sourced', 'How every page is sourced, graded and reviewed.', ['methodology', 'method', 'sources', 'editorial']],
+    ['/scholars/', 'learn', 'Scholars — Authorities We Quote', 'The scholars and sources quoted across the site.', ['scholars', 'ulama', 'sources', 'authorities']],
+    ['/favourites/', 'tools', 'Favourites — Your Saved Duas, Stories & Verses', 'Your saved duas, stories and verses on this device.', ['favourites', 'favorites', 'saved', 'bookmarks']],
+    ['/al-mushrif/', 'learn', 'Al-Mushrif — Editorial Oversight', 'Editorial oversight and review policy.', ['mushrif', 'editorial', 'review', 'oversight']],
+    ['/donate/', 'learn', 'Donate — Support Hikmah Noor', 'Support free Islamic knowledge with a donation.', ['donate', 'donation', 'support', 'sadaqah']],
+    ['/contact/', 'learn', 'Contact — Get in Touch', 'Contact the Hikmah Noor team.', ['contact', 'email', 'feedback']],
+  ];
+  return defs.map(([path, category, title, description, tags]) => {
+    // al-mushrif has no /hi|ur|ar/ variant — point every locale at the EN page.
+    const url = path === '/al-mushrif/' ? path : `${prefix}${path}`;
+    return { title, description, category, url, tags, locale };
+  });
+}
+
 /** Dashboard + category + tool + standalone entries for a locale. */
 export function toolIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
@@ -884,7 +932,7 @@ export async function buildSearchIndex(locale: string): Promise<SearchDoc[]> {
     id: it.url, type: it.category, title: it.title, url: it.url,
     description: it.description, category: it.category, tags: it.tags,
   });
-  for (const fn of [toolIndexItems, duaIndexItems, kalimaIndexItems, meaningIndexItems,
+  for (const fn of [toolIndexItems, standaloneToolItems, staticPageItems, duaIndexItems, kalimaIndexItems, meaningIndexItems,
     waqiahIndexItems, prophetIndexItems, sahabaIndexItems, womenIndexItems, quizIndexItems,
     hadeesIndexItems, seerahIndexItems, guideIndexItems, historyIndexItems,
     namesIndexItems, topicsIndexItems, hadithCollectionIndexItems, phase9HubIndexItems]) {

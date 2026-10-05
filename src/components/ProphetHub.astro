@@ -57,14 +57,19 @@ const eraNames: Record<string, string> = {
       <p class="mt-3 text-sm leading-6" style="color:var(--hn-muted)">{T.waqiatLine} <a href={L('/waqiat/')} class="font-bold" style="color:var(--hn-primary)">{T.waqiatLink}</a></p>
     </div>
 
+    <div class="mt-6 max-w-3xl">
+      <input id="prophetfilter" class="hn-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder={T.searchPh} aria-label={T.searchPh} />
+    </div>
+    <p id="prophetcount" class="text-sm mt-4" style="color:var(--hn-muted)"></p>
+
     {eras.map((era) => {
       const list = localizeStoryList(prophetsByEra(era), 'prophets', locale);
       return (
-      <div class="mt-8">
+      <div class="mt-8" data-era-block>
         <SectionHeader eyebrow={eraNames[era]} title={eraTitles[era]} sub={eraSub[era]} />
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((p) => (
-            <a href={L(`/prophets/${p.slug}/`)} class="hn-card hn-card-hover overflow-hidden block">
+            <a href={L(`/prophets/${p.slug}/`)} data-search={`${p.order} ${p.title} ${p.name} ${p.summary} ${(p.aliases || []).join(' ')}`.toLowerCase()} class="hn-filterrow hn-card hn-card-hover overflow-hidden block">
               <span class="block overflow-hidden"><ProphetArt motif={p.motif} arabic={p.arabic} prophet={p.name} accent={p.accent} /></span>
               <span class="block hn-card-pad">
                 <span class="flex items-center gap-1.5">
@@ -80,6 +85,29 @@ const eraNames: Record<string, string> = {
       </div>
       );
     })}
+    <script is:inline>
+      (() => {
+        const input = document.getElementById('prophetfilter');
+        const count = document.getElementById('prophetcount');
+        const rows = [...document.querySelectorAll('.hn-filterrow')];
+        const blocks = [...document.querySelectorAll('[data-era-block]')];
+        if (count) count.textContent = `${rows.length} prophets`;
+        input?.addEventListener('input', () => {
+          const q = (input.value || '').toLowerCase().trim();
+          let n = 0;
+          rows.forEach((r) => {
+            const show = !q || (r.dataset.search || '').includes(q);
+            r.classList.toggle('hidden', !show);
+            if (show) n++;
+          });
+          blocks.forEach((b) => {
+            const visible = [...b.querySelectorAll('.hn-filterrow')].some((r) => !r.classList.contains('hidden'));
+            b.classList.toggle('hidden', !visible);
+          });
+          if (count) count.textContent = `${n} ${n === 1 ? 'prophet' : 'prophets'}`;
+        });
+      })();
+    </script>
     <section class="mt-8 max-w-3xl" aria-label={dict.article.faq}>
       <h2 class="text-xl md:text-2xl font-extrabold mb-3">{dict.article.faq}</h2>
       <div class="space-y-3">
