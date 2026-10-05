@@ -154,6 +154,15 @@ const mobileGroups = [
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Google tag (gtag.js) -->
+  <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-JTJT82TN8Q"></script>
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-JTJT82TN8Q');
+  </script>
   <title>{title} | Hikmah Noor</title>
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex" />}
