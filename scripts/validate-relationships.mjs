@@ -39,7 +39,7 @@ const parasMeta = JSON.parse(await read('src/data/paras-meta.json'));
 /** Slugify mirror of src/data/names.ts nameSlug (+ Majid overrides). */
 const nameSlugify = (s) => s.toLowerCase().replace(/[’‘'`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const parseNames = (txt, overrides = {}) => {
-  const rows = [...txt.matchAll(/\{ n: (\d+), arabic: ('[^']*'|"[^"]*"), translit: ('[^']*'|"[^"]*"), meaning: ('[^']*'|"[^"]*") \}/g)]
+  const rows = [...txt.matchAll(/\{ n: (\d+), arabic: ('[^']*'|"[^"]*"), translit: ('[^']*'|"[^"]*"), meaning: ('[^']*'|"[^"]*")[^}]*\}/g)]
     .map((m) => ({ n: +m[1], translit: m[3].slice(1, -1) }));
   const seen = new Set();
   return new Set(rows.map((r) => {

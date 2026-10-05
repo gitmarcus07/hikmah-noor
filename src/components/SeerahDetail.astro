@@ -29,6 +29,7 @@ const faq = [
   { q: T.detFaqStory, a: `${chapter.summary}` },
   { q: T.detFaqLes, a: chapter.lessons.join(' ') },
   { q: T.detFaqSrc, a: `${chapter.references}` },
+  ...((chapter.faq ?? []) as { q: string; a: string }[]),
 ];
 const crumbs = [
   { name: dict.nav.home, path: '/' },

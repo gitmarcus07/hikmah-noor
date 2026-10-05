@@ -29,6 +29,7 @@ const checkList = (label, rows, overrides = {}) => {
     if (!r.translit) fail(`${label} n=${r.n}: missing translit`);
     if (!r.meaning) fail(`${label} n=${r.n}: missing meaning`);
     if (label === 'allah' && !r.detail) fail(`${label} n=${r.n}: missing detail`);
+    if (label === 'prophet' && !r.detail) fail(`${label} n=${r.n}: missing detail`);
   }
   const seen = new Map();
   const slugs = new Map();

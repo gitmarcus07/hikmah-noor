@@ -20,7 +20,7 @@ if (JSON.stringify([...nums].sort((a, b) => a - b)) !== JSON.stringify(Array.fro
 
 // Required fields per entry
 const starts = [...txt.matchAll(/\{ slug: '[^']+', num: \d+, era:/g)].map((m) => m.index);
-const required = ['title:', 'arabic:', 'translit:', 'summary:', 'events:', 'lessons:', 'narrative:', 'references:', 'keywords:', 'aliases:', 'motif:', 'accent:'];
+const required = ['title:', 'arabic:', 'translit:', 'summary:', 'events:', 'lessons:', 'narrative:', 'references:', 'faq:', 'keywords:', 'aliases:', 'motif:', 'accent:'];
 starts.forEach((s, i) => {
   const body = txt.slice(s, i + 1 < starts.length ? starts[i + 1] : txt.length);
   for (const f of required) if (!body.includes(f)) fail(`chapter ${slugs[i]} missing ${f}`);

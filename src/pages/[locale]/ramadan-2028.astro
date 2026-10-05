@@ -1,0 +1,7 @@
+---
+import Ramadan2028Hub from '../../components/Ramadan2028Hub.astro';
+import { nonDefaultLocales } from '../../i18n/utils';
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+---
+<Ramadan2028Hub locale={locale} />
