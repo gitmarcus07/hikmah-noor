@@ -7,13 +7,14 @@ import Icon from '../components/Icon.astro';
 import { localizedPath } from '../i18n/utils';
 import { GUIDES } from '../data/guides';
 import { DUAS } from '../data/duas';
+import { KIDS_STORIES } from '../data/kids-stories';
 
 const locale = 'en';
 const L = (p: string) => localizedPath(locale, p);
 
 const title = `Kids Zone — Short Hadees, Prayer Steps, Prophets & Quiz for Young Muslims`;
 const description = `Islam for kids: 40 short hadees, how to pray and do wudu step by step, prophet stories, morning duas and a fun kids quiz with instant answers.`;
-const keywords = 'islam for kids, hadees for children, bachon ki hadees, kids islamic quiz, how to pray for kids, prophet stories kids, islamic parenting';
+const keywords = 'islam for kids, hadees for children, bachon ki hadees, kids islamic quiz, how to pray for kids, prophet stories kids, islamic parenting, bedtime stories islam, seerah for kids';
 const faq = [
   { q: 'At what age should kids start praying?', a: 'Training from seven, firm expectation from ten, full obligation at puberty. Start with the two-minute wudu + two-rakah routine on our kids path below.' },
   { q: 'How do kids memorize Quran?', a: 'Short surahs with joy from 4–6, structured hifz from ~7. See our memorize-Quran plan guide for the sabq/sabqi/manzil method.' },
@@ -83,6 +84,25 @@ const kidDuas = ['morning-remembrance', 'before-sleeping', 'before-eating', 'ruq
             <span class="font-bold block text-[15px] leading-6">{d.title}</span>
             <span class="text-[13px]" style="color:var(--hn-muted)">{d.use}</span>
           </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Bedtime" title="10 bedtime stories" sub="Three-minute prophet stories with a moral — tap to read together." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {KIDS_STORIES.map((s, i) => (
+          <details class="hn-card hn-card-pad">
+            <summary class="font-extrabold leading-6 cursor-pointer list-none">
+              <span class="hn-badge hn-badge-primary">#{i + 1} · {s.minutes} min · ages {s.age}</span>
+              <span class="block mt-2 text-[16px]">{s.title}</span>
+            </summary>
+            <div class="mt-2 space-y-2">
+              {s.story.map((p) => <p class="text-[14px] leading-7" style="color:var(--hn-ink)">{p}</p>)}
+              <p class="text-[14px] leading-6 font-bold" style="color:var(--hn-primary)">Moral: {s.moral}</p>
+              <p class="text-[12px]" style="color:var(--hn-muted)">Source: {s.ref}</p>
+            </div>
+          </details>
         ))}
       </div>
     </div>

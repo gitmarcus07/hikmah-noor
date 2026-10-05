@@ -39,14 +39,26 @@ export const MONTHS: HijriMonth[] = [
       { d: 10, key: 'ashura', target: { type: 'guide', slug: 'ashura-muharram-fasting' } },
       { d: 10, key: 'karbala', target: { type: 'history', slug: 'karbala-61' } },
     ] },
-  { slug: 'safar', num: 2, name: 'Safar', arabic: 'صفر', sacred: false, events: [] },
+  { slug: 'safar', num: 2, name: 'Safar', arabic: 'صفر', sacred: false,
+    events: [
+      { d: null, key: 'no-omens', target: { type: 'guide', slug: 'superstitions-omens-safar' } },
+    ] },
   { slug: 'rabi-al-awwal', num: 3, name: 'Rabi al-Awwal', arabic: 'ربيع الأول', sacred: false,
     events: [
       { d: 12, key: 'mawlid', target: { type: 'seerah', slug: 'birth-noble-lineage-year-of-elephant' } },
     ] },
-  { slug: 'rabi-al-thani', num: 4, name: 'Rabi al-Thani', arabic: 'ربيع الثاني', sacred: false, events: [] },
-  { slug: 'jumada-al-ula', num: 5, name: 'Jumada al-Ula', arabic: 'جمادى الأولى', sacred: false, events: [] },
-  { slug: 'jumada-al-akhirah', num: 6, name: 'Jumada al-Akhirah', arabic: 'جمادى الآخرة', sacred: false, events: [] },
+  { slug: 'rabi-al-thani', num: 4, name: 'Rabi al-Thani', arabic: 'ربيع الثاني', sacred: false,
+    events: [
+      { d: null, key: 'quran-focus', target: { type: 'guide', slug: 'how-to-understand-quran-tafsir' } },
+    ] },
+  { slug: 'jumada-al-ula', num: 5, name: 'Jumada al-Ula', arabic: 'جمادى الأولى', sacred: false,
+    events: [
+      { d: null, key: 'mutah-remembrance', target: { type: 'seerah', slug: 'khaybar-umrat-qada-mutah' } },
+    ] },
+  { slug: 'jumada-al-akhirah', num: 6, name: 'Jumada al-Akhirah', arabic: 'جمادى الآخرة', sacred: false,
+    events: [
+      { d: null, key: 'sunnah-revival', target: { type: 'guide', slug: 'daily-sunnah-rawatib' } },
+    ] },
   { slug: 'rajab', num: 7, name: 'Rajab', arabic: 'رجب', sacred: true,
     events: [
       { d: 27, key: 'miraj', target: { type: 'guide', slug: 'rajab-virtues' } },
