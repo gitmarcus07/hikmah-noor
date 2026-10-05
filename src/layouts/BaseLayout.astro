@@ -260,9 +260,15 @@ const mobileGroups = [
           </button>
         </div>
       </div>
-      {/* Mobile drawer */}
-      <div id="mobileBackdrop" class="hidden lg:hidden fixed inset-0 z-[60]" style="background:rgba(23,32,27,0.45)" data-menu-close></div>
-      <aside id="mobileMenu" class="hidden lg:hidden fixed top-0 bottom-0 end-0 z-[61] w-[min(22rem,88vw)] flex flex-col" style="background:var(--hn-card);border-inline-start:1px solid var(--hn-border);box-shadow:var(--hn-shadow-lg);padding-bottom:env(safe-area-inset-bottom)" role="dialog" aria-modal="true" aria-label="Menu">
+    </div>
+  </header>
+
+  {/* Mobile drawer — body level, AFTER </header>. It must NOT live inside the
+      <header> above: the header's backdrop-filter creates a containing block
+      for fixed-position descendants, which crushed the drawer into the header
+      box on phones (title + search spilling over the hero). */}
+  <div id="mobileBackdrop" class="hidden lg:hidden fixed inset-0 z-[60]" style="background:rgba(23,32,27,0.45)" data-menu-close></div>
+  <aside id="mobileMenu" class="hidden lg:hidden fixed top-0 bottom-0 end-0 z-[61] w-[min(22rem,88vw)] flex flex-col" style="background:var(--hn-card);border-inline-start:1px solid var(--hn-border);box-shadow:var(--hn-shadow-lg);padding-bottom:env(safe-area-inset-bottom)" role="dialog" aria-modal="true" aria-label="Menu">
         <div class="flex items-center gap-2 px-4" style="height:3.75rem;border-bottom:1px solid var(--hn-border)">
           <img src="/favicon.svg" alt="" width="24" height="24" class="w-6 h-6 shrink-0" />
           <span class="font-extrabold text-[16px]" style="color:var(--hn-ink)">Hikmah Noor</span>
@@ -273,7 +279,7 @@ const mobileGroups = [
             <div class="hn-searchwrap">
               <Icon name="search" size={19} />
               <input name="q" placeholder={dict.nav.search ?? 'Search duas, surahs, topics...'} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" aria-label="Search" />
-              <button class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
+              <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
             </div>
           </form>
         </div>
@@ -326,8 +332,6 @@ const mobileGroups = [
   #mobileMenu details.mobile-nav-group[open] .nav-chev { transform: rotate(180deg); }
   #mobileMenu details.mobile-nav-group[open] { background: var(--hn-primary-soft); }
 </style>
-    </div>
-  </header>
 
   <script is:inline>
     (() => {

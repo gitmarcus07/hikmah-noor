@@ -17,119 +17,120 @@ const { locale, indexUrl, searchUrl, placeholder, id = 'q', mobileSuggest = fals
 const S = (getDict(locale) as any).search || {};
 const T = { viewAll: S.viewAll || 'See all {n} results →', noMatches: S.noMatches || 'No matches — press Enter to search anyway.' };
 ---
-<div class="relative min-w-0 flex-1" data-searchbox data-locale={locale} data-t={JSON.stringify(T)}>
+<div class="relative min-w-0 flex-1" data-searchbox data-locale={locale} data-index-url={indexUrl} data-search-url={searchUrl} data-input-id={id} data-t={JSON.stringify(T)}>
   <form action={searchUrl} method="get" class="hn-searchwrap" role="search">
     <Icon name="search" size={19} />
     <input id={id} name="q" placeholder={placeholder} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" role="combobox" aria-expanded="false" aria-controls={`${id}-suggest`} aria-autocomplete="list" />
-    <button class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
+    <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px] !min-h-[44px]" aria-label="Search"><Icon name="search" size={18} /></button>
   </form>
   <div id={`${id}-suggest`} class="hidden absolute inset-x-0 top-full mt-2 z-40 hn-card overflow-hidden max-h-[60vh] overflow-y-auto" role="listbox"></div>
 </div>
-<script define:vars={{ indexUrl, searchUrl, inputId: id, mobileSuggest }}>
-  import { createIndex, search, suggest, ayahNeeded, escHtml, highlight } from '../lib/search-engine.js';
-  (() => {
-    const boxes = [...document.querySelectorAll(`[data-searchbox] #${CSS.escape(inputId)}`)];
-    const box = boxes[0];
-    if (!box || box.dataset.wired === '1') return;
-    box.dataset.wired = '1';
-    const host = box.closest('[data-searchbox]');
-    const ayahUrl = String(indexUrl).replace('search-index.json', 'search-ayahs.json');
-    const T = JSON.parse(host?.dataset.t || '{}');
-    const panel = document.getElementById(`${inputId}-suggest`);
-    const form = box.closest('form');
-    let corePayload = null;
-    let core = null;
-    let ayahsLoaded = false;
-    let ayahsLoading = null;
-    let active = -1;
-    let rows = [];
-    const loadCore = async () => {
-      if (!core) {
-        try { corePayload = await (await fetch(indexUrl)).json(); }
-        catch { corePayload = null; }
-        if (!corePayload) corePayload = { v: 1, locale: 'en', cats: [], docs: [], surahs: [], aliases: {} };
-        core = createIndex(corePayload, null);
-      }
-      return core;
-    };
-    const ensureAyahs = async (q) => {
-      const idx = await loadCore();
-      if (ayahsLoaded || !ayahNeeded(idx, q)) return;
-      if (!ayahsLoading) {
-        ayahsLoading = (async () => {
-          try {
-            const payload = await (await fetch(ayahUrl)).json();
-            core = createIndex(corePayload, payload);
-          } catch { /* keep core-only */ }
-          ayahsLoaded = true;
-          ayahsLoading = null;
-        })();
-      }
-      await ayahsLoading;
-    };
-    const fill = (tpl, m) => String(tpl || '').replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
-    const close = () => {
-      panel.classList.add('hidden');
-      box.setAttribute('aria-expanded', 'false');
-      active = -1;
-    };
-    /* Suggestions work on every screen size — the popup is absolutely
-       positioned, capped in height, and dismisses on scroll, so it stays
-       usable on phones as well as desktops. */
-    const allowSuggest = () => true;
-    const render = (list, q, total) => {
-      rows = list;
-      if (!list.length) {
-        panel.innerHTML = `<p class="px-4 py-3.5 text-sm">${escHtml(T.noMatches)}</p>`;
-      } else {
-        panel.innerHTML = list.map((it, i) =>
-          `<a href="${escHtml(it.u)}" role="option" data-i="${i}" class="sugrow flex items-center gap-3 px-3.5 py-2.5 hover:opacity-80 ${i > 0 ? 'border-t' : ''}" style="border-color:var(--hn-border)">` +
-          `<span class="hn-badge hn-badge-primary">${escHtml(it.c)}</span>` +
-          `<span class="min-w-0"><span class="font-semibold text-[14px] leading-5 block truncate">${highlight(it.t, q)}</span></span>` +
-          `</a>`
-        ).join('') + (total > list.length
-          ? `<a href="${searchUrl}?q=${encodeURIComponent(q)}" class="block px-3.5 py-3 text-sm font-bold" style="color:var(--hn-primary);border-top:1px solid var(--hn-border)">${escHtml(fill(T.viewAll, { n: total }))}</a>`
-          : '');
-      }
-      panel.classList.remove('hidden');
-      box.setAttribute('aria-expanded', 'true');
-    };
-    let t = null;
-    box.addEventListener('input', () => {
-      clearTimeout(t);
-      t = setTimeout(async () => {
-        const q = box.value.trim();
-        if (q.length < 1 || !allowSuggest()) { close(); return; }
-        await loadCore();
-        await ensureAyahs(q);
-        const ranked = search(core, q, { limit: 60 });
-        render(ranked.slice(0, 6).map((r) => r.d), q, ranked.length);
-      }, 120);
+<script>
+  import { createIndex, search, ayahNeeded, escHtml, highlight } from '../lib/search-engine.js';
+  /* Config comes from data-* attributes on [data-searchbox] (NOT define:vars:
+   * vars force Astro to inline the script, which leaves the import above as a
+   * SyntaxError in the browser and silently kills all suggestions). */
+  const wireSearchBoxes = () => {
+    document.querySelectorAll('[data-searchbox]').forEach((host) => {
+      if (host.dataset.wired === '1') return;
+      host.dataset.wired = '1';
+      const indexUrl = host.dataset.indexUrl || '/search-index.json';
+      const searchUrl = host.dataset.searchUrl || '/search/';
+      const inputId = host.dataset.inputId || 'q';
+      const box = host.querySelector(`#${CSS.escape(inputId)}`);
+      const panel = host.querySelector(`#${CSS.escape(inputId)}-suggest`);
+      const form = box?.closest('form');
+      if (!box || !panel) return;
+      const ayahUrl = String(indexUrl).replace('search-index.json', 'search-ayahs.json');
+      const T = JSON.parse(host.dataset.t || '{}');
+      let corePayload = null;
+      let core = null;
+      let ayahsLoaded = false;
+      let ayahsLoading = null;
+      let active = -1;
+      const loadCore = async () => {
+        if (!core) {
+          try { corePayload = await (await fetch(indexUrl)).json(); }
+          catch { corePayload = null; }
+          if (!corePayload) corePayload = { v: 1, locale: 'en', cats: [], docs: [], surahs: [], aliases: {} };
+          core = createIndex(corePayload, null);
+        }
+        return core;
+      };
+      const ensureAyahs = async (q) => {
+        const idx = await loadCore();
+        if (ayahsLoaded || !ayahNeeded(idx, q)) return;
+        if (!ayahsLoading) {
+          ayahsLoading = (async () => {
+            try {
+              const payload = await (await fetch(ayahUrl)).json();
+              core = createIndex(corePayload, payload);
+            } catch { /* keep core-only */ }
+            ayahsLoaded = true;
+            ayahsLoading = null;
+          })();
+        }
+        await ayahsLoading;
+      };
+      const fill = (tpl, m) => String(tpl || '').replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
+      const close = () => {
+        panel.classList.add('hidden');
+        box.setAttribute('aria-expanded', 'false');
+        active = -1;
+      };
+      const render = (list, q, total) => {
+        if (!list.length) {
+          panel.innerHTML = `<p class="px-4 py-3.5 text-sm">${escHtml(T.noMatches)}</p>`;
+        } else {
+          panel.innerHTML = list.map((it, i) =>
+            `<a href="${escHtml(it.u)}" role="option" data-i="${i}" class="sugrow flex items-center gap-3 px-3.5 py-2.5 hover:opacity-80 ${i > 0 ? 'border-t' : ''}" style="border-color:var(--hn-border)">` +
+            `<span class="hn-badge hn-badge-primary">${escHtml(it.c)}</span>` +
+            `<span class="min-w-0"><span class="font-semibold text-[14px] leading-5 block truncate">${highlight(it.t, q)}</span></span>` +
+            `</a>`
+          ).join('') + (total > list.length
+            ? `<a href="${searchUrl}?q=${encodeURIComponent(q)}" class="block px-3.5 py-3 text-sm font-bold" style="color:var(--hn-primary);border-top:1px solid var(--hn-border)">${escHtml(fill(T.viewAll, { n: total }))}</a>`
+            : '');
+        }
+        panel.classList.remove('hidden');
+        box.setAttribute('aria-expanded', 'true');
+      };
+      let t = null;
+      box.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(async () => {
+          const q = box.value.trim();
+          if (q.length < 1) { close(); return; }
+          await loadCore();
+          await ensureAyahs(q);
+          const ranked = search(core, q, { limit: 60 });
+          render(ranked.slice(0, 6).map((r) => r.d), q, ranked.length);
+        }, 120);
+      });
+      box.addEventListener('focus', async () => {
+        if (box.value.trim().length >= 1) box.dispatchEvent(new Event('input'));
+        else loadCore();
+      });
+      box.addEventListener('keydown', (e) => {
+        const links = [...panel.querySelectorAll('.sugrow')];
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          if (panel.classList.contains('hidden') || !links.length) return;
+          e.preventDefault();
+          active = e.key === 'ArrowDown' ? (active + 1) % links.length : (active - 1 + links.length) % links.length;
+          links.forEach((a, i) => a.classList.toggle('hn-active-sug', i === active));
+          links[active]?.scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter' && active >= 0 && links[active]) {
+          e.preventDefault();
+          window.location.href = links[active].href;
+        } else if (e.key === 'Escape') close();
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('[data-searchbox]')) close();
+      });
+      form?.addEventListener('submit', () => close());
     });
-    box.addEventListener('focus', async () => {
-      if (box.value.trim().length >= 1) box.dispatchEvent(new Event('input'));
-      else loadCore();
-    });
-    box.addEventListener('keydown', (e) => {
-      const links = [...panel.querySelectorAll('.sugrow')];
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        if (panel.classList.contains('hidden') || !links.length) return;
-        e.preventDefault();
-        active = e.key === 'ArrowDown' ? (active + 1) % links.length : (active - 1 + links.length) % links.length;
-        links.forEach((a, i) => a.classList.toggle('hn-active-sug', i === active));
-        links[active]?.scrollIntoView({ block: 'nearest' });
-      } else if (e.key === 'Enter' && active >= 0 && links[active]) {
-        e.preventDefault();
-        window.location.href = links[active].href;
-      } else if (e.key === 'Escape') close();
-    });
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('[data-searchbox]')) close();
-    });
-    /* Dismiss suggestions on scroll so results stay visible (esp. mobile). */
-    document.addEventListener('scroll', () => close(), { passive: true, capture: true });
-    form?.addEventListener('submit', () => close());
-  })();
+  };
+  wireSearchBoxes();
+  document.addEventListener('astro:page-load', wireSearchBoxes);
 </script>
 <style>
   .hn-active-sug { background: var(--hn-primary-soft); }
