@@ -68,7 +68,12 @@ export const MONTHS: HijriMonth[] = [
       { d: 1, key: 'eid-fitr', target: { type: 'guide', slug: 'eid-prayer-method' } },
       { d: null, key: 'six-fasts', target: { type: 'guide', slug: 'shawwal-six-fasts' } },
     ] },
-  { slug: 'dhul-qadah', num: 11, name: 'Dhul-Qadah', arabic: 'ذو القعدة', sacred: true, events: [] },
+  { slug: 'dhul-qadah', num: 11, name: 'Dhul-Qadah', arabic: 'ذو القعدة', sacred: true,
+    hub: ['hajj-umrah-basics', 'ihram-how-to', 'umrah-day-plan'],
+    events: [
+      { d: null, key: 'hajj-prep', target: { type: 'guide', slug: 'hajj-umrah-basics' } },
+      { d: null, key: 'umrah-arrivals', target: { type: 'guide', slug: 'umrah-day-plan' } },
+    ] },
   { slug: 'dhul-hijjah', num: 12, name: 'Dhul-Hijjah', arabic: 'ذو الحجة', sacred: true,
     hub: ['hajj-day-by-day', 'mina-arafah-muzdalifah', 'qurbani-rules'],
     events: [
