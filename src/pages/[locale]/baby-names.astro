@@ -1,0 +1,155 @@
+---
+/* Baby names hub (locale) — same tables, localized links. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../../components/hn/SectionHeader.astro';
+import Icon from '../../components/Icon.astro';
+import { nonDefaultLocales, localizedPath } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Islamic Baby Names — Boy & Girl Names With Meanings`;
+const description = `30 beautiful Islamic baby names with verified meanings: Muhammad, Ahmad, Maryam, Fatima, Yusuf, Noor and more — plus naming Sunnahs, aqeeqah, and names to avoid.`;
+const keywords = 'islamic baby names, muslim baby boy names meaning, muslim baby girl names meaning, muhammad ahmad maryam fatima meaning, naming sunnah aqeeqah, baby names quran';
+const faq = [
+  { q: 'When should we name the baby?', a: 'On the seventh day with aqeeqah is the Sunnah pattern — though naming at birth is also established. Announce tahnik (chewed date on the palate) and adhan in the right ear at birth.' },
+  { q: 'Which names are best in Islam?', a: 'The Prophet ﷺ loved Abdullah and Abdur-Rahman (Muslim), and names of prophets and the righteous. Choose good meanings — the child will be called by it on the Last Day (Abu Dawud).' },
+  { q: 'Which names should we avoid?', a: 'Names implying servitude to other than Allah, ugly or shameful meanings, and Allah’s exclusive attributes as personal names. The Prophet ﷺ himself changed bad names to good ones (Muslim).' },
+  { q: 'What is aqeeqah?', a: 'Sacrifice on the seventh day (two sheep for a boy, one for a girl), shaving the hair with charity of silver equal to its weight, and naming. Our aqeeqah guide covers the first 7 days step by step.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Baby Names', path: '/baby-names/' },
+];
+const boys: { n: string; m: string }[] = [
+  { n: 'Muhammad ﷺ', m: 'Praised, praiseworthy — the Prophet’s ﷺ own name' },
+  { n: 'Ahmad', m: 'Most praised — his name in earlier scripture' },
+  { n: 'Abdullah', m: 'Servant of Allah — most beloved of names (Muslim)' },
+  { n: 'Abdur-Rahman', m: 'Servant of the Most Merciful — most beloved of names' },
+  { n: 'Ali', m: 'Sublime, exalted' },
+  { n: 'Umar', m: 'Flourishing, thriving' },
+  { n: 'Yusuf', m: 'Allah increases — beauty and power' },
+  { n: 'Ibrahim', m: 'Father of multitudes' },
+  { n: 'Ismail', m: 'Allah hears' },
+  { n: 'Musa', m: 'Drawn out (of the water)' },
+  { n: 'Dawud', m: 'Beloved' },
+  { n: 'Sulayman', m: 'Man of peace' },
+  { n: 'Yahya', m: 'He lives' },
+  { n: 'Hamza', m: 'Lion; steadfast' },
+  { n: 'Hasan', m: 'Good, beautiful' },
+];
+const girls: { n: string; m: string }[] = [
+  { n: 'Maryam', m: 'Devout worshipper — the only woman named in the Quran' },
+  { n: 'Fatima', m: 'One who weans — keeps away (from evil)' },
+  { n: 'Aisha', m: 'Living, prosperous' },
+  { n: 'Khadija', m: 'Early-born — the first Mother of the Believers' },
+  { n: 'Amina', m: 'Trustworthy, secure — the Prophet’s ﷺ mother' },
+  { n: 'Halima', m: 'Gentle, forbearing — his nursing mother' },
+  { n: 'Hafsa', m: 'Young lioness — guardian of the Quran copy' },
+  { n: 'Zaynab', m: 'Fragrant flowering tree' },
+  { n: 'Sarah', m: 'Noblewoman, princess' },
+  { n: 'Huda', m: 'Guidance' },
+  { n: 'Noor', m: 'Light' },
+  { n: 'Iman', m: 'Faith' },
+  { n: 'Amira', m: 'Princess, commander' },
+  { n: 'Layla', m: 'Night — born at night' },
+  { n: 'Tasnim', m: 'Fountain of Paradise (Quran 83:27)' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/baby-names/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">30 names</span>
+        <span class="hn-badge">Verified meanings</span>
+        <span class="hn-badge">Naming Sunnahs</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Islamic Baby Names</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">A name is a lifetime dua over your child — the Prophet ﷺ said you will be called by your names on the Last Day, so beautify them (Abu Dawud). Thirty established names with honest meanings, plus the Sunnah naming routine.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search names — yusuf, noor, maryam…" aria-label="Search baby names" />
+          <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/learn/family/aqeeqah-newborn/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Aqeeqah & first 7 days</a>
+        <a href={L('/names-of-allah/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">99 Names of Allah</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Sunnah" title="The naming routine" sub="Tahnik and adhan at birth; naming, aqeeqah and charity on day seven." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="hn-card hn-card-pad">
+          <p class="font-extrabold">At birth</p>
+          <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">Tahnik (softened date on the palate) and adhan in the right ear — the newborn’s first sounds are remembrance.</p>
+        </div>
+        <div class="hn-card hn-card-pad">
+          <p class="font-extrabold">Day seven</p>
+          <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">Name the child, sacrifice aqeeqah (two sheep for a boy, one for a girl), shave the hair and give silver equal to its weight in charity.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Boys" title="15 boy names" sub="Prophets, companions and meanings of strength." />
+      <div class="hn-card overflow-hidden">
+        <table class="w-full text-[14px] leading-6">
+          <thead>
+            <tr style="background:var(--hn-bg-soft)">
+              <th class="text-start font-extrabold px-4 py-3">Name</th>
+              <th class="text-start font-extrabold px-4 py-3">Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            {boys.map((b) => (
+              <tr class="border-t" style="border-color:var(--hn-border)">
+                <td class="px-4 py-2.5 font-bold whitespace-nowrap">{b.n}</td>
+                <td class="px-4 py-2.5" style="color:var(--hn-muted)">{b.m}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Girls" title="15 girl names" sub="Mothers of believers, Quranic women and meanings of light." />
+      <div class="hn-card overflow-hidden">
+        <table class="w-full text-[14px] leading-6">
+          <thead>
+            <tr style="background:var(--hn-bg-soft)">
+              <th class="text-start font-extrabold px-4 py-3">Name</th>
+              <th class="text-start font-extrabold px-4 py-3">Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            {girls.map((g) => (
+              <tr class="border-t" style="border-color:var(--hn-border)">
+                <td class="px-4 py-2.5 font-bold whitespace-nowrap">{g.n}</td>
+                <td class="px-4 py-2.5" style="color:var(--hn-muted)">{g.m}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

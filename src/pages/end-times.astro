@@ -1,0 +1,106 @@
+---
+/* End Times hub — Dajjal, Mahdi, Isa's return, Yajuj-Majuj, signs, grave and protection.
+ * Strictly sourced, no date predictions: learn the sequence, live the preparation. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import Icon from '../components/Icon.astro';
+import { localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+
+const locale = 'en';
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `End Times in Islam — Dajjal, Mahdi, Return of Isa, Signs & Protection`;
+const description = `Dajjal's trial and protection, Imam Mahdi, the return of Isa, Yajuj-Majuj, major and minor signs, grave and Barzakh — authentically sourced, no date predictions, with a protection routine.`;
+const keywords = 'end times islam, dajjal protection, imam mahdi, isa return, yajuj majuj, major signs qiyamah, minor signs judgement day, grave barzakh, kahf dajjal';
+const faq = [
+  { q: 'What should I do to prepare for the end times?', a: 'The Prophetic preparation is present-tense: guard the five prayers, memorize the first ten verses of Kahf, seek refuge from Dajjal in every tashahhud, live repentance-current, and ignore all date-setters.' },
+  { q: 'Has any major sign appeared?', a: 'No. Minor signs are visibly present, but no major sign — Dajjal, Mahdi, Isa’s descent — has fallen. Anyone dating the Hour contradicts Quran 7:187.' },
+  { q: 'How do I protect my children?', a: 'Teach the sequence as hope-filled story, memorize Kahf’s first ten together, guard their prayers, and model calm trust — fear without worship fails the signs’ only purpose.' },
+  { q: 'Why no dates or predictions here?', a: 'Because the Quran reserves the Hour’s knowledge to Allah alone, and fourteen centuries of date-setters stand refuted. We teach the sequence and the preparation — never the calendar.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'End Times', path: '/end-times/' },
+];
+const figureSlugs = ['dajjal-trial-protection', 'mahdi-awaited-guide', 'isa-second-coming', 'yajuj-majuj-barrier'];
+const signSlugs = ['signs-day-of-judgment', 'grave-barzakh-after-death', 'virtue-kahf-first-ten'];
+const figures = figureSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
+const signs = signSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/end-times/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">End Times hub</span>
+        <span class="hn-badge">No predictions</span>
+        <span class="hn-badge">Protection routine</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">End Times — Signs & Protection</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">Dajjal, Mahdi, the return of Isa, Yajuj-Majuj — learn the sequence from authentic sources, skip every date-setter, and live the fourfold protection routine daily.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search — dajjal, mahdi, signs…" aria-label="Search end times" />
+          <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/learn/aqeedah/signs-day-of-judgment/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Start: the 10 major signs</a>
+        <a href={L('/learn/aqeedah/dajjal-trial-protection/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Dajjal protection</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Figures" title="The awaited figures" sub="Dajjal, Mahdi, Isa and Yajuj-Majuj — what is established, what is not." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {figures.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Sequence" title="Signs, grave & preparation" sub="The order of events, the Barzakh between, and the Kahf shield." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {signs.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Duas" title="Protection duas" sub="The daily armor: refuge, Kursi, Quls and remembrance." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/duas/protection/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Protection duas</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Ayatul Kursi, Quls, and prophetic shields with Arabic and meaning</span>
+        </a>
+        <a href={L('/duas/morning-evening/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Morning & evening adhkar</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">The daily litany that guards the believer till night and till dawn</span>
+        </a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

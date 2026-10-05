@@ -1,0 +1,150 @@
+---
+/* Discover Islam hub — for the curious, seekers and new Muslims.
+ * Beliefs, God, Prophet, Quran, worship and Jesus & Mary — gentle, sourced, no polemics. */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../components/hn/SectionHeader.astro';
+import Icon from '../components/Icon.astro';
+import { localizedPath } from '../i18n/utils';
+import { GUIDES } from '../data/guides';
+
+const locale = 'en';
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Discover Islam — What Muslims Believe, in Simple Words`;
+const description = `Curious about Islam? Who Allah is, who Muhammad ﷺ is, what the Quran says, the five pillars, Jesus and Mary in Islam — clear answers with sources, plus a path for new Muslims.`;
+const keywords = 'discover islam, what is islam, who is allah, who is muhammad, what is quran, five pillars islam, jesus in islam, mary in islam, how to become muslim, shahada';
+const faq = [
+  { q: 'What do Muslims believe in one minute?', a: 'One eternal God (Allah) without partner; angels, revealed books, all prophets ending with Muhammad ﷺ, the Last Day, and divine decree — worshipped through five daily prayers, charity, fasting and pilgrimage.' },
+  { q: 'Do Muslims believe in Jesus and Mary?', a: 'Yes — Isa is a mighty messenger born miraculously to Maryam, honoured with a whole Quran chapter (Maryam 19); Muslims love him, await his return, and worship Allah alone.' },
+  { q: 'How does someone become Muslim?', a: 'By testifying with conviction: none is worthy of worship but Allah, and Muhammad is His messenger — then learning prayer step by step. Our New Muslim hub guides the first weeks.' },
+  { q: 'Where do I ask tough questions?', a: 'Start with these pages, then bring specifics to a local mosque or our Ask page — sincere questions deserve patient, sourced answers.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Discover Islam', path: '/discover-islam/' },
+];
+const startSlugs = ['what-is-islam-simple', 'who-is-allah-simple', 'who-is-muhammad-simple'];
+const starts = startSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean);
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/discover-islam/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">For the curious</span>
+        <span class="hn-badge">Simple words</span>
+        <span class="hn-badge">Sourced</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Discover Islam</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">What Muslims believe and why — God, the Prophet ﷺ, the Quran, worship, and Jesus & Mary — in plain language with sources. Read in order; twenty minutes answers years of questions.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Ask — who is Allah, what is Quran…" aria-label="Ask about Islam" />
+          <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/learn/aqeedah/what-is-islam-simple/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Start: what is Islam?</a>
+        <a href={L('/new-muslim/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">New Muslim path</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Start" title="Read in order" sub="Three short pages: the message, God, and the Messenger." />
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {starts.map((g: any) => (
+          <a href={L(`/learn/${g.cat}/${g.slug}/`)} class="hn-card hn-card-hover hn-card-pad block">
+            <span class="font-extrabold block leading-6">{g.title}</span>
+            <span class="text-sm leading-6 block mt-1 line-clamp-2" style="color:var(--hn-muted)">{g.intro}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Beliefs" title="Core beliefs, simply" sub="Six articles, worship pillars, and the Last Day." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/learn/aqeedah/six-pillars-iman-explained/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Six Pillars of Iman</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Allah, angels, books, messengers, Last Day and decree — explained</span>
+        </a>
+        <a href={L('/learn/salah/how-to-pray-namaz/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">How Muslims pray</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Five daily prayers, step by step with meanings</span>
+        </a>
+        <a href={L('/learn/salah/wudu-ablution/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Wudu — ablution before prayer</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">The ritual washing, step by step</span>
+        </a>
+        <a href={L('/aqeedah/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Aqeedah hub — all beliefs</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Tawhid, shirk, Qadr, angels, books and messengers</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Quran" title="The Book Muslims read" sub="What it is, how it begins, and where to start reading." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/quran/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Read the Quran</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Full Arabic text with translation and audio</span>
+        </a>
+        <a href={L('/surahs/1-al-faatiha/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Start here: Surah Al-Fatiha</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">The Opening — recited in every prayer, explained</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Jesus & Mary" title="Isa and Maryam in Islam" sub="Honoured, beloved — and strictly human, worshipped never." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/learn/aqeedah/isa-second-coming/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Jesus in Islam & his return</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Miraculous birth, mighty messenger, awaited descent</span>
+        </a>
+        <a href={L('/surahs/19-maryam/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Surah Maryam — read her story</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">The chapter named for Mary, with translation</span>
+        </a>
+        <a href={L('/women/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Women in Islam</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Maryam, Khadija, Aisha, Fatima and 20 more lives</span>
+        </a>
+        <a href={L('/prophets/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">All 25 prophets in order</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Adam to Muhammad ﷺ — one message, many messengers</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Next" title="Take the next step" sub="New Muslim path, local mosques, and asking questions." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href={L('/new-muslim/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">New Muslim starter path</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Shahada to first prayer, week by week</span>
+        </a>
+        <a href={L('/ask/')} class="hn-card hn-card-hover hn-card-pad block">
+          <span class="font-extrabold block leading-6">Ask a question</span>
+          <span class="text-sm leading-6 block mt-1" style="color:var(--hn-muted)">Sincere questions get patient, sourced answers</span>
+        </a>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

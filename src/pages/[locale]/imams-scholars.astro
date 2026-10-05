@@ -1,0 +1,103 @@
+---
+/* Imams & Scholars hub (locale) — same biographies, localized links. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/hn/Breadcrumbs.astro';
+import SectionHeader from '../../components/hn/SectionHeader.astro';
+import Icon from '../../components/Icon.astro';
+import { nonDefaultLocales, localizedPath } from '../../i18n/utils';
+
+export async function getStaticPaths() { return nonDefaultLocales.map((locale) => ({ params: { locale } })); }
+const { locale } = Astro.params;
+const L = (p: string) => localizedPath(locale, p);
+
+const title = `Imams & Scholars — Abu Hanifa, Malik, Shafii, Ahmad, Bukhari & Muslim`;
+const description = `Who were the 4 Imams? What is a madhhab? Short biographies of Abu Hanifa, Malik, Shafii, Ahmad ibn Hanbal, Bukhari and Muslim — and how ordinary Muslims follow scholarship.`;
+const keywords = 'four imams, abu hanifa malik shafii ahmad, what is madhhab, imam bukhari biography, imam muslim biography, hanafi maliki shafii hanbali, following scholars islam';
+const faq = [
+  { q: 'What is a madhhab?', a: 'A school of Islamic law — a preserved method for deriving rulings from the Quran and Sunnah, named after its founding imam. Laypeople follow one consistently to avoid fatwa-shopping.' },
+  { q: 'Which madhhab should I follow?', a: 'The one of your teachers and land — learn it properly from scholars. All four Sunni schools are valid paths to the same Sunnah; switching for convenience is blameworthy.' },
+  { q: 'Are Bukhari and Muslim the Quran?', a: 'No — the Quran is Allah’s word; their collections are the most authentic hadith books after it. Their narrations are graded, studied, and explained by scholars, not read in isolation for rulings.' },
+  { q: 'How do I learn from scholars today?', a: 'Attach to living, known scholars; study one madhhab’s basics; verify viral clips against books; and never issue rulings from translations alone.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Imams & Scholars', path: '/imams-scholars/' },
+];
+const imams: { n: string; d: string; w: string; b: string }[] = [
+  { n: 'Imam Abu Hanifa (d. 150 AH)', d: 'Kufa, Iraq', w: 'Founder of the Hanafi school; master of analogy (qiyas); students Abu Yusuf and Muhammad preserved his rulings.', b: 'Merchant-scholar famed for worship, scrupulousness and reasoned law. His school guides most South Asian, Turkish and Central Asian Muslims — learn your prayer and fasting rulings from Hanafi teachers if that is your land’s school.' },
+  { n: 'Imam Malik (d. 179 AH)', d: 'Madinah', w: 'Author of Al-Muwatta; anchored law in Madinah’s living practice alongside hadith.', b: 'The Imam of the Abode of Migration — refused to flog, taught seated with awe for hadith. His school guides North and West Africa. His respect for the Prophet’s ﷺ city models adab with knowledge.' },
+  { n: 'Imam Shafii (d. 204 AH)', d: 'Gaza → Baghdad → Egypt', w: 'Author of Al-Risala, the first book on legal theory (usul); student of Malik and of Abu Hanifa’s students.', b: 'The unifier: systematized how Quran, Sunnah, consensus and analogy work together. His school guides Egypt, East Africa and Southeast Asia. Memorize his rule: my opinion is right, possibly wrong — another’s wrong, possibly right.' },
+  { n: 'Imam Ahmad ibn Hanbal (d. 241 AH)', d: 'Baghdad', w: 'Compiler of Al-Musnad (~30,000 narrations); stood unbroken through the Mihna inquisition over the Quran’s uncreatedness.', b: 'The Imam of steadfastness — whipped for refusing state doctrine, forgiving his torturers. His school guides the Arabian Peninsula. His life teaches: scholarship sometimes costs, and truth outlasts thrones.' },
+  { n: 'Imam Bukhari (d. 256 AH)', d: 'Bukhara → Nishapur', w: 'Compiler of Sahih al-Bukhari — ~7,000 narrations (with repetitions) sifted from 600,000; each written after ritual bath and prayer.', b: 'The most meticulous hadith critic in history: memory tested publicly and passed, chains verified meeting-by-meeting. His Sahih is the most authentic book after the Quran — read it with commentary, not alone.' },
+  { n: 'Imam Muslim (d. 261 AH)', d: 'Nishapur', w: 'Compiler of Sahih Muslim — arranged by theme for study; student of Bukhari who refined arrangement and precision.', b: 'The organizer: his Sahih’s chapter order teaches fiqh through hadith sequence. Together, “the Two Sahihs” (Bukhari + Muslim) are the agreed peak of authenticity — agreed-upon narrations are proof beyond dispute.' },
+];
+---
+<BaseLayout title={title} description={description} keywords={keywords} locale={locale} type="collection" faq={faq} crumbs={crumbs} canonicalPath="/imams-scholars/">
+  <div class="hn-discover hn-section">
+    <Breadcrumbs locale={locale} items={crumbs} />
+    <div class="mt-3 max-w-2xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="hn-badge hn-badge-primary">6 biographies</span>
+        <span class="hn-badge">Non-polemical</span>
+        <span class="hn-badge">How to follow</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Imams & Scholars</h1>
+      <p class="mt-2 leading-7" style="color:var(--hn-muted)">The four Imams, the two Sahih compilers — who they were, what they wrote, and how ordinary Muslims follow scholarship without confusion or partisanship.</p>
+      <form action={L('/search/')} method="get" class="mt-4" role="search">
+        <div class="hn-searchwrap max-w-xl">
+          <Icon name="search" size={19} />
+          <input name="q" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck={false} enterkeyhint="search" inputmode="search" placeholder="Search — hanafi, bukhari, madhhab…" aria-label="Search scholars" />
+          <button type="submit" class="hn-btn hn-btn-primary !rounded-[10px]">Go</button>
+        </div>
+      </form>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <a href={L('/hadees/')} class="hn-btn hn-btn-primary !min-h-[44px] text-sm">Hadees library</a>
+        <a href={L('/methodology/')} class="hn-btn hn-btn-secondary !min-h-[44px] text-sm">Our methodology</a>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Lives" title="Six lives that carry the deen" sub="Read each in a minute; study each for a lifetime." />
+      <div class="grid gap-3 sm:grid-cols-2">
+        {imams.map((m, i) => (
+          <div class="hn-card hn-card-pad">
+            <span class="hn-badge hn-badge-primary">#{i + 1} · {m.d}</span>
+            <p class="font-extrabold text-[17px] leading-7 mt-2">{m.n}</p>
+            <p class="text-sm leading-6 mt-1 font-semibold" style="color:var(--hn-primary)">{m.w}</p>
+            <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">{m.b}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <SectionHeader eyebrow="Method" title="How a layperson follows" sub="Three rules that end 90% of confusion." />
+      <div class="grid gap-3 sm:grid-cols-3">
+        <div class="hn-card hn-card-pad">
+          <p class="font-extrabold">1 · One school, properly</p>
+          <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">Learn your land’s madhhab from teachers — consistency beats cherry-picking the easiest opinion each time.</p>
+        </div>
+        <div class="hn-card hn-card-pad">
+          <p class="font-extrabold">2 · Scholars, not clips</p>
+          <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">Take rulings from known, qualified scholars with full context — never from anonymous videos or forwarded fatwas.</p>
+        </div>
+        <div class="hn-card hn-card-pad">
+          <p class="font-extrabold">3 · Respect all four</p>
+          <p class="text-sm leading-6 mt-1" style="color:var(--hn-muted)">Valid differences are mercy. Never mock another school’s followers — the Imams themselves forbade partisanship.</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="mt-8 max-w-3xl" aria-label="Frequently asked questions">
+      <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
