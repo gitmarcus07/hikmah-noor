@@ -227,6 +227,20 @@ const uid = `${(name ?? motif ?? 'art').toLowerCase().replace(/[^a-z0-9]+/g, '')
         <circle cx="66" cy="20" r="3" fill={accent} stroke="none" />
       </g>
     )}
+    {motif === 'rampart' && (
+      <g>
+        <path d="M16 74 V44 H24 V36 H32 V44 H40 V36 H48 V44 H56 V36 H64 V44 H72 V36 H74 V74" />
+        <path d="M16 74 H74" stroke-width="4" />
+        <path d="M45 44 V60" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'gate' && (
+      <g>
+        <path d="M28 74 V40 C28 26 36 18 45 18 C54 18 62 26 62 40 V74" stroke-width="4" />
+        <path d="M28 74 H62 M20 74 H70" stroke-width="3" />
+        <circle cx="45" cy="14" r="3" fill={accent} stroke="none" />
+      </g>
+    )}
   </g>
 
   {/* emblem calligraphy */}

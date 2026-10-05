@@ -16,8 +16,8 @@ const fail = (msg) => { errors++; console.error('X ' + msg); };
 const warn = (msg) => { warnings++; console.warn('! ' + msg); };
 
 const nameSlugify = (s) => s.toLowerCase().replace(/[’‘'`]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const parseNames = (txt) => [...txt.matchAll(/\{ n: (\d+), arabic: ('[^']*'|"[^"]*"), translit: ('[^']*'|"[^"]*"), meaning: ('[^']*'|"[^"]*") \}/g)]
-  .map((m) => ({ n: +m[1], arabic: m[2].slice(1, -1), translit: m[3].slice(1, -1), meaning: m[4].slice(1, -1) }));
+const parseNames = (txt) => [...txt.matchAll(/\{ n: (\d+), arabic: ('[^']*'|"[^"]*"), translit: ('[^']*'|"[^"]*"), meaning: ('[^']*'|"[^"]*")[^}]*\}/g)]
+  .map((m) => ({ n: +m[1], arabic: m[2].slice(1, -1), translit: m[3].slice(1, -1), meaning: m[4].slice(1, -1), detail: /detail: ('[^']*'|"[^"]*")/.test(m[0]) }));
 
 const checkList = (label, rows, overrides = {}) => {
   console.log(`  ${label}: ${rows.length} entries`);
@@ -28,6 +28,7 @@ const checkList = (label, rows, overrides = {}) => {
     if (!r.arabic) fail(`${label} n=${r.n}: missing arabic`);
     if (!r.translit) fail(`${label} n=${r.n}: missing translit`);
     if (!r.meaning) fail(`${label} n=${r.n}: missing meaning`);
+    if (label === 'allah' && !r.detail) fail(`${label} n=${r.n}: missing detail`);
   }
   const seen = new Map();
   const slugs = new Map();

@@ -55,6 +55,12 @@ const next = nextAllah(entry.n) ? localizeAllahName(nextAllah(entry.n), locale) 
       <hr class="hn-divider" />
       <p class="hn-block-label">{T.meaningL}</p>
       <p class="text-[17px] font-bold leading-8">{entry.meaning}</p>
+      {entry.detail && (
+        <div class="mt-4">
+          <p class="hn-block-label">{T.detailL ?? 'In practice'}</p>
+          <p class="text-[15px] leading-8" style="color:var(--hn-ink)">{entry.detail}</p>
+        </div>
+      )}
     </div>
 
     <p class="mt-3 text-[13px]" style="color:var(--hn-muted)">{T.srcL}: <strong style="color:var(--hn-ink)">{T.srcNote}</strong></p>

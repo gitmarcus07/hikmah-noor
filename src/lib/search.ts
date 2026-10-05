@@ -785,8 +785,8 @@ export function historyIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : '/' + locale;
   const items: IndexItem[] = [
     {
-      title: 'Islamic History — 20 Landmark Events in Order',
-      description: 'Hijrah, Badr, Hudaybiyyah, Yarmuk, Cordoba, Baghdad, Hattin, Constantinople and more — timelines, lessons and references.',
+      title: 'Islamic History — 22 Landmark Events in Order',
+      description: 'Hijrah, Badr, Hudaybiyyah, Yarmuk, Cordoba, Baghdad, Hattin, Crusades, Constantinople, Ottomans and more — timelines, lessons and references.',
       category: 'history',
       url: prefix + '/history/',
       tags: ['history', 'tarikh', 'islamic history', 'muslim history', 'timeline', 'seerah history'],
