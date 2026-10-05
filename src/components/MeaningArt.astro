@@ -337,6 +337,117 @@ const uid = `${(term ?? motif ?? 'art').toLowerCase().replace(/[^a-z0-9]+/g, '')
         <circle cx="45" cy="28" r="5" stroke-width="3" />
       </g>
     )}
+    {motif === 'unity' && (
+      <g>
+        <circle cx="45" cy="45" r="30" />
+        <circle cx="45" cy="45" r="6" fill={accent} stroke="none" />
+      </g>
+    )}
+    {motif === 'shard' && (
+      <g>
+        <path d="M45 10 C66 24 70 50 56 68 C46 80 30 80 22 68" />
+        <path d="M45 10 C40 30 48 44 38 58 M45 10 C52 28 44 46 54 62" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'eclipse' && (
+      <g>
+        <circle cx="45" cy="45" r="28" />
+        <path d="M45 17 A28 28 0 0 1 45 73 A22 34 0 0 0 45 17 Z" fill={accent} stroke="none" opacity="0.85" />
+      </g>
+    )}
+    {motif === 'mask' && (
+      <g>
+        <path d="M20 30 C20 58 30 74 45 74 C60 74 70 58 70 30 C60 38 52 38 45 38 C38 38 30 38 20 30 Z" />
+        <circle cx="35" cy="50" r="3" fill={accent} stroke="none" />
+        <circle cx="55" cy="50" r="3" fill={accent} stroke="none" />
+        <path d="M45 38 V48" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'tangle' && (
+      <g>
+        <path d="M25 25 C45 25 45 65 65 65" />
+        <path d="M65 25 C65 45 25 45 25 65" />
+        <circle cx="25" cy="25" r="4" fill={accent} stroke="none" />
+        <circle cx="65" cy="65" r="4" fill={accent} stroke="none" />
+      </g>
+    )}
+    {motif === 'path' && (
+      <g>
+        <path d="M20 75 L45 75 L60 15 L75 15" />
+        <path d="M45 75 L60 15" stroke-width="3" opacity="0.5" />
+        <circle cx="67" cy="15" r="6" fill={accent} stroke="none" />
+        <path d="M20 75 H32" stroke-width="6" />
+      </g>
+    )}
+    {motif === 'scroll' && (
+      <g>
+        <path d="M28 20 H62 M28 20 C24 34 24 56 28 70 M62 20 C66 34 66 56 62 70 M28 70 H62" />
+        <path d="M36 34 H54 M36 44 H54 M36 54 H48" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'medal' && (
+      <g>
+        <circle cx="45" cy="52" r="20" />
+        <circle cx="45" cy="52" r="6" fill={accent} stroke="none" />
+        <path d="M37 34 L30 12 M53 34 L60 12 M30 12 H60" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'voice' && (
+      <g>
+        <path d="M30 50 H20 C20 62 28 70 38 72 V78 H52 V72 C62 70 70 62 70 50 H60" />
+        <rect x="38" y="18" width="14" height="30" rx="7" />
+        <path d="M45 78 V84" stroke-width="4" />
+      </g>
+    )}
+    {motif === 'ring' && (
+      <g>
+        <circle cx="45" cy="18" r="4" fill={accent} stroke="none" />
+        <circle cx="69" cy="31" r="4" fill={accent} stroke="none" />
+        <circle cx="73" cy="58" r="4" fill={accent} stroke="none" />
+        <circle cx="56" cy="76" r="4" fill={accent} stroke="none" />
+        <circle cx="34" cy="76" r="4" fill={accent} stroke="none" />
+        <circle cx="17" cy="58" r="4" fill={accent} stroke="none" />
+        <circle cx="21" cy="31" r="4" fill={accent} stroke="none" />
+        <circle cx="45" cy="47" r="10" />
+      </g>
+    )}
+    {motif === 'ewer' && (
+      <g>
+        <path d="M38 26 H54 V36 C60 42 61 52 57 62 C54 70 50 74 45 74 C40 74 36 70 33 62 C29 52 30 42 36 36 Z" />
+        <path d="M36 40 C26 40 24 50 29 56" stroke-width="3" />
+        <path d="M45 26 V18 M39 18 H51" stroke-width="3" />
+        <path d="M30 62 C34 68 40 70 45 70" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'rain' && (
+      <g>
+        <path d="M28 34 A14 14 0 0 1 42 22 A12 12 0 0 1 64 34 Z" />
+        <path d="M34 48 V58 M45 48 V62 M56 48 V58" stroke-width="4" />
+        <path d="M28 68 H62" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'alms' && (
+      <g>
+        <path d="M18 60 C26 72 36 76 45 76 C54 76 64 72 72 60" stroke-width="4" />
+        <circle cx="45" cy="42" r="16" />
+        <path d="M45 34 V50 M39 38 L45 34 L51 38" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'cube' && (
+      <g>
+        <polygon points="45,20 68,31 68,62 45,73 22,62 22,31" />
+        <path d="M45 20 V51 M22 31 L45 42 L68 31 M45 51 V73" stroke-width="3" />
+      </g>
+    )}
+    {motif === 'bloom' && (
+      <g>
+        <circle cx="45" cy="40" r="7" fill={accent} stroke="none" />
+        <path d="M45 33 C45 24 40 18 34 16 C38 24 40 29 45 33 Z" stroke-width="3" />
+        <path d="M45 33 C45 24 50 18 56 16 C52 24 50 29 45 33 Z" stroke-width="3" />
+        <path d="M45 47 V78" stroke-width="4" />
+        <path d="M45 64 C36 62 30 64 26 70 M45 64 C54 62 60 64 64 70" stroke-width="3" />
+      </g>
+    )}
   </g>
 
   {/* medallion rings */}

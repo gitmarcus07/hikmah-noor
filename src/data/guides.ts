@@ -1818,6 +1818,20 @@ export const GUIDES: Guide[] = [
       { q: 'Is Asr good for beginners and kids?', a: 'Ideal: three short verses carrying complete theology. Memorize it in the first week of any Quran journey.' },
     ],
     aliases: ['surah asr benefits', 'wal asr meaning', 'shafii asr statement', 'four conditions success islam'] },
+  { slug: 'wazifa-duas-authentic', cat: 'duties', title: 'Wazifa & Special Duas — What Is Authentic and What Is Not',
+    intro: 'Searching wazifa for job, marriage or rizq? Learn which special duas are authentically established, which popular wazifas lack evidence, and the Prophetic formula that actually brings help.',
+    sections: [
+      { h: 'What wazifa really means', ps: ['Wazifa originally means a regular portion of dhikr or Quran - a daily litany. The Prophet fixed many: morning-evening adhkar, post-salah tasbih, nightly Quls. These established routines ARE the authentic wazifa - no invention needed.', 'Problems start with fixed-count formulas tied to specific worldly outcomes (recite X 1100 times for a job) with no source. Scholars rule: specifying unlegislated numbers, times and promises is innovation - even with Quranic words.'] },
+      { h: 'The authentic formula for needs', ps: ['Five established doors: (1) obligatory worship on time, (2) morning-evening adhkar, (3) Tahajjud and the last-third dua, (4) abundant istighfar - "whoever holds to istighfar, Allah gives relief and provision" (Abu Dawud, graded hasan), and (5) durood - Ubayy was told his worries would be sufficed (Tirmidhi, hasan).', 'Add halal means with excellence, abandon sin (it blocks rizq), give charity, and keep family ties - provision flows through these channels by texts. Then trust and wait: hastiness ("I prayed and got nothing") blocks acceptance.'] },
+    ],
+    steps: ['Fix the five daily prayers and abandon the blocking sin first.', 'Hold morning-evening adhkar and 100x daily istighfar with presence.', 'Pray Tahajjud (even 2 rakahs) and ask explicitly in the last third.', 'Send abundant durood; give charity; serve parents and kin.', 'Take the best halal means, then stop recalculating - trust the Timing.'],
+    ref: 'Sunan Abi Dawud (istighfar relief and provision, graded hasan); Tirmidhi (durood suffices worries, hasan); Sahih collections (morning-evening adhkar, Tahajjud)',
+    faq: [
+      { q: 'Is reading Surah Yaseen 41 times for a need allowed?', a: 'No fixed basis: Yaseen\u2019s general merit stands, but the 41-count-for-needs formula is invented. Read Yaseen for reward, and ask needs through the five established doors above.' },
+      { q: 'What about wazifas my elders taught me?', a: 'Honour elders, verify worship: keep whatever matches Sunnah adhkar, and gently replace fixed-count formulas with the authentic routines - love for elders never outranks following the Prophet.' },
+      { q: 'Should I pay someone for taweez or wazifa?', a: 'Never pay for amulets or secret formulas - our fake-raqi guide lists the red flags. Authentic dua is free, in your own tongue, direct to Allah.' },
+    ],
+    aliases: ['wazifa for job', 'wazifa for marriage', 'wazifa for rizq', 'wazifa authentic or bidah', 'special duas needs', 'vazifa islam'] },
 ];
 export function guideCat(slug: string) {
   return GUIDE_CATS.find((c) => c.slug === slug);

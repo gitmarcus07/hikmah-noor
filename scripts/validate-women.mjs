@@ -1,4 +1,4 @@
-// Women library validator: 12 figures in order, unique slugs/motifs/orders,
+// Women library validator: 24 figures in order, unique slugs/motifs/orders,
 // required fields, no collisions with waqiat slugs or women article slugs.
 // Run: npm run content:women
 import { readFile, readdir } from 'node:fs/promises';
@@ -15,12 +15,12 @@ let errors = 0;
 const fail = (msg) => { errors++; console.error('❌ ' + msg); };
 
 const slugs = [...txt.matchAll(/slug: '([^']+)', order:/g)].map((m) => m[1]);
-if (slugs.length !== 12) fail(`expected 12 figures, found ${slugs.length}`);
+if (slugs.length !== 24) fail(`expected 24 figures, found ${slugs.length}`);
 if (new Set(slugs).size !== slugs.length) fail('duplicate woman slugs');
 
 const orders = [...txt.matchAll(/order: (\d+), name:/g)].map((m) => Number(m[1]));
 const sorted = [...orders].sort((a, b) => a - b);
-if (JSON.stringify(sorted) !== JSON.stringify(Array.from({ length: 12 }, (_, i) => i + 1))) fail(`orders must be 1-12 exactly once, found: ${orders.join(',')}`);
+if (JSON.stringify(sorted) !== JSON.stringify(Array.from({ length: 24 }, (_, i) => i + 1))) fail(`orders must be 1-24 exactly once, found: ${orders.join(',')}`);
 
 const starts = [...txt.matchAll(/\{ slug: '[^']+', order:/g)].map((m) => m.index);
 const required = ['title:', 'name:', 'era:', 'arabic:', 'translit:', 'summary:', 'narrative:', 'events:', 'lessons:', 'references:', 'aliases:', 'motif:', 'accent:'];
@@ -55,4 +55,4 @@ for (const s of slugs) if (artSlugs.has(s)) fail(`slug collision with article: $
 console.log(`\n📊 Women: ${slugs.length} — orders ${sorted[0]}-${sorted[sorted.length - 1]}`);
 console.log(`📊 Search index entries per locale: ${1 + slugs.length} (hub + figures)`);
 if (errors) { console.error(`\n${errors} error(s).`); process.exit(1); }
-console.log('✅ women.ts valid — 12 in order, unique slugs/motifs, no collisions, fields present.');
+console.log('✅ women.ts valid — 24 in order, unique slugs/motifs, no collisions, fields present.');

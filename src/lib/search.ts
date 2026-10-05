@@ -480,7 +480,7 @@ export function womenIndexItems(locale: string): IndexItem[] {
   const prefix = locale === 'en' ? '' : `/${locale}`;
   const items: IndexItem[] = [
     {
-      title: 'Women in Islam — Lives of 12 Noble Figures',
+      title: 'Women in Islam — Lives of 24 Noble Figures',
       description: 'Stories of Khadija, Aisha, Fatima, Maryam, Asiya and more — faith, courage and scholarship. Each figure has its own page.',
       category: 'women',
       url: `${prefix}/women/`,
