@@ -1,8 +1,6 @@
 ---
 import '../styles/global.css';
-import { ClientRouter } from 'astro:transitions';
 import { isRTL, localeNames, locales, getDict, localizedPath } from '../i18n/utils';
-import { isQuranRoute } from '../lib/quran-routes';
 import Icon from '../components/Icon.astro';
 import NoticePopup from '../components/NoticePopup.astro';
 
@@ -71,10 +69,6 @@ const crumbLd = crumbs.length ? {
 } : null;
 
 const L = (p: string) => localizedPath(locale, p);
-// Client-side navigation is enabled ONLY for the Quran reading routes so the
-// global audio player survives Para/Surah navigation. Every other route keeps
-// normal full page loads (a client guard forces reloads when leaving Quran).
-const useClientRouter = isQuranRoute(Astro.url.pathname);
 const moreGroups = [
   { label: 'Read', links: [
     { label: dict.nav.surahs ?? 'Surahs', href: L('/surahs/'), icon: 'surahs' },
@@ -189,7 +183,6 @@ const mobileGroups = [
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <meta name="theme-color" content="#FAF8F2" />
-  {useClientRouter && <ClientRouter />}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
@@ -411,38 +404,12 @@ const mobileGroups = [
       }
 
       wireHeader();
-      document.addEventListener('astro:page-load', wireHeader);
-      document.addEventListener('astro:after-swap', wireHeader);
     })();
   </script>
 
   <main id="content" class="flex-1 w-full">
     <slot />
   </main>
-
-  {/* ============ GLOBAL QURAN AUDIO MINI-PLAYER ============ */}
-  {/* Persistent host: the single <audio> element lives here and is carried
-      across client-side navigation by Astro's transition:persist. Kept in the
-      render tree (offscreen 1px, NOT display:none) so the browser always treats
-      the media element as active. */}
-  <div id="hn-audio-host" transition:persist="hn-audio-host" aria-hidden="true" style="position:fixed;width:1px;height:1px;left:-9999px;top:0;overflow:hidden;pointer-events:none"></div>
-  <div id="hnPlayer" transition:persist="hn-player" class="hidden fixed inset-x-0 z-40 px-3" role="region" aria-label="Quran audio player">
-    <div class="hn-card mx-auto max-w-2xl px-2.5 py-2 flex items-center gap-2" style="box-shadow:var(--hn-shadow-lg)">
-      <button type="button" data-hp-prev class="hn-icon-btn !w-10 !h-10 !rounded-full" aria-label="Previous verse">⏮</button>
-      <button type="button" data-hp-toggle class="hn-icon-btn !w-11 !h-11 !rounded-full" aria-label="Play" style="background:var(--hn-primary);color:#fff;border-color:var(--hn-primary)">▶</button>
-      <button type="button" data-hp-next class="hn-icon-btn !w-10 !h-10 !rounded-full" aria-label="Next verse">⏭</button>
-      <div class="min-w-0 flex-1">
-        <div data-hp-title class="text-sm font-bold truncate" style="color:var(--hn-ink)">Quran</div>
-        <div data-hp-sub class="text-xs truncate" style="color:var(--hn-muted)">Ready</div>
-      </div>
-      <a data-hp-open href="#" class="hidden text-xs font-bold whitespace-nowrap" style="color:var(--hn-primary)">Open</a>
-      <button type="button" data-hp-close class="hn-icon-btn !w-9 !h-9 !rounded-full" aria-label="Close player">✕</button>
-    </div>
-  </div>
-  <style>
-    #hnPlayer { bottom: calc(4.75rem + env(safe-area-inset-bottom)); }
-    @media (min-width: 768px) { #hnPlayer { bottom: 1rem; } }
-  </style>
 
   {/* ============ MOBILE BOTTOM NAV ============ */}
   <nav class="md:hidden fixed bottom-0 inset-x-0 z-50 border-t" style="background:var(--hn-header);backdrop-filter:blur(12px);border-color:var(--hn-border);padding-bottom:env(safe-area-inset-bottom)" aria-label="Quick">
@@ -537,10 +504,5 @@ const mobileGroups = [
   </footer>
   )}
   <NoticePopup />
-
-  {/* One persistent Quran audio player for the whole document. */}
-  <script>
-    import '../scripts/quran-audio';
-  </script>
 </body>
 </html>

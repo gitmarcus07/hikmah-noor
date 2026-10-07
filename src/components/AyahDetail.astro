@@ -2,7 +2,7 @@
 /* Individual Ayah page — canonical reference page, no invented tafsir.
  * Arabic + verified translations + transliteration from the existing
  * surah JSONs; tafsir note only when the repo has a matching key verse;
- * audio via the existing global Quran player (single-verse queue). */
+ * audio via direct EveryAyah MP3 (single verse). */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumbs from './hn/Breadcrumbs.astro';
 import SectionHeader from './hn/SectionHeader.astro';
@@ -130,27 +130,30 @@ const refLabel = (r: any) => r ? `${r.surah.name} ${r.surahNum}:${r.ayahNum}` : 
   </div>
 </BaseLayout>
 
-<script>
-  import { getQuranAudio } from '../scripts/quran-audio';
-
-  function initAyahPlayer() {
-    const btn = document.getElementById('ayahplay') as HTMLButtonElement | null;
-    if (!btn || btn.dataset.hnWired === '1') return;
-    btn.dataset.hnWired = '1';
+<script is:inline>
+  (() => {
+    const btn = document.getElementById('ayahplay');
+    if (!btn) return;
+    const pad3 = (n) => String(n).padStart(3, '0');
+    const audio = new Audio();
+    audio.preload = 'none';
+    let playing = false;
+    const baseLabel = btn.textContent?.trim() || 'Listen';
+    function stop() {
+      audio.pause();
+      playing = false;
+      btn.textContent = `▶ ${baseLabel.replace(/^▶\\s*|^⏸\\s*/, '')}`;
+    }
     btn.addEventListener('click', () => {
-      const player = getQuranAudio();
+      if (playing) { stop(); return; }
       const surah = Number(btn.dataset.surah);
       const verse = Number(btn.dataset.verse);
-      const label = btn.dataset.label || `Quran ${surah}:${verse}`;
-      const surahName = btn.dataset.surahname || String(surah);
-      player.playQueue(
-        [{ surah, verse }],
-        0,
-        { type: 'single', surah, label, href: window.location.pathname, surahNames: { [String(surah)]: surahName } },
-      );
+      audio.src = `https://everyayah.com/data/Alafasy_128kbps/${pad3(surah)}${pad3(verse)}.mp3`;
+      audio.play().catch(() => stop());
+      playing = true;
+      btn.textContent = '⏸ Playing…';
     });
-  }
-
-  initAyahPlayer();
-  document.addEventListener('astro:page-load', initAyahPlayer);
+    audio.addEventListener('ended', stop);
+    audio.addEventListener('error', () => { if (audio.src) stop(); });
+  })();
 </script>

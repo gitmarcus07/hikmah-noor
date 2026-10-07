@@ -45,19 +45,14 @@ const faq = [
       ))}
     </div>
     <script>
-      // Re-runs after client-side navigation (the list DOM is recreated).
-      function initParaFilter() {
-        const input = document.getElementById('parafilter') as HTMLInputElement | null;
-        if (!input || input.dataset.wired === '1') return;
-        input.dataset.wired = '1';
-        const rows = [...document.querySelectorAll<HTMLElement>('.pararow')];
-        input.addEventListener('input', () => {
+      (() => {
+        const input = document.getElementById('parafilter');
+        const rows = [...document.querySelectorAll('.pararow')];
+        input?.addEventListener('input', () => {
           const q = input.value.toLowerCase().trim();
-          rows.forEach(r => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
+          rows.forEach(r => r.classList.toggle('hidden', q !== '' && !r.dataset.search.toLowerCase().includes(q)));
         });
-      }
-      initParaFilter();
-      document.addEventListener('astro:page-load', initParaFilter);
+      })();
     </script>
 
     <section class="mt-10 bg-night-850 border border-white/10 rounded-2xl p-5 md:p-6 prose-islamic">

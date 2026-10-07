@@ -89,19 +89,14 @@ const pageKeywords = category === 'quran'
           ))}
         </div>
         <script>
-          // Re-runs after client-side navigation (the list DOM is recreated).
-          function initSurahFilter() {
-            const input = document.getElementById('surahfilter') as HTMLInputElement | null;
-            if (!input || input.dataset.wired === '1') return;
-            input.dataset.wired = '1';
-            const rows = [...document.querySelectorAll<HTMLElement>('.surahrow')];
-            input.addEventListener('input', () => {
+          (() => {
+            const input = document.getElementById('surahfilter');
+            const rows = [...document.querySelectorAll('.surahrow')];
+            input?.addEventListener('input', () => {
               const q = input.value.toLowerCase().trim();
-              rows.forEach(r => r.classList.toggle('hidden', q !== '' && !(r.dataset.search || '').toLowerCase().includes(q)));
+              rows.forEach(r => r.classList.toggle('hidden', q !== '' && !r.dataset.search.toLowerCase().includes(q)));
             });
-          }
-          initSurahFilter();
-          document.addEventListener('astro:page-load', initSurahFilter);
+          })();
         </script>
         {list.length > 0 && (
           <>
