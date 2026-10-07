@@ -53,6 +53,7 @@ const cardThemes = [
         <button data-ac-random class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🎲 Random</button>
       </div>
       <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-ac-err>Verse not found — check the numbers.</p>
+      <button data-ac-retry type="button" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm hidden">Retry</button>
     </div>
 
     <div class="mt-3 hn-card hn-card-pad text-center">
@@ -109,23 +110,9 @@ const cardThemes = [
         return picked && THEMES[picked.value] ? picked.value : DEFAULT_THEME;
       };
       let cur = { ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ', tr: 'Say: He is Allah, the One.', ref: 'Quran 112:1' };
-      let metaCache = null;
-      const meta = async () => {
-        if (metaCache) return metaCache;
-        const r = await fetch('/search-index.json');
-        const j = await r.json();
-        // Compact index: { surahs: [[num, slug, name, en, verseCount, aliases], ...] }
-        // Legacy fallback: [{ category: 'surahs', url: '/<num>-<slug>/', description: '… N verses …' }]
-        const rows = Array.isArray(j)
-          ? j.filter((x) => x && x.category === 'surahs').map((x) => {
-              const m = String(x.url || '').match(/\/(\d+)-[^/]+\/$/);
-              const v = String(x.description || '').match(/(\d+) verses/);
-              return { num: Number(m?.[1] || 0), verses: Number(v?.[1] || 0) };
-            })
-          : (j.surahs || []).map((s) => ({ num: Number(s[0]), verses: Number(s[4]) }));
-        metaCache = rows.filter((x) => x.num > 0 && x.verses > 0);
-        return metaCache;
-      };
+      // Verse counts per surah (1–114) — Random picks from this table so it
+      // never depends on /search-index.json being fetched and parsed.
+      const SURAH_VERSES = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
       const wrap = (c, text, max, font) => {
         c.font = font;
         const words = String(text).split(/\s+/);
@@ -169,7 +156,7 @@ const cardThemes = [
       // ---- Share: hand the real generated PNG + a fixed caption to the OS share sheet ----
       // Exact approved caption — do not reword: emojis, line breaks, URL and punctuation are fixed.
       const AYAH_CARD_SHARE_TEXT =
-        '🌙 Make your own Ayah Card with Hikmah Noor\n' +
+        '🕌 Make your own Ayah Card with Hikmah Noor\n' +
         '🔗 https://hikmahnoor.in/tools/ayah-card/\n\n' +
         '📖 If someone reads this Ayah, you will also be rewarded, so please don\u2019t remove this caption.';
       const SHARE_TITLE = 'Ayah Card — Hikmah Noor';
@@ -278,31 +265,72 @@ const cardThemes = [
         btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
         setTimeout(() => { btn.textContent = 'Copy caption'; }, 2500);
       });
-      const load = async (s, v) => {
+      // A service outage must not read like bad user input, and it must not look
+      // like nothing happened — say what failed and offer a retry.
+      const LOAD_ERRORS = {
+        notfound: 'Verse not found — check the surah and ayah numbers.',
+        service: 'Couldn’t load this verse — the verse service is unavailable right now, so the previous card is still shown. Try again in a moment.',
+      };
+      const showLoadError = (kind) => {
         const err = $('[data-ac-err]');
-        err?.classList.add('hidden');
+        if (err) { err.textContent = LOAD_ERRORS[kind] || LOAD_ERRORS.service; err.classList.remove('hidden'); }
+        $('[data-ac-retry]')?.classList.toggle('hidden', kind !== 'service');
+      };
+      // Verse source for the card. /api/verse scans the entire D1 verse table on
+      // every call (surah/verse are UNINDEXED in the FTS5 table), so it burns the
+      // database's daily read quota and then answers 503 once it is gone — which is
+      // why Random and the Meaning switch looked dead: the verse never arrived, so
+      // nothing redrew. The same texts ship as one static JSON per surah
+      // (/ayah-data/<n>.json), fetched on demand and cached per surah below.
+      const surahCache = new Map();
+      const staticVerse = async (s, v, lang) => {
+        const n = Number(s);
+        if (!Number.isInteger(n) || n < 1 || n > 114) return null;
         try {
-          const lang = $('[data-ac-lang]').value;
+          let j = surahCache.get(n);
+          if (!j) {
+            const r = await fetch(`/ayah-data/${n}.json`);
+            if (!r.ok) return null;
+            j = await r.json();
+            surahCache.set(n, j);
+          }
+          const row = (j.vs || []).find((x) => Number(x.v) === Number(v));
+          if (!row || !row.ar) return null;
+          return { ar: row.ar, tr: row[lang] || row.en || '', ref: `Quran ${n}:${row.v}${j.sname ? ` (${j.sname})` : ''}` };
+        } catch { return null; }
+      };
+      let loadSeq = 0;
+      const load = async (s, v) => {
+        const my = ++loadSeq;
+        $('[data-ac-err]')?.classList.add('hidden');
+        $('[data-ac-retry]')?.classList.add('hidden');
+        const lang = $('[data-ac-lang]').value;
+        const show = (d) => { if (my !== loadSeq) return; cur = d; draw(); };
+        const fail = (kind) => { if (my !== loadSeq) return; showLoadError(kind); };
+        // The static copy is asked first: it holds the same texts, costs no
+        // database reads, and cannot be taken down by the verse API's quota.
+        const d = await staticVerse(s, v, lang);
+        if (d) { show(d); return; }
+        // Fallback for anything the static copy does not carry (out-of-range
+        // numbers), and the only path that can report 'notfound' from the API.
+        try {
           const r = await fetch(`/api/verse?surah=${encodeURIComponent(s)}&verse=${encodeURIComponent(v)}&lang=${encodeURIComponent(lang)}`);
-          if (!r.ok) throw 0;
+          if (!r.ok) { fail(r.status === 404 ? 'notfound' : 'service'); return; }
           const j = await r.json();
-          if (!j.ar) throw 0;
-          cur = { ar: j.ar, tr: j.text || '', ref: `Quran ${j.surah}:${j.verse}${j.sname ? ` (${j.sname})` : ''}` };
-          draw();
-        } catch { err?.classList.remove('hidden'); }
+          if (!j.ar) { fail('notfound'); return; }
+          show({ ar: j.ar, tr: j.text || '', ref: `Quran ${j.surah}:${j.verse}${j.sname ? ` (${j.sname})` : ''}` });
+        } catch { fail('service'); }
       };
       $('[data-ac-load]').addEventListener('click', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
       $('[data-ac-lang]').addEventListener('change', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
       $('[data-ac-themes]')?.addEventListener('change', draw);
-      $('[data-ac-random]').addEventListener('click', async () => {
-        try {
-          const m = await meta();
-          const pick = m[Math.floor(Math.random() * m.length)];
-          const v = 1 + Math.floor(Math.random() * pick.verses);
-          $('[data-ac-surah]').value = pick.num; $('[data-ac-ayah]').value = v;
-          load(pick.num, v);
-        } catch {}
+      $('[data-ac-random]').addEventListener('click', () => {
+        const s = 1 + Math.floor(Math.random() * 114);
+        const v = 1 + Math.floor(Math.random() * (SURAH_VERSES[s - 1] || 10));
+        $('[data-ac-surah]').value = s; $('[data-ac-ayah]').value = v;
+        load(s, v);
       });
+      $('[data-ac-retry]')?.addEventListener('click', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
       $('[data-ac-dl]').addEventListener('click', () => {
         const a = document.createElement('a');
         a.download = 'ayah-card.png';
