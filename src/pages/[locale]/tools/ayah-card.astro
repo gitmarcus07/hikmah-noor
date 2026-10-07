@@ -16,6 +16,14 @@ const crumbs = [
   { name: 'Tools', path: '/tools/' },
   { name: 'Ayah Card Maker', path: '/tools/ayah-card/' },
 ];
+// Card colour themes — ids must match THEMES in the canvas script at the bottom.
+const cardThemes = [
+  { id: 'emerald', label: 'Emerald', dot: '#047C70' },
+  { id: 'midnight', label: 'Midnight', dot: '#0F172A' },
+  { id: 'gold', label: 'Gold', dot: '#D97706' },
+  { id: 'rose', label: 'Rose', dot: '#E11D48' },
+  { id: 'royal', label: 'Royal', dot: '#4F46E5' },
+];
 ---
 <BaseLayout title="Ayah Card Maker — Beautiful Quran Verse Images to Share" description="Create shareable Quran verse cards: pick any ayah with Urdu/English/Hindi meaning, choose a theme, download the PNG for WhatsApp and social media." keywords="ayah card maker, quran verse image, islamic wallpaper maker, ayah png download, quran quote card" locale={locale} canonicalPath="/tools/ayah-card/" faq={faq} crumbs={crumbs}>
   <AppHeader locale={locale} title="Ayah Card Maker" backHref="/tools/" />
@@ -25,14 +33,21 @@ const crumbs = [
         <label class="text-[13px] font-bold">Surah (1–114)<input data-ac-surah inputmode="numeric" value="112" class="hn-input mt-1" aria-label="Surah number" /></label>
         <label class="text-[13px] font-bold">Ayah<input data-ac-ayah inputmode="numeric" value="1" class="hn-input mt-1" aria-label="Ayah number" /></label>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        <label class="text-[13px] font-bold">Meaning
-          <select data-ac-lang class="hn-input mt-1"><option value="ur">Urdu</option><option value="en" selected>English</option><option value="hi">Hindi</option></select>
-        </label>
-        <label class="text-[13px] font-bold">Theme
-          <select data-ac-theme class="hn-input mt-1"><option value="night">Midnight gold</option><option value="dawn">Dawn sand</option><option value="emerald">Emerald</option></select>
-        </label>
-      </div>
+      <label class="text-[13px] font-bold block">Meaning
+        <select data-ac-lang class="hn-input mt-1"><option value="ur">Urdu</option><option value="en" selected>English</option><option value="hi">Hindi</option></select>
+      </label>
+      <fieldset class="hn-theme-set" data-ac-themes>
+        <legend class="text-[13px] font-bold">Color Theme</legend>
+        <div class="flex flex-wrap gap-1.5 mt-1.5">
+          {cardThemes.map((t) => (
+            <label class="hn-theme-chip">
+              <input type="radio" name="ac-theme" value={t.id} class="sr-only" checked={t.id === 'emerald'} />
+              <span class="hn-theme-dot" style={`background:${t.dot}`} aria-hidden="true"></span>
+              {t.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div class="flex gap-2">
         <button data-ac-load class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm">Load verse</button>
         <button data-ac-random class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🎲 Random</button>
@@ -77,10 +92,21 @@ const crumbs = [
       const $ = (s) => root.querySelector(s);
       const cv = $('[data-ac-canvas]');
       const cx = cv.getContext('2d');
+      // Card palettes. Role keys are the original renderer's, and only their values
+      // change: bg1/bg2 = background gradient, gold = accent (frame, wordmark,
+      // divider, reference), ink = Arabic text, mut = translation. Shades are tuned
+      // so text stays readable on every palette; no layout role is touched.
       const THEMES = {
-        night: { bg1: '#101828', bg2: '#1d2939', gold: '#d4af37', ink: '#ffffff', mut: '#d5dbe5' },
-        dawn: { bg1: '#faf3e3', bg2: '#f0e2c4', gold: '#8a6d1b', ink: '#2b2113', mut: '#6b5f45' },
-        emerald: { bg1: '#062e22', bg2: '#0b4d3a', gold: '#e9c46a', ink: '#ffffff', mut: '#cfe3d8' },
+        emerald: { bg1: '#047C70', bg2: '#05998B', gold: '#CCFBF1', ink: '#ffffff', mut: '#E6FFFB' },
+        midnight: { bg1: '#0F172A', bg2: '#1E293B', gold: '#A5B4FC', ink: '#ffffff', mut: '#CBD5E1' },
+        gold: { bg1: '#D97706', bg2: '#F59E0B', gold: '#431407', ink: '#431407', mut: '#4A2208' },
+        rose: { bg1: '#BE123C', bg2: '#E11D48', gold: '#FFE4E6', ink: '#ffffff', mut: '#FECDD3' },
+        royal: { bg1: '#4338CA', bg2: '#4F46E5', gold: '#E0E7FF', ink: '#ffffff', mut: '#C7D2FE' },
+      };
+      const DEFAULT_THEME = 'emerald';
+      const themeName = () => {
+        const picked = root.querySelector('input[name="ac-theme"]:checked');
+        return picked && THEMES[picked.value] ? picked.value : DEFAULT_THEME;
       };
       let cur = { ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ', tr: 'Say: He is Allah, the One.', ref: 'Quran 112:1' };
       let metaCache = null;
@@ -114,7 +140,7 @@ const crumbs = [
         return lines;
       };
       const draw = () => {
-        const T = THEMES[$('[data-ac-theme]').value] || THEMES.night;
+        const T = THEMES[themeName()] || THEMES[DEFAULT_THEME];
         const W = 1080, H = 1080;
         const g = cx.createLinearGradient(0, 0, W, H);
         g.addColorStop(0, T.bg1); g.addColorStop(1, T.bg2);
@@ -135,11 +161,15 @@ const crumbs = [
         for (const ln of trLines.slice(0, 8)) { cx.fillText(ln, W / 2, y); y += 58; }
         cx.fillStyle = T.gold; cx.font = '700 40px Georgia, serif';
         cx.fillText(cur.ref, W / 2, H - 120);
+        // Branding — drawn on the canvas itself, inside the existing frame and below
+        // the reference line, so every downloaded/shared PNG carries hikmahnoor.in.
+        cx.font = '600 28px Georgia, serif';
+        cx.fillText('hikmahnoor.in', W / 2, H - 86);
       };
       // ---- Share: hand the real generated PNG + a fixed caption to the OS share sheet ----
       // Exact approved caption — do not reword: emojis, line breaks, URL and punctuation are fixed.
       const AYAH_CARD_SHARE_TEXT =
-        '🕌 Make your own Ayah Card with Hikmah Noor\n' +
+        '🌙 Make your own Ayah Card with Hikmah Noor\n' +
         '🔗 https://hikmahnoor.in/tools/ayah-card/\n\n' +
         '📖 If someone reads this Ayah, you will also be rewarded, so please don\u2019t remove this caption.';
       const SHARE_TITLE = 'Ayah Card — Hikmah Noor';
@@ -263,7 +293,7 @@ const crumbs = [
       };
       $('[data-ac-load]').addEventListener('click', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
       $('[data-ac-lang]').addEventListener('change', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
-      $('[data-ac-theme]').addEventListener('change', draw);
+      $('[data-ac-themes]')?.addEventListener('change', draw);
       $('[data-ac-random]').addEventListener('click', async () => {
         try {
           const m = await meta();

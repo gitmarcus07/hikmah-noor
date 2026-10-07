@@ -284,6 +284,30 @@ svg { height: auto; }
 .hn-searchwrap input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; font-size: 1rem; color: var(--hn-ink); padding: 0.65rem 0; }
 .hn-searchwrap input::placeholder { color: var(--hn-muted); }
 
+/* ---------- Theme chips (Ayah Card colour selector) ---------- */
+.hn-theme-set { border: 0; margin: 0; padding: 0; min-width: 0; }
+.hn-theme-set > legend { padding: 0; }
+.hn-theme-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  border: 1px solid var(--hn-border); border-radius: 999px;
+  background: var(--hn-card); color: var(--hn-ink);
+  padding: 0.35rem 0.7rem; min-height: 44px; cursor: pointer;
+  font-size: 0.8rem; font-weight: 600; line-height: 1;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.hn-theme-chip:hover { border-color: var(--hn-primary); }
+.hn-theme-chip:has(input:focus-visible) { outline: 2px solid var(--hn-primary); outline-offset: 2px; }
+.hn-theme-chip:has(input:checked) {
+  border-color: var(--hn-primary);
+  background: var(--hn-primary-soft);
+  color: var(--hn-primary);
+  font-weight: 800;
+}
+.hn-theme-dot {
+  flex: none; width: 0.85rem; height: 0.85rem; border-radius: 999px;
+  border: 1px solid var(--hn-border);
+}
+
 /* ---------- Reading primitives ---------- */
 .hn-reading-card {
   background: var(--hn-card); border: 1px solid var(--hn-border);
