@@ -40,7 +40,18 @@ const crumbs = [
 
     <div class="mt-3 hn-card hn-card-pad text-center">
       <canvas data-ac-canvas width="1080" height="1080" class="w-full rounded-[12px]" style="border:1px solid var(--hn-border)"></canvas>
-      <button data-ac-dl class="hn-btn hn-btn-primary w-full !min-h-[48px] text-sm mt-3">Download PNG</button>
+      <div class="flex gap-2 mt-3">
+        <button data-ac-dl class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm">Download PNG</button>
+        <button data-ac-share type="button" aria-label="Share this Ayah Card" class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm disabled:opacity-60">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12" /><path d="m8 7 4-4 4 4" /><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" /></svg>
+          Share
+        </button>
+      </div>
+      <p class="text-[13px] font-bold mt-2 hidden" style="color:#b3261e" data-ac-share-msg role="status" aria-live="polite"></p>
+      <div class="mt-1 hidden" data-ac-share-fallback>
+        <a data-ac-wa href="https://wa.me/?text=" target="_blank" rel="noopener noreferrer" class="hn-btn hn-btn-ghost mx-1 text-sm">WhatsApp (text only)</a>
+        <button data-ac-copy type="button" class="hn-btn hn-btn-ghost mx-1 text-sm">Copy caption</button>
+      </div>
       <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 — perfect for WhatsApp status & posts.</p>
     </div>
 
@@ -123,6 +134,118 @@ const crumbs = [
         cx.fillStyle = T.gold; cx.font = '700 40px Georgia, serif';
         cx.fillText(cur.ref, W / 2, H - 120);
       };
+      // ---- Share: hand the real generated PNG + a fixed caption to the OS share sheet ----
+      // Exact approved caption — do not reword: emojis, line breaks, URL and punctuation are fixed.
+      const AYAH_CARD_SHARE_TEXT =
+        '🕌 Make your own Ayah Card with Hikmah Noor\n' +
+        '🔗 https://hikmahnoor.in/tools/ayah-card/\n\n' +
+        '📖 If someone reads this Ayah, you will also be rewarded, so please don\u2019t remove this caption.';
+      const SHARE_TITLE = 'Ayah Card — Hikmah Noor';
+      const SHARE_FILE = 'hikmah-noor-ayah-card.png';
+      const shareBtn = $('[data-ac-share]');
+      const shareMsg = $('[data-ac-share-msg]');
+      const shareFallback = $('[data-ac-share-fallback]');
+      let sharing = false;
+      const say = (text, bad) => {
+        if (!shareMsg) return;
+        shareMsg.textContent = text || '';
+        shareMsg.classList.toggle('hidden', !text);
+        shareMsg.style.color = bad ? '#b3261e' : 'var(--hn-muted)';
+      };
+      // Reuse the existing canvas. Conversion happens on click, so the shared file is
+      // always the card on screen right now (never a stale previous card).
+      const cardBlob = () => new Promise((res) => {
+        try {
+          if (typeof cv.toBlob === 'function') { cv.toBlob((b) => res(b && b.size ? b : null), 'image/png'); return; }
+          const url = cv.toDataURL('image/png');
+          const bin = atob(url.slice(url.indexOf(',') + 1));
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const b = new Blob([bytes], { type: 'image/png' });
+          res(b.size ? b : null);
+        } catch { res(null); }
+      });
+      const cardFile = async () => {
+        const blob = await cardBlob();
+        if (!blob || typeof File !== 'function') return null;
+        try { return new File([blob], SHARE_FILE, { type: blob.type || 'image/png' }); } catch { return null; }
+      };
+      const downloadCard = (blob) => {
+        const a = document.createElement('a');
+        a.download = SHARE_FILE;
+        a.href = blob ? URL.createObjectURL(blob) : cv.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        if (blob) setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      };
+      const copyCaption = async () => {
+        try { await navigator.clipboard.writeText(AYAH_CARD_SHARE_TEXT); return true; } catch { return false; }
+      };
+      // navigator.canShare is optional: when it exists, ask it about the exact payload.
+      const filesShareable = (file) => {
+        if (typeof navigator.canShare !== 'function') return true;
+        try { return navigator.canShare({ files: [file], text: AYAH_CARD_SHARE_TEXT, title: SHARE_TITLE }); } catch { return false; }
+      };
+      // Last resort: download the PNG, copy the caption, and say plainly that the
+      // wa.me link only carries text — the image has to be attached by the user.
+      const manualFallback = async (lead) => {
+        const blob = await cardBlob();
+        if (blob) downloadCard(blob);
+        const copied = await copyCaption();
+        if (shareFallback) shareFallback.classList.remove('hidden');
+        const wa = $('[data-ac-wa]');
+        if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(AYAH_CARD_SHARE_TEXT);
+        say(
+          blob
+            ? `${lead} — the card image is downloaded${copied ? ' and the caption is copied' : ''}. Open WhatsApp and attach it yourself: a WhatsApp link can carry the text but not the image.`
+            : `${lead} — the card image could not be prepared. Use Download PNG, then attach the file in WhatsApp manually.`,
+          !blob
+        );
+      };
+      const shareCard = async () => {
+        if (sharing) return;
+        sharing = true;
+        if (shareBtn) { shareBtn.disabled = true; shareBtn.setAttribute('aria-busy', 'true'); }
+        say('Preparing your Ayah Card…');
+        try {
+          const file = await cardFile();
+          if (!file) { await manualFallback('Could not prepare the card image'); return; }
+          // 1. Native sheet with the real image file + caption (Android Chrome → WhatsApp).
+          if (typeof navigator.share === 'function' && filesShareable(file)) {
+            try {
+              await navigator.share({ files: [file], text: AYAH_CARD_SHARE_TEXT, title: SHARE_TITLE });
+              say('');
+              return;
+            } catch (err) {
+              // User closed the sheet — say nothing.
+              if (err && err.name === 'AbortError') { say(''); return; }
+            }
+          }
+          // 2. Sheet exists but cannot take files → share the caption as text.
+          if (typeof navigator.share === 'function') {
+            try {
+              await navigator.share({ text: AYAH_CARD_SHARE_TEXT, title: SHARE_TITLE });
+              say('Shared as text only — this browser cannot attach images. Use Download PNG to send the card itself.');
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') { say(''); return; }
+            }
+          }
+          // 3. No usable Web Share → download + copy + WhatsApp text link.
+          await manualFallback('Sharing is not available in this browser');
+        } finally {
+          sharing = false;
+          if (shareBtn) { shareBtn.disabled = false; shareBtn.removeAttribute('aria-busy'); }
+        }
+      };
+      shareBtn?.addEventListener('click', shareCard);
+      $('[data-ac-copy]')?.addEventListener('click', async (ev) => {
+        const btn = ev.currentTarget;
+        const ok = await copyCaption();
+        btn.textContent = ok ? 'Copied ✓' : 'Copy failed';
+        setTimeout(() => { btn.textContent = 'Copy caption'; }, 2500);
+      });
       const load = async (s, v) => {
         const err = $('[data-ac-err]');
         err?.classList.add('hidden');
@@ -156,6 +279,7 @@ const crumbs = [
         a.click();
         a.remove();
       });
+      draw();
       load(112, 1);
     })();
   </script>
