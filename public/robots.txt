@@ -1,3 +1,27 @@
 User-agent: *
 Allow: /
+# Query-string reader URLs (?verse=N) are canonicalized away — block
+# crawling them to save budget for real content (GSC: Discovered 1628).
+Disallow: /*?*
+# Noindex app-shell pages: keep crawlers on indexed content.
+# Mirrors the sitemap filter in astro.config.mjs (EN + /hi|ur|ar/ variants).
+Disallow: /search/
+Disallow: /offline/
+Disallow: /al-mushrif/
+Disallow: /favourites/
+Disallow: /tools/read/
+Disallow: /tools/my-progress/
+Disallow: /tools/search-quran/
+Disallow: /*/search/
+Disallow: /*/offline/
+Disallow: /*/al-mushrif/
+Disallow: /*/favourites/
+Disallow: /*/tools/read/
+Disallow: /*/tools/my-progress/
+Disallow: /*/tools/search-quran/
+Disallow: /*/profile/
+Disallow: /*/leaderboard/
+Disallow: /*/user/
+Disallow: /*/bookmarks/
+Disallow: /*/challenges/
 Sitemap: https://hikmahnoor.in/sitemap-index.xml

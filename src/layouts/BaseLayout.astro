@@ -12,6 +12,9 @@ interface Props {
   image?: string;
   canonicalPath?: string;
   noindex?: boolean;
+  /** When true (404 page), emit no canonical/hreflang/og:url.
+   *  A 404 pointing canonical -> "/" looks like a soft-404 to Google. */
+  noCanonical?: boolean;
   /** Page shape for structured data + og:type.
    *  - `article`: a single reading/detail page (Article schema).
    *  - `collection`: a hub/listing page over many items (CollectionPage schema).
@@ -25,7 +28,7 @@ interface Props {
   theme?: 'dark' | 'light';
 }
 
-const { title, description, locale, keywords, image = '/og-cover-v2.jpg', canonicalPath = '', noindex = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
+const { title, description, locale, keywords, image = '/og-cover-v2.jpg', canonicalPath = '', noindex = false, noCanonical = false, type = 'website', pubDate, faq = [], crumbs = [], hideFooter = false } = Astro.props;
 const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmahnoor.in').replace(/\/$/, '');
@@ -159,18 +162,18 @@ const mobileGroups = [
   </script>
   <title>{title} | Hikmah Noor</title>
   <meta name="description" content={description} />
-  {noindex && <meta name="robots" content="noindex" />}
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
   {keywords && <meta name="keywords" content={keywords} />}
-  <link rel="canonical" href={canonical} />
-  {locales.map(l => <link rel="alternate" hreflang={l} href={`${site}${localizedPath(l, canonicalPath || '/')}`} />)}
-  <link rel="alternate" hreflang="x-default" href={`${site}${localizedPath('en', canonicalPath || '/')}`} />
+  {!noCanonical && <link rel="canonical" href={canonical} />}
+  {!noCanonical && locales.map(l => <link rel="alternate" hreflang={l} href={`${site}${localizedPath(l, canonicalPath || '/')}`} />)}
+  {!noCanonical && <link rel="alternate" hreflang="x-default" href={`${site}${localizedPath('en', canonicalPath || '/')}`} />}
   {/* og:type allowlist is website|article — CollectionPage maps to website. */}
   <meta property="og:type" content={type === 'article' ? 'article' : 'website'} />
   <meta property="og:locale" content={locale === 'hi' ? 'hi_IN' : locale === 'ur' ? 'ur_PK' : locale === 'ar' ? 'ar_SA' : 'en_US'} />
   <meta property="og:site_name" content="Hikmah Noor" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
+  {!noCanonical && <meta property="og:url" content={canonical} />}
   <meta property="og:image" content={`${site}${image}`} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />

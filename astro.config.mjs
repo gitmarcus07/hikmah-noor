@@ -11,6 +11,10 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://hikmahnoor.in',
   output: 'static',
+  // Always enforce trailing slash: canonical + sitemap use `/about/`.
+  // Without this Astro serves both `/about` and `/about/` (200), which
+  // Google reports as Duplicate / Redirect error / canonical mismatch.
+  trailingSlash: 'always',
   i18n: {
     locales: ['en', 'hi', 'ur', 'ar'],
     defaultLocale: 'en',

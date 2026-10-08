@@ -55,6 +55,12 @@ export async function renderAyahPage({ locale, surahParam, ayahParam, env }) {
   const L = (p) => localizedPath(locale, p);
   const ayahPath = '/quran/' + surah.slug + '/' + v + '/';
   const canonical = 'https://hikmahnoor.in' + L(ayahPath);
+  // Match BaseLayout hreflang (en/hi/ur/ar + x-default) so Google doesn't
+  // flag dynamic ayahs as "Duplicate, different canonical than user".
+  const hreflangs = ['en', 'hi', 'ur', 'ar']
+    .map((l) => '<link rel="alternate" hreflang="' + l + '" href="' + esc('https://hikmahnoor.in' + localizedPath(l, ayahPath)) + '">')
+    .join('')
+    + '<link rel="alternate" hreflang="x-default" href="' + esc('https://hikmahnoor.in' + localizedPath('en', ayahPath)) + '">';
 
   let description =
     'Read Quran ' + ref + ' — Surah ' + surah.name + ' (' + surah.englishName + '), ayah ' + v + ' of ' + surah.verseCount +
@@ -77,6 +83,7 @@ export async function renderAyahPage({ locale, surahParam, ayahParam, env }) {
     + '<title>' + esc(title) + '</title>'
     + '<meta name="description" content="' + esc(description) + '">'
     + '<link rel="canonical" href="' + esc(canonical) + '">'
+    + hreflangs
     + '<meta property="og:title" content="' + esc(title) + '">'
     + '<meta property="og:description" content="' + esc(description) + '">'
     + '<meta property="og:type" content="article">'
