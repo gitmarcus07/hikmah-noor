@@ -1,3 +1,6 @@
+# NOTE: with functions/_middleware.js active, Cloudflare Pages does not apply
+# _redirects to Function-served requests — the /en strip is enforced in the
+# middleware. These rules stay as fallback/documentation.
 /en / 301
 /en/ / 301
 /en/* /:splat 301
