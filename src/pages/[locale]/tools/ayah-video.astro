@@ -10,7 +10,7 @@ const { locale } = Astro.params;
 const faq = [
   { q: 'What can I turn into a video?', a: 'One ayah (pick surah + ayah number, like Ayah Card) or a full short surah from the preset list (Fatiha, Ikhlas, Kawthar, Asr, Nas, Falaq and more). Long surahs are not offered so recordings stay short and shareable.' },
   { q: 'What audio is in the video?', a: 'Arabic recitation (Mishary Alafasy, needs internet) is recorded into the video. Urdu/English translation voice is also recorded when switched on. Hindi meaning appears as on-screen text and is spoken in preview only — browsers cannot record their Hindi voice into the file.' },
-  { q: 'What format is the download?', a: 'Your browser decides: Chrome gives WebM, Safari gives MP4. Both are 1080×1080 square — perfect for WhatsApp status and posts. Use Share for the system share sheet, Download for the file.' },
+  { q: 'What format is the download?', a: 'MP4 wherever your browser supports it (plays in gallery + WhatsApp), otherwise WebM — both 1080×1080 square, perfect for status and posts.' },
 ];
 const crumbs = [
   { name: 'Home', path: '/' },
@@ -123,7 +123,7 @@ const shortSurahs = [
       </div>
       <p class="text-[13px] font-bold mt-2 hidden" style="color:#b3261e" data-av-msg role="status" aria-live="polite"></p>
       <!-- WhatsApp/copy fallback removed: Share uses the system sheet now. -->
-      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 square — Arabic recitation recorded in. Hindi voice: preview only. <span data-av-ver>v16</span></p>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 square — Arabic recitation recorded in. Hindi voice: preview only. <span data-av-ver>v17</span></p>
     </div>
 
     <section class="mt-8" aria-label="Frequently asked questions">
@@ -143,7 +143,7 @@ const shortSurahs = [
       const root = document.querySelector('[data-av]');
       if (!root || root.dataset.wired) return;
       root.dataset.wired = '1';
-      try { console.info('[ayah-video] v16 eq-loop'); } catch {}
+      try { console.info('[ayah-video] v17 duration-fix'); } catch {}
       const $ = (s) => root.querySelector(s);
       const cv = $('[data-av-canvas]');
       const cx = cv.getContext('2d');
@@ -806,7 +806,7 @@ const shortSurahs = [
       let chunks = [];
       let actx = null;
       const pickMime = () => {
-        const cands = ['video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', ''];
+        const cands = ['video/mp4', 'video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', ''];
         for (const m of cands) {
           try {
             if (!m) return '';
@@ -864,6 +864,37 @@ const shortSurahs = [
         isRec = true;
         recT0 = performance.now();
       };
+      // Gallery apps read length from the container header. Chrome's WebM writer
+      // leaves a wrong Duration there, so galleries clip the length while VLC
+      // (which measures the stream) plays full — patch the header value.
+      const patchWebmDuration = (blob, seconds) => new Promise((res) => {
+        try {
+          if (!blob || blob.size < 16) return res(blob);
+          const fr = new FileReader();
+          fr.onload = () => {
+            try {
+              const buf = new Uint8Array(fr.result);
+              const end = Math.min(buf.length - 12, 8192);
+              let infoAt = -1;
+              for (let i = 0; i < end - 4; i++) {
+                if (buf[i] === 0x15 && buf[i + 1] === 0x49 && buf[i + 2] === 0xA9 && buf[i + 3] === 0x66) { infoAt = i; break; }
+              }
+              const from = infoAt >= 0 ? infoAt : 0;
+              for (let i = from; i < end; i++) {
+                if (buf[i] === 0x44 && buf[i + 1] === 0x89 && (buf[i + 2] === 0x84 || buf[i + 2] === 0x88)) {
+                  const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+                  if (buf[i + 2] === 0x84) v.setFloat32(i + 3, seconds, false);
+                  else v.setFloat64(i + 3, seconds, false);
+                  return res(new Blob([buf], { type: blob.type }));
+                }
+              }
+              res(blob);
+            } catch { res(blob); }
+          };
+          fr.onerror = () => res(blob);
+          fr.readAsArrayBuffer(blob);
+        } catch { res(blob); }
+      });
       const stopRecording = () => new Promise((res) => {
         isRec = false;
         try {
@@ -1023,6 +1054,12 @@ const shortSurahs = [
           if (my !== seq) return;
           try {
             recBlob = new Blob(chunks, { type: recMime || 'video/webm' });
+            if (recExt !== 'mp4' && recBlob && recBlob.size) {
+              try {
+                const ms = Math.max(500, Math.round(performance.now() - recT0));
+                recBlob = await patchWebmDuration(recBlob, ms / 1000);
+              } catch {}
+            }
             if (video && recBlob.size) {
               video.src = URL.createObjectURL(recBlob);
               video.classList.remove('hidden');
