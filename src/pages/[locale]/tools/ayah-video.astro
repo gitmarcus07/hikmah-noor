@@ -123,7 +123,7 @@ const shortSurahs = [
       </div>
       <p class="text-[13px] font-bold mt-2 hidden" style="color:#b3261e" data-av-msg role="status" aria-live="polite"></p>
       <!-- WhatsApp/copy fallback removed: Share uses the system sheet now. -->
-      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 square — Arabic recitation recorded in. Hindi voice: preview only. <span data-av-ver>v17</span></p>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 square — Arabic recitation recorded in. Hindi voice: preview only. <span data-av-ver>v20</span></p>
     </div>
 
     <section class="mt-8" aria-label="Frequently asked questions">
@@ -143,7 +143,7 @@ const shortSurahs = [
       const root = document.querySelector('[data-av]');
       if (!root || root.dataset.wired) return;
       root.dataset.wired = '1';
-      try { console.info('[ayah-video] v17 duration-fix'); } catch {}
+      try { console.info('[ayah-video] v20 mp4-repair'); } catch {}
       const $ = (s) => root.querySelector(s);
       const cv = $('[data-av-canvas]');
       const cx = cv.getContext('2d');
@@ -864,36 +864,279 @@ const shortSurahs = [
         isRec = true;
         recT0 = performance.now();
       };
-      // Gallery apps read length from the container header. Chrome's WebM writer
-      // leaves a wrong Duration there, so galleries clip the length while VLC
-      // (which measures the stream) plays full — patch the header value.
-      const patchWebmDuration = (blob, seconds) => new Promise((res) => {
+      // Gallery apps + Instagram read length from the container header. Chrome's
+      // WebM writer leaves a wrong Duration there (VLC measures the stream, so
+      // it plays full anyway). Repair it: overwrite the placeholder Duration,
+      // or inject one into a Void gap when none exists. Core logic unit-tested.
+      const repairWebmDuration = (blob, seconds) => new Promise((res) => {
+        const done = (outBlob, patched) => res({ blob: outBlob, patched: !!patched });
+        const repairCore = (buf) => {
+          const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+          const readId = (p) => {
+            if (p >= buf.length) return null;
+            const b0 = buf[p];
+            if (b0 & 0x80) return { id: b0, len: 1 };
+            if (p + 1 >= buf.length) return null;
+            if (b0 & 0x40) return { id: (b0 << 8) | buf[p + 1], len: 2 };
+            if (p + 2 >= buf.length) return null;
+            if (b0 & 0x20) return { id: (b0 << 16) | (buf[p + 1] << 8) | buf[p + 2], len: 3 };
+            if (p + 3 >= buf.length) return null;
+            if (b0 & 0x10) return { id: (((b0 << 24) | (buf[p + 1] << 16) | (buf[p + 2] << 8) | buf[p + 3]) >>> 0), len: 4 };
+            return null;
+          };
+          const readSize = (p) => {
+            if (p >= buf.length) return null;
+            const b0 = buf[p];
+            let mask = 0x80, len = 1;
+            while (len <= 8 && !(b0 & mask)) { mask >>= 1; len++; }
+            if (len > 8 || p + len > buf.length) return null;
+            let size = b0 & (mask - 1);
+            for (let i = 1; i < len; i++) size = size * 256 + buf[p + i];
+            if (size === Math.pow(2, 7 * len) - 1) size = -1;
+            return { size, len };
+          };
+          let infoData = -1, infoEnd = -1;
+          for (let p = 0; p < Math.min(buf.length - 5, 4096); p++) {
+            const id = readId(p);
+            if (id && id.id === 0x1549A966) {
+              const sz = readSize(p + id.len);
+              if (!sz || sz.size < 0) break;
+              infoData = p + id.len + sz.len;
+              infoEnd = infoData + sz.size;
+              break;
+            }
+          }
+          if (infoData < 0) return { patched: false };
+          let durAt = -1, durLen = 0, voidAt = -1, voidTotal = 0;
+          let p = infoData, guard = 0;
+          while (p + 2 < Math.min(infoEnd, buf.length) && guard++ < 200) {
+            const id = readId(p);
+            const sz = id && readSize(p + id.len);
+            if (!id || !sz || sz.size < 0) break;
+            const total = id.len + sz.len + sz.size;
+            if (id.id === 0x4489 && (sz.size === 4 || sz.size === 8)) { durAt = p + id.len + sz.len; durLen = sz.size; break; }
+            if (id.id === 0xEC && id.len + sz.len + sz.size >= 13 && voidAt < 0) { voidAt = p; voidTotal = id.len + sz.len + sz.size; }
+            p += total;
+          }
+          const writeF = (at, len, v) => { if (len === 4) dv.setFloat32(at, v, false); else dv.setFloat64(at, v, false); };
+          if (durAt >= 0) { writeF(durAt, durLen, seconds); return { patched: true }; }
+          if (voidAt >= 0) {
+            for (const dl of [4, 8]) {
+              const need = 3 + dl;
+              const rem = voidTotal - need;
+              if (rem < 2) continue;
+              for (const vl of [1, 2]) {
+                const dataLen = rem - 1 - vl;
+                const maxFor = vl === 1 ? 126 : 16382;
+                if (dataLen < 0 || dataLen > maxFor) continue;
+                buf.fill(0, voidAt, voidAt + voidTotal);
+                buf[voidAt] = 0x44; buf[voidAt + 1] = 0x89;
+                buf[voidAt + 2] = dl === 4 ? 0x84 : 0x88;
+                writeF(voidAt + 3, dl, seconds);
+                let o = voidAt + need;
+                buf[o++] = 0xEC;
+                if (vl === 1) buf[o] = 0x80 | dataLen;
+                else { buf[o++] = 0x40 | (dataLen >> 8); buf[o] = dataLen & 0xff; }
+                return { patched: true };
+              }
+            }
+          }
+          return { patched: false };
+        };
         try {
-          if (!blob || blob.size < 16) return res(blob);
+          if (!blob || blob.size < 16) return done(blob, false);
           const fr = new FileReader();
           fr.onload = () => {
             try {
               const buf = new Uint8Array(fr.result);
-              const end = Math.min(buf.length - 12, 8192);
-              let infoAt = -1;
-              for (let i = 0; i < end - 4; i++) {
-                if (buf[i] === 0x15 && buf[i + 1] === 0x49 && buf[i + 2] === 0xA9 && buf[i + 3] === 0x66) { infoAt = i; break; }
+              const r = repairCore(buf);
+              done(r.patched ? new Blob([buf], { type: blob.type }) : blob, r.patched);
+            } catch { done(blob, false); }
+          };
+          fr.onerror = () => done(blob, false);
+          fr.readAsArrayBuffer(blob);
+        } catch { done(blob, false); }
+      });
+      // Header inspector: reads back the duration the file itself declares
+      // (MP4 mvhd or WebM Duration) so gallery/Instagram behavior is visible.
+      const inspectMedia = (blob) => new Promise((res) => {
+        const done = (o) => res(o);
+        try {
+          if (!blob || blob.size < 16) return done({ container: '?', dur: -1 });
+          const fr = new FileReader();
+          fr.onload = () => {
+            try {
+              const buf = new Uint8Array(fr.result);
+              const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+              if (buf[4] === 0x66 && buf[5] === 0x74 && buf[6] === 0x79 && buf[7] === 0x70) {
+                let p = 0;
+                const lim = Math.min(buf.length, 65536);
+                while (p + 8 <= lim) {
+                  const size = dv.getUint32(p, false);
+                  const type = String.fromCharCode(buf[p + 4], buf[p + 5], buf[p + 6], buf[p + 7]);
+                  if (size < 8) break;
+                  if (type === 'moov') {
+                    let q = p + 8;
+                    const qLim = Math.min(p + size, lim);
+                    while (q + 8 <= qLim && q + 8 <= buf.length) {
+                      const s2 = dv.getUint32(q, false);
+                      const t2 = String.fromCharCode(buf[q + 4], buf[q + 5], buf[q + 6], buf[q + 7]);
+                      if (s2 < 8) break;
+                      if (t2 === 'mvhd') {
+                        const ver = buf[q + 8];
+                        let ts = 0, du = 0;
+                        if (ver === 1 && q + 40 <= buf.length) { ts = dv.getUint32(q + 28, false); du = Number(dv.getBigUint64(q + 32, false)); }
+                        else if (q + 28 <= buf.length) { ts = dv.getUint32(q + 20, false); du = dv.getUint32(q + 24, false); }
+                        return done({ container: 'mp4', dur: ts > 0 ? du / ts : -1 });
+                      }
+                      if (q + s2 > buf.length) break;
+                      q += s2;
+                    }
+                    return done({ container: 'mp4', dur: -1 });
+                  }
+                  if (p + size > buf.length) break;
+                  p += size;
+                }
+                return done({ container: 'mp4', dur: -1 });
               }
-              const from = infoAt >= 0 ? infoAt : 0;
-              for (let i = from; i < end; i++) {
-                if (buf[i] === 0x44 && buf[i + 1] === 0x89 && (buf[i + 2] === 0x84 || buf[i + 2] === 0x88)) {
-                  const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
-                  if (buf[i + 2] === 0x84) v.setFloat32(i + 3, seconds, false);
-                  else v.setFloat64(i + 3, seconds, false);
-                  return res(new Blob([buf], { type: blob.type }));
+              const rId = (x) => {
+                if (x >= buf.length) return null;
+                const b0 = buf[x];
+                if (b0 & 0x80) return { id: b0, len: 1 };
+                if (x + 1 >= buf.length) return null;
+                if (b0 & 0x40) return { id: (b0 << 8) | buf[x + 1], len: 2 };
+                if (x + 2 >= buf.length) return null;
+                if (b0 & 0x20) return { id: (b0 << 16) | (buf[x + 1] << 8) | buf[x + 2], len: 3 };
+                if (x + 3 >= buf.length) return null;
+                if (b0 & 0x10) return { id: (((b0 << 24) | (buf[x + 1] << 16) | (buf[x + 2] << 8) | buf[x + 3]) >>> 0), len: 4 };
+                return null;
+              };
+              const rSz = (x) => {
+                if (x >= buf.length) return null;
+                const b0 = buf[x];
+                let m = 0x80, l = 1;
+                while (l <= 8 && !(b0 & m)) { m >>= 1; l++; }
+                if (l > 8 || x + l > buf.length) return null;
+                let s = b0 & (m - 1);
+                for (let i = 1; i < l; i++) s = s * 256 + buf[x + i];
+                if (s === Math.pow(2, 7 * l) - 1) s = -1;
+                return { size: s, len: l };
+              };
+              for (let x = 0; x < Math.min(buf.length - 5, 4096); x++) {
+                const id = rId(x);
+                if (id && id.id === 0x1549A966) {
+                  const sz = rSz(x + id.len);
+                  if (!sz || sz.size < 0) break;
+                  let q = x + id.len + sz.len;
+                  const qEnd = Math.min(q + sz.size, buf.length);
+                  let g = 0;
+                  while (q + 2 < qEnd && g++ < 200) {
+                    const ci = rId(q);
+                    const cs = ci && rSz(q + ci.len);
+                    if (!ci || !cs || cs.size < 0) break;
+                    if (ci.id === 0x4489 && (cs.size === 4 || cs.size === 8)) {
+                      const at = q + ci.len + cs.len;
+                      const v = cs.size === 4 ? dv.getFloat32(at, false) : dv.getFloat64(at, false);
+                      return done({ container: 'webm', dur: v });
+                    }
+                    q += ci.len + cs.len + cs.size;
+                  }
+                  return done({ container: 'webm', dur: -1 });
                 }
               }
-              res(blob);
-            } catch { res(blob); }
+              done({ container: '?', dur: -1 });
+            } catch { done({ container: '?', dur: -1 }); }
           };
-          fr.onerror = () => res(blob);
+          fr.onerror = () => done({ container: '?', dur: -1 });
+          fr.readAsArrayBuffer(blob.slice(0, 131072));
+        } catch { done({ container: '?', dur: -1 }); }
+      });
+      // MP4 duration repair: Chrome's MP4 muxer can leave broken track timing
+      // (gallery showed 0.000 fps / clipped length). Overwrite mvhd + tkhd +
+      // mdhd durations in place — same-size writes, structure untouched.
+      const repairMp4Core = (buf, seconds) => {
+        const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+        const boxes = (from, end) => {
+          const out = [];
+          let p = from, g = 0;
+          while (p + 8 <= end && g++ < 100) {
+            const size = dv.getUint32(p, false);
+            if (size < 8) break;
+            const type = String.fromCharCode(buf[p + 4], buf[p + 5], buf[p + 6], buf[p + 7]);
+            out.push({ type, at: p, size });
+            if (size === 1) break;
+            p += size;
+            if (p > buf.length) break;
+          }
+          return out;
+        };
+        const setTsDur = (at) => {
+          const ver = buf[at + 8];
+          if (ver === 1) {
+            if (at + 40 > buf.length) return 0;
+            const ts = dv.getUint32(at + 28, false);
+            if (!ts) return 0;
+            dv.setBigUint64(at + 32, BigInt(Math.round(seconds * ts)), false);
+            return ts;
+          }
+          if (at + 28 > buf.length) return 0;
+          const ts = dv.getUint32(at + 20, false);
+          if (!ts) return 0;
+          dv.setUint32(at + 24, Math.round(seconds * ts), false);
+          return ts;
+        };
+        const setTkhd = (at, movieTs) => {
+          if (!movieTs) return false;
+          const ver = buf[at + 8];
+          if (ver === 1) {
+            if (at + 44 > buf.length) return false;
+            dv.setBigUint64(at + 36, BigInt(Math.round(seconds * movieTs)), false);
+            return true;
+          }
+          if (at + 24 > buf.length) return false;
+          dv.setUint32(at + 20, Math.round(seconds * movieTs), false);
+          return true;
+        };
+        const top = boxes(0, buf.length);
+        const moov = top.find((b) => b.type === 'moov');
+        if (!moov) return { patched: false };
+        let patched = false;
+        const kids = boxes(moov.at + 8, Math.min(moov.at + moov.size, buf.length));
+        for (const k of kids) if (k.type === 'mvhd' && setTsDur(k.at)) patched = true;
+        let movieTs = 0;
+        for (const k of kids) {
+          if (k.type !== 'mvhd') continue;
+          const ver = buf[k.at + 8];
+          movieTs = ver === 1 ? dv.getUint32(k.at + 28, false) : dv.getUint32(k.at + 20, false);
+        }
+        for (const k of kids) {
+          if (k.type !== 'trak') continue;
+          const tk = boxes(k.at + 8, Math.min(k.at + k.size, buf.length));
+          for (const t of tk) {
+            if (t.type === 'tkhd' && setTkhd(t.at, movieTs)) patched = true;
+            if (t.type === 'mdia') {
+              const md = boxes(t.at + 8, Math.min(t.at + t.size, buf.length));
+              for (const m of md) if (m.type === 'mdhd' && setTsDur(m.at)) patched = true;
+            }
+          }
+        }
+        return { patched };
+      };
+      const repairMp4Duration = (blob, seconds) => new Promise((res) => {
+        const done = (outBlob, patched) => res({ blob: outBlob, patched: !!patched });
+        try {
+          if (!blob || blob.size < 32) return done(blob, false);
+          const fr = new FileReader();
+          fr.onload = () => {
+            try {
+              const buf = new Uint8Array(fr.result);
+              const r = repairMp4Core(buf, seconds);
+              done(r.patched ? new Blob([buf], { type: blob.type }) : blob, r.patched);
+            } catch { done(blob, false); }
+          };
+          fr.onerror = () => done(blob, false);
           fr.readAsArrayBuffer(blob);
-        } catch { res(blob); }
+        } catch { done(blob, false); }
       });
       const stopRecording = () => new Promise((res) => {
         isRec = false;
@@ -961,6 +1204,7 @@ const shortSurahs = [
       // New verses in → old exported file is stale: canvas + Export back on.
       const resetResult = () => {
         recBlob = null;
+        dlStamp = '';
         cv?.classList.remove('hidden');
         if (video) { video.classList.add('hidden'); video.removeAttribute('src'); }
         const dl = $('[data-av-dl]');
@@ -1052,14 +1296,23 @@ const shortSurahs = [
           hideVeil();
           setMonitor(true);
           if (my !== seq) return;
+          let dlSecs = 0, dlFixed = false, headDur = -1;
+          try { dlSecs = Math.max(1, Math.round((performance.now() - recT0) / 1000)); } catch {}
           try {
             recBlob = new Blob(chunks, { type: recMime || 'video/webm' });
-            if (recExt !== 'mp4' && recBlob && recBlob.size) {
+            if (recBlob && recBlob.size && dlSecs > 0) {
               try {
-                const ms = Math.max(500, Math.round(performance.now() - recT0));
-                recBlob = await patchWebmDuration(recBlob, ms / 1000);
+                const fixed = recExt === 'mp4'
+                  ? await repairMp4Duration(recBlob, dlSecs)
+                  : await repairWebmDuration(recBlob, dlSecs);
+                recBlob = fixed.blob; dlFixed = fixed.patched;
               } catch {}
             }
+            try {
+              const insp = await inspectMedia(recBlob);
+              headDur = insp.dur;
+              console.info('[ayah-video] export', recExt, dlSecs + 's', 'header-ok=' + dlFixed, 'header-says=' + (headDur >= 0 ? headDur.toFixed(2) + 's' : '?'));
+            } catch {}
             if (video && recBlob.size) {
               video.src = URL.createObjectURL(recBlob);
               video.classList.remove('hidden');
@@ -1067,6 +1320,7 @@ const shortSurahs = [
             const dl = $('[data-av-dl]');
             if (dl) dl.disabled = !(recBlob && recBlob.size);
             if (recBlob && recBlob.size) {
+              dlStamp = stamp();
               cv?.classList.add('hidden');
               showExportBtn(false);
               showRunRow(false);
@@ -1076,7 +1330,7 @@ const shortSurahs = [
               showRunRow(true);
             }
             say(recBlob && recBlob.size ? 'Video ready — play it above, then press Download.' : 'Export failed — try again in Chrome.', !(recBlob && recBlob.size));
-            if (recBlob && recBlob.size) setInfo(items.length + (items.length > 1 ? ' ayahs exported — play above, then press Download.' : ' ayah exported — play above, then press Download.'));
+            if (recBlob && recBlob.size) setInfo(items.length + (items.length > 1 ? ' ayahs' : ' ayah') + ' exported (' + recExt.toUpperCase() + ' ' + dlSecs + 's, file says ' + (headDur >= 0 ? headDur.toFixed(1) + 's' : '?') + ') — play above, then press Download.');
           } catch {
             say('Export failed — try again in Chrome.', true);
           }
@@ -1095,7 +1349,9 @@ const shortSurahs = [
         '🔗 https://hikmahnoor.in/tools/ayah-video/\n\n' +
         '📖 If someone reads this Ayah, you will also be rewarded, so please don\u2019t remove this caption.';
       const SHARE_TITLE = 'Ayah Video — Hikmah Noor';
-      const shareFileName = () => 'hikmah-noor-ayah-video.' + recExt;
+      let dlStamp = '';
+      const stamp = () => { const d = new Date(); const p2 = (n) => String(n).padStart(2, '0'); return d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes()) + p2(d.getSeconds()); };
+      const shareFileName = () => 'hikmah-noor-ayah-video' + (dlStamp ? '-' + dlStamp : '') + '.' + recExt;
 
       // ---- Wiring ----
       const modeRadios = root.querySelectorAll('input[name="av-mode"]');
