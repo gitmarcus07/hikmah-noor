@@ -179,6 +179,7 @@ export function standaloneToolItems(locale: string): IndexItem[] {
   const defs: Array<[string, string, string, string[]]> = [
     ['/tools/mosque-finder/', 'Mosque Finder — Nearby Masjids with Distance & Directions', 'Find nearby mosques with distance and directions from your location.', ['mosque finder', 'masjid', 'masjid near me', 'mosque near me', 'mosque locator', 'prayer place']],
     ['/tools/ayah-card/', 'Ayah Card Maker — Verse Images to Share & Download', 'Create beautiful ayah images to share and download.', ['ayah card', 'verse image', 'share ayah', 'quran image', 'ayah wallpaper']],
+    ['/tools/ayah-video/', 'Ayah Video Maker — Short Surah & Verse Videos to Share & Download', 'Create 1:1 square ayah videos with recitation and meaning to share and download.', ['ayah video', 'surah video', 'quran video', 'verse video', 'ayah mp4', 'status video']],
     ['/tools/daily-reminder/', 'Daily Reminder — One Ayah Notification Every Day', 'Get one ayah notification every day on your device.', ['daily reminder', 'ayah reminder', 'daily ayah', 'notification', 'reminder']],
     ['/tools/eid-takbeer/', 'Eid Takbeer Studio — Wording, Audio & Tashriq Schedule', 'Eid takbeer wording with audio and the Tashriq schedule.', ['eid takbeer', 'takbeer', 'takbir', 'tashriq', 'eid audio']],
     ['/tools/qurbani-dua/', 'Qurbani Dua — What to Say at Slaughter, with Audio', 'What to say at the time of Qurbani slaughter, with Arabic audio.', ['qurbani dua', 'qurbani', 'slaughter dua', 'udhia dua', 'bakra eid dua']],

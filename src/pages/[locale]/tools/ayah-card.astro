@@ -41,7 +41,7 @@ const cardThemes = [
         <div class="flex flex-wrap gap-1.5 mt-1.5">
           {cardThemes.map((t) => (
             <label class="hn-theme-chip">
-              <input type="radio" name="ac-theme" value={t.id} class="sr-only" checked={t.id === 'emerald'} />
+              <input type="radio" name="ac-theme" value={t.id} class="sr-only" checked={t.id === 'midnight'} />
               <span class="hn-theme-dot" style={`background:${t.dot}`} aria-hidden="true"></span>
               {t.label}
             </label>
@@ -103,7 +103,7 @@ const cardThemes = [
         rose: { bg1: '#BE123C', bg2: '#E11D48', gold: '#FFE4E6', ink: '#ffffff', mut: '#FECDD3' },
         royal: { bg1: '#4338CA', bg2: '#4F46E5', gold: '#E0E7FF', ink: '#ffffff', mut: '#C7D2FE' },
       };
-      const DEFAULT_THEME = 'emerald';
+      const DEFAULT_THEME = 'midnight';
       const themeName = () => {
         const picked = root.querySelector('input[name="ac-theme"]:checked');
         return picked && THEMES[picked.value] ? picked.value : DEFAULT_THEME;
