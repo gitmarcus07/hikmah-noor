@@ -51,7 +51,6 @@ const cardThemes = [
         <button data-ac-random class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🎲 Random</button>
       </div>
       <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-ac-err>Verse not found — check the numbers.</p>
-      <button data-ac-retry type="button" class="hn-btn hn-btn-secondary !min-h-[44px] text-sm hidden">Retry</button>
     </div>
 
     <div class="mt-3 hn-card hn-card-pad text-center">
@@ -264,7 +263,7 @@ const cardThemes = [
         setTimeout(() => { btn.textContent = 'Copy caption'; }, 2500);
       });
       // A service outage must not read like bad user input, and it must not look
-      // like nothing happened — say what failed and offer a retry.
+      // like nothing happened — say what failed.
       const LOAD_ERRORS = {
         notfound: 'Verse not found — check the surah and ayah numbers.',
         service: 'Couldn’t load this verse — the verse service is unavailable right now, so the previous card is still shown. Try again in a moment.',
@@ -272,7 +271,6 @@ const cardThemes = [
       const showLoadError = (kind) => {
         const err = $('[data-ac-err]');
         if (err) { err.textContent = LOAD_ERRORS[kind] || LOAD_ERRORS.service; err.classList.remove('hidden'); }
-        $('[data-ac-retry]')?.classList.toggle('hidden', kind !== 'service');
       };
       // Verse source for the card. /api/verse scans the entire D1 verse table on
       // every call (surah/verse are UNINDEXED in the FTS5 table), so it burns the
@@ -301,7 +299,6 @@ const cardThemes = [
       const load = async (s, v) => {
         const my = ++loadSeq;
         $('[data-ac-err]')?.classList.add('hidden');
-        $('[data-ac-retry]')?.classList.add('hidden');
         const lang = $('[data-ac-lang]').value;
         const show = (d) => { if (my !== loadSeq) return; cur = d; draw(); };
         const fail = (kind) => { if (my !== loadSeq) return; showLoadError(kind); };
@@ -328,7 +325,6 @@ const cardThemes = [
         $('[data-ac-surah]').value = s; $('[data-ac-ayah]').value = v;
         load(s, v);
       });
-      $('[data-ac-retry]')?.addEventListener('click', () => load($('[data-ac-surah]').value, $('[data-ac-ayah]').value));
       $('[data-ac-dl]').addEventListener('click', () => {
         const a = document.createElement('a');
         a.download = 'ayah-card.png';
