@@ -31,7 +31,9 @@ export async function renderAyahPage({ locale, surahParam, ayahParam, env }) {
   if (!VALID_LOCALES.has(locale)) return null;
   const surah = surahBySlugOrNum(surahParam);
   if (!surah) return null;
-  const v = parseInt(String(ayahParam), 10);
+  // Tolerate `S:V` refs in the ayah slot (e.g. /59-al-hashr/59:10/ from
+  // external links): take the verse part, then range-check as usual.
+  const v = parseInt(String(ayahParam).split(':').pop(), 10);
   if (!Number.isInteger(v) || v < 1 || v > surah.verseCount) return null;
 
   // Verse text lives in D1 (migration 0005). No 6.9MB JSON bundled in Worker.
@@ -39,7 +41,7 @@ export async function renderAyahPage({ locale, surahParam, ayahParam, env }) {
   let row = null;
   try {
     row = await env.DB.prepare(
-      'SELECT surah, verse, sname, ar, ur, en, hi FROM verses_fts WHERE surah = ? AND verse = ?'
+      'SELECT surah, verse, sname, ar, ur, en, hi FROM verses WHERE surah = ? AND verse = ?'
     ).bind(surah.num, v).first();
   } catch {
     return null;

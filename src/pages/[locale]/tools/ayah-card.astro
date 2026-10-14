@@ -326,12 +326,10 @@ const cardThemes = [
         const err = $('[data-ac-err]');
         if (err) { err.textContent = LOAD_ERRORS[kind] || LOAD_ERRORS.service; err.classList.remove('hidden'); }
       };
-      // Verse source for the card. /api/verse scans the entire D1 verse table on
-      // every call (surah/verse are UNINDEXED in the FTS5 table), so it burns the
-      // database's daily read quota and then answers 503 once it is gone — which is
-      // why Random and the Meaning switch looked dead: the verse never arrived, so
-      // nothing redrew. The same texts ship as one static JSON per surah
-      // (/ayah-data/<n>.json), fetched on demand and cached per surah below.
+      // Verse source for the card. The same texts ship as one static JSON per
+      // surah (/ayah-data/<n>.json), fetched on demand and cached per surah
+      // below — /api/verse is only the fallback (it reads the indexed
+      // `verses` table, one row per call).
       const surahCache = new Map();
       const staticVerse = async (s, v, lang) => {
         const n = Number(s);

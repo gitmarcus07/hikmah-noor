@@ -9,6 +9,14 @@
 const APEX = 'https://hikmahnoor.in';
 const LEGACY_HOSTS = new Set(['www.hikmahnoor.in', 'hikmah-noor.pages.dev']);
 
+// Dead slugs (indexed 404s in Search Console) -> live pages, all locales.
+const MOVED = new Map([
+  ['/kalimas/pehla-kalima/', '/kalimas/first-kalimah-tayyibah/'],
+  ['/waqiat/noahs-ark-build-material-unknown/', '/waqiat/nuh-ark-flood/'],
+  ['/duas/how-to-perform-wudu/', '/learn/salah/wudu-ablution/'],
+]);
+for (const l of ['hi', 'ur', 'ar']) for (const [f, t] of [...MOVED]) MOVED.set('/' + l + f, '/' + l + t);
+
 export async function onRequest(context) {
   const url = new URL(context.request.url);
   if (LEGACY_HOSTS.has(url.hostname)) {
@@ -16,6 +24,10 @@ export async function onRequest(context) {
   }
   if (url.pathname === '/en' || url.pathname === '/en/') {
     return Response.redirect(APEX + '/' + url.search, 301);
+  }
+  const moved = MOVED.get(url.pathname);
+  if (moved) {
+    return Response.redirect(APEX + moved + url.search, 301);
   }
   if (url.pathname.startsWith('/en/')) {
     return Response.redirect(APEX + url.pathname.slice(3) + url.search, 301);

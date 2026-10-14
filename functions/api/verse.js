@@ -17,7 +17,7 @@ export async function onRequestGet(context) {
   if (!surah || !verse) return json({ error: 'invalid_ref' }, 400);
   try {
     const r = await env.DB.prepare(
-      'SELECT surah, verse, sname, ar, ur, en, hi FROM verses_fts WHERE surah = ? AND verse = ?'
+      'SELECT surah, verse, sname, ar, ur, en, hi FROM verses WHERE surah = ? AND verse = ?'
     ).bind(surah, verse).first();
     if (!r) return json({ error: 'not_found' }, 404);
     return json({
