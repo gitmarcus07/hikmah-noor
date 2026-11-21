@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { isRTL, localeNames, locales, getDict, localizedPath } from '../i18n/utils';
 import Icon from '../components/Icon.astro';
 import NoticePopup from '../components/NoticePopup.astro';
+import AppDownloadPopup from '../components/AppDownloadPopup.astro';
 
 interface Props {
   title: string;
@@ -446,7 +447,7 @@ const mobileGroups = [
 
   {/* ============ QURAN WALL APP STRIP — every page except homepages (the homepage has the big banner) ============ */}
   {!isHome && (
-    <a href="https://play.google.com/store/apps/details?id=app.quranwall.wallpaper" target="_blank" rel="noopener" class="block" style="background:linear-gradient(90deg,#171208,#0a0805 70%);border-bottom:1px solid #2b2113;text-decoration:none">
+    <a href="https://play.google.com/store/apps/details?id=app.quranwall.wallpaper" target="_blank" rel="noopener" class="block" style="position:sticky;top:3.75rem;z-index:40;background:linear-gradient(90deg,#171208,#0a0805 70%);border-bottom:1px solid #2b2113;text-decoration:none">
       <div class="hn-container flex items-center gap-3 py-2.5">
         <img src="/images/quran-walls-icon.png" alt="" width="36" height="36" loading="lazy" class="shrink-0" style="border-radius:9px" />
         <p class="min-w-0 flex-1 text-[13.5px] leading-5 line-clamp-2" style="color:#fbf7ef">
@@ -557,5 +558,6 @@ const mobileGroups = [
   </footer>
   )}
   <NoticePopup />
+  <AppDownloadPopup />
 </body>
 </html>
