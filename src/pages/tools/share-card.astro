@@ -1,0 +1,807 @@
+---
+/* Share Card Studio — one client-side canvas generator for every shareable
+ * card on the site: a Quran ayah with its meaning, a dua, a hadith, one of the
+ * 99 Names of Allah, or your own message.
+ *
+ * Two jobs, one tool:
+ *   1. Traffic — every card has to be made here, and every card prints the
+ *      exact source page it came from, so a reader who wants the ayah/dua/
+ *      hadith/Name lands on that page.
+ *   2. Advertising — the PNG the user shares carries the Hikmah Noor wordmark
+ *      and hikmahnoor.in on the image itself, and the share caption repeats the
+ *      source link (with UTM) plus the studio link. The image is the ad, the
+ *      link is the return path.
+ *
+ * No backend: verse text comes from /ayah-data/<n>.json, duas from
+ * /card-data/duas/<cat>.json, hadith from /card-data/hadith.json and names
+ * from /card-data/names.json — all fetched on demand and cached per session. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AppHeader from '../../components/AppHeader.astro';
+import { DUA_CATS } from '../../data/duas';
+
+const locale = 'en';
+const TOOL_PATH = '/tools/share-card/';
+const faq = [
+  { q: 'What can I make in the Share Card Studio?', a: 'Five card types in one tool: a Quran ayah with its meaning, a dua, a hadith, one of the 99 Names of Allah, or your own message. Pick the type, choose the content, pick a colour theme, then download the PNG or share it straight to WhatsApp, Instagram or Facebook.' },
+  { q: 'Why does every card print a link?', a: 'Each card shows the exact page it came from, and the share caption carries the same link. Whoever receives the card can open that ayah, dua, hadith or Name on this site — that is how one shared card keeps sending readers back.' },
+  { q: 'Can I change the words on the card?', a: 'The Arabic and its meaning always come from this site so the text stays accurate and is never rewritten. You choose the content, the meaning language, the colour theme and — for a My Message card — your own words.' },
+  { q: 'Do I need an account?', a: 'No. The card is drawn in your browser: nothing is uploaded, no sign-up is needed, and a message you type never leaves your device.' },
+];
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Tools', path: '/tools/' },
+  { name: 'Share Card Studio', path: TOOL_PATH },
+];
+// Card colour themes — ids must match THEMES in the canvas script at the bottom.
+const cardThemes = [
+  { id: 'emerald', label: 'Emerald', dot: '#047C70' },
+  { id: 'midnight', label: 'Midnight', dot: '#0F172A' },
+  { id: 'gold', label: 'Gold', dot: '#D97706' },
+  { id: 'rose', label: 'Rose', dot: '#E11D48' },
+  { id: 'royal', label: 'Royal', dot: '#4F46E5' },
+];
+const CARD_TYPES = [
+  { id: 'ayah', label: 'Ayah' },
+  { id: 'dua', label: 'Dua' },
+  { id: 'hadith', label: 'Hadith' },
+  { id: 'name', label: 'Name of Allah' },
+  { id: 'msg', label: 'My Message' },
+];
+const duaCats = DUA_CATS.map((c) => ({ slug: c.slug, title: c.title }));
+---
+<BaseLayout title="Share Card Studio — Make Islamic Cards to Share on WhatsApp & Instagram" description="Make shareable Islamic cards in one tool: a Quran ayah with meaning, a dua, a hadith, one of the 99 Names of Allah, or your own message. Pick a theme, download the PNG or share it — every card links back to its source page." keywords="islamic card maker, share card maker, dua image, hadith card, name of allah card, quran verse card, whatsapp status image, islamic poster maker" locale={locale} canonicalPath={TOOL_PATH} faq={faq} crumbs={crumbs}>
+  <AppHeader locale={locale} title="Share Card Studio" backHref="/tools/" />
+  <div class="max-w-md mx-auto px-4 py-5" data-sc>
+    <div class="hn-card hn-card-pad space-y-3">
+      <fieldset class="hn-theme-set" data-sc-types>
+        <legend class="text-[13px] font-bold">Card type</legend>
+        <div class="flex flex-wrap gap-1.5 mt-1.5">
+          {CARD_TYPES.map((t) => (
+            <label class="hn-theme-chip">
+              <input type="radio" name="sc-type" value={t.id} class="sr-only" checked={t.id === 'ayah'} />
+              {t.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <div data-panel="ayah">
+        <div class="grid grid-cols-2 gap-2">
+          <label class="text-[13px] font-bold">Surah (1–114)<input data-sc-surah inputmode="numeric" value="112" class="hn-input mt-1" aria-label="Surah number" /></label>
+          <label class="text-[13px] font-bold">Ayah<input data-sc-ayah inputmode="numeric" value="1" class="hn-input mt-1" aria-label="Ayah number" /></label>
+        </div>
+      </div>
+
+      <div data-panel="dua" hidden>
+        <label class="text-[13px] font-bold block">Dua category
+          <select data-sc-duacat class="hn-input mt-1" aria-label="Dua category">
+            {duaCats.map((c) => <option value={c.slug}>{c.title}</option>)}
+          </select>
+        </label>
+        <label class="text-[13px] font-bold block mt-2">Dua
+          <select data-sc-dua class="hn-input mt-1" aria-label="Dua"></select>
+        </label>
+      </div>
+
+      <div data-panel="hadith" hidden>
+        <label class="text-[13px] font-bold block">Hadith
+          <select data-sc-hadith class="hn-input mt-1" aria-label="Hadith"></select>
+        </label>
+      </div>
+
+      <div data-panel="name" hidden>
+        <label class="text-[13px] font-bold block">Name of Allah
+          <select data-sc-name class="hn-input mt-1" aria-label="Name of Allah"></select>
+        </label>
+      </div>
+
+      <div data-panel="msg" hidden>
+        <label class="text-[13px] font-bold block">Your message
+          <textarea data-sc-msg class="hn-input mt-1" rows="4" maxlength="420" placeholder="Write your own words — a reminder, a du‘a, a wish…" aria-label="Your message"></textarea>
+        </label>
+        <label class="text-[13px] font-bold block mt-2">From (optional)
+          <input data-sc-from class="hn-input mt-1" maxlength="60" placeholder="Your name" aria-label="From" />
+        </label>
+      </div>
+
+      <label class="text-[13px] font-bold block hidden" data-sc-langrow>Meaning
+        <select data-sc-lang class="hn-input mt-1" aria-label="Meaning language">
+          <option value="ur">Urdu</option>
+          <option value="en" selected>English</option>
+          <option value="hi">Hindi</option>
+        </select>
+      </label>
+
+      <div class="flex gap-2" data-sc-actions>
+        <button data-sc-load class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm">Load verse</button>
+        <button data-sc-random class="hn-btn hn-btn-secondary !min-h-[48px] text-sm">🎲 Random</button>
+      </div>
+
+      <fieldset class="hn-theme-set" data-sc-themes>
+        <legend class="text-[13px] font-bold">Color Theme</legend>
+        <div class="flex flex-wrap gap-1.5 mt-1.5">
+          {cardThemes.map((t) => (
+            <label class="hn-theme-chip">
+              <input type="radio" name="sc-theme" value={t.id} class="sr-only" checked={t.id === 'midnight'} />
+              <span class="hn-theme-dot" style={`background:${t.dot}`} aria-hidden="true"></span>
+              {t.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <p class="text-[13px] font-bold hidden" style="color:#b3261e" data-sc-err role="alert"></p>
+      <p class="text-[13px] hidden" style="color:var(--hn-muted)" data-sc-status role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="mt-3 hn-card hn-card-pad text-center">
+      <canvas data-sc-canvas width="1080" height="1080" class="w-full rounded-[12px]" style="border:1px solid var(--hn-border)"></canvas>
+      <div class="flex items-center justify-center gap-2 mt-3 hidden" data-sc-pager>
+        <button data-sc-prev class="hn-btn hn-btn-secondary !min-h-[44px] !px-4 text-sm">← Prev</button>
+        <span class="text-[13px] font-bold" style="color:var(--hn-muted)" data-sc-pageinfo>Part 1 of 1</span>
+        <button data-sc-next class="hn-btn hn-btn-secondary !min-h-[44px] !px-4 text-sm">Next →</button>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button data-sc-dl class="hn-btn hn-btn-primary flex-1 !min-h-[48px] text-sm">Download PNG</button>
+        <button data-sc-share type="button" aria-label="Share this card" class="hn-btn hn-btn-secondary flex-1 !min-h-[48px] text-sm disabled:opacity-60">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12" /><path d="m8 7 4-4 4 4" /><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" /></svg>
+          Share
+        </button>
+      </div>
+      <p class="text-[13px] font-bold mt-2 hidden" style="color:#b3261e" data-sc-share-msg role="status" aria-live="polite"></p>
+      <div class="mt-1 hidden" data-sc-share-fallback>
+        <a data-sc-wa href="https://wa.me/?text=" target="_blank" rel="noopener noreferrer" class="hn-btn hn-btn-ghost mx-1 text-sm">WhatsApp (text only)</a>
+        <button data-sc-copy type="button" class="hn-btn hn-btn-ghost mx-1 text-sm">Copy caption</button>
+      </div>
+      <p class="mt-2 text-[12.5px]" style="color:var(--hn-muted)">1080×1080 square — long content splits into parts automatically.</p>
+    </div>
+
+    <section class="mt-8" aria-label="How the Share Card Studio works">
+      <div class="hn-card hn-card-pad">
+        <h2 class="font-extrabold text-lg leading-7">How it works</h2>
+        <ol class="mt-3 space-y-3 text-[14.5px] leading-6" style="color:var(--hn-muted)">
+          <li><span class="font-extrabold" style="color:var(--hn-ink)">1. Pick your card.</span> Ayah, dua, hadith, one of the 99 Names of Allah, or your own words — with a colour theme that suits you.</li>
+          <li><span class="font-extrabold" style="color:var(--hn-ink)">2. Download or share.</span> A 1080×1080 PNG, ready for WhatsApp status, Instagram, Facebook and Telegram.</li>
+          <li><span class="font-extrabold" style="color:var(--hn-ink)">3. The card carries its source.</span> It prints the exact page it came from, and the share caption repeats that link — so anyone who reads it can open the full text, and make their own card.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="mt-8" aria-label="Frequently asked questions">
+      <div class="space-y-3">
+        {faq.map((f) => (
+          <details class="hn-faq">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-sc]');
+      if (!root || root.dataset.wired) return;
+      root.dataset.wired = '1';
+      const $ = (s) => root.querySelector(s);
+      const cv = $('[data-sc-canvas]');
+      const cx = cv.getContext('2d');
+      const W = 1080, H = 1080, MAX = W - 220, CONTENT_W = W - 128;
+      const TOOL_PATH = '/tools/share-card/';
+      const ORIGIN = 'https://hikmahnoor.in';
+      // Tag every outgoing share so GA4 can report visits that came from a card.
+      const UTM = 'utm_source=share-card&utm_medium=social&utm_campaign=share-card-studio';
+
+      // Card palettes — same five as the Ayah Card Maker so the whole family of
+      // cards reads as one brand. Role keys map to the canvas renderer below.
+      const THEMES = {
+        emerald: { bg1: '#047C70', bg2: '#05998B', gold: '#CCFBF1', ink: '#ffffff', mut: '#E6FFFB' },
+        midnight: { bg1: '#0F172A', bg2: '#1E293B', gold: '#A5B4FC', ink: '#ffffff', mut: '#CBD5E1' },
+        gold: { bg1: '#D97706', bg2: '#F59E0B', gold: '#431407', ink: '#431407', mut: '#4A2208' },
+        rose: { bg1: '#BE123C', bg2: '#E11D48', gold: '#FFE4E6', ink: '#ffffff', mut: '#FECDD3' },
+        royal: { bg1: '#4338CA', bg2: '#4F46E5', gold: '#E0E7FF', ink: '#ffffff', mut: '#C7D2FE' },
+      };
+      const DEFAULT_THEME = 'midnight';
+      const themeName = () => {
+        const picked = root.querySelector('input[name="sc-theme"]:checked');
+        return picked && THEMES[picked.value] ? picked.value : DEFAULT_THEME;
+      };
+
+      // Block roles: ar = Arabic, nm = upright accent (Name transliteration),
+      // msg = card owner's own words, tx = translation/meaning, ref = source
+      // line, div = divider rule. Each keeps its own font builder so a block
+      // can shrink to fit without losing its identity.
+      const FONTS = {
+        ar: (s) => s + 'px "Amiri Quran", "Noto Naskh Arabic", serif',
+        nm: (s) => '700 ' + s + 'px Georgia, serif',
+        msg: (s) => 'italic ' + s + 'px Georgia, serif',
+        tx: (s) => 'italic ' + s + 'px Georgia, serif',
+        ref: (s) => '700 ' + s + 'px Georgia, serif',
+      };
+      const INK_OF = { ar: 'ink', nm: 'gold', msg: 'ink', tx: 'mut', ref: 'gold' };
+
+      const wrap = (text, font, max) => {
+        cx.font = font;
+        const words = String(text || '').split(/\s+/).filter(Boolean);
+        const lines = [];
+        let line = '';
+        for (const w of words) {
+          const t = line ? line + ' ' + w : w;
+          if (cx.measureText(t).width > max && line) { lines.push(line); line = w; }
+          else line = t;
+        }
+        if (line) lines.push(line);
+        return lines;
+      };
+      // Shrink a size until the line measures inside `max` — guards single long
+      // words and long source URLs that wrapping alone cannot fix.
+      const fitSize = (text, tpl, size, max) => {
+        let s = size;
+        cx.font = tpl(s);
+        while (s > 18 && cx.measureText(String(text)).width > max) { s -= 2; cx.font = tpl(s); }
+        return s;
+      };
+
+      let cur = {
+        kind: 'ayah',
+        ar: 'قُلْ هُوَ اللَّهُ أَحَدٌ',
+        tx: 'Say: He is Allah, the One.',
+        ref: 'Quran 112:1 (Al-Ikhlaas)',
+        path: '/quran/112-al-ikhlaas/1/',
+        kicker: 'Ayah Card',
+      };
+      let pageIdx = 0, pageCount = 1;
+
+      // Verse counts per surah (1–114) — Random picks from this table so a
+      // random ayah never waits on a fetch that may fail.
+      const SURAH_VERSES = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+
+      // ---- card content -> blocks ----
+      const line = (out, text, kind, fs, tpl) => {
+        for (const ln of wrap(text, tpl(fs), MAX)) {
+          const size = fitSize(ln, tpl, fs, MAX);
+          out.push({ kind, text: ln, fs: size, tpl, h: kind === 'ar' ? size + 22 : size + 16 });
+        }
+      };
+      // The Clear Quran translation already carries its own quotation and ˹…˺
+      // annotation marks, which Georgia renders quote-shaped — adding another
+      // pair of “…” on top reads as ””. Only style a plain line as a quote card
+      // when it carries no quotation or annotation marks of its own.
+      const QUOTED = /[\u2018-\u201F\u02B8-\u02FF"'`]/;
+      const quoteIfNeeded = (s) => {
+        const t = String(s || '');
+        if (!t || QUOTED.test(t)) return t;
+        return '\u201C' + t + '\u201D';
+      };
+
+      const buildBlocks = (c) => {
+        const bl = [];
+        if (c.kind === 'name') {
+          // The name is the hero: big Arabic, gold transliteration, then meaning.
+          if (c.ar) line(bl, c.ar, 'ar', fitSize(c.ar, FONTS.ar, 96, MAX), FONTS.ar);
+          if (c.tx) line(bl, c.tx, 'nm', fitSize(c.tx, FONTS.nm, 46, MAX), FONTS.nm);
+          if (c.sub) { bl.push({ kind: 'div', h: 46 }); line(bl, c.sub, 'tx', 34, FONTS.tx); }
+          if (c.ref) line(bl, c.ref, 'ref', 30, FONTS.ref);
+        } else if (c.kind === 'msg') {
+          if (c.ar) line(bl, c.ar, 'msg', 44, FONTS.msg);
+          if (c.ref) { bl.push({ kind: 'div', h: 46 }); line(bl, c.ref, 'ref', 30, FONTS.ref); }
+        } else {
+          // Ayah / dua / hadith: Arabic, rule, meaning, source line.
+          if (c.ar) line(bl, c.ar, 'ar', c.kind === 'ayah' ? 44 : 40, FONTS.ar);
+          if (c.tx) {
+            bl.push({ kind: 'div', h: 46 });
+            line(bl, c.quote ? quoteIfNeeded(c.tx) : c.tx, 'tx', c.kind === 'ayah' ? 40 : 36, FONTS.tx);
+          }
+          if (c.ref) line(bl, c.ref, 'ref', 30, FONTS.ref);
+        }
+        return bl;
+      };
+
+      const paintPager = () => {
+        const pager = $('[data-sc-pager]');
+        if (pager) pager.classList.toggle('hidden', pageCount < 2);
+        const info = $('[data-sc-pageinfo]');
+        if (info) info.textContent = 'Part ' + (pageIdx + 1) + ' of ' + pageCount;
+        const pv = $('[data-sc-prev]'), nx = $('[data-sc-next]');
+        if (pv) pv.disabled = pageIdx <= 0;
+        if (nx) nx.disabled = pageIdx >= pageCount - 1;
+      };
+
+      const linkPath = () => (cur.path && cur.path !== TOOL_PATH ? cur.path : TOOL_PATH);
+      const kickerText = () => {
+        const label = cur.kicker || 'Card';
+        return pageCount > 1 ? label + ' \u00B7 Part ' + (pageIdx + 1) + ' of ' + pageCount : label;
+      };
+
+      const draw = () => {
+        const T = THEMES[themeName()] || THEMES[DEFAULT_THEME];
+        if (cv.height !== H) cv.height = H;
+
+        // Pack blocks into pages that fit between the header and the footer links.
+        const blocks = buildBlocks(cur);
+        const TOP = 300, BOTTOM = 940, BUDGET = BOTTOM - TOP;
+        const pages = [];
+        let pg = [], used = 0;
+        for (const b of blocks) {
+          if (used + b.h > BUDGET && pg.length) { pages.push({ items: pg, used }); pg = []; used = 0; }
+          pg.push(b); used += b.h;
+        }
+        pages.push({ items: pg, used });
+        pageCount = pages.length;
+        if (pageIdx > pageCount - 1) pageIdx = pageCount - 1;
+        if (pageIdx < 0) pageIdx = 0;
+        const P = pages[pageIdx];
+        paintPager();
+
+        const g = cx.createLinearGradient(0, 0, W, H);
+        g.addColorStop(0, T.bg1); g.addColorStop(1, T.bg2);
+        cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+        cx.strokeStyle = T.gold; cx.lineWidth = 6; cx.strokeRect(48, 48, W - 96, H - 96);
+        cx.lineWidth = 2; cx.strokeRect(64, 64, W - 128, H - 128);
+
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillStyle = T.gold;
+        cx.font = FONTS.nm(44);
+        cx.fillText('\u2629 Hikmah Noor', W / 2, 150);
+        cx.globalAlpha = 0.9;
+        cx.font = FONTS.nm(28);
+        cx.fillText(kickerText(), W / 2, 196);
+        cx.globalAlpha = 1;
+
+        // Single short cards centre in the zone; multi-part cards stay top-aligned.
+        const startY = pageCount === 1 ? TOP + Math.max(0, (BUDGET - P.used) / 2) : TOP;
+        let y = startY;
+        for (const b of P.items) {
+          if (b.kind === 'div') {
+            cx.fillStyle = T.gold;
+            cx.fillRect(W / 2 - 60, y + b.h / 2 - 1.5, 120, 3);
+          } else {
+            cx.fillStyle = T[INK_OF[b.kind]];
+            cx.font = b.tpl(b.fs);
+            cx.fillText(b.text, W / 2, y + b.h / 2);
+          }
+          y += b.h;
+        }
+
+        // Footer: the return path. Line 1 is the page the card came from, line 2
+        // invites the reader to make their own. Both are inside the inner frame.
+        const path = linkPath();
+        const short = 'hikmahnoor.in' + path;
+        const srcSize = fitSize(short, FONTS.ref, 30, CONTENT_W);
+        cx.fillStyle = T.gold;
+        cx.font = FONTS.ref(srcSize);
+        if (path === TOOL_PATH) {
+          cx.fillText(short, W / 2, 975);
+        } else {
+          cx.fillText(short, W / 2, 958);
+          cx.globalAlpha = 0.8;
+          cx.font = FONTS.ref(fitSize('Make your own \u2192 hikmahnoor.in/tools/share-card/', FONTS.ref, 24, CONTENT_W));
+          cx.fillText('Make your own \u2192 hikmahnoor.in/tools/share-card/', W / 2, 996);
+          cx.globalAlpha = 1;
+        }
+      };
+
+      // ---- load state ----
+      const LOAD_ERRORS = {
+        notfound: 'Not found — check the numbers and try again.',
+        service: 'Couldn’t load that content — the data service is unavailable right now. Try again in a moment.',
+        empty: 'This card needs some text before it can be downloaded.',
+      };
+      const showErr = (msg) => {
+        const el = $('[data-sc-err]');
+        if (!el) return;
+        el.textContent = msg || '';
+        el.classList.toggle('hidden', !msg);
+      };
+      const setStatus = (msg) => {
+        const el = $('[data-sc-status]');
+        if (!el) return;
+        el.textContent = msg || '';
+        el.classList.toggle('hidden', !msg);
+      };
+
+      // ---- data sources (all static, fetched on demand, cached) ----
+      const surahCache = new Map();
+      const loadAyah = async (s, v, lang) => {
+        const n = Number(s);
+        if (!Number.isInteger(n) || n < 1 || n > 114) return null;
+        let j = surahCache.get(n);
+        if (!j) {
+          const r = await fetch('/ayah-data/' + n + '.json');
+          if (!r.ok) return null;
+          j = await r.json();
+          surahCache.set(n, j);
+        }
+        const row = (j.vs || []).find((x) => Number(x.v) === Number(v));
+        if (!row || !row.ar) return null;
+        return {
+          kind: 'ayah',
+          ar: row.ar,
+          tx: row[lang] || row.en || '',
+          quote: true,
+          ref: 'Quran ' + n + ':' + row.v + (j.sname ? ' (' + j.sname + ')' : ''),
+          path: '/quran/' + j.slug + '/' + row.v + '/',
+          kicker: 'Ayah Card',
+        };
+      };
+
+      const duaCache = new Map();
+      const ensureDuaCat = async (cat) => {
+        if (duaCache.has(cat)) return duaCache.get(cat);
+        const r = await fetch('/card-data/duas/' + encodeURIComponent(cat) + '.json');
+        if (!r.ok) throw new Error('service');
+        const j = await r.json();
+        const list = j.duas || [];
+        duaCache.set(cat, list);
+        return list;
+      };
+      const hadithCache = { list: null };
+      const ensureHadith = async () => {
+        if (hadithCache.list) return hadithCache.list;
+        const r = await fetch('/card-data/hadith.json');
+        if (!r.ok) throw new Error('service');
+        const j = await r.json();
+        hadithCache.list = j.hadith || [];
+        return hadithCache.list;
+      };
+      const nameCache = { list: null };
+      const ensureNames = async () => {
+        if (nameCache.list) return nameCache.list;
+        const r = await fetch('/card-data/names.json');
+        if (!r.ok) throw new Error('service');
+        const j = await r.json();
+        nameCache.list = j.names || [];
+        return nameCache.list;
+      };
+
+      // Source line for a hadith/dua: grade \u00B7 narrator \u00B7 book.
+      const sourceLine = (o) => [o.gr, o.nar, o.src].filter(Boolean).join(' \u00B7 ');
+
+      const fillSelect = (sel, items, fmt) => {
+        if (!sel) return;
+        const keep = sel.value;
+        sel.textContent = '';
+        for (const it of items) {
+          const o = document.createElement('option');
+          o.value = fmt(it).v;
+          o.textContent = fmt(it).t;
+          sel.appendChild(o);
+        }
+        if (keep && [...sel.options].some((o) => o.value === keep)) sel.value = keep;
+      };
+
+      // ---- per-type loading ----
+      const state = { type: 'ayah', lang: 'en' };
+      const LOAD_LABEL = { ayah: 'Load verse', dua: 'Load dua', hadith: 'Load hadith', name: 'Load name', msg: 'Load' };
+      const KICKER = { ayah: 'Ayah Card', dua: 'Dua Card', hadith: 'Hadith', name: 'Name of Allah', msg: 'Message' };
+      const LANGS = { ayah: ['ur', 'en', 'hi'], hadith: ['en', 'ur'] };
+      const LANG_LABEL = { ur: 'Urdu', en: 'English', hi: 'Hindi' };
+
+      const applyLangOptions = () => {
+        const row = $('[data-sc-langrow]');
+        const sel = $('[data-sc-lang]');
+        const allowed = LANGS[state.type];
+        if (!row || !sel) return;
+        row.classList.toggle('hidden', !allowed);
+        if (!allowed) return;
+        const wanted = allowed.includes(state.lang) ? state.lang : 'en';
+        state.lang = wanted;
+        sel.textContent = '';
+        for (const l of allowed) {
+          const o = document.createElement('option');
+          o.value = l; o.textContent = LANG_LABEL[l];
+          sel.appendChild(o);
+        }
+        sel.value = wanted;
+      };
+
+      const loadAyahFromInputs = async () => {
+        const d = await loadAyah($('[data-sc-surah]').value, $('[data-sc-ayah]').value, state.lang);
+        if (!d) { showErr(LOAD_ERRORS.notfound); return; }
+        showErr('');
+        cur = d; pageIdx = 0; draw();
+      };
+
+      const loadDuaFromSelect = async () => {
+        const list = await ensureDuaCat($('[data-sc-duacat]').value);
+        const sel = $('[data-sc-dua]');
+        const d = list.find((x) => x.s === sel.value) || list[0];
+        if (!d) { showErr(LOAD_ERRORS.notfound); return; }
+        showErr('');
+        cur = { kind: 'dua', ar: d.a, tx: d.e, ref: sourceLine(d), path: d.p, kicker: KICKER.dua };
+        pageIdx = 0; draw();
+      };
+
+      const loadHadithFromSelect = () => {
+        const list = hadithCache.list || [];
+        const d = list.find((x) => x.s === $('[data-sc-hadith]').value) || list[0];
+        if (!d) { showErr(LOAD_ERRORS.notfound); return; }
+        showErr('');
+        cur = {
+          kind: 'hadith',
+          ar: d.a,
+          tx: state.lang === 'ur' ? d.u || d.e : d.e,
+          ref: sourceLine(d),
+          path: d.p,
+          kicker: KICKER.hadith,
+        };
+        pageIdx = 0; draw();
+      };
+
+      const loadNameFromSelect = () => {
+        const list = nameCache.list || [];
+        const d = list.find((x) => x.s === $('[data-sc-name]').value) || list[0];
+        if (!d) { showErr(LOAD_ERRORS.notfound); return; }
+        showErr('');
+        cur = {
+          kind: 'name',
+          ar: d.a,
+          tx: d.t,
+          sub: d.m,
+          ref: 'Asma-ul-Husna \u00B7 Name ' + d.n + ' of 99',
+          path: d.p,
+          kicker: KICKER.name,
+        };
+        pageIdx = 0; draw();
+      };
+
+      // An empty message is not shippable — nothing worth downloading yet.
+      // The same gate drives Download, Share and the share-sheet entry point.
+      const syncActionState = () => {
+        const can = !(state.type === 'msg' && cur.empty);
+        const dl = $('[data-sc-dl]'), sh = $('[data-sc-share]');
+        if (dl) dl.disabled = !can;
+        if (sh) sh.disabled = !can;
+        return can;
+      };
+
+      const drawMessage = () => {
+        const text = ($('[data-sc-msg]').value || '').trim();
+        const from = ($('[data-sc-from]').value || '').trim();
+        const empty = !text;
+        cur = {
+          kind: 'msg',
+          ar: text || 'Your words will appear here — type a message above…',
+          ref: from && !empty ? '\u2014 ' + from : '',
+          path: TOOL_PATH,
+          kicker: KICKER.msg,
+          empty,
+        };
+        showErr('');
+        setStatus(empty ? LOAD_ERRORS.empty : '');
+        syncActionState();
+        pageIdx = 0; draw();
+      };
+
+      const loadSelected = async () => {
+        if (state.type === 'ayah') return loadAyahFromInputs();
+        if (state.type === 'dua') return loadDuaFromSelect();
+        if (state.type === 'hadith') return loadHadithFromSelect();
+        if (state.type === 'name') return loadNameFromSelect();
+        return drawMessage();
+      };
+
+      const activate = async (id) => {
+        state.type = id;
+        root.querySelectorAll('[data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== id; });
+        const actions = $('[data-sc-actions]');
+        if (actions) actions.classList.toggle('hidden', id === 'msg');
+        const loadBtn = $('[data-sc-load]');
+        if (loadBtn) loadBtn.textContent = LOAD_LABEL[id] || 'Load';
+        applyLangOptions();
+        showErr('');
+        if (id !== 'msg') setStatus('Loading…');
+        try {
+          if (id === 'dua') {
+            const list = await ensureDuaCat($('[data-sc-duacat]').value);
+            fillSelect($('[data-sc-dua]'), list, (x) => ({ v: x.s, t: x.t }));
+          } else if (id === 'hadith') {
+            const list = await ensureHadith();
+            fillSelect($('[data-sc-hadith]'), list, (x) => ({ v: x.s, t: (x.col ? x.col + ' \u00B7 ' : '') + x.t }));
+          } else if (id === 'name') {
+            const list = await ensureNames();
+            fillSelect($('[data-sc-name]'), list, (x) => ({ v: x.s, t: x.n + '. ' + x.t }));
+          }
+          if (id !== 'msg') setStatus('');
+          await loadSelected();
+        } catch {
+          setStatus('');
+          showErr(LOAD_ERRORS.service);
+        }
+        syncActionState();
+      };
+
+      // ---- share: hand the real generated PNG + a fixed caption to the OS sheet ----
+      const shareUrl = () => ORIGIN + linkPath() + (linkPath().includes('?') ? '&' : '?') + UTM;
+      const shareText = () => {
+        const lines = ['\uD83E\uDD4D ' + (cur.kicker || 'Card') + ' \u2014 Hikmah Noor', '\uD83D\uDD17 ' + shareUrl(), ''];
+        if (linkPath() !== TOOL_PATH) lines.push('\uD83E\uDD4D Make your own \u2192 ' + ORIGIN + TOOL_PATH, '');
+        lines.push('\uD83D\uDCD6 If someone reads this, you will also be rewarded, so please don\u2019t remove this caption.');
+        return lines.join('\n');
+      };
+      const SHARE_TITLE = 'Share Card \u2014 Hikmah Noor';
+      const shareFile = () => (pageCount > 1 ? 'hikmah-noor-share-card-p' + (pageIdx + 1) + '.png' : 'hikmah-noor-share-card.png');
+      const shareBtn = $('[data-sc-share]');
+      const shareMsg = $('[data-sc-share-msg]');
+      const shareFallback = $('[data-sc-share-fallback]');
+      let sharing = false;
+      const say = (text, bad) => {
+        if (!shareMsg) return;
+        shareMsg.textContent = text || '';
+        shareMsg.classList.toggle('hidden', !text);
+        shareMsg.style.color = bad ? '#b3261e' : 'var(--hn-muted)';
+      };
+      const cardBlob = () => new Promise((res) => {
+        try {
+          if (typeof cv.toBlob === 'function') { cv.toBlob((b) => res(b && b.size ? b : null), 'image/png'); return; }
+          const url = cv.toDataURL('image/png');
+          const bin = atob(url.slice(url.indexOf(',') + 1));
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const b = new Blob([bytes], { type: 'image/png' });
+          res(b.size ? b : null);
+        } catch { res(null); }
+      });
+      const cardFile = async () => {
+        const blob = await cardBlob();
+        if (!blob || typeof File !== 'function') return null;
+        try { return new File([blob], shareFile(), { type: blob.type || 'image/png' }); } catch { return null; }
+      };
+      const downloadCard = (blob) => {
+        const a = document.createElement('a');
+        a.download = shareFile();
+        a.href = blob ? URL.createObjectURL(blob) : cv.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        if (blob) setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      };
+      const copyCaption = async () => {
+        try { await navigator.clipboard.writeText(shareText()); return true; } catch { return false; }
+      };
+      const filesShareable = (file) => {
+        if (typeof navigator.canShare !== 'function') return true;
+        try { return navigator.canShare({ files: [file], text: shareText(), title: SHARE_TITLE }); } catch { return false; }
+      };
+      const manualFallback = async (lead) => {
+        const blob = await cardBlob();
+        if (blob) downloadCard(blob);
+        const copied = await copyCaption();
+        if (shareFallback) shareFallback.classList.remove('hidden');
+        const wa = $('[data-sc-wa]');
+        if (wa) wa.href = 'https://wa.me/?text=' + encodeURIComponent(shareText());
+        say(
+          blob
+            ? lead + ' \u2014 the card image is downloaded' + (copied ? ' and the caption is copied' : '') + '. Open WhatsApp and attach it yourself: a WhatsApp link can carry the text but not the image.'
+            : lead + ' \u2014 the card image could not be prepared. Use Download PNG, then attach the file in WhatsApp manually.',
+          !blob
+        );
+      };
+      const shareCard = async () => {
+        if (sharing) return;
+        sharing = true;
+        if (shareBtn) { shareBtn.disabled = true; shareBtn.setAttribute('aria-busy', 'true'); }
+        say('Preparing your card\u2026');
+        try {
+          const file = await cardFile();
+          if (!file) { await manualFallback('Could not prepare the card image'); return; }
+          if (typeof navigator.share === 'function' && filesShareable(file)) {
+            try {
+              await navigator.share({ files: [file], text: shareText(), title: SHARE_TITLE });
+              say('');
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') { say(''); return; }
+            }
+          }
+          if (typeof navigator.share === 'function') {
+            try {
+              await navigator.share({ text: shareText(), title: SHARE_TITLE });
+              say('Shared as text only \u2014 this browser cannot attach images. Use Download PNG to send the card itself.');
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') { say(''); return; }
+            }
+          }
+          await manualFallback('Sharing is not available in this browser');
+        } finally {
+          sharing = false;
+          syncActionState();
+          if (shareBtn && !shareBtn.disabled) shareBtn.removeAttribute('aria-busy');
+        }
+      };
+
+      // ---- wiring ----
+      root.querySelector('[data-sc-types]')?.addEventListener('change', (e) => {
+        const v = e.target && e.target.value;
+        if (v) activate(v);
+      });
+      $('[data-sc-themes]')?.addEventListener('change', draw);
+      $('[data-sc-load]')?.addEventListener('click', () => { setStatus(''); loadSelected().catch(() => showErr(LOAD_ERRORS.service)); });
+      $('[data-sc-lang]')?.addEventListener('change', (e) => {
+        state.lang = e.target.value;
+        loadSelected().catch(() => showErr(LOAD_ERRORS.service));
+      });
+      $('[data-sc-duacat]')?.addEventListener('change', async (e) => {
+        setStatus('Loading duas\u2026');
+        try {
+          const list = await ensureDuaCat(e.target.value);
+          fillSelect($('[data-sc-dua]'), list, (x) => ({ v: x.s, t: x.t }));
+          setStatus('');
+          await loadDuaFromSelect();
+        } catch { setStatus(''); showErr(LOAD_ERRORS.service); }
+      });
+      $('[data-sc-dua]')?.addEventListener('change', () => { loadDuaFromSelect().catch(() => showErr(LOAD_ERRORS.service)); });
+      $('[data-sc-hadith]')?.addEventListener('change', () => { try { loadHadithFromSelect(); } catch { showErr(LOAD_ERRORS.service); } });
+      $('[data-sc-name]')?.addEventListener('change', () => { try { loadNameFromSelect(); } catch { showErr(LOAD_ERRORS.service); } });
+      $('[data-sc-msg]')?.addEventListener('input', drawMessage);
+      $('[data-sc-from]')?.addEventListener('input', drawMessage);
+      $('[data-sc-surah]')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadSelected(); });
+      $('[data-sc-ayah]')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadSelected(); });
+      $('[data-sc-prev]')?.addEventListener('click', () => { if (pageIdx > 0) { pageIdx--; draw(); } });
+      $('[data-sc-next]')?.addEventListener('click', () => { if (pageIdx < pageCount - 1) { pageIdx++; draw(); } });
+
+      $('[data-sc-random]')?.addEventListener('click', async () => {
+        const t = state.type;
+        setStatus('');
+        try {
+          if (t === 'ayah') {
+            const s = 1 + Math.floor(Math.random() * 114);
+            const v = 1 + Math.floor(Math.random() * (SURAH_VERSES[s - 1] || 10));
+            $('[data-sc-surah]').value = s;
+            $('[data-sc-ayah]').value = v;
+            await loadAyahFromInputs();
+            return;
+          }
+          if (t === 'dua') {
+            const catSel = $('[data-sc-duacat]');
+            const cats = [...catSel.options].map((o) => o.value);
+            const cat = cats[Math.floor(Math.random() * cats.length)] || catSel.value;
+            catSel.value = cat;
+            const list = await ensureDuaCat(cat);
+            fillSelect($('[data-sc-dua]'), list, (x) => ({ v: x.s, t: x.t }));
+            const pick = list[Math.floor(Math.random() * list.length)];
+            if (pick) $('[data-sc-dua]').value = pick.s;
+            await loadDuaFromSelect();
+            return;
+          }
+          if (t === 'hadith') {
+            const list = await ensureHadith();
+            const pick = list[Math.floor(Math.random() * list.length)];
+            if (pick) { $('[data-sc-hadith]').value = pick.s; loadHadithFromSelect(); }
+            return;
+          }
+          if (t === 'name') {
+            const list = await ensureNames();
+            const pick = list[Math.floor(Math.random() * list.length)];
+            if (pick) { $('[data-sc-name]').value = pick.s; loadNameFromSelect(); }
+          }
+        } catch { showErr(LOAD_ERRORS.service); }
+      });
+
+      $('[data-sc-dl]')?.addEventListener('click', () => {
+        if (state.type === 'msg' && cur.empty) return;
+        const a = document.createElement('a');
+        a.download = pageCount > 1 ? 'share-card-p' + (pageIdx + 1) + '.png' : 'share-card.png';
+        a.href = cv.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+      shareBtn?.addEventListener('click', shareCard);
+      $('[data-sc-copy]')?.addEventListener('click', async (ev) => {
+        const btn = ev.currentTarget;
+        const ok = await copyCaption();
+        btn.textContent = ok ? 'Copied \u2713' : 'Copy failed';
+        setTimeout(() => { btn.textContent = 'Copy caption'; }, 2500);
+      });
+
+      draw();
+      activate('ayah');
+      // Redraw once web fonts land so the measured line breaks match the PNG.
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { try { draw(); } catch {} });
+    })();
+  </script>
+</BaseLayout>
