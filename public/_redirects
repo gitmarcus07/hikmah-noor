@@ -1,6 +1,6 @@
-# NOTE: with functions/_middleware.js active, Cloudflare Pages does not apply
-# _redirects to Function-served requests — the /en strip is enforced in the
-# middleware. These rules stay as fallback/documentation.
+# Quran wall app (Instagram bio cannot open play.google.com directly — the
+# tap dies in Instagram's in-app browser; /app redirects from our own domain).
+/app https://play.google.com/store/apps/details?id=app.quranwall.wallpaper 302
 /en / 301
 /en/ / 301
 /en/* /:splat 301
