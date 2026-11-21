@@ -16,6 +16,11 @@ const articles = defineCollection({
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
     keywords: z.string().optional(),
+    /* Canonical override (root-relative path, no locale prefix — the
+     * layout adds the locale). Used when an article duplicates a
+     * data-driven detail page (e.g. the 6 kalima articles, which
+     * canonicalise to their KalimaDetail pages). */
+    canonical: z.string().optional(),
     arabic: z.string().optional(),
     transliteration: z.string().optional(),
     faq: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
