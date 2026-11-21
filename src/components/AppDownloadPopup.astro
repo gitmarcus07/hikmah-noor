@@ -1,0 +1,142 @@
+// Quran wall app download popup — shows every minute on every page.
+// First show 60s after arrival, then every 60s (setInterval). Never stacks:
+// if it is already open when the timer fires, it stays as-is. Dismiss via
+// the × button, the backdrop, or Escape — the next one still comes 60s later.
+// z-index 80 sits above the site-notice popup (70) when both are up.
+// Never shows on the /al-mushrif admin panel.
+---
+<div id="qw-app-popup" hidden>
+  <div class="qw-app-backdrop" data-qw-close></div>
+  <div class="qw-app-card" role="dialog" aria-modal="true" aria-label="Download Quran wall">
+    <button type="button" class="qw-app-close" data-qw-close aria-label="Dismiss">×</button>
+    <img src="/images/quran-walls-icon.png" alt="" width="64" height="64" loading="lazy" class="qw-app-icon" />
+    <h2>Quran wall</h2>
+    <p>Set a beautiful Quran verse wallpaper on your home screen — a new verse every morning.</p>
+    <a href="https://play.google.com/store/apps/details?id=app.quranwall.wallpaper" target="_blank" rel="noopener" class="qw-app-btn">Download on Google Play</a>
+    <span class="qw-app-free">Free · Android</span>
+  </div>
+</div>
+
+<style is:global>
+  #qw-app-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem calc(1.5rem + env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+  #qw-app-popup[hidden] { display: none !important; }
+  .qw-app-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(23, 32, 27, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    pointer-events: auto;
+  }
+  .qw-app-card {
+    position: relative;
+    pointer-events: auto;
+    width: 100%;
+    max-width: 22rem;
+    text-align: center;
+    background: linear-gradient(135deg, #171208 0%, #0a0805 60%, #120d05 100%);
+    border: 1px solid #2b2113;
+    border-radius: 20px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+  .qw-app-close {
+    position: absolute;
+    top: 0.7rem;
+    inset-inline-end: 0.7rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid #3a2f18;
+    background: rgba(251, 247, 239, 0.06);
+    color: #cfc6b0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .qw-app-close:hover { border-color: #d4af37; color: #d4af37; }
+  .qw-app-icon {
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    margin: 0 auto;
+  }
+  .qw-app-card h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: #fbf7ef;
+    margin: 0.75rem 0 0;
+  }
+  .qw-app-card p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #cfc6b0;
+  }
+  .qw-app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 1.1rem;
+    padding: 0.7rem 1.25rem;
+    border-radius: 999px;
+    background: #d4af37;
+    color: #171208;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .qw-app-free {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: #8f8468;
+  }
+  @media print {
+    #qw-app-popup { display: none !important; }
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    const POPUP_ID = 'qw-app-popup';
+    const EVERY = 60_000; // every minute
+    // Never pop over the admin panel itself.
+    if (location.pathname.replace(/\/$/, '') === '/al-mushrif') return;
+    const root = document.getElementById(POPUP_ID);
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+
+    function open() {
+      // Already open — don't stack.
+      if (!root.hidden) return;
+      root.hidden = false;
+      document.addEventListener('keydown', onKey);
+    }
+    function close() {
+      root.hidden = true;
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+
+    root.querySelectorAll('[data-qw-close]').forEach(el => el.addEventListener('click', close));
+    // First popup 1 minute after arrival, then every minute.
+    setInterval(open, EVERY);
+  })();
+</script>
