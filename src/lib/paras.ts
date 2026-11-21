@@ -1,5 +1,29 @@
 import parasMeta from '../data/paras-meta.json';
 import surahsMeta from '../data/surahs-meta.json';
+import {
+  paraTitle as seoParaTitle,
+  paraDescription as seoParaDescription,
+  paraKeywords as seoParaKeywords,
+  paraFaq as seoParaFaq,
+} from './surah-seo';
+
+/** Localised para SEO strings live in ./surah-seo (single source of truth).
+ *  These wrappers keep the old call shape working; pass the page locale. */
+export function paraTitle(para: ParaMeta, locale = 'en') {
+  return seoParaTitle(para, locale);
+}
+
+export function paraDescription(para: ParaMeta, locale = 'en') {
+  return seoParaDescription(para, locale);
+}
+
+export function paraKeywords(para: ParaMeta, locale = 'en') {
+  return seoParaKeywords(para, locale);
+}
+
+export function paraFaq(para: ParaMeta, locale = 'en') {
+  return seoParaFaq(para, locale);
+}
 
 export interface ParaMeta {
   num: number;
@@ -42,44 +66,4 @@ export function paraSurahs(para: ParaMeta) {
     if (m) out.push(m);
   }
   return out;
-}
-
-export function paraTitle(para: ParaMeta) {
-  return `Quran Para ${para.num} (${para.name}) with Urdu, English & Hindi Translation`;
-}
-
-export function paraDescription(para: ParaMeta) {
-  return `Read Quran Para ${para.num} (${para.name}, ${para.range}) in Arabic (Uthmani) with Urdu, English and Hindi meaning, transliteration and audio recitation. Full Juz ${para.num} of 30.`;
-}
-
-export function paraKeywords(para: ParaMeta) {
-  return [
-    `quran para ${para.num}`,
-    `quran juz ${para.num}`,
-    `para ${para.num} ${para.name.toLowerCase()}`,
-    `juz ${para.num} ${para.name.toLowerCase()}`,
-    `quran para ${para.num} with urdu translation`,
-    `quran para ${para.num} english translation`,
-    `quran para ${para.num} hindi meaning`,
-    `quran para ${para.num} audio`,
-    `quran para ${para.num} transliteration`,
-    para.range.toLowerCase(),
-  ].join(', ');
-}
-
-export function paraFaq(para: ParaMeta) {
-  return [
-    {
-      q: `Which surahs are in Quran Para ${para.num}?`,
-      a: `Para ${para.num} (${para.name}) covers ${para.range}.`,
-    },
-    {
-      q: `How can I read Quran Para ${para.num} with translation?`,
-      a: `This page shows every verse of Para ${para.num} in Arabic with Urdu, English and Hindi meaning, transliteration and audio. Use the language buttons above the verses to switch translation.`,
-    },
-    {
-      q: `Can I listen to Quran Para ${para.num} audio?`,
-      a: `Yes. Press play on any verse for Arabic recitation — choose from 5 reciters (Alafasy, Abdul Basit, Husary, Muaiqly, Minshawi) in the 🎙 menu — or use Play para to listen continuously. Urdu and English translation audio is available from the dropdown.`,
-    },
-  ];
 }
