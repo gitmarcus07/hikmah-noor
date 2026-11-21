@@ -180,6 +180,7 @@ export function standaloneToolItems(locale: string): IndexItem[] {
     ['/tools/mosque-finder/', 'Mosque Finder — Nearby Masjids with Distance & Directions', 'Find nearby mosques with distance and directions from your location.', ['mosque finder', 'masjid', 'masjid near me', 'mosque near me', 'mosque locator', 'prayer place']],
     ['/tools/ayah-card/', 'Ayah Card Maker — Verse Images to Share & Download', 'Create beautiful ayah images to share and download.', ['ayah card', 'verse image', 'share ayah', 'quran image', 'ayah wallpaper']],
     ['/tools/ayah-video/', 'Ayah Video Maker — Short Surah & Verse Videos to Share & Download', 'Create 1:1 square ayah videos with recitation and meaning to share and download.', ['ayah video', 'surah video', 'quran video', 'verse video', 'ayah mp4', 'status video']],
+    ['/tools/share-card/', 'Share Card Studio — Make Islamic Cards to Share on WhatsApp & Instagram', 'Make one branded card from an ayah, dua, hadith, Name of Allah or your own message, then download or share it.', ['share card', 'islamic card maker', 'dua image', 'hadith card', 'name of allah card', 'quran verse card', 'whatsapp status image', 'islamic poster maker']],
     ['/tools/daily-reminder/', 'Daily Reminder — One Ayah Notification Every Day', 'Get one ayah notification every day on your device.', ['daily reminder', 'ayah reminder', 'daily ayah', 'notification', 'reminder']],
     ['/tools/eid-takbeer/', 'Eid Takbeer Studio — Wording, Audio & Tashriq Schedule', 'Eid takbeer wording with audio and the Tashriq schedule.', ['eid takbeer', 'takbeer', 'takbir', 'tashriq', 'eid audio']],
     ['/tools/qurbani-dua/', 'Qurbani Dua — What to Say at Slaughter, with Audio', 'What to say at the time of Qurbani slaughter, with Arabic audio.', ['qurbani dua', 'qurbani', 'slaughter dua', 'udhia dua', 'bakra eid dua']],
@@ -193,9 +194,13 @@ export function standaloneToolItems(locale: string): IndexItem[] {
     ['/tools/search-quran/', 'Search Quran — Translation & Arabic Text Search', 'Search the Quran by translation words or Arabic text.', ['search quran', 'quran search', 'find verse', 'quran word search']],
     ['/tools/read/', 'Read Quran — All Surahs with Translation & Audio', 'Read all 114 surahs in Arabic with translation, transliteration and audio.', ['read quran', 'quran reader', 'read surah', 'quran with audio']],
   ];
-  return defs.map(([path, title, description, tags]) => ({
-    title, description, category: 'tools', url: `${prefix}${path}`, tags: [...tags, 'tools', 'tool'], locale,
-  }));
+  return defs.map(([path, title, description, tags]) => {
+    // /tools/share-card/ has no /hi|ur|ar/ variant yet — point every locale at
+    // the EN page (same precedent as al-mushrif) so the entry never 404s.
+    // Flip this when src/pages/[locale]/tools/share-card/ lands.
+    const url = path === '/tools/share-card/' ? path : `${prefix}${path}`;
+    return { title, description, category: 'tools', url, tags: [...tags, 'tools', 'tool'], locale };
+  });
 }
 
 /** Static/info pages so everything on the site is navigable via search. */
