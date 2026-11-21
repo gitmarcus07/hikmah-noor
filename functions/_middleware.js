@@ -9,6 +9,12 @@
 const APEX = 'https://hikmahnoor.in';
 const LEGACY_HOSTS = new Set(['www.hikmahnoor.in', 'hikmah-noor.pages.dev']);
 
+// Quran wall app: /app -> Google Play (302, so the destination can change).
+// Instagram's in-app browser will not open a play.google.com link directly
+// from a bio (the tap dies silently), but it opens hikmahnoor.in fine —
+// the redirect from our own domain hands the user to the Play Store.
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=app.quranwall.wallpaper';
+
 // Dead slugs (indexed 404s in Search Console) -> live pages, all locales.
 const MOVED = new Map([
   ['/kalimas/pehla-kalima/', '/kalimas/first-kalimah-tayyibah/'],
@@ -20,6 +26,9 @@ for (const l of ['hi', 'ur', 'ar']) for (const [f, t] of [...MOVED]) MOVED.set('
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
+  if (url.pathname === '/app' || url.pathname === '/app/') {
+    return Response.redirect(PLAY_URL, 302);
+  }
   if (LEGACY_HOSTS.has(url.hostname)) {
     return Response.redirect(APEX + url.pathname + url.search, 301);
   }
