@@ -28,3 +28,25 @@ export const CAL_META = {
     },
   ],
 };
+
+export const CAL_META_BY_LOCALE: Record<string, { title: string; description: string; keywords: string }> = {
+  hi: {
+    title: 'इस्लामी कैलेंडर — हिजरी तिथियाँ, रमज़ान, ईद-उल-फ़ित्र व ईद-उल-अज़हा की तारीख़ें',
+    description: 'इस्लामी (हिजरी) कैलेंडर: रमज़ान, लैलतुल क़द्र, ईद-उल-फ़ित्र, हज, ईद-उल-अज़हा, आशूरा, शब-ए-बरात सहित हर पवित्र तारीख़ — ग्रेगोरियन समकक्ष, माह दृश्य और उल्टी गिनती सहित।',
+    keywords: 'islamic calendar hindi, hijri calendar, hijri 1447, hijri 1448, ramadan date, eid al fitr date, eid al adha date, ashura date, shab e barat date, islamic date today, chand ki tareekh, hijri months',
+  },
+  ur: {
+    title: 'اسلامی کیلنڈر — ہجری تاریخیں، رمضان، عید الفطر و عید الاضحی کی تاریخیں',
+    description: 'اسلامی (ہجری) کیلنڈر: رمضان، لیلۃ القدر، عید الفطر، حج، عید الاضحی، عاشورہ، شب برات سمیت ہر مقدس تاریخ — گریگورین مطابقت، مہینے کا منظر اور الٹی گنتی کے ساتھ۔',
+    keywords: 'islamic calendar urdu, hijri calendar, hijri 1447, hijri 1448, ramadan date, eid al fitr date, eid al adha date, ashura date, shab e barat date, islamic date today, chand ki tareekh, hijri months',
+  },
+  ar: {
+    title: 'التقويم الإسلامي — التواريخ الهجرية وشهر رمضان وعيد الفطر وعيد الأضحى',
+    description: 'التقويم الإسلامي (الهجري) مع كل تاريخ مقدس — رمضان وليلة القدر وعيد الفطر والحج وعيد الأضحى وعاشوراء وليلة البراءة — بالمقابل الميلادي وعرض الشهور والعد التنازلي.',
+    keywords: 'التقويم الإسلامي, التقويم الهجري, هجري 1447, هجري 1448, موعد رمضان, موعد عيد الفطر, موعد عيد الأضحى, يوم عاشوراء, ليلة البراءة, التاريخ الهجري اليوم, الأشهر الهجرية',
+  },
+};
+
+export function calMetaFor(locale: string) {
+  return CAL_META_BY_LOCALE[locale] ?? { title: CAL_META.title, description: CAL_META.description, keywords: CAL_META.keywords };
+}
