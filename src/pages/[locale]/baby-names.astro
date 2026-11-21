@@ -10,9 +10,33 @@ export async function getStaticPaths() { return nonDefaultLocales.map((locale) =
 const { locale } = Astro.params;
 const L = (p: string) => localizedPath(locale, p);
 
-const title = `Islamic Baby Names — Boy & Girl Names With Meanings`;
-const description = `30 beautiful Islamic baby names with verified meanings: Muhammad, Ahmad, Maryam, Fatima, Yusuf, Noor and more — plus naming Sunnahs, aqeeqah, and names to avoid.`;
-const keywords = 'islamic baby names, muslim baby boy names meaning, muslim baby girl names meaning, muhammad ahmad maryam fatima meaning, naming sunnah aqeeqah, baby names quran';
+const BABY_META: Record<string, { title: string; description: string; keywords: string; h1: string; intro: string }> = {
+  hi: {
+    title: 'इस्लामी बच्चों के नाम — लड़कों व लड़कियों के नाम अर्थ सहित',
+    description: 'अर्थ सहित 30 इस्लामी बच्चों के नाम: मुहम्मद, अहमद, मरयम, फ़ातिमा, यूसुफ़, नूर और अधिक — साथ में नामकरण सुन्नतें, अकीक़ा और वे नाम जिनसे बचना चाहिए।',
+    keywords: 'islamic baby names hindi, muslim baby boy names meaning hindi, muslim baby girl names meaning, muhammad ahmad maryam fatima meaning, naming sunnah aqeeqah',
+    h1: 'इस्लामी बच्चों के नाम',
+    intro: 'नाम चुनने का तरीका: पहले अच्छा और स्पष्ट अर्थ देखें — नीचे की तालिकाएँ इसी तरह बनी हैं, लड़कों में नबियों, सहाबा और नेक लोगों के नाम, और लड़कियों में उम्महातुल मोमिनीन, क़ुरानी महिलाओं के नाम व नूर जैसे अर्थ। अल्लाह के सिवा किसी की बंदगी का भाव देने वाले नामों, बुरे या शर्मनाक अर्थ वाले नामों और अल्लाह की ख़ास सिफ़ात को निजी नाम बनाकर रखने से बचें — नीचे दिए गए सवाल-जवाब में हर बात समझाई गई है। इस पृष्ठ से अकीक़ा व पहले सात दिनों की गाइड और अल्लाह के 99 नामों तक भी लिंक है, ताकि नाम अपनी पूरी सुन्नत दिनचर्या के साथ चुना जाए, अकेले नहीं।',
+  },
+  ur: {
+    title: 'اسلامی بچوں کے نام — لڑکوں و لڑکیوں کے نام معانی کے ساتھ',
+    description: 'معانی کے ساتھ 30 اسلامی بچوں کے نام: محمد، احمد، مریم، فاطمہ، یوسف، نور اور مزید — نام رکھنے کی سنتیں، عقیقہ اور ان ناموں کے ساتھ جن سے بچنا چاہیے۔',
+    keywords: 'islamic baby names urdu, muslim baby boy names meaning urdu, muslim baby girl names meaning, muhammad ahmad maryam fatima meaning, naming sunnah aqeeqah',
+    h1: 'اسلامی بچوں کے نام',
+    intro: 'نام چننے کا طریقہ: پہلے اچھا اور واضح معنی دیکھیں — نیچے کی جدولیں اسی طرح بنی ہیں، لڑکوں میں انبیاء، صحابہ اور نیک لوگوں کے نام، اور لڑکیوں میں امہات المؤمنین، قرآنی خواتین کے نام اور نور جیسے معانی۔ اللہ کے سوا کسی کی بندگی کا مفہوم دینے والے ناموں، برے یا شرمناک معنی والے ناموں اور اللہ کی خاص صفات کو ذاتی نام بنا کر رکھنے سے بچیں — نیچے سوالات و جوابات میں ہر بات سمجھائی گئی ہے۔ اس صفحے سے عقیقہ و پہلے سات دنوں کی گائیڈ اور اللہ کے 99 ناموں تک بھی ربط ہے، تاکہ نام اپنی مکمل سنت کے ساتھ چنا جائے، اکیلا نہیں۔',
+  },
+  ar: {
+    title: 'أسماء الأطفال الإسلامية — أسماء الأولاد والبنات مع معانيها',
+    description: '30 اسما إسلاميا للأطفال مع معانيها الموثقة: محمد وأحمد ومريم وفاطمة ويوسف ونور وغيرها — مع سنن التسمية والعقيقة والأسماء التي ينبغي تجنبها.',
+    keywords: 'أسماء أطفال إسلامية, أسماء مواليد إسلامية ومعانيها, محمد أحمد مريم فاطمة, سنة التسمية, العقيقة',
+    h1: 'أسماء الأطفال الإسلامية',
+    intro: 'طريقة الاختيار: ابدأ بمعنى حسن وواضح — الجداول أدناه مرتبة على هذا النحو، ففي أسماء الأولاد أسماء الأنبياء والصحابة والصالحين، وفي أسماء البنات أسماء أمهات المؤمنين والنساء القرآنيات ومعاني النور. وتجنب الأسماء التي توحي بالعبودية لغير الله، والأسماء ذات المعاني القبيحة أو المشينة، وصفات الله الخاصة إذا اتخذت أسماء شخصية — والأسئلة الشائعة أدناه تشرح كل نقطة. وتربط هذه الصفحة أيضا بدليل العقيقة والأيام السبعة الأولى وبأسماء الله الحسنى، حتى يختار الاسم مع سنته كاملة لا وحده.',
+  },
+};
+const M = BABY_META[locale] ?? { title: `Islamic Baby Names — Boy & Girl Names With Meanings`, description: `30 beautiful Islamic baby names with verified meanings: Muhammad, Ahmad, Maryam, Fatima, Yusuf, Noor and more — plus naming Sunnahs, aqeeqah, and names to avoid.`, keywords: 'islamic baby names, muslim baby boy names meaning, muslim baby girl names meaning, muhammad ahmad maryam fatima meaning, naming sunnah aqeeqah, baby names quran', h1: 'Islamic Baby Names', intro: '' };
+const title = M.title;
+const description = M.description;
+const keywords = M.keywords;
 const faq = [
   { q: 'When should we name the baby?', a: 'On the seventh day with aqeeqah is the Sunnah pattern — though naming at birth is also established. Announce tahnik (chewed date on the palate) and adhan in the right ear at birth.' },
   { q: 'Which names are best in Islam?', a: 'The Prophet ﷺ loved Abdullah and Abdur-Rahman (Muslim), and names of prophets and the righteous. Choose good meanings — the child will be called by it on the Last Day (Abu Dawud).' },
@@ -67,8 +91,9 @@ const girls: { n: string; m: string }[] = [
         <span class="hn-badge">Verified meanings</span>
         <span class="hn-badge">Naming Sunnahs</span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">Islamic Baby Names</h1>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{M.h1}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">A name is a lifetime dua over your child — the Prophet ﷺ said you will be called by your names on the Last Day, so beautify them (Abu Dawud). Thirty established names with honest meanings, plus the Sunnah naming routine.</p>
+      {M.intro && (<p class="mt-3 leading-7">{M.intro}</p>)}
       <form action={L('/search/')} method="get" class="mt-4" role="search">
         <div class="hn-searchwrap max-w-xl">
           <Icon name="search" size={19} />
