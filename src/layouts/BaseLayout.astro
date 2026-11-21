@@ -33,6 +33,10 @@ const dict = getDict(locale);
 const dir = isRTL(locale) ? 'rtl' : 'ltr';
 const site = (Astro.site?.toString() ?? 'https://hikmahnoor.in').replace(/\/$/, '');
 const canonical = `${site}${localizedPath(locale, canonicalPath || '/')}`;
+/* Don't double the brand: homepages pass a title that already starts with
+ * "Hikmah Noor" (dict.home.heroTitle), which used to render as
+ * "Hikmah Noor — … | Hikmah Noor". */
+const fullTitle = title.startsWith('Hikmah Noor') ? title : `${title} | Hikmah Noor`;
 const fontCss = 'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap';
 
 const articleLd = type === 'article' ? {
@@ -40,10 +44,38 @@ const articleLd = type === 'article' ? {
   '@type': 'Article',
   headline: title,
   description,
+  image: `${site}${image}`,
   inLanguage: locale,
   datePublished: pubDate,
+  /* No separate updated date is tracked; pubDate is the last known date. */
+  ...(pubDate ? { dateModified: pubDate } : {}),
+  ...(!noCanonical ? { mainEntityOfPage: canonical } : {}),
   author: { '@type': 'Organization', name: 'Hikmah Noor' },
   publisher: { '@type': 'Organization', name: 'Hikmah Noor' },
+} : null;
+
+/* WebSite + Organization: homepage only (one per locale homepage).
+ * SearchAction points at the site's own search page for that locale. */
+const isHome = canonicalPath === '/';
+const websiteLd = isHome ? {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Hikmah Noor',
+  url: `${site}/`,
+  inLanguage: ['en', 'hi', 'ur', 'ar'],
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: `${site}${localizedPath(locale, '/search/')}?q={search_term_string}` },
+    'query-input': 'required name=search_term_string',
+  },
+} : null;
+const orgLd = isHome ? {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Hikmah Noor',
+  url: `${site}/`,
+  logo: `${site}/favicon.svg`,
+  sameAs: ['https://www.instagram.com/in.hikmahnoor/'],
 } : null;
 
 /* CollectionPage for hub/listing pages. Only factual fields (name,
@@ -160,7 +192,7 @@ const mobileGroups = [
 
     gtag('config', 'G-JTJT82TN8Q');
   </script>
-  <title>{title} | Hikmah Noor</title>
+  <title>{fullTitle}</title>
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex, nofollow" />}
   {keywords && <meta name="keywords" content={keywords} />}
@@ -190,6 +222,8 @@ const mobileGroups = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href={fontCss} rel="stylesheet" />
   {articleLd && <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />}
+  {websiteLd && <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} />}
+  {orgLd && <script type="application/ld+json" set:html={JSON.stringify(orgLd)} />}
   {collectionLd && <script type="application/ld+json" set:html={JSON.stringify(collectionLd)} />}
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
   {crumbLd && <script type="application/ld+json" set:html={JSON.stringify(crumbLd)} />}
@@ -468,6 +502,8 @@ const mobileGroups = [
           <li><a class="hover:underline" href={L('/hajj/')}>Hajj & Umrah</a></li>
           <li><a class="hover:underline" href={L('/kids/')}>Kids Zone</a></li>
           <li><a class="hover:underline" href={L('/calendar/')}>Islamic Calendar</a></li>
+          <li><a class="hover:underline" href={L('/adab/')}>Adab</a></li>
+          <li><a class="hover:underline" href={L('/baby-names/')}>Baby Names</a></li>
           <li><a class="hover:underline" href={L('/eid/')}>Eid & Qurbani</a></li>
           <li><a class="hover:underline" href={L('/names-of-allah/')}>99 Names</a></li>
         </ul>
