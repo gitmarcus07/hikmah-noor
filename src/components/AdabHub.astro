@@ -35,6 +35,20 @@ const hadithSlugs = ['hospitality-three-days', 'salam-spread-peace', 'gifts-brin
 const hadith = hadithSlugs.map((s) => sahihBySlug(s)).filter(Boolean).map((h: any) => localizeHadees(h, locale, 'sahih'));
 const guideSlugs = ['parenting-tarbiyah-guide', 'marital-rights-conflict', 'hijab-ruling-evidence'];
 const guides = guideSlugs.map((s) => GUIDES.find((g) => g.slug === s)).filter(Boolean).map((g: any) => localizeGuide(g, locale));
+
+const HUB_INTRO: Record<string, string> = {
+  en: "Adab is the everyday shape of character in Islam: how a person speaks, greets, hosts guests, treats parents and neighbours, and keeps promises. This hub gathers that material in one place instead of scattering it across separate collections — duas for social life, marriage, children and family milestones; eight character terms such as truthfulness, trust, patience and gratitude, each with its proof; hadith on hospitality, greeting with peace, parents and patience; and practical guides on parenting, marriage and hijab. Start with speech and family, the two areas the hub returns to most, and follow the links below to the full collection behind each card.",
+  hi: "आदाब इस्लाम में चरित्र का रोज़मर्रा रूप है: व्यक्ति कैसे बोलता है, सलाम करता है, मेहमानों की मेज़बानी करता है, माता-पिता और पड़ोसियों से व्यवहार करता है और वादे निभाता है। यह केंद्र इस सामग्री को एक जगह इकट्ठा करता है — सामाजिक जीवन, विवाह, बच्चों और पारिवारिक अवसरों की दुआएं; सत्यता, अमानत, धैर्य और शुक्र जैसे आठ चारित्रिक शब्द, प्रत्येक अपने प्रमाण सहित; मेहमाननवाज़ी, सलाम, माता-पिता और धैर्य पर हदीसें; और परवरिश, विवाह व हिजाब पर व्यावहारिक गाइड। वाणी और परिवार से शुरुआत करें — ये वे दो क्षेत्र हैं जिनकी ओर यह केंद्र सबसे अधिक लौटता है — और प्रत्येक कार्ड के पीछे के पूरे संग्रह तक नीचे दिए गए लिंक से जाएं।",
+  ur: "آداب اسلام میں کردار کی روزمرہ شکل ہے: انسان کیسے بولتا ہے، سلام کرتا ہے، مہمان نوازی کرتا ہے، والدین اور پڑوسیوں سے برتاؤ کرتا ہے اور وعدے نبھاتا ہے۔ یہ مرکز اس مواد کو ایک جگہ جمع کرتا ہے — معاشرتی زندگی، شادی، بچوں اور خاندانی مواقع کی دعائیں؛ صدق، امانت، صبر اور شکر جیسے آٹھ اخلاقی الفاظ، ہر ایک اپنے ثبوت کے ساتھ؛ مہمان نوازی، سلام، والدین اور صبر پر حدیثیں؛ اور پرورش، شادی اور حجاب پر عملی گائیڈز۔ گفتگو اور خاندان سے آغاز کریں، یہی وہ دو شعبے ہیں جن کی طرف یہ مرکز سب سے زیادہ لوٹتا ہے، اور ہر کارڈ کے پیچھے مکمل مجموعے تک نیچے دیے گئے روابط سے جائیں۔",
+  ar: "الأدب هو الشكل اليومي للخلق في الإسلام: كيف يتكلم الإنسان ويسلم ويستضيف الضيوف ويعامل والديه وجيرانه ويفي بوعوده. يجمع هذا المركز هذا المواد في مكان واحد — أدعية الحياة الاجتماعية والزواج والأطفال ومناسبات الأسرة؛ وثمانية مصطلحات خلقية مثل الصدق والأمانة والصبر والشكر، كل منها بدليله؛ وأحاديث في الضيافة والسلام والوالدين والصبر؛ وأدلة عملية في التربية والزواج والحجاب. ابدأ بالكلام والأسرة، وهما المجالان اللذان يعود إليهما المركز أكثر من غيرهما، واتبع الروابط أدناه للوصول إلى المجموعة الكاملة خلف كل بطاقة.",
+};
+const hubIntro = HUB_INTRO[locale] ?? HUB_INTRO.en;
+const introLinksLabel: Record<string, string> = {
+  en: 'The duas gathered here cover:',
+  hi: 'यहाँ इकट्ठा की गई दुआएं इन विषयों को कवर करती हैं:',
+  ur: 'یہاں جمع کی گئی دعائیں ان موضوعات کا احاطہ کرتی ہیں:',
+  ar: 'الأدعية المجموعة هنا تغطي:',
+};
 const crumbs = [
   { name: dict.nav.home, path: '/' },
   { name: T.crumb, path: '/adab/' },
@@ -50,6 +64,8 @@ const crumbs = [
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mt-3">{T.hubH1}</h1>
       <p class="mt-2 leading-7" style="color:var(--hn-muted)">{T.hubSub}</p>
+      <p class="mt-3 leading-7">{hubIntro}</p>
+      <p class="mt-3 leading-7"><span style="color:var(--hn-muted)">{introLinksLabel[locale] ?? introLinksLabel.en} </span>{duaCats.map((c: any, i: number) => (<span>{i > 0 ? ', ' : ''}<a href={L(`/duas/${c.slug}/`)} class="underline font-bold">{c.title}</a></span>))}.</p>
     </div>
 
     <div class="mt-8">
