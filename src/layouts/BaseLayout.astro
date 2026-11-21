@@ -444,6 +444,20 @@ const mobileGroups = [
     })();
   </script>
 
+  {/* ============ QURAN WALL APP STRIP — every page except homepages (the homepage has the big banner) ============ */}
+  {!isHome && (
+    <a href="https://play.google.com/store/apps/details?id=app.quranwall.wallpaper" target="_blank" rel="noopener" class="block" style="background:linear-gradient(90deg,#171208,#0a0805 70%);border-bottom:1px solid #2b2113;text-decoration:none">
+      <div class="hn-container flex items-center gap-3 py-2.5">
+        <img src="/images/quran-walls-icon.png" alt="" width="36" height="36" loading="lazy" class="shrink-0" style="border-radius:9px" />
+        <p class="min-w-0 flex-1 text-[13.5px] leading-5 line-clamp-2" style="color:#fbf7ef">
+          <span class="font-extrabold">Quran wall</span>
+          <span style="color:#cfc6b0"> — Set Quran verse wallpapers on your home screen. Free on Google Play.</span>
+        </p>
+        <span class="shrink-0 inline-flex items-center px-3.5 py-2 rounded-full text-[13px] font-extrabold" style="background:#d4af37;color:#171208">Get the app</span>
+      </div>
+    </a>
+  )}
+
   <main id="content" class="flex-1 w-full">
     <slot />
   </main>
