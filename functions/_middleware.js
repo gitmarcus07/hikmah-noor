@@ -14,6 +14,7 @@ const MOVED = new Map([
   ['/kalimas/pehla-kalima/', '/kalimas/first-kalimah-tayyibah/'],
   ['/waqiat/noahs-ark-build-material-unknown/', '/waqiat/nuh-ark-flood/'],
   ['/duas/how-to-perform-wudu/', '/learn/salah/wudu-ablution/'],
+  ['/duas/dua-as-safar/', '/duas/travel-journey/'],
 ]);
 for (const l of ['hi', 'ur', 'ar']) for (const [f, t] of [...MOVED]) MOVED.set('/' + l + f, '/' + l + t);
 
