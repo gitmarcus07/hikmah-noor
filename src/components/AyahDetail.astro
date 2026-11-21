@@ -10,6 +10,7 @@ import RelatedContent from './RelatedContent.astro';
 import { getDict, localizedPath } from '../i18n/utils';
 import { secUI } from '../lib/site-ui-1';
 import { AYAH_UI } from '../lib/site-ui-4';
+import { ayahTitle, ayahHeading, ayahDescription, ayahKeywords } from '../lib/surah-seo';
 
 interface Props {
   surah: any;
@@ -29,10 +30,9 @@ const ayahPath = `/quran/${surah.slug}/${verse.v}/`;
 const trans = locale === 'hi' ? verse.hi : locale === 'ur' || locale === 'ar' ? verse.ur : verse.en;
 const makki = String(surah.revelation).toLowerCase().startsWith('mecca');
 
-const title = `Quran ${ref} — Surah ${surah.name} with Translation & Audio`;
-let description = `Read Quran ${ref} — Surah ${surah.name} (${surah.englishName}), ayah ${verse.v} of ${surah.verseCount} (${makki ? 'Makki' : 'Madani'}) — in Arabic with Urdu, English and Hindi translation, transliteration and audio recitation.`;
-if (description.length > 160) description = description.slice(0, 157) + '…';
-const keywords = `quran ${ref}, ${ref}, surah ${surah.name.toLowerCase()} ayah ${verse.v}, ${surah.name.toLowerCase()} ${verse.v}, quran verse ${surah.num} ${verse.v}, ayah ${verse.v}`;
+const title = ayahTitle(ref, surah, verse.v, locale);
+const description = ayahDescription(ref, surah, verse.v, locale);
+const keywords = ayahKeywords(ref, surah, verse.v, locale);
 
 const faq = [
   { q: T.faqWhatQ.replace('{ref}', ref), a: `${ref} — ${T.ayahWord} ${verse.v} ${T.ofL} ${surah.verseCount} ${dict.nav.surahs ?? 'Surahs'} ${surah.name} (${surah.englishName}).` },
@@ -64,7 +64,7 @@ const refLabel = (r: any) => r ? `${r.surah.name} ${r.surahNum}:${r.ayahNum}` : 
     </div>
 
     <p class="mt-4 text-[13px] font-bold" style="color:var(--hn-muted)">{T.refL}: <strong style="color:var(--hn-ink)">Surah {surah.name} ({surah.englishName}), {ref}</strong> — {T.ayahWord} {verse.v} {T.ofL} {surah.verseCount}</p>
-    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-3">Quran {ref} — Surah {surah.name} ({surah.englishName})</h1>
+    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-3">{ayahHeading(ref, surah, locale)}</h1>
 
     <div class="hn-reading-card mt-4">
       <p class="arabic-block text-[22px] md:text-[26px]" lang="ar" dir="rtl">{verse.ar} <span style="color:var(--hn-gold);font-size:0.8em">﴿{verse.v}﴾</span></p>
