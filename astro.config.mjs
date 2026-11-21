@@ -26,12 +26,22 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
+      // Freshness signal: no per-page mtime is tracked, so every URL gets
+      // the build date as lastmod (the whole static site is rebuilt).
+      serialize(item) {
+        item.lastmod = new Date().toISOString();
+        return item;
+      },
       // Keep noindex redirect stubs, login-gated habit pages,
       // account/app-shell pages, and site-search pages out.
       // (gems IS indexed, so it stays in.)
+      // Kalima articles canonicalise to their KalimaDetail pages
+      // (canonical frontmatter), so they stay out of the sitemap too.
       filter: (page) =>
         !/\/tools\/(zakat-calculator|classical-finance\/ushr-guide)\/$/.test(page) &&
-        !/\/tools\/read\/\d/.test(page) &&
+        !/\/kalimas\/(first-kalima-tayyab|second-kalima-shahadat|third-kalima-tamjeed|fourth-kalima-tawheed|fifth-kalima-astaghfar|sixth-kalima-radd-e-kufr)\/$/.test(page) &&
+        !/\/(hi|ur|ar)\/kalimas\/pehla-kalima\/$/.test(page) &&
+        !/\/tools\/read\//.test(page) &&
         !/\/tools\/my-progress\//.test(page) &&
         !/\/al-mushrif\//.test(page) &&
         !/\/offline\//.test(page) &&
